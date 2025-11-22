@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.partykit.io/schema.json",
   "name": "songguess",
-  "main": "src/server.js",
+  "main": "src/server.ts",
   "compatibilityDate": "2025-11-22",
   "serve": {
     "path": "public",
-    "build": "src/client.js"
+    "build": "src/client.ts"
   }
 }
