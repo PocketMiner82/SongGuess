@@ -30,7 +30,6 @@ jobs:
           @semantic-release/changelog
           @semantic-release/git
           @saithodev/semantic-release-backmerge
-          semantic-release-replace-plugin
           @semantic-release/exec
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
