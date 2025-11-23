@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/PocketMiner82/SongGuess/compare/1.0.0...1.1.0) (2025-11-23)
+
+
+### Features
+
+* **auth:** start implementing auth to authenticate with spotify ([c3d409b](https://github.com/PocketMiner82/SongGuess/commit/c3d409beaa07f98cb588d1250e776d00a036b6f6))
+
 # 1.0.0 (2025-11-22)
 
 
