@@ -2,6 +2,9 @@
   "$schema": "https://www.partykit.io/schema.json",
   "name": "songguess",
   "main": "src/server.ts",
+  "parties": {
+    "auth": "src/auth.ts"
+  },
   "compatibilityDate": "2025-11-22",
   "serve": {
     "path": "public",

@@ -7,5 +7,6 @@
       "fileMatch": ["partykit.json"],
       "url": "https://www.partykit.io/schema.json"
     }
-  ]
+  ],
+  "search.useIgnoreFiles": false
 }
