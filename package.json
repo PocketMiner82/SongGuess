@@ -7,9 +7,12 @@
     "deploy": "partykit deploy"
   },
   "dependencies": {
+    "cookie": "^1.0.2",
     "partysocket": "^1.0.2"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251125.0",
+    "@types/node": "^24.10.1",
     "partykit": "^0.0.110",
     "typescript": "^5.5.4"
   }

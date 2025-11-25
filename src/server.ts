@@ -1,4 +1,5 @@
 import type * as Party from "partykit/server";
+import Auth from "./auth";
 
 export default class Server implements Party.Server {
   constructor(readonly room: Party.Room) {}
@@ -25,6 +26,17 @@ export default class Server implements Party.Server {
       // ...except for the connection it came from
       [sender.id]
     );
+  }
+
+  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
+    let url = new URL(req.url);
+
+    if (url.pathname.startsWith("/auth")) {
+      let auth = new Auth(url, req, lobby, ctx);
+      return auth.onAuthRequest();
+    } else {
+      return new Response("Not found", { status: 404 });
+    }
   }
 }
 
