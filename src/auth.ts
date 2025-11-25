@@ -97,7 +97,7 @@ export default class Auth {
     }
 
     private async authLogin(): Promise<Response> {
-        var scope = "streaming user-read-email user-read-private";
+        var scope = "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state";
         var state = this.generateRandomString(16);
 
         var auth_query_parameters = new URLSearchParams({

@@ -55,6 +55,27 @@ function getCookie(name: string): string|null {
   return null;
 }
 
+// Store the device ID when the SDK is ready
+let deviceId: string|undefined;
+
+async function startMusic(trackUri: string) {
+  const token = await getToken();
+  
+  if (!deviceId) {
+    console.error("Device ID not ready yet");
+    return;
+  }
+
+  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+    method: "PUT",
+    body: JSON.stringify({ uris: [trackUri] }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
 async function getToken(redirect:boolean = true): Promise<string> {
   let token = getCookie("spotify-access-token");
 
@@ -82,8 +103,6 @@ function connect() {
     player.connect().then(success => {
       if (success) {
         (document.getElementById("spotifyLogin") as HTMLElement).hidden = true;
-
-        
       } else {
         alert("Spotify connection failed.");
       }
@@ -96,6 +115,12 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     name: "SongGuess",
     getOAuthToken: cb => { getToken().then(token => cb(token)) },
     volume: 0.15
+  });
+
+  player.addListener("ready", ({ device_id }) => {
+    console.log("Ready with Device ID", device_id);
+    deviceId = device_id;
+    startMusic("spotify:track:4PTG3Z6ehGkBFwjybzWkR8");
   });
 
   if (getCookie("spotify-access-token")) {
