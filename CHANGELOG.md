@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.0...1.3.1) (2025-11-25)
+
+
+### Bug Fixes
+
+* play song on spotify player connect ([b758ffe](https://github.com/PocketMiner82/SongGuess/commit/b758ffedfd68b4d32c45773dc8812be11e302a31))
+
 # [1.3.0](https://github.com/PocketMiner82/SongGuess/compare/1.2.0...1.3.0) (2025-11-25)
 
 
