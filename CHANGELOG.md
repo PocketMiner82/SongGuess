@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/PocketMiner82/SongGuess/compare/1.2.0...1.3.0) (2025-11-25)
+
+
+### Features
+
+* add spotify web sdk ([dd032ba](https://github.com/PocketMiner82/SongGuess/commit/dd032ba1d47231d3cb2f2abb4273c61e1f5120f0))
+
 # [1.2.0](https://github.com/PocketMiner82/SongGuess/compare/1.1.0...1.2.0) (2025-11-25)
 
 
