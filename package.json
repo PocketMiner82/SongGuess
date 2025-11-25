@@ -13,6 +13,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251125.0",
     "@types/node": "^24.10.1",
+    "@types/spotify-web-playback-sdk": "^0.1.19",
     "partykit": "^0.0.110",
     "typescript": "^5.5.4"
   }
