@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/PocketMiner82/SongGuess/compare/1.1.0...1.2.0) (2025-11-25)
+
+
+### Features
+
+* implement token refreshing ([75f7934](https://github.com/PocketMiner82/SongGuess/commit/75f7934016d8a8f27383212f2a0436feec704599))
+
 # [1.1.0](https://github.com/PocketMiner82/SongGuess/compare/1.0.0...1.1.0) (2025-11-23)
 
 
