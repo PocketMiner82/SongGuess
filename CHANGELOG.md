@@ -1,3 +1,10 @@
+# [2.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.1...2.0.0-dev.2) (2025-11-26)
+
+
+### Features
+
+* split room and main page + fix CORS error ([b7bbd62](https://github.com/PocketMiner82/SongGuess/commit/b7bbd62794ecc3145c79688b788c80a6a6f45fd8))
+
 # [2.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.1...2.0.0-dev.1) (2025-11-26)
 
 
