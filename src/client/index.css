@@ -26,6 +26,10 @@ h6 {
   margin-bottom: 0.5rem;
 }
 
+input {
+  width: 100%;
+}
+
 #app {
   padding: 1rem;
 }

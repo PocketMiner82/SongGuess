@@ -32,17 +32,18 @@ let storeInput: HTMLInputElement = document.getElementById("inputStoreUrl") as H
 if (storeInput) {
   storeInput.onkeydown = async ev => {
     if (ev.key === "Enter") {
-
       try {
         var { results } = await lookup("url", storeInput.value, {
           entity: "song",
-          sort: "popular"
+          sort: "popular",
+          limit: 200
         });
       } catch {
         // @ts-ignore
         var { results } = await lookup("url", storeInput.value, {
           entity: "song",
           sort: "popular",
+          limit: 200,
           magicnumber: Date.now()
         });
       }
