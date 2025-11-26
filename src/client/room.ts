@@ -1,5 +1,4 @@
-import { lookup, type ResultMusicTrack } from "itunes-store-api";
-import "./styles.css";
+import "./room.css";
 
 import PartySocket from "partysocket";
 
@@ -48,27 +47,10 @@ conn.addEventListener("message", (event) => {
 // And send a ping every 2 seconds right after
 conn.addEventListener("open", () => {
   add("Connected!");
-  // add("Sending a ping every 2 seconds...");
-  // // TODO: make this more interesting / nice
-  // clearInterval(pingInterval);
-  // pingInterval = setInterval(() => {
-  //   conn.send("ping");
-  // }, 1000);
+  add("Sending a ping every 2 seconds...");
+  // TODO: make this more interesting / nice
+  clearInterval(pingInterval);
+  pingInterval = setInterval(() => {
+    conn.send("ping");
+  }, 1000);
 });
-
-let storeInput: HTMLInputElement = document.getElementById("inputStoreUrl") as HTMLInputElement;
-if (storeInput) {
-  storeInput.onkeydown = async ev => {
-    if (ev.key === "Enter") {
-      const { results } = await lookup("url", storeInput.value, {entity: "song", sort: "popular"});
-
-      add(`Songs for "${storeInput.value}":`);
-
-      results.forEach(result => {
-        if (result.trackName && result.previewUrl) {
-          addAudio(result.trackName, result.previewUrl);
-        }
-      });
-    }
-  };
-}
