@@ -1,3 +1,10 @@
+# [2.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.2...2.0.0-dev.3) (2025-11-26)
+
+
+### Bug Fixes
+
+* increase textbox size + test returning 200 results ([7232c2a](https://github.com/PocketMiner82/SongGuess/commit/7232c2ac535ca33d4dc47b7ff5d731ff0d5212c3))
+
 # [2.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.1...2.0.0-dev.2) (2025-11-26)
 
 
