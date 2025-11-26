@@ -1,3 +1,15 @@
+# [2.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.1...2.0.0-dev.1) (2025-11-26)
+
+
+### Features
+
+* Switch to apple music from Spotify ([0b38aaa](https://github.com/PocketMiner82/SongGuess/commit/0b38aaadb8f1ff950192bf59b33cef2e96e93a67))
+
+
+### BREAKING CHANGES
+
+* this removes spotify and auth entirely
+
 ## [1.3.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.0...1.3.1) (2025-11-25)
 
 
