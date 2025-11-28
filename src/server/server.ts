@@ -61,10 +61,9 @@ export default class Server implements Party.Server {
   static async onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
     let url: URL = new URL(req.url);
 
-    // if room url is requested without trailing /, append trailing /
+    // if room url is requested without html extension, add it
     if (url.pathname === '/room') {
-      url.pathname = "/room/";
-      return Response.redirect(url);
+      return lobby.assets.fetch("/room.html" + url.search);
     }
 
     // redirect to main page, if on another one

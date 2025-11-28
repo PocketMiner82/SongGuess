@@ -7,7 +7,7 @@
     "path": "public",
     "build": {
       "entry": [
-        "src/client/index.ts",
+        "src/client/index.tsx",
         "src/client/room.ts"
       ]
     }
