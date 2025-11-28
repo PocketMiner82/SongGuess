@@ -1,3 +1,10 @@
+# [2.0.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.7...2.0.0-dev.8) (2025-11-28)
+
+
+### Bug Fixes
+
+* update metadata in html files to correct values ([599cbd5](https://github.com/PocketMiner82/SongGuess/commit/599cbd5242baeb53d13aec22b3dab18b09199d99))
+
 # [2.0.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.6...2.0.0-dev.7) (2025-11-28)
 
 # [2.0.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.5...2.0.0-dev.6) (2025-11-28)
