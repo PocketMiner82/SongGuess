@@ -1,5 +1,5 @@
 # SongGuess
-A Game where you can guess with your friends, which song is played from a Spotify playlist (requires Premium):
+A game where you and your friends guess which songs are playing from an Apple Music playlist.
 
 ## Links
 Stable: https://songguess.pocketminer82.partykit.dev/<br>
