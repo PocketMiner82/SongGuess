@@ -1,3 +1,10 @@
+# [2.0.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.4...2.0.0-dev.5) (2025-11-28)
+
+
+### Features
+
+* add styling via tailwindcss ([ee4ac15](https://github.com/PocketMiner82/SongGuess/commit/ee4ac15a0616e606c639d3dfa3bc4e697f63d95c))
+
 # [2.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.3...2.0.0-dev.4) (2025-11-28)
 
 
