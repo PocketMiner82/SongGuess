@@ -1,3 +1,54 @@
+# [2.0.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.7...2.0.0-dev.8) (2025-11-28)
+
+
+### Bug Fixes
+
+* update metadata in html files to correct values ([599cbd5](https://github.com/PocketMiner82/SongGuess/commit/599cbd5242baeb53d13aec22b3dab18b09199d99))
+
+# [2.0.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.6...2.0.0-dev.7) (2025-11-28)
+
+# [2.0.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.5...2.0.0-dev.6) (2025-11-28)
+
+# [2.0.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.4...2.0.0-dev.5) (2025-11-28)
+
+
+### Features
+
+* add styling via tailwindcss ([ee4ac15](https://github.com/PocketMiner82/SongGuess/commit/ee4ac15a0616e606c639d3dfa3bc4e697f63d95c))
+
+# [2.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.3...2.0.0-dev.4) (2025-11-28)
+
+
+### Features
+
+* convert index.ts to use React ([b6f4805](https://github.com/PocketMiner82/SongGuess/commit/b6f48057bf7fe54f92f2aba31e137a63d9b5665d))
+
+# [2.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.2...2.0.0-dev.3) (2025-11-26)
+
+
+### Bug Fixes
+
+* increase textbox size + test returning 200 results ([7232c2a](https://github.com/PocketMiner82/SongGuess/commit/7232c2ac535ca33d4dc47b7ff5d731ff0d5212c3))
+
+# [2.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.1...2.0.0-dev.2) (2025-11-26)
+
+
+### Features
+
+* split room and main page + fix CORS error ([b7bbd62](https://github.com/PocketMiner82/SongGuess/commit/b7bbd62794ecc3145c79688b788c80a6a6f45fd8))
+
+# [2.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.1...2.0.0-dev.1) (2025-11-26)
+
+
+### Features
+
+* Switch to apple music from Spotify ([0b38aaa](https://github.com/PocketMiner82/SongGuess/commit/0b38aaadb8f1ff950192bf59b33cef2e96e93a67))
+
+
+### BREAKING CHANGES
+
+* this removes spotify and auth entirely
+
 ## [1.3.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.0...1.3.1) (2025-11-25)
 
 
