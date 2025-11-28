@@ -19,9 +19,10 @@ function Audio({trackName, url}: {trackName: string, url: string}) {
 function SearchBar({searchText, onSearchTextChange, onEnter}: {searchText: string, onSearchTextChange: Dispatch<SetStateAction<string>>, onEnter: Function}) {
   return (
     <>
-    <a href="https://music.apple.com/">Search Apple Music</a>
-    <br/>
-    <input placeholder="Enter apple music URL" value={searchText} onChange={e => {onSearchTextChange(e.target.value);}} onKeyDown={e => {if (e.key === "Enter") onEnter();}}/>
+    <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 underline">Search Apple Music</a>
+    <br/><br/>
+    <input placeholder="Enter apple music URL" className="w-full outline-0 focus:outline-0 border-b-2 border-b-gray-400  focus:border-b-cyan-600" value={searchText} onChange={e => {onSearchTextChange(e.target.value);}} onKeyDown={e => {if (e.key === "Enter") onEnter();}}/>
+    <br/><br/>
     </>
   );
 }
@@ -32,7 +33,7 @@ function ResultsList({searchText, results}: {searchText: string, results: Result
   return (
     <>
     Songs for "{searchText}" ({results.length}):
-    <br/>
+    <br/><br/>
 
     {results
       .filter(result => result.trackName && result.previewUrl)

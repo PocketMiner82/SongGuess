@@ -11,5 +11,12 @@
         "src/client/room.ts"
       ]
     }
+  },
+  "build": {
+    "command": "npm run build",
+    "watch": [
+      "src",
+      "public/*.html"
+    ]
   }
 }

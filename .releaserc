@@ -45,7 +45,7 @@
       "@semantic-release/exec",
       {
         "prepareCmd": "npm ci && npm version --no-commit-hooks --no-git-tag-version ${nextRelease.version}",
-        "publishCmd": "npx partykit deploy <% if (branch.name == 'dev') { %>--preview dev<% } %>"
+        "publishCmd": "npm <% if (branch.name == 'dev') { %>dev-deploy<% } else { %>deploy<%%>"
       }
     ],
     [
