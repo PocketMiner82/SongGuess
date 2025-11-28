@@ -1,3 +1,10 @@
+# [2.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.3...2.0.0-dev.4) (2025-11-28)
+
+
+### Features
+
+* convert index.ts to use React ([b6f4805](https://github.com/PocketMiner82/SongGuess/commit/b6f48057bf7fe54f92f2aba31e137a63d9b5665d))
+
 # [2.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.2...2.0.0-dev.3) (2025-11-26)
 
 
