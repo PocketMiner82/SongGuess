@@ -8,7 +8,7 @@
     "build": {
       "entry": [
         "src/client/index.tsx",
-        "src/client/room.ts"
+        "src/client/room/room.tsx"
       ]
     }
   },

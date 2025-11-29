@@ -1,79 +1,54 @@
-import { lookup, type ResultMusicTrack } from "itunes-store-api";
 import "./index.css";
+
+import { lookup, type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
 import { useCallback, useState, type Dispatch, type JSX, type SetStateAction } from "react";
 
 
-function Audio({trackName, url}: {trackName: string, url: string}) {
-  return (
-    <>
-    {trackName}:
-    <audio controls>
-      <source src={url} type="audio/aac"/>
-    </audio>
-    <br/>
-    </>
-  );
-}
-
-function SearchBar({searchText, onSearchTextChange, onEnter}: {searchText: string, onSearchTextChange: Dispatch<SetStateAction<string>>, onEnter: Function}) {
-  return (
-    <>
-    <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 underline">Search Apple Music</a>
-    <br/><br/>
-    <input placeholder="Enter apple music URL" className="w-full outline-0 focus:outline-0 border-b-2 border-b-gray-400  focus:border-b-cyan-600" value={searchText} onChange={e => {onSearchTextChange(e.target.value);}} onKeyDown={e => {if (e.key === "Enter") onEnter();}}/>
-    <br/><br/>
-    </>
-  );
-}
-
-function ResultsList({searchText, results}: {searchText: string, results: ResultMusicTrack[] | undefined}) {
-  if (!results) results = []
-
-  return (
-    <>
-    Songs for "{searchText}" ({results.length}):
-    <br/><br/>
-
-    {results
-      .filter(result => result.trackName && result.previewUrl)
-      .map(result => (
-        <Audio
-          key={result.previewUrl}
-          trackName={result.trackName}
-          url={result.previewUrl}
-        />
-      ))
-    }
-    </>
-  );
-}
-
 function App() {
-  const [searchText, setSearchText] = useState("");
-  const [results, setResults] = useState<ResultMusicTrack[]>();
-  const handleEnter = useCallback(async () => {
-    try {
-      var { results } = await lookup("url", searchText, {
-        entity: "song",
-        limit: 200
-      });
-    } catch {
-      // @ts-ignore
-      var { results } = await lookup("url", searchText, {
-        entity: "song",
-        limit: 200,
-        magicnumber: Date.now()
-      });
-    }
+  const [error, setError] = useState(false);
 
-    setResults(results);
-  }, [setResults, searchText]);
+  const buttonClick = () => {
+    fetch("/createRoom", {method: "POST", redirect: "error"}).then(async resp => {
+      if (resp.status != 201) {
+        setError(true);
+        return;
+      }
+
+      window.location.href = `/room?id=${await resp.text()}`;
+    }).catch(() => {
+      setError(true);
+    });
+  };
 
   return (
     <>
-    <SearchBar searchText={searchText} onSearchTextChange={setSearchText} onEnter={handleEnter} />
-    {results ? <ResultsList searchText={searchText} results={results}/> : "" }
+    <div className="m-auto justify-items-center text-center">
+      <div className="text-8xl font-extrabold mb-24">SongGuess</div>
+      
+      <div
+      className={"flex items-center justify-center mb-2 text-sm text-red-800 rounded-lg dark:text-red-400 " + (error ? "visible" : "invisible")}
+      role="alert">
+        <svg
+        className="shrink-0 inline w-4 h-4 me-3"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20">
+          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+        </svg>
+
+        <span className="sr-only">Error</span>
+        <div>
+          <span className="font-medium">Unknown error</span>
+        </div>
+      </div>
+      
+      <button
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-3xl py-3 px-6 rounded cursor-pointer"
+      onClick={buttonClick}>Create Room</button>
+      
+    </div>
     </>
   );
 }

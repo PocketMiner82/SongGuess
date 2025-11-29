@@ -1,16 +1,34 @@
 import type * as Party from "partykit/server";
 
 export default class Server implements Party.Server {
-  static rooms: Set<string> = new Set<string>();
+  static rooms: Map<string, boolean> = new Map();
   hostConnection: Party.Connection|null = null;
 
   constructor(readonly room: Party.Room) {}
 
+  static async onBeforeConnect(
+    req: Party.Request,
+    lobby: Party.Lobby,
+    ctx: Party.ExecutionContext
+  ) {
+    // room does not exist
+    if (!Server.rooms.has(lobby.id)) {
+      return new Response("Room does not exist", {status: 401});
+    }
+
+    return req;
+  }
+
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    // check if room is set to being used (so that our timeout handler doesnt delete it)
+    const isUsed = Server.rooms.get(this.room.id);
+    if (!isUsed) {
+      Server.rooms.set(this.room.id, true); 
+    }
+
     // first player connected, this must be the host
     if (this.getOnlineCount() == 1) {
       this.hostConnection = conn;
-      Server.rooms.add(this.room.id);
     }
 
     // A websocket just connected!
@@ -35,6 +53,8 @@ export default class Server implements Party.Server {
       // ...except for the connection it came from
       [sender.id]
     );
+
+    console.log(Server.rooms);
   }
 
   onClose(connection: Party.Connection) {
@@ -58,12 +78,58 @@ export default class Server implements Party.Server {
     return Array.from(this.room.getConnections()).length;
   }
 
+  private static async generateRoomID(): Promise<string | null> {
+    let text: string = "";
+    let possible: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (let attempt = 0; attempt < 100; attempt++) {
+      for (let i: number = 0; i < 6; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+
+      if (Server.rooms.has(text)) {
+        continue;
+      }
+
+      return text;
+    }
+    
+    return null;
+  }
+
+  private static async createNewRoom(ctx: Party.ExecutionContext): Promise<Response> {
+    let roomID = await Server.generateRoomID();
+
+    if (roomID) {
+      const roomTimeoutPromise = new Promise<void>((resolve) => {
+        // set the timeout inside the Promise
+        const timeout = setTimeout(() => {
+          // only delete room if not used
+          if (Server.rooms.get(roomID) === false) {
+            Server.rooms.delete(roomID);
+          }
+
+          // always resolve the promise
+          resolve();
+        }, 5000);
+
+        Server.rooms.set(roomID, false);
+      });
+
+      ctx.waitUntil(roomTimeoutPromise);
+    }
+    
+    return roomID == null ? new Response("Can't find free room id.", {status: 409}) : new Response(roomID, {status: 201});
+  }
+
   static async onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
     let url: URL = new URL(req.url);
 
     // if room url is requested without html extension, add it
-    if (url.pathname === '/room') {
+    if (url.pathname === "/room") {
       return lobby.assets.fetch("/room.html" + url.search);
+    } else if (url.pathname === "/createRoom") {
+      return await Server.createNewRoom(ctx);
     }
 
     // redirect to main page, if on another one
