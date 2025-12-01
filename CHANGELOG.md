@@ -1,3 +1,10 @@
+# [2.0.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.10...2.0.0-dev.11) (2025-12-01)
+
+
+### Bug Fixes
+
+* add global_fetch_private_origin compatibility flag to attempt to make fetch work ([e331075](https://github.com/PocketMiner82/SongGuess/commit/e331075a33fb81189304fd6f53a9ef80ec06b949))
+
 # [2.0.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.9...2.0.0-dev.10) (2025-12-01)
 
 
