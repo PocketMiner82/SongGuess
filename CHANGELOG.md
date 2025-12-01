@@ -1,3 +1,10 @@
+# [2.0.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.16...2.0.0-dev.17) (2025-12-01)
+
+
+### Bug Fixes
+
+* **room:** wrong var assignment for itunes search ([a5374d6](https://github.com/PocketMiner82/SongGuess/commit/a5374d67992acd433ca111126aac0a6fb3e59de6))
+
 # [2.0.0-dev.16](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.15...2.0.0-dev.16) (2025-12-01)
 
 
