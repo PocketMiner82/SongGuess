@@ -121,17 +121,17 @@ function App() {
 
   const handleEnter = useCallback(async () => {
     try {
-      var { results } = await lookup("url", searchText, {
+      var results = (await lookup("url", searchText, {
         entity: "song",
         limit: 200
-      });
+      })).results;
     } catch {
       // @ts-ignore
-      results = await lookup("url", searchText, {
+      results = (await lookup("url", searchText, {
         entity: "song",
         limit: 200,
         magicnumber: Date.now()
-      });
+      })).results;
     }
 
     socket.send(`Entered Apple Music URL: ${searchText}`);
