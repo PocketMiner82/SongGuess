@@ -1,3 +1,10 @@
+# [2.0.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.14...2.0.0-dev.15) (2025-12-01)
+
+
+### Features
+
+* use more robust fetch method for createRoom ([d36812b](https://github.com/PocketMiner82/SongGuess/commit/d36812b0e8ae200fae65fe23483ce5d39ba53426))
+
 # [2.0.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.13...2.0.0-dev.14) (2025-12-01)
 
 
