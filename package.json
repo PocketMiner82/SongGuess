@@ -16,7 +16,8 @@
     "partysocket": "^1.1.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^4.1.17",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251128.0",
@@ -24,6 +25,8 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.22",
+    "eslint": "^8.57.1",
+    "eslint-config-react-app": "^7.0.1",
     "partykit": "^0.0.115",
     "typescript": "^5.9.3"
   }

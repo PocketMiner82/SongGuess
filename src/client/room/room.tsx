@@ -1,6 +1,5 @@
 import "./room.css";
 
-// 1. Add the React hook import
 import usePartySocket from "partysocket/react";
 import { lookup, type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
@@ -8,14 +7,11 @@ import { useCallback, useState, useEffect, type Dispatch, type SetStateAction, u
 
 declare const PARTYKIT_HOST: string;
 
-// REACT CODE
-
-// 2. This is the new component that replaces the "No Framework" code
 function ConnectionLogger() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
   const [logs, setLogs] = useState<string[]>([]);
   
-  // 1. Create a reference to the scrollable element
+  // Create a reference to the scrollable element
   const logContainerRef = useRef<HTMLDivElement>(null);
 
   const socket = usePartySocket({
@@ -43,7 +39,7 @@ function ConnectionLogger() {
     return () => clearInterval(interval);
   }, [socket]);
 
-  // 2. Scroll to the bottom whenever the 'logs' state is updated
+  // Scroll to the bottom whenever the 'logs' state is updated
   useEffect(() => {
     const container = logContainerRef.current;
     if (container) {
@@ -56,7 +52,6 @@ function ConnectionLogger() {
   return (
     <div className="mt-8">
       <h3 className="font-bold mb-2">Room Activity</h3>
-      {/* 3. Attach the ref to your scrollable div */}
       <div 
         ref={logContainerRef} 
         className="bg-gray-700 p-2 rounded max-h-60 overflow-y-auto font-mono text-xs text-white" 
@@ -123,30 +118,29 @@ function ResultsList({searchText, results}: {searchText: string, results: Result
 function App() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<ResultMusicTrack[]>();
-  
+
   const handleEnter = useCallback(async () => {
-    // Basic error handling wrapper
     try {
-        // Attempt search
-        // Note: 'lookup' usually expects params differently depending on the library version, 
-        // assuming your existing logic works for your version of itunes-store-api.
-        const response = await lookup("url", searchText, {
-          entity: "song",
-          limit: 200
-        });
-        setResults(response.results);
-    } catch (e) {
-      console.error("Search failed", e);
-      // Fallback or retry logic here if needed
+      var { results } = await lookup("url", searchText, {
+        entity: "song",
+        limit: 200
+      });
+    } catch {
+      // @ts-ignore
+      results = await lookup("url", searchText, {
+        entity: "song",
+        limit: 200,
+        magicnumber: Date.now()
+      });
     }
+
+    setResults(results);
   }, [searchText]);
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <SearchBar searchText={searchText} onSearchTextChange={setSearchText} onEnter={handleEnter} />
       <ResultsList searchText={searchText} results={results}/>
-      
-      {/* 3. Add the ConnectionLogger component here */}
       <ConnectionLogger />
     </div>
   );
