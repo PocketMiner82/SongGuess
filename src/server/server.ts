@@ -30,6 +30,12 @@ export default class Server implements Party.Server {
   //
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    // kick player if room is not created yet
+    if (!this.isValidRoom) {
+      conn.close(4001, "Room ID not found");
+      return;
+    }
+
     // first player connected, this must be the host
     if (this.getOnlineCount() === 1) {
       this.hostConnection = conn;
@@ -43,6 +49,11 @@ export default class Server implements Party.Server {
   }
 
   onMessage(message: string, sender: Party.Connection) {
+    // ignore all messages if room is not valid
+    if (!this.isValidRoom) {
+      return;
+    }
+
     // let's log the message
     this.log(`${sender.id} sent message: ${message}`);
     // as well as broadcast it to all the other connections in the room except for the connection it came from
@@ -50,6 +61,11 @@ export default class Server implements Party.Server {
   }
 
   onClose(connection: Party.Connection) {
+    // ignore disconnects if room is not valid
+    if (!this.isValidRoom) {
+      return;
+    }
+
     this.log(`${connection.id} left.`);
 
     // host left, close room
@@ -127,21 +143,6 @@ export default class Server implements Party.Server {
     }
 
     return new Response("Bad request", { status: 400 });
-  }
-
-  //
-  // STATIC ROOM WS CONNECT EVENT
-  //
-
-  static async onBeforeConnect(req: Party.Request, lobby: Party.Lobby, ctx: Party.ExecutionContext) {
-    let roomInfo = await fetchGetRoom(req.url);
-
-    // deny access if room does not exist
-    if (!roomInfo || !roomInfo.isValidRoom) {
-      return new Response("Room does not exist", {status: 401});
-    }
-
-    return req;
   }
 
   //
