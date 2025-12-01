@@ -1,3 +1,10 @@
+# [2.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.8...2.0.0-dev.9) (2025-12-01)
+
+
+### Features
+
+* add basic room management ([c8bd564](https://github.com/PocketMiner82/SongGuess/commit/c8bd564fc5a19cecbec224f7dbdbecce5d6f4d4d))
+
 # [2.0.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.7...2.0.0-dev.8) (2025-11-28)
 
 
