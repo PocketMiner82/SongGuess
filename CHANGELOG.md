@@ -1,6 +1,18 @@
 # [2.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.8...2.0.0-dev.9) (2025-12-01)
 
 
+### Bug Fixes
+
+* attempt to make room management work for worker environment ([d71b8bb](https://github.com/PocketMiner82/SongGuess/commit/d71b8bb17103c4d30c7868cfb0268f145e72cdd7))
+
+
+### Features
+
+* add basic room management ([c8bd564](https://github.com/PocketMiner82/SongGuess/commit/c8bd564fc5a19cecbec224f7dbdbecce5d6f4d4d))
+
+# [2.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.8...2.0.0-dev.9) (2025-12-01)
+
+
 ### Features
 
 * add basic room management ([c8bd564](https://github.com/PocketMiner82/SongGuess/commit/c8bd564fc5a19cecbec224f7dbdbecce5d6f4d4d))
