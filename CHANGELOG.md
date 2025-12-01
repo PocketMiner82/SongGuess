@@ -1,3 +1,10 @@
+# [2.0.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.12...2.0.0-dev.13) (2025-12-01)
+
+
+### Bug Fixes
+
+* **server:** move connection kick on invalid room id to onConnect ([e3cd3e4](https://github.com/PocketMiner82/SongGuess/commit/e3cd3e4fbc4b815d2dfbe90cea79e890a5c9860d))
+
 # [2.0.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.11...2.0.0-dev.12) (2025-12-01)
 
 
