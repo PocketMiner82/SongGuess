@@ -4,40 +4,21 @@ import usePartySocket from "partysocket/react";
 import { lookup, type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
 import { useCallback, useState, useEffect, type Dispatch, type SetStateAction, useRef } from "react";
+import type PartySocket from "partysocket";
 
 declare const PARTYKIT_HOST: string;
 
-function ConnectionLogger() {
-  const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
-  const [logs, setLogs] = useState<string[]>([]);
-  
+function ConnectionLogger({socket, logs}: {socket: PartySocket, logs: string[]}) {
   // Create a reference to the scrollable element
   const logContainerRef = useRef<HTMLDivElement>(null);
 
-  const socket = usePartySocket({
-    host: PARTYKIT_HOST,
-    room: roomID,
-    onOpen() {
-      setLogs((prev) => [...prev, `Connected to ${roomID}!`, "Sending a ping every 2 seconds..."]);
-    },
-    onMessage(event) {
-      setLogs((prev) => [...prev, `Received -> ${event.data}`]);
-    },
-    onClose(ev) {
-      setLogs((prev) => [...prev, `Disconnected (${ev.code})`]);
-    },
-    onError(ev) {
-      setLogs((prev) => [...prev, "Cannot connect to this room."]);
-    }
-  });
-
   // Handle the ping interval
-  useEffect(() => {
-    const interval = setInterval(() => {
-      socket.send("ping");
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [socket]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     socket.send("ping");
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [socket]);
 
   // Scroll to the bottom whenever the 'logs' state is updated
   useEffect(() => {
@@ -118,6 +99,25 @@ function ResultsList({searchText, results}: {searchText: string, results: Result
 function App() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<ResultMusicTrack[]>();
+  const [logs, setLogs] = useState<string[]>([]);
+
+  const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
+  const socket = usePartySocket({
+    host: PARTYKIT_HOST,
+    room: roomID,
+    onOpen() {
+      setLogs((prev) => [...prev, `Connected to ${roomID}!`]);
+    },
+    onMessage(event) {
+      setLogs((prev) => [...prev, `Received -> ${event.data}`]);
+    },
+    onClose(ev) {
+      setLogs((prev) => [...prev, `Disconnected (${ev.code}): ${ev.reason}`]);
+    },
+    onError(ev) {
+      setLogs((prev) => [...prev, "Cannot connect to this room."]);
+    }
+  });
 
   const handleEnter = useCallback(async () => {
     try {
@@ -134,12 +134,13 @@ function App() {
       });
     }
 
+    socket.send(`Entered Apple Music URL: ${searchText}`);
     setResults(results);
-  }, [searchText]);
+  }, [searchText, socket]);
 
   return (
     <div className="max-w-3/4 mx-auto">
-      <ConnectionLogger />
+      <ConnectionLogger socket={socket} logs={logs}/>
       <SearchBar searchText={searchText} onSearchTextChange={setSearchText} onEnter={handleEnter} />
       <ResultsList searchText={searchText} results={results}/>
     </div>
