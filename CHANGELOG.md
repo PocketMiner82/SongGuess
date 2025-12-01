@@ -1,3 +1,10 @@
+# [2.0.0-dev.16](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.15...2.0.0-dev.16) (2025-12-01)
+
+
+### Bug Fixes
+
+* add array check to results null check ([e029f3d](https://github.com/PocketMiner82/SongGuess/commit/e029f3d6c1a249a8c0691a1b55731f0eecb19dc0))
+
 # [2.0.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.14...2.0.0-dev.15) (2025-12-01)
 
 
