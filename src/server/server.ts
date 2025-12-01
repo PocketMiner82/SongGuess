@@ -92,8 +92,13 @@ export default class Server implements Party.Server {
   //
 
   async onRequest(req: Party.Request): Promise<Response> {
+    let url: URL = new URL(req.url);
+
+    // handle room creation
+    if (url.pathname.endsWith("/createRoom")) {
+      return await Server.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
     // respond with JSON containing the current online count and if the room is valid
-    if (req.method === "GET") {
+    } else if (req.method === "GET") {
       let json: RoomInfoResponse = {
         onlineCount: this.getOnlineCount(),
         isValidRoom: this.isValidRoom
@@ -149,9 +154,6 @@ export default class Server implements Party.Server {
     // if room url is requested without html extension, add it
     if (url.pathname === "/room") {
       return lobby.assets.fetch("/room.html" + url.search);
-    // handle room creation
-    } else if (url.pathname === "/createRoom") {
-      return await Server.createNewRoom(new URL(req.url).origin, lobby.env.VALIDATE_ROOM_TOKEN as string);
     }
 
     // redirect to main page, if on another one

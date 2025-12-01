@@ -9,7 +9,7 @@ function App() {
 
   const buttonClick = async () => {
     try {
-      const resp = await fetch("/createRoom", {method: "POST", redirect: "error"});
+      const resp = await fetch("/parties/main/createRoom", {method: "POST", redirect: "error"});
       const text = await resp.text();
 
       if (resp.status !== 201) {
