@@ -1,3 +1,10 @@
+# [2.0.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.11...2.0.0-dev.12) (2025-12-01)
+
+
+### Bug Fixes
+
+* don't use edge workers for room creation ([3b6abd9](https://github.com/PocketMiner82/SongGuess/commit/3b6abd92f0ef993b98305e58428106618b3990b4))
+
 # [2.0.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.10...2.0.0-dev.11) (2025-12-01)
 
 
