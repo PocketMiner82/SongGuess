@@ -1,3 +1,10 @@
+# [2.0.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.13...2.0.0-dev.14) (2025-12-01)
+
+
+### Features
+
+* send searched text instead of ping interval ([b6e061c](https://github.com/PocketMiner82/SongGuess/commit/b6e061cbc028f016b9d92e89bce322c20bac210b))
+
 # [2.0.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.12...2.0.0-dev.13) (2025-12-01)
 
 
