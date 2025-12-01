@@ -28,7 +28,7 @@ export type PostCreateRoomResponse = z.infer<typeof PostCreateRoomResponseSchema
 
 export async function fetchGetRoom(url: URL|string): Promise<RoomInfoResponse|null> {
   try {
-    const resp = await fetch(url);
+    const resp = await fetch(url, {signal: AbortSignal.timeout(5000)});
     if (resp.status !== 200) {
       console.error(`Getting ${url} returned ${resp.status}!`);
       return null;
@@ -56,7 +56,7 @@ export async function fetchPostRoom(urlParam: URL|string, token: string): Promis
     url.searchParams.delete("token");
     url.searchParams.set("token", token);
 
-    const resp = await fetch(url, {method: "POST"});
+    const resp = await fetch(url, {method: "POST", signal: AbortSignal.timeout(5000)});
     if (resp.status !== 200) {
       console.error(`Posting ${url} returned ${resp.status}!`);
       return false;
@@ -73,7 +73,7 @@ export async function fetchPostRoom(urlParam: URL|string, token: string): Promis
 
 export async function fetchPostCreateRoom(url: URL|string): Promise<PostCreateRoomResponse|null> {
   try {
-    const resp = await fetch(url, {method: "POST"});
+    const resp = await fetch(url, {method: "POST", signal: AbortSignal.timeout(5000)});
     if (resp.status !== 200) {
       console.error(`Posting ${url} returned ${resp.status}!`);
       return null;
