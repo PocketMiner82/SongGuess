@@ -1,3 +1,10 @@
+# [2.0.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.9...2.0.0-dev.10) (2025-12-01)
+
+
+### Bug Fixes
+
+* add larger timeout to fetch requests ([c1b9259](https://github.com/PocketMiner82/SongGuess/commit/c1b9259c2bc809ece268416c9bb5871c6dad8f06))
+
 # [2.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.8...2.0.0-dev.9) (2025-12-01)
 
 
