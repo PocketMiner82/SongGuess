@@ -20,7 +20,12 @@ const PostCreateRoomResponseSchema = z.object({
   /**
    * The ID of the created room
    */
-  roomID: z.string()
+  roomID: z.string(),
+
+  /**
+   * If an error happend, this will contain the error message
+   */
+  error: z.string()
 });
 
 export type PostCreateRoomResponse = z.infer<typeof PostCreateRoomResponseSchema>;
@@ -74,9 +79,8 @@ export async function fetchPostRoom(urlParam: URL|string, token: string): Promis
 export async function fetchPostCreateRoom(url: URL|string): Promise<PostCreateRoomResponse|null> {
   try {
     const resp = await fetch(url, {method: "POST", signal: AbortSignal.timeout(5000)});
-    if (resp.status !== 200) {
+    if (resp.status !== 201) {
       console.error(`Posting ${url} returned ${resp.status}!`);
-      return null;
     }
 
     const data = await resp.json();

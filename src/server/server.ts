@@ -1,5 +1,5 @@
 import type * as Party from "partykit/server";
-import { fetchGetRoom, fetchPostRoom, type RoomInfoResponse } from "../RoomRequests";
+import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfoResponse } from "../RoomHTTPRequests";
 
 export default class Server implements Party.Server {
   /**
@@ -215,14 +215,25 @@ export default class Server implements Party.Server {
    */
   private static async createNewRoom(origin: string, token: string): Promise<Response> {
     let roomID = await Server.generateRoomID(origin);
+    let errorMessage = "";
+    let statusCode = 201;
 
     if (roomID) {
       if(!await fetchPostRoom(`${origin}/parties/main/${roomID}`, token)) {
-        return new Response("Can't validate room.", {status: 500});
+        errorMessage = "Can't validate room.";
+        statusCode = 500;
       }
+    } else {
+      errorMessage = "Can't find a free room id.";
+      statusCode = 409;
     }
+
+    let json: PostCreateRoomResponse = {
+      roomID: roomID as string,
+      error: errorMessage
+    };
     
-    return roomID == null ? new Response("Can't find a free room id.", {status: 409}) : new Response(roomID, {status: 201});
+    return Response.json(json, {status: statusCode});
   }
 }
 

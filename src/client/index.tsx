@@ -2,25 +2,26 @@ import "./index.css";
 
 import { createRoot } from "react-dom/client";
 import { useState } from "react";
+import { fetchPostCreateRoom } from "../RoomHTTPRequests";
 
 
 function App() {
   const [error, setError] = useState<string|null>(null);
 
   const buttonClick = async () => {
-    try {
-      const resp = await fetch("/parties/main/createRoom", {method: "POST", redirect: "error"});
-      const text = await resp.text();
+    const resp = await fetchPostCreateRoom("/parties/main/createRoom");
 
-      if (resp.status !== 201) {
-        setError(text.trim().length === 0 ? "Unknown error" : text.trim());
-        return;
-      }
-
-      window.location.href = `/room?id=${text}`;
-    } catch {
-      setError("Unknown error");
+    if (!resp) {
+      setError("Unknown server error");
+      return;
     }
+
+    if (resp.error !== "") {
+      setError(resp.error);
+      return;
+    }
+
+    window.location.href = `/room?id=${resp.roomID}`;
   };
 
   return (
