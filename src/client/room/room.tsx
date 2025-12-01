@@ -76,7 +76,7 @@ function SearchBar({searchText, onSearchTextChange, onEnter}: {searchText: strin
 }
 
 function ResultsList({searchText, results}: {searchText: string, results: ResultMusicTrack[] | undefined}) {
-  if (!results) return null;
+  if (!results || !Array.isArray(results)) return null;
 
   return (
     <div className="mb-6">
