@@ -1,24 +1,26 @@
 import "./index.css";
 
-import { lookup, type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
-import { useCallback, useState, type Dispatch, type JSX, type SetStateAction } from "react";
+import { useState } from "react";
 
 
 function App() {
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string|null>(null);
 
-  const buttonClick = () => {
-    fetch("/createRoom", {method: "POST", redirect: "error"}).then(async resp => {
-      if (resp.status != 201) {
-        setError(true);
+  const buttonClick = async () => {
+    try {
+      const resp = await fetch("/createRoom", {method: "POST", redirect: "error"});
+      const text = await resp.text();
+
+      if (resp.status !== 201) {
+        setError(text.trim().length === 0 ? "Unknown error" : text.trim());
         return;
       }
 
-      window.location.href = `/room?id=${await resp.text()}`;
-    }).catch(() => {
-      setError(true);
-    });
+      window.location.href = `/room?id=${text}`;
+    } catch {
+      setError("Unknown error");
+    }
   };
 
   return (
@@ -40,7 +42,7 @@ function App() {
 
         <span className="sr-only">Error</span>
         <div>
-          <span className="font-medium">Unknown error</span>
+          <span className="font-medium">{error as string}</span>
         </div>
       </div>
       

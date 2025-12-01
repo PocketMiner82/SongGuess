@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "npx @tailwindcss/cli -i ./src/client/global.css -o ./public/dist/global.css",
-    "dev": "partykit dev --live",
+    "dev": "partykit dev --live --var VALIDATE_ROOM_TOKEN abc",
     "deploy": "partykit deploy",
     "dev-deploy": "partykit deploy --preview dev",
     "clean": "rm -rf public/dist"

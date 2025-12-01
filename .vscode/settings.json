@@ -7,18 +7,5 @@
       "fileMatch": ["partykit.json"],
       "url": "https://www.partykit.io/schema.json"
     }
-  ],
-  "search.useIgnoreFiles": false,
-  "search.exclude": {
-    "**/*.code-search": false,
-    "**/bower_components": false,
-    "**/node_modules": false
-  },
-  "files.exclude": {
-    "**/.DS_Store": false,
-    "**/.git": false,
-    "**/.hg": false,
-    "**/.svn": false,
-    "**/Thumbs.db": false
-  }
+  ]
 }

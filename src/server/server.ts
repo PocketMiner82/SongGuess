@@ -1,5 +1,5 @@
 import type * as Party from "partykit/server";
-import { fetchGetRoom, fetchPushRoom, type RoomInfoResponse } from "./ServerRoomRequests";
+import { fetchGetRoom, fetchPostRoom, type RoomInfoResponse } from "../RoomRequests";
 
 export default class Server implements Party.Server {
   /**
@@ -17,6 +17,11 @@ export default class Server implements Party.Server {
    */
   hostConnection: Party.Connection|null = null;
 
+  /**
+   * Log messages are prefixed with this string.
+   */
+  LOG_PREFIX: string = `[Room ${this.room.id}]`;
+
 
   constructor(readonly room: Party.Room) {}
 
@@ -31,12 +36,7 @@ export default class Server implements Party.Server {
     }
 
     // A websocket just connected!
-    console.log(
-      `Connected:
-  id: ${conn.id}
-  room: ${this.room.id}
-  url: ${new URL(ctx.request.url).pathname}`
-    );
+    this.log(`${conn.id} connected.`);
 
     // let's send a message to the connection
     conn.send("hello from server");
@@ -44,20 +44,17 @@ export default class Server implements Party.Server {
 
   onMessage(message: string, sender: Party.Connection) {
     // let's log the message
-    console.log(`connection ${sender.id} sent message: ${message}`);
-    // as well as broadcast it to all the other connections in the room...
-    this.room.broadcast(
-      `${sender.id}: ${message}`,
-      // ...except for the connection it came from
-      [sender.id]
-    );
+    this.log(`${sender.id} sent message: ${message}`);
+    // as well as broadcast it to all the other connections in the room except for the connection it came from
+    this.room.broadcast(`${sender.id}: ${message}`, [sender.id]);
   }
 
   onClose(connection: Party.Connection) {
-    console.log(this.getOnlineCount());
+    this.log(`${connection.id} left.`);
 
     // host left, close room
     if (this.hostConnection === connection) {
+      this.log("Host left, closing room...");
       for (const conn of this.room.getConnections()) {
         conn.close(4000, "Host left room");
       }
@@ -67,18 +64,35 @@ export default class Server implements Party.Server {
     if (this.getOnlineCount() === 0) {
       this.hostConnection = null;
       this.isValidRoom = false;
+
+      this.log("Room closed.");
     }
   }
 
+  //
+  // NORMAL FUNCTIONS
+  //
+
+  private log(text: string) {
+    console.log(`${this.LOG_PREFIX} ${text}`);
+  }
+
+  /**
+   * Calculates and returns the current number of active WebSocket connections in the room.
+   *
+   * @private
+   * @returns {number} The count of connected clients.
+   */
   private getOnlineCount(): number {
     return Array.from(this.room.getConnections()).length;
   }
 
   //
-  // ROOM HTTP
+  // ROOM HTTP EVENTS
   //
 
   async onRequest(req: Party.Request): Promise<Response> {
+    // respond with JSON containing the current online count and if the room is valid
     if (req.method === "GET") {
       let json: RoomInfoResponse = {
         onlineCount: this.getOnlineCount(),
@@ -86,7 +100,8 @@ export default class Server implements Party.Server {
       };
 
       return Response.json(json);
-    } else if (req.method === "PUSH") {
+    // used to initially validate and activate the room, requires a secret token shared between this method and the static createRoom method
+    } else if (req.method === "POST") {
       let url = new URL(req.url);
       if (url.searchParams.has("token") && url.searchParams.get("token") === this.room.env.VALIDATE_ROOM_TOKEN) {
         this.isValidRoom = true;
@@ -95,9 +110,11 @@ export default class Server implements Party.Server {
         setTimeout(() => {
           if (this.getOnlineCount() === 0) {
             this.isValidRoom = false;
+            this.log("Room closed due to timeout.");
           }
         }, 5000);
 
+        this.log("Room created.");
         return new Response("ok", { status: 200 });
       }
 
@@ -108,13 +125,13 @@ export default class Server implements Party.Server {
   }
 
   //
-  // STATIC ROOM WS CONNECT
+  // STATIC ROOM WS CONNECT EVENT
   //
 
   static async onBeforeConnect(req: Party.Request, lobby: Party.Lobby, ctx: Party.ExecutionContext) {
     let roomInfo = await fetchGetRoom(req.url);
 
-    // room does not exist
+    // deny access if room does not exist
     if (!roomInfo || !roomInfo.isValidRoom) {
       return new Response("Room does not exist", {status: 401});
     }
@@ -123,9 +140,39 @@ export default class Server implements Party.Server {
   }
 
   //
-  // STATIC GLOBAL FETCH
+  // STATIC GLOBAL FETCH EVENTS
   //
 
+  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
+    let url: URL = new URL(req.url);
+
+    // if room url is requested without html extension, add it
+    if (url.pathname === "/room") {
+      return lobby.assets.fetch("/room.html" + url.search);
+    // handle room creation
+    } else if (url.pathname === "/createRoom") {
+      return await Server.createNewRoom(new URL(req.url).origin, lobby.env.VALIDATE_ROOM_TOKEN as string);
+    }
+
+    // redirect to main page, if on another one
+    return Response.redirect(url.origin);
+  }
+
+  //
+  // STATIC FUNCTIONS
+  //
+
+  /**
+   * Generates a unique 6-character room ID that does not currently exist on the server.
+   *
+   * It attempts to generate a random ID and checks for its existence up to 100 times.
+   * The possible characters for the ID are alphanumeric (A-Z, a-z, 0-9).
+   *
+   * @private
+   * @static
+   * @param {string} origin The base URL or origin of the server (e.g., 'http://localhost:3000').
+   * @returns {Promise<string | null>} A Promise that resolves with the unique 6-character room ID, or `null` if a unique ID couldn't be found after 100 attempts.
+   */
   private static async generateRoomID(origin: string): Promise<string | null> {
     let text: string = "";
     let possible: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -148,28 +195,31 @@ export default class Server implements Party.Server {
     return null;
   }
 
+  /**
+   * Creates a new room on the server by generating a unique ID and then returning the room data.
+   *
+   * It first calls `generateRoomID` to get an available room ID. If an ID is successfully
+   * generated, it sends a request to create the room with the provided token.
+   *
+   * @private
+   * @static
+   * @param {string} origin The base URL or origin of the server (e.g., 'http://localhost:3000').
+   * @param {string} token The initial authentication token to associate with the new room.
+   * @returns {Promise<Response>} A Promise that resolves with a standard `Response` object.
+   * - Status 201 (Created) with the room ID as the body on success.
+   * - Status 409 (Conflict) on failure.
+   * - Status 500 (Internal Server Error) on room validation failure.
+   */
   private static async createNewRoom(origin: string, token: string): Promise<Response> {
     let roomID = await Server.generateRoomID(origin);
 
     if (roomID) {
-      await fetchPushRoom(`${origin}/parties/main/${roomID}`, token);
+      if(!await fetchPostRoom(`${origin}/parties/main/${roomID}`, token)) {
+        return new Response("Can't validate room.", {status: 500});
+      }
     }
     
     return roomID == null ? new Response("Can't find a free room id.", {status: 409}) : new Response(roomID, {status: 201});
-  }
-
-  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
-    let url: URL = new URL(req.url);
-
-    // if room url is requested without html extension, add it
-    if (url.pathname === "/room") {
-      return lobby.assets.fetch("/room.html" + url.search);
-    } else if (url.pathname === "/createRoom") {
-      return await Server.createNewRoom(new URL(req.url).origin, lobby.env.VALIDATE_ROOM_TOKEN as string);
-    }
-
-    // redirect to main page, if on another one
-    return Response.redirect(url.origin);
   }
 }
 

@@ -1,6 +1,10 @@
 import z from "zod";
 
 const RoomInfoResponseSchema = z.object({
+  /**
+   * The amount of players online in the room
+   * @see {@link Serverr#getOnlineCount}
+   */
   onlineCount: z.number(),
 
   /**
@@ -11,6 +15,15 @@ const RoomInfoResponseSchema = z.object({
 });
 
 export type RoomInfoResponse = z.infer<typeof RoomInfoResponseSchema>;
+
+const PostCreateRoomResponseSchema = z.object({
+  /**
+   * The ID of the created room
+   */
+  roomID: z.string()
+});
+
+export type PostCreateRoomResponse = z.infer<typeof PostCreateRoomResponseSchema>;
 
 
 export async function fetchGetRoom(url: URL|string): Promise<RoomInfoResponse|null> {
@@ -37,22 +50,47 @@ export async function fetchGetRoom(url: URL|string): Promise<RoomInfoResponse|nu
   }
 }
 
-export async function fetchPushRoom(urlParam: URL|string, token: string): Promise<boolean> {
+export async function fetchPostRoom(urlParam: URL|string, token: string): Promise<boolean> {
   try {
     let url = new URL(urlParam);
     url.searchParams.delete("token");
     url.searchParams.set("token", token);
 
-    const resp = await fetch(url, {method: "PUSH"});
+    const resp = await fetch(url, {method: "POST"});
     if (resp.status !== 200) {
-      console.error(`Pushing ${url} returned ${resp.status}!`);
+      console.error(`Posting ${url} returned ${resp.status}!`);
       return false;
     }
 
     // make sure correct response was returned
     return (await resp.text()) === "ok" ? true : false;
   } catch (error) {
-    console.error(`Exception occurred while pushing ${urlParam}:`, error);
+    console.error(`Exception occurred while posting ${urlParam}:`, error);
     return false;
+  }
+}
+
+
+export async function fetchPostCreateRoom(url: URL|string): Promise<PostCreateRoomResponse|null> {
+  try {
+    const resp = await fetch(url, {method: "POST"});
+    if (resp.status !== 200) {
+      console.error(`Posting ${url} returned ${resp.status}!`);
+      return null;
+    }
+
+    const data = await resp.json();
+    
+    // make sure correct response was returned
+    const result = PostCreateRoomResponseSchema.safeParse(data);
+    if (result.success) {
+      return result.data;
+    } else {
+      console.error(`Error validating API response while posting ${url}:`, result.error);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Exception occurred while posting ${url}:`, error);
+    return null;
   }
 }

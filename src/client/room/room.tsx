@@ -50,7 +50,7 @@ function ConnectionLogger() {
 
 
   return (
-    <div className="mt-8">
+    <div className="mb-8">
       <h3 className="font-bold mb-2">Room Activity</h3>
       <div 
         ref={logContainerRef} 
@@ -138,10 +138,10 @@ function App() {
   }, [searchText]);
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
+    <div className="max-w-3/4 mx-auto">
+      <ConnectionLogger />
       <SearchBar searchText={searchText} onSearchTextChange={setSearchText} onEnter={handleEnter} />
       <ResultsList searchText={searchText} results={results}/>
-      <ConnectionLogger />
     </div>
   );
 }
