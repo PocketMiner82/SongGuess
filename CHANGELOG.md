@@ -1,3 +1,10 @@
+# [2.0.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.17...2.0.0-dev.18) (2025-12-02)
+
+
+### Bug Fixes
+
+* styling on mobile ([b8eae30](https://github.com/PocketMiner82/SongGuess/commit/b8eae309f0f763edd23495b7e2a8f0c438bb179b))
+
 # [2.0.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.16...2.0.0-dev.17) (2025-12-01)
 
 
