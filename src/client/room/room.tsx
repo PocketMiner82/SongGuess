@@ -64,7 +64,7 @@ function SearchBar({searchText, onSearchTextChange, onEnter}: {searchText: strin
       <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 underline">Search Apple Music</a>
       <br/><br/>
       <input 
-        placeholder="Enter apple music URL or Search Term" 
+        placeholder="Enter apple music URL" 
         className="w-full outline-0 focus:outline-0 border-b-2 border-b-gray-400  focus:border-b-cyan-600 pb-1" 
         value={searchText} 
         onChange={e => {onSearchTextChange(e.target.value);}} 
