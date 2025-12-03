@@ -13,7 +13,6 @@ const RoomInfoResponseSchema = z.object({
    */
   isValidRoom: z.boolean(),
 });
-
 export type RoomInfoResponse = z.infer<typeof RoomInfoResponseSchema>;
 
 const PostCreateRoomResponseSchema = z.object({
@@ -27,7 +26,6 @@ const PostCreateRoomResponseSchema = z.object({
    */
   error: z.string()
 });
-
 export type PostCreateRoomResponse = z.infer<typeof PostCreateRoomResponseSchema>;
 
 

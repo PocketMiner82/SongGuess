@@ -1,11 +1,30 @@
 import type * as Party from "partykit/server";
-import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfoResponse } from "../RoomHTTPRequests";
+import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfoResponse } from "../RoomHTTPMessages";
+import type { GameState, UpdateMessage } from "../RoomMessages";
+import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
+
+type ConnectionState = {
+  username: string,
+  color: string
+};
+
+const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
 
 export default class Server implements Party.Server {
   /**
    * True, if this room was created by a request to /createRoom
    */
   isValidRoom: boolean = false;
+
+  /**
+   * Log messages are prefixed with this string.
+   */
+  LOG_PREFIX: string = `[Room ${this.room.id}]`;
+
+  /**
+   * The current state of the game.
+   */
+  state: GameState = "lobby";
 
   /**
    * This is the websocket connection of the host.
@@ -17,22 +36,23 @@ export default class Server implements Party.Server {
    */
   hostConnection: Party.Connection|null = null;
 
-  /**
-   * Log messages are prefixed with this string.
-   */
-  LOG_PREFIX: string = `[Room ${this.room.id}]`;
-
 
   constructor(readonly room: Party.Room) {}
 
   //
-  // ROOM WS
+  // ROOM WS EVENTS
   //
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     // kick player if room is not created yet
     if (!this.isValidRoom) {
-      conn.close(4001, "Room ID not found");
+      conn.close(4000, "Room ID not found");
+      return;
+    }
+
+    // also kick if room is already ingame
+    if (this.state === "ingame") {
+      conn.close(4001, "Game is already running");
       return;
     }
 
@@ -41,11 +61,12 @@ export default class Server implements Party.Server {
       this.hostConnection = conn;
     }
 
-    // A websocket just connected!
     this.log(`${conn.id} connected.`);
 
-    // let's send a message to the connection
-    conn.send("hello from server");
+    this.initConnection(conn);
+
+    // send the first update to the connection
+    this.sendUpdate(conn);
   }
 
   onMessage(message: string, sender: Party.Connection) {
@@ -72,7 +93,7 @@ export default class Server implements Party.Server {
     if (this.hostConnection === connection) {
       this.log("Host left, closing room...");
       for (const conn of this.room.getConnections()) {
-        conn.close(4000, "Host left room");
+        conn.close(4900, "Host left room");
       }
     }
 
@@ -89,18 +110,100 @@ export default class Server implements Party.Server {
   // NORMAL FUNCTIONS
   //
 
+  /**
+   * Logs a message with the {@link LOG_PREFIX}
+   * 
+   * @private
+   * @param text 
+   */
   private log(text: string) {
     console.log(`${this.LOG_PREFIX} ${text}`);
   }
 
   /**
-   * Calculates and returns the current number of active WebSocket connections in the room.
+   * Calculates the current number of active WebSocket connections in the room.
    *
    * @private
-   * @returns {number} The count of connected clients.
+   * @returns The count of connected clients.
    */
   private getOnlineCount(): number {
     return Array.from(this.room.getConnections()).length;
+  }
+
+  /**
+   * Get all usernames and there associated color
+   * 
+   * @private
+   * @returns A map containing the username as keys and their color as values
+   */
+  private getUsernamesWithColors(): Map<string, string> {
+    let map = new Map<string, string>();
+    for (let connection of this.room.getConnections()) {
+      let state = connection.state as ConnectionState;
+
+      if (state && state.username && state.color) {
+        map.set(state.username, state.color);
+      }
+    }
+
+    return map;
+  }
+
+  /**
+   * Get all colors, which aren't used by any player
+   * 
+   * @private
+   * @returns A string array of unused colors or an empty array if all colors are used.
+   */
+  private getUnusedColors(): string[] {
+    let usedColors = Array.from(this.getUsernamesWithColors().values());
+
+    return COLORS.filter(item => usedColors.indexOf(item) < 0);
+  }
+
+  /**
+   * Sends an {@link UpdateMessage} with the current room/connection states to the connection.
+   * 
+   * @private
+   */
+  private sendUpdate(conn: Party.Connection) {
+    let connState = conn.state as ConnectionState;
+
+    let update: UpdateMessage = {
+      type: "update",
+      state: this.state,
+      players: Array.from(this.getUsernamesWithColors()),
+      username: connState.username,
+      color: connState.color,
+      isHost: conn === this.hostConnection
+    };
+
+    console.log(update);
+    console.log(JSON.stringify(update));
+
+    conn.send(JSON.stringify(update));
+  }
+
+  /**
+   * Set initial random username and unused color for the connection
+   * 
+   * @private
+   */
+  private initConnection(conn: Party.Connection) {
+    let username = uniqueUsernameGenerator({
+      dictionaries: [adjectives, nouns],
+      style: "titleCase",
+      length: 16
+    });
+
+    let color = this.getUnusedColors()[0];
+
+    let connState: ConnectionState = {
+      username: username,
+      color: color
+    };
+
+    conn.setState(connState);
   }
 
   //

@@ -17,6 +17,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.1.17",
+    "unique-username-generator": "^1.5.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {

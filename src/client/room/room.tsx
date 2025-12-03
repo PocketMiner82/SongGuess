@@ -1,5 +1,3 @@
-import "./room.css";
-
 import usePartySocket from "partysocket/react";
 import { lookup, type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";

@@ -1,8 +1,6 @@
-import "./index.css";
-
 import { createRoot } from "react-dom/client";
 import { useState } from "react";
-import { fetchPostCreateRoom } from "../RoomHTTPRequests";
+import { fetchPostCreateRoom } from "../RoomHTTPMessages";
 
 
 function App() {
