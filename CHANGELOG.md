@@ -1,3 +1,10 @@
+# [2.0.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.18...2.0.0-dev.19) (2025-12-03)
+
+
+### Features
+
+* wip implemtation of room messages and server side code ([2f8eac9](https://github.com/PocketMiner82/SongGuess/commit/2f8eac983676824a891bf72ac428000303c34361))
+
 # [2.0.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.17...2.0.0-dev.18) (2025-12-02)
 
 
