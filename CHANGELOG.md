@@ -1,3 +1,10 @@
+# [2.0.0-dev.20](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.19...2.0.0-dev.20) (2025-12-04)
+
+
+### Bug Fixes
+
+* transfer host instead of kicking all players ([a84cb95](https://github.com/PocketMiner82/SongGuess/commit/a84cb95b913dcb2c45dd316cfd382411d4feda71))
+
 # [2.0.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.18...2.0.0-dev.19) (2025-12-03)
 
 
