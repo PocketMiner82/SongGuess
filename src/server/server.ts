@@ -65,8 +65,8 @@ export default class Server implements Party.Server {
 
     this.initConnection(conn);
 
-    // send the first update to the connection
-    this.sendUpdate(conn);
+    // send the first update to the connection (and inform all other connections about the new player)
+    this.broadcastUpdate();
   }
 
   onMessage(message: string, sender: Party.Connection) {
@@ -89,11 +89,12 @@ export default class Server implements Party.Server {
 
     this.log(`${connection.id} left.`);
 
-    // host left, close room
+    // host left, attempt to transfer host to another client
     if (this.hostConnection === connection) {
-      this.log("Host left, closing room...");
-      for (const conn of this.room.getConnections()) {
-        conn.close(4900, "Host left room");
+      let next = this.room.getConnections()[Symbol.iterator]().next();
+      if (!next.done) {
+        this.log(`Host left, transfering host to ${next.value.id}`);
+        this.hostConnection = next.value;
       }
     }
 
@@ -102,7 +103,10 @@ export default class Server implements Party.Server {
       this.hostConnection = null;
       this.isValidRoom = false;
 
-      this.log("Room closed.");
+      this.log("Last client left, room closed.");
+    } else {
+      // inform all clients about changes, including possible host transfer
+      this.broadcastUpdate();
     }
   }
 
@@ -178,10 +182,19 @@ export default class Server implements Party.Server {
       isHost: conn === this.hostConnection
     };
 
-    console.log(update);
-    console.log(JSON.stringify(update));
-
     conn.send(JSON.stringify(update));
+  }
+
+  /**
+   * Broadcast an update to all connected clients.
+   * 
+   * @private
+   * @see {@link sendUpdate}
+   */
+  private broadcastUpdate() {
+    for (const conn of this.room.getConnections()) {
+      this.sendUpdate(conn);
+    }
   }
 
   /**

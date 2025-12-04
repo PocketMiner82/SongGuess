@@ -51,6 +51,27 @@ export const UpdatePlaylistMessageSchema = z.object({
 export type UpdatePlaylistMessage = z.infer<typeof UpdatePlaylistMessageSchema>;
 
 
+/**
+ * Allowed characters + length restriction of usernames
+ */
+const UsernameSchma = z.stringFormat("user", /^[a-zA-ZäöüÄÖÜßẞ0-9_]{1,16}$/);
+
+
+/**
+ * A request sent by a client to change its username
+ */
+export const ChangeUsernameMessageSchema = z.object({
+  type: z.literal("change_username"),
+
+  /**
+   * The new username.
+   */
+  username: UsernameSchma
+});
+
+export type ChangeUsernameMessage = z.infer<typeof ChangeUsernameMessageSchema>;
+
+
 const GameStateSchema = z.literal([
   "lobby",
   "ingame",
@@ -83,7 +104,7 @@ export const UpdateMessageSchema = z.object({
   /**
    * The friendly username of the player (which the user can reqest to change)
    */
-  username: z.stringFormat("user", /^[a-zA-ZäöüÄÖÜßẞ0-9_]{1,16}$/),
+  username: UsernameSchma,
 
   /**
    * The color of the user
