@@ -1,3 +1,10 @@
+# [2.0.0-dev.21](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.20...2.0.0-dev.21) (2025-12-04)
+
+
+### Features
+
+* start implementing some messages + close room after 5 seconds if last player left + first attempt to sync something: search bar updates for all players when the host updates it ([27caa71](https://github.com/PocketMiner82/SongGuess/commit/27caa71ccf56257af1651d8cb3e09e236c36b086))
+
 # [2.0.0-dev.20](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.19...2.0.0-dev.20) (2025-12-04)
 
 
