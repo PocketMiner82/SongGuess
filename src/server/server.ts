@@ -1,12 +1,12 @@
 import type * as Party from "partykit/server";
-import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfoResponse } from "../RoomHTTPMessages";
-import type { GameState, UpdateMessage } from "../RoomMessages";
+import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfoResponse } from "../messages/RoomHTTPMessages";
+import { ClientMessageSchema } from "../messages/RoomMessages";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
+import z from "zod";
+import type { GameState, PlayerState, ServerUpdatePlaylistMessage, UpdateMessage } from "../messages/RoomServerMessages";
+import type { Song } from "../messages/RoomClientMessages";
+import type { Playlist, ErrorMessage } from "../messages/RoomSharedMessages";
 
-type ConnectionState = {
-  username: string,
-  color: string
-};
 
 const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
 
@@ -35,6 +35,16 @@ export default class Server implements Party.Server {
    *  - Kick players
    */
   hostConnection: Party.Connection|null = null;
+
+  /**
+   * Currently selected playlist(s)
+   */
+  playlists: Playlist[] = [];
+
+  /**
+   * Songs of the currently selected playlist(s)
+   */
+  songs: Song[] = [];
 
 
   constructor(readonly room: Party.Room) {}
@@ -69,16 +79,71 @@ export default class Server implements Party.Server {
     this.broadcastUpdate();
   }
 
-  onMessage(message: string, sender: Party.Connection) {
+  onMessage(message: string, conn: Party.Connection) {
     // ignore all messages if room is not valid
     if (!this.isValidRoom) {
       return;
     }
 
-    // let's log the message
-    this.log(`${sender.id} sent message: ${message}`);
-    // as well as broadcast it to all the other connections in the room except for the connection it came from
-    this.room.broadcast(`${sender.id}: ${message}`, [sender.id]);
+    this.log(`${conn.id} sent: ${message}`, "trace");
+
+    // try to parse json
+    try {
+      var json = JSON.parse(message);
+    } catch {
+      this.sendError(conn, "Message is not JSON.");
+      return;
+    }
+
+    // check if received message is valid
+    const result = ClientMessageSchema.safeParse(json);
+    if (!result.success) {
+      this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
+      this.sendError(conn, z.prettifyError(result.error));
+      return;
+    }
+
+    let msg = result.data;
+
+    // handle each message type
+    switch(msg.type) {
+      case "error":
+        this.log(`Client ${conn.id} reported an error:\n${msg.error}`, "warn");
+        break;
+      case "change_username":
+        if (this.state !== "lobby") {
+          this.sendError(conn, "Can only change name while in lobby.");
+          return;
+        }
+
+        // username is already validated
+        (conn.state as PlayerState).username = msg.username;
+
+        // this not only informs all other users about the name change but also the tells the connection
+        // that the name change was successful
+        this.broadcastUpdate();
+        break;
+      case "host_update_playlists":
+        if (conn !== this.hostConnection) {
+          this.sendError(conn, "Only host can update playlists.");
+          return;
+        }
+
+        this.playlists = msg.playlists;
+        this.songs = msg.songs;
+
+        let resp: ServerUpdatePlaylistMessage = {
+          type: "server_update_playlists",
+          playlists: this.playlists
+        };
+
+        // send the update to all players, including sender (for confirmation)
+        this.room.broadcast(JSON.stringify(resp));
+        break;
+      default:
+        this.sendError(conn, `Invalid message type: ${msg.type}`);
+        break;
+    }
   }
 
   onClose(connection: Party.Connection) {
@@ -98,12 +163,12 @@ export default class Server implements Party.Server {
       }
     }
 
-    // no more players left, cleanup the room
+    // no more players left
     if (this.getOnlineCount() === 0) {
       this.hostConnection = null;
-      this.isValidRoom = false;
+      this.delayedCleanup();
 
-      this.log("Last client left, room closed.");
+      this.log("Last client left, room will close in 5 seconds if no one joins...");
     } else {
       // inform all clients about changes, including possible host transfer
       this.broadcastUpdate();
@@ -115,13 +180,45 @@ export default class Server implements Party.Server {
   //
 
   /**
+   * Invalidates the room if no players join within 5 seconds.
+   */
+  private delayedCleanup() {
+    setTimeout(() => {
+      if (this.getOnlineCount() === 0) {
+        this.isValidRoom = false;
+        this.log("Room closed due to timeout.");
+      }
+    }, 5000);
+  }
+
+  /**
    * Logs a message with the {@link LOG_PREFIX}
    * 
    * @private
    * @param text 
    */
-  private log(text: string) {
-    console.log(`${this.LOG_PREFIX} ${text}`);
+  private log(text: string, level: "debug"|"trace"|"warn"|"error"|"info" = "info") {
+    let logFunction: (...data: any) => void;
+    switch(level) {
+      case "debug":
+        logFunction = console.debug;
+        break;
+      case "trace":
+        logFunction = console.trace;
+        break;
+      case "warn":
+        logFunction = console.error;
+        break;
+      case "error":
+        logFunction = console.error;
+        break;
+      case "info":
+      default:
+        logFunction = console.info;
+        break;
+    }
+
+    logFunction(`${this.LOG_PREFIX} ${text}`);
   }
 
   /**
@@ -140,17 +237,17 @@ export default class Server implements Party.Server {
    * @private
    * @returns A map containing the username as keys and their color as values
    */
-  private getUsernamesWithColors(): Map<string, string> {
-    let map = new Map<string, string>();
+  private getUsernamesWithColors(): PlayerState[] {
+    let states: PlayerState[] = [];
     for (let connection of this.room.getConnections()) {
-      let state = connection.state as ConnectionState;
+      let state = connection.state as PlayerState;
 
       if (state && state.username && state.color) {
-        map.set(state.username, state.color);
+        states.push(state);
       }
     }
 
-    return map;
+    return states;
   }
 
   /**
@@ -160,7 +257,7 @@ export default class Server implements Party.Server {
    * @returns A string array of unused colors or an empty array if all colors are used.
    */
   private getUnusedColors(): string[] {
-    let usedColors = Array.from(this.getUsernamesWithColors().values());
+    let usedColors = this.getUsernamesWithColors().map(item => item.color);
 
     return COLORS.filter(item => usedColors.indexOf(item) < 0);
   }
@@ -171,18 +268,27 @@ export default class Server implements Party.Server {
    * @private
    */
   private sendUpdate(conn: Party.Connection) {
-    let connState = conn.state as ConnectionState;
+    let connState = conn.state as PlayerState;
 
     let update: UpdateMessage = {
       type: "update",
       state: this.state,
-      players: Array.from(this.getUsernamesWithColors()),
+      players: this.getUsernamesWithColors(),
       username: connState.username,
       color: connState.color,
       isHost: conn === this.hostConnection
     };
 
     conn.send(JSON.stringify(update));
+  }
+
+  private sendError(conn: Party.Connection, error: string) {
+    let resp: ErrorMessage = {
+      type: "error",
+      error: error
+    }
+    conn.send(JSON.stringify(resp));
+    this.sendUpdate(conn);
   }
 
   /**
@@ -211,7 +317,7 @@ export default class Server implements Party.Server {
 
     let color = this.getUnusedColors()[0];
 
-    let connState: ConnectionState = {
+    let connState: PlayerState = {
       username: username,
       color: color
     };
@@ -242,14 +348,7 @@ export default class Server implements Party.Server {
       let url = new URL(req.url);
       if (url.searchParams.has("token") && url.searchParams.get("token") === this.room.env.VALIDATE_ROOM_TOKEN) {
         this.isValidRoom = true;
-
-        // if no one joins within 5 seconds, invalidate the room number again
-        setTimeout(() => {
-          if (this.getOnlineCount() === 0) {
-            this.isValidRoom = false;
-            this.log("Room closed due to timeout.");
-          }
-        }, 5000);
+        this.delayedCleanup();
 
         this.log("Room created.");
         return new Response("ok", { status: 200 });

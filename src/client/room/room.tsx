@@ -3,6 +3,8 @@ import { lookup, type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
 import { useCallback, useState, useEffect, type Dispatch, type SetStateAction, useRef } from "react";
 import type PartySocket from "partysocket";
+import type { HostUpdatePlaylistMessage } from "../../messages/RoomClientMessages";
+import { ServerMessageSchema } from "../../messages/RoomMessages";
 
 declare const PARTYKIT_HOST: string;
 
@@ -108,6 +110,20 @@ function App() {
     },
     onMessage(event) {
       setLogs((prev) => [...prev, `Received -> ${event.data}`]);
+
+      try {
+        let json = JSON.parse(event.data);
+
+        // check if received message is valid
+        const result = ServerMessageSchema.safeParse(json);
+        if (result.success) {
+          let msg = result.data;
+          if (msg.type === "server_update_playlists" && msg.playlists[0] && msg.playlists[0].playlistName !== searchText) {
+            setSearchText(msg.playlists[0].playlistName);
+            handleEnter(msg.playlists[0].playlistName);
+          }
+        }
+      } catch {}
     },
     onClose(ev) {
       setLogs((prev) => [...prev, `Disconnected (${ev.code}): ${ev.reason}`]);
@@ -117,22 +133,31 @@ function App() {
     }
   });
 
-  const handleEnter = useCallback(async () => {
+  const handleEnter = useCallback(async (text: string = searchText) => {
     try {
-      var results = (await lookup("url", searchText, {
+      var results = (await lookup("url", text, {
         entity: "song",
         limit: 200
       })).results;
     } catch {
       // @ts-ignore
-      results = (await lookup("url", searchText, {
+      results = (await lookup("url", text, {
         entity: "song",
         limit: 200,
         magicnumber: Date.now()
       })).results;
     }
 
-    socket.send(`Entered Apple Music URL: ${searchText}`);
+    let req: HostUpdatePlaylistMessage = {
+      type: "host_update_playlists",
+      playlists: [{
+        playlistName: text,
+        playlistCover: null
+      }],
+      songs: []
+    };
+
+    socket.send(JSON.stringify(req));
     setResults(results);
   }, [searchText, socket]);
 
