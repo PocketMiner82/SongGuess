@@ -1,13 +1,8 @@
-import usePartySocket from "partysocket/react";
-import { lookup, type ResultMusicTrack } from "itunes-store-api";
+import { type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
-import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
-import type { HostUpdatePlaylistMessage } from "../../messages/RoomClientMessages";
-import { ServerMessageSchema } from "../../messages/RoomMessages";
-import z from "zod";
+import { type Dispatch, type SetStateAction } from "react";
 import { useRoomController } from "./RoomController";
 
-declare const PARTYKIT_HOST: string;
 
 function Audio({trackName, url}: {trackName: string, url: string}) {
   return (

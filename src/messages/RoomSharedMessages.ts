@@ -11,7 +11,7 @@ export const PlaylistSchema = z.object({
    * Cover URL of the playlist.
    * Currently only cover arts by Apple Music are allowed.
    */
-  playlistCover: z.null(z.url({pattern: /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/}))
+  playlistCover: z.nullable(z.url({pattern: /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/}))
 });
 
 export type Playlist = z.infer<typeof PlaylistSchema>;

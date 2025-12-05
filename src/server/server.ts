@@ -3,7 +3,7 @@ import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfo
 import { ClientMessageSchema } from "../messages/RoomMessages";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import z from "zod";
-import { ServerUpdatePlaylistMessageSchema, type GameState, type PlayerState, type ServerUpdatePlaylistMessage, type UpdateMessage } from "../messages/RoomServerMessages";
+import { type GameState, type PlayerState, type ServerUpdatePlaylistMessage, type UpdateMessage } from "../messages/RoomServerMessages";
 import type { Song } from "../messages/RoomClientMessages";
 import type { Playlist, ErrorMessage } from "../messages/RoomSharedMessages";
 
