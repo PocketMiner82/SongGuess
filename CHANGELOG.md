@@ -1,3 +1,10 @@
+# [2.0.0-dev.22](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.21...2.0.0-dev.22) (2025-12-05)
+
+
+### Features
+
+* create react hook for room controller to simplify partykit communication + cleanup server code ([ba1224c](https://github.com/PocketMiner82/SongGuess/commit/ba1224c0671df26401eea668735fb32ff0c9d3a7))
+
 # [2.0.0-dev.21](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.20...2.0.0-dev.21) (2025-12-04)
 
 
