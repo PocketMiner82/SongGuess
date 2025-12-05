@@ -1,0 +1,482 @@
+import type * as Party from "partykit/server";
+import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfoResponse } from "../messages/RoomHTTPMessages";
+import { ClientMessageSchema } from "../messages/RoomMessages";
+import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
+import z from "zod";
+import { type GameState, type PlayerState, type ServerUpdatePlaylistMessage, type UpdateMessage } from "../messages/RoomServerMessages";
+import type { Song } from "../messages/RoomClientMessages";
+import type { Playlist, ErrorMessage } from "../messages/RoomSharedMessages";
+
+
+const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
+
+export default class Server implements Party.Server {
+  /**
+   * True, if this room was created by a request to /createRoom
+   */
+  isValidRoom: boolean = false;
+
+  /**
+   * Log messages are prefixed with this string.
+   */
+  LOG_PREFIX: string = `[Room ${this.room.id}]`;
+
+  /**
+   * The current state of the game.
+   */
+  state: GameState = "lobby";
+
+  /**
+   * This is the websocket connection of the host.
+   * If the host leaves, the room will close.
+   * A host can:
+   *  - Start the game
+   *  - Select a playlist
+   *  - Kick players
+   */
+  hostConnection: Party.Connection|null = null;
+
+  /**
+   * Currently selected playlist(s)
+   */
+  playlists: Playlist[] = [];
+
+  /**
+   * Songs of the currently selected playlist(s)
+   */
+  songs: Song[] = [];
+
+
+  constructor(readonly room: Party.Room) {}
+
+  //
+  // ROOM WS EVENTS
+  //
+
+  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    // kick player if room is not created yet
+    if (!this.isValidRoom) {
+      conn.close(4000, "Room ID not found");
+      return;
+    }
+
+    // also kick if room is already ingame
+    if (this.state === "ingame") {
+      conn.close(4001, "Game is already running");
+      return;
+    }
+
+    // first player connected, this must be the host
+    if (this.getOnlineCount() === 1) {
+      this.hostConnection = conn;
+    }
+
+    this.log(`${conn.id} connected.`);
+
+    this.initConnection(conn);
+
+    // send the first update to the connection (and inform all other connections about the new player)
+    this.broadcastUpdate();
+  }
+
+  onMessage(message: string, conn: Party.Connection) {
+    // ignore all messages if room is not valid
+    if (!this.isValidRoom) {
+      return;
+    }
+
+    this.log(`${conn.id} sent: ${message}`, "debug");
+
+    // try to parse json
+    try {
+      var json = JSON.parse(message);
+    } catch {
+      this.sendError(conn, "Message is not JSON.");
+      return;
+    }
+
+    // check if received message is valid
+    const result = ClientMessageSchema.safeParse(json);
+    if (!result.success) {
+      this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
+      this.sendError(conn, z.prettifyError(result.error));
+      return;
+    }
+
+    let msg = result.data;
+
+    // handle each message type
+    switch(msg.type) {
+      case "error":
+        this.log(`Client ${conn.id} reported an error:\n${msg.error}`, "warn");
+        break;
+      case "change_username":
+        if (!this.performLobbyCheck(conn, msg.type)) return;
+
+        // username is already validated
+        (conn.state as PlayerState).username = msg.username;
+
+        // this not only informs all other users about the name change but also the tells the connection
+        // that the name change was successful
+        this.broadcastUpdate();
+        break;
+      case "host_update_playlists":
+        if (!this.performHostCheck(conn, msg.type) || !this.performLobbyCheck(conn, msg.type)) return;
+
+        this.playlists = msg.playlists;
+        this.songs = msg.songs;
+
+        // send the update to all players, including sender (for confirmation)
+        this.room.broadcast(this.getPlaylistUpdateMessage());
+        break;
+      default:
+        this.sendError(conn, `Invalid message type: ${msg.type}`);
+        break;
+    }
+  }
+
+  onClose(connection: Party.Connection) {
+    // ignore disconnects if room is not valid
+    if (!this.isValidRoom) {
+      return;
+    }
+
+    this.log(`${connection.id} left.`);
+
+    // host left, attempt to transfer host to another client
+    if (this.hostConnection === connection) {
+      let next = this.room.getConnections()[Symbol.iterator]().next();
+      if (!next.done) {
+        this.log(`Host left, transfering host to ${next.value.id}`);
+        this.hostConnection = next.value;
+      }
+    }
+
+    // no more players left
+    if (this.getOnlineCount() === 0) {
+      this.hostConnection = null;
+      this.delayedCleanup();
+
+      this.log("Last client left, room will close in 5 seconds if no one joins...");
+    } else {
+      // inform all clients about changes, including possible host transfer
+      this.broadcastUpdate();
+    }
+  }
+
+  //
+  // NORMAL FUNCTIONS
+  //
+
+  /**
+   * Invalidates the room if no players join within 5 seconds.
+   */
+  private delayedCleanup() {
+    setTimeout(() => {
+      if (this.getOnlineCount() === 0) {
+        this.isValidRoom = false;
+        this.log("Room closed due to timeout.");
+      }
+    }, 5000);
+  }
+
+  /**
+   * Logs a message with the {@link LOG_PREFIX}
+   * 
+   * @param text 
+   */
+  private log(text: string, level: "debug"|"warn"|"error"|"info" = "info") {
+    let logFunction: (...data: any) => void;
+    switch(level) {
+      case "debug":
+        logFunction = console.debug;
+        break;
+      case "warn":
+        logFunction = console.error;
+        break;
+      case "error":
+        logFunction = console.error;
+        break;
+      case "info":
+      default:
+        logFunction = console.info;
+        break;
+    }
+
+    logFunction(`${this.LOG_PREFIX} ${text}`);
+  }
+
+  /**
+   * Calculates the current number of active WebSocket connections in the room.
+   *
+   * @returns The count of connected clients.
+   */
+  private getOnlineCount(): number {
+    return Array.from(this.room.getConnections()).length;
+  }
+
+  /**
+   * Get all usernames and there associated color
+   * 
+   * @returns A map containing the username as keys and their color as values
+   */
+  private getUsernamesWithColors(): PlayerState[] {
+    let states: PlayerState[] = [];
+    for (let connection of this.room.getConnections()) {
+      let state = connection.state as PlayerState;
+
+      if (state && state.username && state.color) {
+        states.push(state);
+      }
+    }
+
+    return states;
+  }
+
+  /**
+   * Get all colors, which aren't used by any player
+   * 
+   * @returns A string array of unused colors or an empty array if all colors are used.
+   */
+  private getUnusedColors(): string[] {
+    let usedColors = this.getUsernamesWithColors().map(item => item.color);
+
+    return COLORS.filter(item => usedColors.indexOf(item) < 0);
+  }
+
+  /**
+   * Sends an {@link UpdateMessage} with the current room/connection states to the connection.
+   */
+  private sendUpdate(conn: Party.Connection) {
+    let connState = conn.state as PlayerState;
+
+    let update: UpdateMessage = {
+      type: "update",
+      state: this.state,
+      players: this.getUsernamesWithColors(),
+      username: connState.username,
+      color: connState.color,
+      isHost: conn === this.hostConnection
+    };
+
+    conn.send(JSON.stringify(update));
+  }
+
+  /**
+   * Construct a playlist update message with the current playlist array.
+   * 
+   * @returns a JSON string of a {@link ServerUpdatePlaylistMessage}
+   */
+  private getPlaylistUpdateMessage(): string {
+    let update: ServerUpdatePlaylistMessage = {
+      type: "server_update_playlists",
+      playlists: this.playlists
+    };
+
+    return JSON.stringify(update);
+  }
+
+  /**
+   * Sends an error and an update to a player.
+   * 
+   * @param conn The connection of the player that should receive the messages
+   * @param error A description of the error
+   * @see {@link sendUpdate}
+   */
+  private sendError(conn: Party.Connection, error: string) {
+    let resp: ErrorMessage = {
+      type: "error",
+      error: error
+    }
+    conn.send(JSON.stringify(resp));
+    this.sendUpdate(conn);
+  }
+
+  /**
+   * Checks if a player is the host. If not, send an error.
+   * 
+   * @param conn The connection of the player to check
+   * @returns true if the connection is the host
+   * @see {@link sendError}
+   */
+  private performHostCheck(conn: Party.Connection, action: string = "this action"): boolean {
+    if (conn !== this.hostConnection) {
+      this.sendError(conn, `Only host can perform ${action}.`);
+    }
+    return conn === this.hostConnection;
+  }
+
+  /**
+   * Checks if room is in lobby state. If not, send an error.
+   * 
+   * @param conn The connection that should receive the (possible) error.
+   * @returns true if room state is lobby
+   * @see {@link sendError}
+   */
+  private performLobbyCheck(conn: Party.Connection, action: string = "this action"): boolean {
+    if (this.state !== "lobby") {
+      this.sendError(conn, `Can only perform ${action} while in lobby.`);
+    }
+    return this.state === "lobby";
+  }
+
+  /**
+   * Broadcast an update to all connected clients.
+   * 
+   * @see {@link sendUpdate}
+   */
+  private broadcastUpdate() {
+    for (const conn of this.room.getConnections()) {
+      this.sendUpdate(conn);
+    }
+  }
+
+  /**
+   * Set initial random username and unused color for a player.
+   * 
+   * @param conn The connection of the player
+   */
+  private initConnection(conn: Party.Connection) {
+    let username = uniqueUsernameGenerator({
+      dictionaries: [adjectives, nouns],
+      style: "titleCase",
+      length: 16
+    });
+
+    let color = this.getUnusedColors()[0];
+
+    let connState: PlayerState = {
+      username: username,
+      color: color
+    };
+
+    conn.setState(connState);
+
+    // send the current playlist to the connection
+    conn.send(this.getPlaylistUpdateMessage());
+  }
+
+  //
+  // ROOM HTTP EVENTS
+  //
+
+  async onRequest(req: Party.Request): Promise<Response> {
+    let url: URL = new URL(req.url);
+
+    // handle room creation
+    if (url.pathname.endsWith("/createRoom")) {
+      return await Server.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
+    // respond with JSON containing the current online count and if the room is valid
+    } else if (req.method === "GET") {
+      let json: RoomInfoResponse = {
+        onlineCount: this.getOnlineCount(),
+        isValidRoom: this.isValidRoom
+      };
+
+      return Response.json(json);
+    // used to initially validate and activate the room, requires a secret token shared between this method and the static createRoom method
+    } else if (req.method === "POST") {
+      let url = new URL(req.url);
+      if (url.searchParams.has("token") && url.searchParams.get("token") === this.room.env.VALIDATE_ROOM_TOKEN) {
+        this.isValidRoom = true;
+        this.delayedCleanup();
+
+        this.log("Room created.");
+        return new Response("ok", { status: 200 });
+      }
+
+      return new Response("Token invalid/missing.", { status: 401 });
+    }
+
+    return new Response("Bad request", { status: 400 });
+  }
+
+  //
+  // STATIC GLOBAL FETCH EVENTS
+  //
+
+  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
+    let url: URL = new URL(req.url);
+
+    // if room url is requested without html extension, add it
+    if (url.pathname === "/room") {
+      return lobby.assets.fetch("/room.html" + url.search);
+    }
+
+    // redirect to main page, if on another one
+    return Response.redirect(url.origin);
+  }
+
+  //
+  // STATIC FUNCTIONS
+  //
+
+  /**
+   * Generates a unique 6-character room ID that does not currently exist on the server.
+   *
+   * It attempts to generate a random ID and checks for its existence up to 100 times.
+   * The possible characters for the ID are alphanumeric (A-Z, a-z, 0-9).
+   *
+   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
+   * @returns A Promise that resolves with the unique 6-character room ID, or `null` if a unique ID couldn't be found after 100 attempts.
+   */
+  private static async generateRoomID(origin: string): Promise<string | null> {
+    let text: string = "";
+    let possible: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (let attempt = 0; attempt < 100; attempt++) {
+      for (let i: number = 0; i < 6; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+
+      let roomInfo = await fetchGetRoom(`${origin}/parties/main/${text}`);
+
+      // room already exists
+      if (roomInfo && roomInfo.isValidRoom) {
+        continue;
+      }
+
+      return text;
+    }
+    
+    return null;
+  }
+
+  /**
+   * Creates a new room on the server by generating a unique ID and then returning the room data.
+   *
+   * It first calls `generateRoomID` to get an available room ID. If an ID is successfully
+   * generated, it sends a request to create the room with the provided token.
+   *
+   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
+   * @param token The initial authentication token to associate with the new room.
+   * @returns A Promise that resolves with a standard `Response` object.
+   * - Status 201 (Created) with the room ID as the body on success.
+   * - Status 409 (Conflict) on failure.
+   * - Status 500 (Internal Server Error) on room validation failure.
+   */
+  private static async createNewRoom(origin: string, token: string): Promise<Response> {
+    let roomID = await Server.generateRoomID(origin);
+    let errorMessage = "";
+    let statusCode = 201;
+
+    if (roomID) {
+      if(!await fetchPostRoom(`${origin}/parties/main/${roomID}`, token)) {
+        errorMessage = "Can't validate room.";
+        statusCode = 500;
+      }
+    } else {
+      errorMessage = "Can't find a free room id.";
+      statusCode = 409;
+    }
+
+    let json: PostCreateRoomResponse = {
+      roomID: roomID as string,
+      error: errorMessage
+    };
+    
+    return Response.json(json, {status: statusCode});
+  }
+}
+
+Server satisfies Party.Worker;
