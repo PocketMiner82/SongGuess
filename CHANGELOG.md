@@ -1,3 +1,10 @@
+# [2.0.0-dev.23](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.22...2.0.0-dev.23) (2025-12-05)
+
+
+### Bug Fixes
+
+* type errors + cleanup ([c1786bd](https://github.com/PocketMiner82/SongGuess/commit/c1786bde602fe8f39ce5d71226c998ee7eac5f2d))
+
 # [2.0.0-dev.22](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.21...2.0.0-dev.22) (2025-12-05)
 
 
