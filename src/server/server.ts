@@ -3,7 +3,7 @@ import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfo
 import { ClientMessageSchema } from "../messages/RoomMessages";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import z from "zod";
-import type { GameState, PlayerState, ServerUpdatePlaylistMessage, UpdateMessage } from "../messages/RoomServerMessages";
+import { ServerUpdatePlaylistMessageSchema, type GameState, type PlayerState, type ServerUpdatePlaylistMessage, type UpdateMessage } from "../messages/RoomServerMessages";
 import type { Song } from "../messages/RoomClientMessages";
 import type { Playlist, ErrorMessage } from "../messages/RoomSharedMessages";
 
@@ -85,7 +85,7 @@ export default class Server implements Party.Server {
       return;
     }
 
-    this.log(`${conn.id} sent: ${message}`, "trace");
+    this.log(`${conn.id} sent: ${message}`, "debug");
 
     // try to parse json
     try {
@@ -111,10 +111,7 @@ export default class Server implements Party.Server {
         this.log(`Client ${conn.id} reported an error:\n${msg.error}`, "warn");
         break;
       case "change_username":
-        if (this.state !== "lobby") {
-          this.sendError(conn, "Can only change name while in lobby.");
-          return;
-        }
+        if (!this.performLobbyCheck(conn, msg.type)) return;
 
         // username is already validated
         (conn.state as PlayerState).username = msg.username;
@@ -124,21 +121,13 @@ export default class Server implements Party.Server {
         this.broadcastUpdate();
         break;
       case "host_update_playlists":
-        if (conn !== this.hostConnection) {
-          this.sendError(conn, "Only host can update playlists.");
-          return;
-        }
+        if (!this.performHostCheck(conn, msg.type) || !this.performLobbyCheck(conn, msg.type)) return;
 
         this.playlists = msg.playlists;
         this.songs = msg.songs;
 
-        let resp: ServerUpdatePlaylistMessage = {
-          type: "server_update_playlists",
-          playlists: this.playlists
-        };
-
         // send the update to all players, including sender (for confirmation)
-        this.room.broadcast(JSON.stringify(resp));
+        this.room.broadcast(this.getPlaylistUpdateMessage());
         break;
       default:
         this.sendError(conn, `Invalid message type: ${msg.type}`);
@@ -194,17 +183,13 @@ export default class Server implements Party.Server {
   /**
    * Logs a message with the {@link LOG_PREFIX}
    * 
-   * @private
    * @param text 
    */
-  private log(text: string, level: "debug"|"trace"|"warn"|"error"|"info" = "info") {
+  private log(text: string, level: "debug"|"warn"|"error"|"info" = "info") {
     let logFunction: (...data: any) => void;
     switch(level) {
       case "debug":
         logFunction = console.debug;
-        break;
-      case "trace":
-        logFunction = console.trace;
         break;
       case "warn":
         logFunction = console.error;
@@ -224,7 +209,6 @@ export default class Server implements Party.Server {
   /**
    * Calculates the current number of active WebSocket connections in the room.
    *
-   * @private
    * @returns The count of connected clients.
    */
   private getOnlineCount(): number {
@@ -234,7 +218,6 @@ export default class Server implements Party.Server {
   /**
    * Get all usernames and there associated color
    * 
-   * @private
    * @returns A map containing the username as keys and their color as values
    */
   private getUsernamesWithColors(): PlayerState[] {
@@ -253,7 +236,6 @@ export default class Server implements Party.Server {
   /**
    * Get all colors, which aren't used by any player
    * 
-   * @private
    * @returns A string array of unused colors or an empty array if all colors are used.
    */
   private getUnusedColors(): string[] {
@@ -264,8 +246,6 @@ export default class Server implements Party.Server {
 
   /**
    * Sends an {@link UpdateMessage} with the current room/connection states to the connection.
-   * 
-   * @private
    */
   private sendUpdate(conn: Party.Connection) {
     let connState = conn.state as PlayerState;
@@ -282,6 +262,27 @@ export default class Server implements Party.Server {
     conn.send(JSON.stringify(update));
   }
 
+  /**
+   * Construct a playlist update message with the current playlist array.
+   * 
+   * @returns a JSON string of a {@link ServerUpdatePlaylistMessage}
+   */
+  private getPlaylistUpdateMessage(): string {
+    let update: ServerUpdatePlaylistMessage = {
+      type: "server_update_playlists",
+      playlists: this.playlists
+    };
+
+    return JSON.stringify(update);
+  }
+
+  /**
+   * Sends an error and an update to a player.
+   * 
+   * @param conn The connection of the player that should receive the messages
+   * @param error A description of the error
+   * @see {@link sendUpdate}
+   */
   private sendError(conn: Party.Connection, error: string) {
     let resp: ErrorMessage = {
       type: "error",
@@ -292,9 +293,36 @@ export default class Server implements Party.Server {
   }
 
   /**
+   * Checks if a player is the host. If not, send an error.
+   * 
+   * @param conn The connection of the player to check
+   * @returns true if the connection is the host
+   * @see {@link sendError}
+   */
+  private performHostCheck(conn: Party.Connection, action: string = "this action"): boolean {
+    if (conn !== this.hostConnection) {
+      this.sendError(conn, `Only host can perform ${action}.`);
+    }
+    return conn === this.hostConnection;
+  }
+
+  /**
+   * Checks if room is in lobby state. If not, send an error.
+   * 
+   * @param conn The connection that should receive the (possible) error.
+   * @returns true if room state is lobby
+   * @see {@link sendError}
+   */
+  private performLobbyCheck(conn: Party.Connection, action: string = "this action"): boolean {
+    if (this.state !== "lobby") {
+      this.sendError(conn, `Can only perform ${action} while in lobby.`);
+    }
+    return this.state === "lobby";
+  }
+
+  /**
    * Broadcast an update to all connected clients.
    * 
-   * @private
    * @see {@link sendUpdate}
    */
   private broadcastUpdate() {
@@ -304,9 +332,9 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Set initial random username and unused color for the connection
+   * Set initial random username and unused color for a player.
    * 
-   * @private
+   * @param conn The connection of the player
    */
   private initConnection(conn: Party.Connection) {
     let username = uniqueUsernameGenerator({
@@ -323,6 +351,9 @@ export default class Server implements Party.Server {
     };
 
     conn.setState(connState);
+
+    // send the current playlist to the connection
+    conn.send(this.getPlaylistUpdateMessage());
   }
 
   //
@@ -386,10 +417,8 @@ export default class Server implements Party.Server {
    * It attempts to generate a random ID and checks for its existence up to 100 times.
    * The possible characters for the ID are alphanumeric (A-Z, a-z, 0-9).
    *
-   * @private
-   * @static
-   * @param {string} origin The base URL or origin of the server (e.g., 'http://localhost:3000').
-   * @returns {Promise<string | null>} A Promise that resolves with the unique 6-character room ID, or `null` if a unique ID couldn't be found after 100 attempts.
+   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
+   * @returns A Promise that resolves with the unique 6-character room ID, or `null` if a unique ID couldn't be found after 100 attempts.
    */
   private static async generateRoomID(origin: string): Promise<string | null> {
     let text: string = "";
@@ -419,11 +448,9 @@ export default class Server implements Party.Server {
    * It first calls `generateRoomID` to get an available room ID. If an ID is successfully
    * generated, it sends a request to create the room with the provided token.
    *
-   * @private
-   * @static
-   * @param {string} origin The base URL or origin of the server (e.g., 'http://localhost:3000').
-   * @param {string} token The initial authentication token to associate with the new room.
-   * @returns {Promise<Response>} A Promise that resolves with a standard `Response` object.
+   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
+   * @param token The initial authentication token to associate with the new room.
+   * @returns A Promise that resolves with a standard `Response` object.
    * - Status 201 (Created) with the room ID as the body on success.
    * - Status 409 (Conflict) on failure.
    * - Status 500 (Internal Server Error) on room validation failure.
