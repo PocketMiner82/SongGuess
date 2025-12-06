@@ -14,7 +14,7 @@
     "cookie": "^1.1.1",
     "itunes-store-api": "^2.1.0",
     "partysocket": "^1.1.6",
-    "react": "^19.2.0",
+    "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "tailwindcss": "^4.1.17",
     "unique-username-generator": "^1.5.1",
