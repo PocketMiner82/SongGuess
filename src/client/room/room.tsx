@@ -1,21 +1,22 @@
 import { type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
-import { type Dispatch, type SetStateAction } from "react";
-import { useRoomController } from "./RoomController";
+import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
+import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
 
+const RoomContext = createContext<RoomController | null>(null);
 
-function Audio({trackName, url}: {trackName: string, url: string}) {
-  return (
-    <div className="mb-4">
-      <div className="font-semibold">{trackName}:</div>
-      <audio controls className="mt-1">
-        <source src={url} type="audio/aac"/>
-      </audio>
-    </div>
-  );
+function useController() {
+  const controller = useContext(RoomContext);
+  if (!controller) throw new Error("useRoom must be used within RoomProvider");
+  return controller;
 }
 
-function SearchBar({searchText, onSearchTextChange, onEnter}: {searchText: string, onSearchTextChange: Dispatch<SetStateAction<string>>, onEnter: Function}) {
+function SearchBar() {
+  const controller = useController();
+  const [searchText, setSearchText] = useState(controller.searchText);
+  const listener = useCallback((c: RoomController) => setSearchText(c.searchText), []);
+  useRoomControllerListener(controller, listener);
+ 
   return (
     <>
       <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 underline">Search Apple Music</a>
@@ -24,47 +25,62 @@ function SearchBar({searchText, onSearchTextChange, onEnter}: {searchText: strin
         placeholder="Enter apple music URL" 
         className="w-full outline-0 focus:outline-0 border-b-2 border-b-gray-400  focus:border-b-cyan-600 pb-1" 
         value={searchText} 
-        onChange={e => {onSearchTextChange(e.target.value);}} 
-        onKeyDown={e => {if (e.key === "Enter") onEnter();}}
+        onChange={e => {setSearchText(e.target.value); controller.searchText = e.target.value;}} 
+        onKeyDown={e => {if (e.key === "Enter") controller.performSearch(searchText);}}
       />
       <br/><br/>
     </>
   );
 }
 
-function ResultsList({searchText, results}: {searchText: string, results: ResultMusicTrack[] | undefined}) {
-  if (!results || !Array.isArray(results)) return null;
+function Audio() {
+  const ref = useRef<HTMLAudioElement | null>(null);
+  const controller = useController();
+
+  const listener = useCallback((c: RoomController) => {
+    const currentSong = c.results?.[0];
+    const audio = ref.current;
+    if (!audio) return;
+
+    if (currentSong && currentSong.previewUrl) {
+      if (audio.src !== currentSong.previewUrl) audio.src = currentSong.previewUrl;
+      audio.load();
+      audio.volume = 0.2;
+      audio.play().catch(() => {/* ignore play promise errors */});
+    } else {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    }
+  }, []);
+
+  useRoomControllerListener(controller, listener);
+
+  // initialize once from current controller state
+  useEffect(() => {
+    listener(controller);
+  }, [controller, listener]);
 
   return (
-    <div className="mb-6">
-      <div className="mb-4">Songs for "{searchText}" ({results.length}):</div>
-      
-      {results
-        .filter(result => result.trackName && result.previewUrl)
-        .map(result => (
-          <Audio
-            key={result.previewUrl}
-            trackName={result.trackName}
-            url={result.previewUrl}
-          />
-        ))
-      }
-    </div>
+    <audio ref={ref} />
   );
 }
 
 function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
+  const { getController, isReady } = useRoomController(roomID);
 
-  const { searchText, results, search, setSearchText } = useRoomController(roomID);
+  if (!isReady) return null;
+
+  const controller = getController();
 
   return (
-    <div className="max-w-3/4 mx-auto">
-      <SearchBar searchText={searchText}
-        onSearchTextChange={setSearchText}
-        onEnter={() => search(searchText)} />
-      <ResultsList searchText={searchText} results={results}/>
-    </div>
+    <RoomContext.Provider value={controller}>
+      <Audio />
+      <div className="max-w-3/4 mx-auto">
+        <SearchBar />
+      </div>
+    </RoomContext.Provider>
   );
 }
 

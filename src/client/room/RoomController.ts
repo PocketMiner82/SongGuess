@@ -10,19 +10,30 @@ import z from "zod";
 declare const PARTYKIT_HOST: string;
 
 
-class RoomController {
+/**
+ * Manages the connection and state of a room.
+ */
+export class RoomController {
+  /**
+   * The PartySocket instance used for server communication.
+   */
   private socket: PartySocket;
-  private notifyReact: (searchText: string, results: ResultMusicTrack[] | undefined) => void;
+
+  /**
+   * Listeners that are called whenever the state of the room changes.
+   */
+  private stateChangeEventListeners: ((instance: RoomController) => void)[] = [];
 
   public searchText: string = "";
-  public results: ResultMusicTrack[] | undefined = undefined;
 
-  constructor(
-    roomID: string, 
-    onStateChange: (text: string, results: ResultMusicTrack[] | undefined) => void
-  ) {
-    this.notifyReact = onStateChange;
+  public results: ResultMusicTrack[] = [];
 
+  /**
+   * Creates a new RoomController instance and initializes the socket connection.
+   * 
+   * @param roomID The ID of the room to connect to.
+   */
+  constructor(roomID: string) {
     this.socket = new PartySocket({
       host: PARTYKIT_HOST,
       room: roomID
@@ -34,24 +45,71 @@ class RoomController {
     this.socket.addEventListener("error", this.onError.bind(this));
   }
 
-  // Cleanup method to call when React component unmounts
+  /**
+   * Cleans up resources and closes the socket connection.
+   */
   public destroy() {
     this.socket.close();
   }
 
+  /**
+   * Registers a listener that will be called whenever the state of the room changes.
+   * 
+   * @param listener A callback function that receives the current instance of RoomController as an argument.
+   * @returns A function to unregister the listener.
+   */
+  public registerOnStateChangeListener(listener: (instance: RoomController) => void) {
+    this.stateChangeEventListeners.push(listener);
+    return () => this.unregisterOnStateChangeListener(listener);
+  }
+
+  /**
+   * Unregisters a previously registered state change listener.
+   * @param listener The listener to unregister.
+   */
+  public unregisterOnStateChangeListener(listener: (instance: RoomController) => void) {
+    this.stateChangeEventListeners = this.stateChangeEventListeners.filter(l => l !== listener);
+  }
+  
+  /**
+   * Calls all registered state change listeners.
+   */
+  private callOnStateChange() {
+    for (const listener of this.stateChangeEventListeners) {
+      listener(this);
+    }
+  }
+
+  /**
+   * Handles the "open" event of the socket connection.
+   */
   private onOpen() {
     console.log(`Connected to ${this.socket.room}`);
   }
 
+  /**
+   * Handles the "close" event of the socket connection.
+   * 
+   * @param ev The CloseEvent containing details about the disconnection.
+   */
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
   }
 
+  /**
+   * Handles the "error" event of the socket connection.
+   * 
+   * @param ev The ErrorEvent containing details about the error.
+   */
   private onError(ev: ErrorEvent) {
     console.error(`Cannot connect to ${this.socket.room}:`, ev);
   }
 
-  // Central Logic: handle incoming messages
+  /**
+   * Handles incoming messages from the server.
+   * 
+   * @param ev The MessageEvent containing the server message.
+   */
   private onMessage(ev: MessageEvent) {
     console.debug("Server sent:", ev.data);
 
@@ -77,7 +135,11 @@ class RoomController {
     }
   }
 
-  // Central Logic: Perform Search and Notify React
+  /**
+   * Performs a search using the iTunes Store API and updates the search results.
+   * 
+   * @param text The search text to query.
+   */
   public async performSearch(text: string) {
     this.searchText = text;
 
@@ -96,7 +158,7 @@ class RoomController {
         })).results;
       } catch {
         try {
-          // this attempts to fix a weird chaching problem on apple's side, where an old access-control-allow-origin header gets cached
+          // this attempts to fix a weird caching problem on Apple's side, where an old access-control-allow-origin header gets cached
           // @ts-ignore
           this.results = (await lookup("url", text, {
             entity: "song",
@@ -111,24 +173,27 @@ class RoomController {
       this.results = [];
     }
 
-    this.notifyReact(this.searchText, this.results);
+    this.callOnStateChange();
   }
 }
 
 
-export function useRoomController(roomID: string)  {
-  const [searchText, setSearchText] = useState("");
-  const [results, setResults] = useState<ResultMusicTrack[]>();
-
+/**
+ * Custom React hook that provides a {@link RoomController} instance for managing
+ * the connection and state of a room.
+ * 
+ * @param roomID The ID of the room to connect to.
+ * @returns An object containing a `getController` method to access the `RoomController` instance.
+ */
+export function useRoomController(roomID: string) {
   // hold the class instance so it persists across renders
   const controllerRef = useRef<RoomController | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // initialize the controller
-    controllerRef.current = new RoomController(roomID, (newText, newResults) => {
-      setSearchText(newText);
-      setResults(newResults);
-    });
+    controllerRef.current = new RoomController(roomID);
+    setIsReady(true);
 
     return () => {
       controllerRef.current?.destroy();
@@ -136,9 +201,19 @@ export function useRoomController(roomID: string)  {
   }, [roomID]);
 
   return {
-    searchText,
-    results,
-    search: (text: string) => controllerRef.current?.performSearch(text),
-    setSearchText: setSearchText
+    getController: (): RoomController => controllerRef.current!,
+    isReady
   };
+}
+
+
+/**
+ * Custom React hook to subscribe to state changes in a {@link RoomController}.
+ * @param controller The RoomController instance to listen to.
+ * @param cb A callback function that receives the RoomController instance when its state changes.
+ */
+export function useRoomControllerListener(controller: RoomController, cb: (c: RoomController) => void) {
+  useEffect(() => {
+    return controller.registerOnStateChangeListener(cb);
+  }, [controller, cb]);
 }
