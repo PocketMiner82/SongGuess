@@ -1,7 +1,7 @@
 import PartySocket from "partysocket";
-import { lookup, type ResultMusicTrack } from "itunes-store-api";
+import { lookup, type Entities, type Media, type Options, type Result, type ResultMusicTrack, type Results } from "itunes-store-api";
 import { useEffect, useState, useRef } from "react";
-import type { HostUpdatePlaylistMessage } from "../../messages/RoomClientMessages";
+import type { HostUpdatePlaylistMessage, Song } from "../../messages/RoomClientMessages";
 import { ServerMessageSchema } from "../../messages/RoomMessages";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
@@ -14,6 +14,9 @@ declare const PARTYKIT_HOST: string;
  * Manages the connection and state of a room.
  */
 export class RoomController {
+  private artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/
+  private albumRegex =  /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/
+
   /**
    * The PartySocket instance used for server communication.
    */
@@ -24,9 +27,10 @@ export class RoomController {
    */
   private stateChangeEventListeners: ((instance: RoomController) => void)[] = [];
 
-  public searchText: string = "";
-
-  public results: ResultMusicTrack[] = [];
+  /**
+   * Whether we are the host of the room.
+   */
+  public isHost: boolean = false;
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -113,26 +117,40 @@ export class RoomController {
   private onMessage(ev: MessageEvent) {
     console.debug("Server sent:", ev.data);
 
+    // try to parse json
     try {
-      const json = JSON.parse(ev.data);
-      const result = ServerMessageSchema.safeParse(json);
-      if (!result.success) {
-          console.error("Server sent invalid data:\n%s", z.prettifyError(result.error));
-          return;
-        }
-
-      const msg = result.data;
-
-      if (msg.type === "server_update_playlists" && msg.playlists[0]) {
-        const newName = msg.playlists[0].playlistName;
-
-        if (newName !== this.searchText) {
-          this.performSearch(newName);
-        }
-      }
+      var json = JSON.parse(ev.data);
     } catch (e) {
       console.error("Server sent invalid JSON:", e);
+      return;
     }
+
+    // check if received message is valid
+    const result = ServerMessageSchema.safeParse(json);
+    if (!result.success) {
+      console.error("Server sent invalid data:\n%s", z.prettifyError(result.error));
+      return;
+    }
+
+    let msg = result.data;
+
+    // handle each message type
+    switch (msg.type) {
+      case "error":
+        console.error(`Server reported an error:\n${msg.error}`);
+        break;
+      case "update":
+        this.isHost = msg.isHost;
+        this.callOnStateChange();
+        break;
+      default:
+        console.error(`Invalid message type: ${msg.type}`);
+    }
+  }
+
+  public getCurrentSong(): Song|null {
+    // TODO: implement current song retrieval
+    return null;
   }
 
   /**
@@ -141,39 +159,86 @@ export class RoomController {
    * @param text The search text to query.
    */
   public async performSearch(text: string) {
-    this.searchText = text;
+    let playlistName = "";
+    let playlistCover = null;
+
+    if (this.artistRegex.test(text)) {
+      let artists = await this.lookupURL(text, {
+        entity: "musicArtist",
+        limit: 1
+      });
+      if (artists.length === 0) return;
+      let artist = artists[0];
+      
+      playlistName = artist.artistName;
+    } else if (this.albumRegex.test(text)) {
+      let albums = await this.lookupURL(text, {
+        entity: "album",
+        limit: 1
+      });
+      if (albums.length === 0) return;
+      let album = albums[0];
+      
+      playlistName = album.collectionName;
+      playlistCover = album.artworkUrl100;
+    } else {
+      // not a valid apple music URL
+      return;
+    }
+
+    let results: ResultMusicTrack[] = await this.lookupURL(text, {
+      entity: "song",
+      limit: 50
+    });
+
+    if (results.length === 0) return;
+
+    // filter only music tracks and map to our internal format
+    const songs = results.filter(r => r.wrapperType === "track").map(r => ({
+      name: r.trackName,
+      audioURL: r.previewUrl,
+    }));
 
     const req: HostUpdatePlaylistMessage = {
       type: "host_update_playlists",
-      playlists: [{ playlistName: text, playlistCover: null }],
-      songs: []
+      playlists: [{
+        playlistName: playlistName,
+        playlistCover: playlistCover
+      }],
+      songs: songs
     };
     this.socket.send(JSON.stringify(req));
 
+    this.callOnStateChange();
+  }
+
+  /**
+   * Safely looks up a URL using the iTunes Store API. Also handles potential caching issues.
+   * @param url The URL to look up.
+   * @param options Optional lookup options.
+   * @returns Promise resolving to an array of results.
+   */
+  private async lookupURL<M extends Media, E extends Entities[M]>(url: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
+    let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
+
     try {
       try {
-        this.results = (await lookup("url", text, {
-          entity: "song",
-          limit: 200
-        })).results;
+        results = (await lookup("url", url, options)).results;
       } catch {
+        // this attempts to fix a weird caching problem on Apple's side, where an old access-control-allow-origin header gets cached
         try {
-          // this attempts to fix a weird caching problem on Apple's side, where an old access-control-allow-origin header gets cached
+          let newOptions = {...options, magicnumber: Date.now()};
           // @ts-ignore
-          this.results = (await lookup("url", text, {
-            entity: "song",
-            limit: 200,
-            magicnumber: Date.now()
-          })).results;
+          results = (await lookup("url", url, newOptions)).results;
         } catch {
-          this.results = [];
+          results = [];
         }
       }
     } catch (e) {
-      this.results = [];
+      results = [];
     }
 
-    this.callOnStateChange();
+    return results;
   }
 }
 

@@ -1,7 +1,7 @@
-import { type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
+import { useState, useCallback, createContext, useContext, useRef, useEffect, use } from "react";
 import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
+import { set } from "zod";
 
 const RoomContext = createContext<RoomController | null>(null);
 
@@ -13,9 +13,16 @@ function useController() {
 
 function SearchBar() {
   const controller = useController();
-  const [searchText, setSearchText] = useState(controller.searchText);
-  const listener = useCallback((c: RoomController) => setSearchText(c.searchText), []);
+  const [isHost, setIsHost] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  const listener = useCallback((c: RoomController) => {
+    setIsHost(c.isHost);
+  }, []);
+
   useRoomControllerListener(controller, listener);
+
+  if (!isHost) return null;
  
   return (
     <>
@@ -25,7 +32,7 @@ function SearchBar() {
         placeholder="Enter apple music URL" 
         className="w-full outline-0 focus:outline-0 border-b-2 border-b-gray-400  focus:border-b-cyan-600 pb-1" 
         value={searchText} 
-        onChange={e => {setSearchText(e.target.value); controller.searchText = e.target.value;}} 
+        onChange={e => {setSearchText(e.target.value)}} 
         onKeyDown={e => {if (e.key === "Enter") controller.performSearch(searchText);}}
       />
       <br/><br/>
@@ -38,12 +45,12 @@ function Audio() {
   const controller = useController();
 
   const listener = useCallback((c: RoomController) => {
-    const currentSong = c.results?.[0];
+    const currentSong = c.getCurrentSong();
     const audio = ref.current;
     if (!audio) return;
 
-    if (currentSong && currentSong.previewUrl) {
-      if (audio.src !== currentSong.previewUrl) audio.src = currentSong.previewUrl;
+    if (currentSong && currentSong.audioURL) {
+      if (audio.src !== currentSong.audioURL) audio.src = currentSong.audioURL;
       audio.load();
       audio.volume = 0.2;
       audio.play().catch(() => {/* ignore play promise errors */});
