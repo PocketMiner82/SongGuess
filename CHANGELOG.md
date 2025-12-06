@@ -1,3 +1,10 @@
+# [2.0.0-dev.25](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.24...2.0.0-dev.25) (2025-12-06)
+
+
+### Features
+
+* test to autoplay first song ([4f999bd](https://github.com/PocketMiner82/SongGuess/commit/4f999bd57a65e9e4998b57d2ff7e9cf19c25697c))
+
 # [2.0.0-dev.24](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.23...2.0.0-dev.24) (2025-12-05)
 
 
