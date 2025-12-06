@@ -1,6 +1,6 @@
 import PartySocket from "partysocket";
 import { lookup, type ResultMusicTrack } from "itunes-store-api";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { HostUpdatePlaylistMessage } from "../../messages/RoomClientMessages";
 import { ServerMessageSchema } from "../../messages/RoomMessages";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
@@ -26,7 +26,7 @@ export class RoomController {
 
   public searchText: string = "";
 
-  public results: ResultMusicTrack[] | undefined = undefined;
+  public results: ResultMusicTrack[] = [];
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.

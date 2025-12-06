@@ -1,29 +1,18 @@
 import { type ResultMusicTrack } from "itunes-store-api";
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, createContext, useContext } from "react";
+import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
 import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
 
 const RoomContext = createContext<RoomController | null>(null);
 
-function useRoom() {
+function useController() {
   const controller = useContext(RoomContext);
   if (!controller) throw new Error("useRoom must be used within RoomProvider");
   return controller;
 }
 
-function Audio({trackName, url}: {trackName: string, url: string}) {
-  return (
-    <div className="mb-4">
-      <div className="font-semibold">{trackName}:</div>
-      <audio controls className="mt-1">
-        <source src={url} type="audio/aac"/>
-      </audio>
-    </div>
-  );
-}
-
 function SearchBar() {
-  const controller = useRoom();
+  const controller = useController();
   const [searchText, setSearchText] = useState(controller.searchText);
   const listener = useCallback((c: RoomController) => setSearchText(c.searchText), []);
   useRoomControllerListener(controller, listener);
@@ -44,34 +33,36 @@ function SearchBar() {
   );
 }
 
-function ResultsList() {
-  const controller = useRoom();
-  const [results, setResults] = useState<ResultMusicTrack[] | undefined>(controller.results);
-  const [searchText, setSearchText] = useState(controller.searchText);
- 
+function Audio() {
+  const ref = useRef<HTMLAudioElement | null>(null);
+  const controller = useController();
+
   const listener = useCallback((c: RoomController) => {
-    setResults(c.results);
-    setSearchText(c.searchText);
+    const currentSong = c.results?.[0];
+    const audio = ref.current;
+    if (!audio) return;
+
+    if (currentSong && currentSong.previewUrl) {
+      if (audio.src !== currentSong.previewUrl) audio.src = currentSong.previewUrl;
+      audio.load();
+      audio.volume = 0.2;
+      audio.play().catch(() => {/* ignore play promise errors */});
+    } else {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    }
   }, []);
+
   useRoomControllerListener(controller, listener);
- 
-  if (!results || !Array.isArray(results)) return null;
+
+  // initialize once from current controller state
+  useEffect(() => {
+    listener(controller);
+  }, [controller, listener]);
 
   return (
-    <div className="mb-6">
-      <div className="mb-4">Songs for "{searchText}" ({results.length}):</div>
-      
-      {results
-        .filter(result => result.trackName && result.previewUrl)
-        .map(result => (
-          <Audio
-            key={result.previewUrl}
-            trackName={result.trackName}
-            url={result.previewUrl}
-          />
-        ))
-      }
-    </div>
+    <audio ref={ref} />
   );
 }
 
@@ -85,9 +76,9 @@ function App() {
 
   return (
     <RoomContext.Provider value={controller}>
+      <Audio />
       <div className="max-w-3/4 mx-auto">
         <SearchBar />
-        <ResultsList />
       </div>
     </RoomContext.Provider>
   );
