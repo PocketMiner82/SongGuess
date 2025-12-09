@@ -1,5 +1,5 @@
 import z from "zod";
-import { PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
+import { GeneralErrorMessageSchema, PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
 export const CountdownMessageSchema = z.object({
@@ -100,3 +100,16 @@ export const UpdateMessageSchema = z.object({
 });
 
 export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;
+
+
+/**
+ * A message sent from the server.
+ */
+export const ServerMessageSchema = z.union([
+  GeneralErrorMessageSchema,
+  UpdateMessageSchema,
+  ServerUpdatePlaylistMessageSchema,
+  CountdownMessageSchema
+]);
+
+export type ServerMessage = z.infer<typeof ServerMessageSchema>;

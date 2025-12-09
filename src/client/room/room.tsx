@@ -21,7 +21,7 @@ function SearchBar() {
 
   useRoomControllerListener(controller, listener);
 
-  //if (!isHost) return null;
+  if (!isHost) return null;
  
   return (
     <>

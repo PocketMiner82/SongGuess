@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
 import type { Song, HostUpdatePlaylistMessage } from "../../schemas/RoomClientMessageSchemas";
-import { ServerMessageSchema } from "../../schemas/RoomMessageSchemas";
+import { ServerMessageSchema } from "../../schemas/RoomServerMessageSchemas";
 
 
 declare const PARTYKIT_HOST: string;

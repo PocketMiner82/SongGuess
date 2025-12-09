@@ -1,5 +1,5 @@
 import z from "zod";
-import { PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
+import { GeneralErrorMessageSchema, PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
 export const StartGameMessageSchema = z.object({
@@ -52,3 +52,16 @@ export const ChangeUsernameMessageSchema = z.object({
 });
 
 export type ChangeUsernameMessage = z.infer<typeof ChangeUsernameMessageSchema>;
+
+
+/**
+ * A message sent from a client.
+ */
+export const ClientMessageSchema = z.union([
+  GeneralErrorMessageSchema,
+  ChangeUsernameMessageSchema,
+  HostUpdatePlaylistMessageSchema,
+  StartGameMessageSchema
+]);
+
+export type ClientMessage = z.infer<typeof ClientMessageSchema>;

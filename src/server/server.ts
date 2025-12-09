@@ -2,9 +2,8 @@ import type * as Party from "partykit/server";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import z from "zod";
 import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
-import type { Song } from "../schemas/RoomClientMessageSchemas";
+import { ClientMessageSchema, type Song } from "../schemas/RoomClientMessageSchemas";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import { ClientMessageSchema } from "../schemas/RoomMessageSchemas";
 import type { GameState, PlayerState, UpdateMessage, ServerUpdatePlaylistMessage } from "../schemas/RoomServerMessageSchemas";
 import type { Playlist, GeneralErrorMessage } from "../schemas/RoomSharedMessageSchemas";
 
