@@ -1,14 +1,14 @@
 import z from "zod";
-import { ChangeUsernameMessageSchema, HostUpdatePlaylistMessageSchema, StartGameMessageSchema } from "./RoomClientMessages";
-import { UpdateMessageSchema, CountdownMessageSchema, ServerUpdatePlaylistMessageSchema } from "./RoomServerMessages";
-import { ErrorMessageSchema } from "./RoomSharedMessages";
+import { ChangeUsernameMessageSchema, HostUpdatePlaylistMessageSchema, StartGameMessageSchema } from "./RoomClientMessageSchemas";
+import { UpdateMessageSchema, CountdownMessageSchema, ServerUpdatePlaylistMessageSchema } from "./RoomServerMessageSchemas";
+import { GeneralErrorMessageSchema } from "./RoomSharedMessageSchemas";
 
 
 /**
  * A message sent from a client.
  */
 export const ClientMessageSchema = z.union([
-  ErrorMessageSchema,
+  GeneralErrorMessageSchema,
   ChangeUsernameMessageSchema,
   HostUpdatePlaylistMessageSchema,
   StartGameMessageSchema
@@ -21,7 +21,7 @@ export type ClientMessage = z.infer<typeof ClientMessageSchema>;
  * A message sent from the server.
  */
 export const ServerMessageSchema = z.union([
-  ErrorMessageSchema,
+  GeneralErrorMessageSchema,
   UpdateMessageSchema,
   ServerUpdatePlaylistMessageSchema,
   CountdownMessageSchema

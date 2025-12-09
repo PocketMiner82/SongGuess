@@ -1,10 +1,10 @@
 import PartySocket from "partysocket";
-import { lookup, type Entities, type Media, type Options, type Result, type ResultMusicTrack, type Results } from "itunes-store-api";
+import { lookup, type Entities, type Media, type Options, type ResultMusicTrack, type Results } from "itunes-store-api";
 import { useEffect, useState, useRef } from "react";
-import type { HostUpdatePlaylistMessage, Song } from "../../messages/RoomClientMessages";
-import { ServerMessageSchema } from "../../messages/RoomMessages";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
+import type { Song, HostUpdatePlaylistMessage } from "../../schemas/RoomClientMessageSchemas";
+import { ServerMessageSchema } from "../../schemas/RoomMessageSchemas";
 
 
 declare const PARTYKIT_HOST: string;
@@ -137,7 +137,7 @@ export class RoomController {
     // handle each message type
     switch (msg.type) {
       case "error":
-        console.error(`Server reported an error:\n${msg.error}`);
+        console.error(`Server reported an error:\n${msg.error_message}`);
         break;
       case "update":
         this.isHost = msg.isHost;

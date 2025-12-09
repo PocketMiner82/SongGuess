@@ -1,5 +1,5 @@
 import z from "zod";
-import { PlaylistSchema, UsernameSchema } from "./RoomSharedMessages";
+import { PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
 export const CountdownMessageSchema = z.object({
@@ -20,7 +20,14 @@ export const ServerUpdatePlaylistMessageSchema = z.object({
   /**
    * Currently selected playlist(s)
    */
-  playlists: z.array(PlaylistSchema)
+  playlists: z.array(PlaylistSchema),
+
+  /**
+   * Optional error information:
+   * - "not_host": only the host can update playlist(s)
+   * - "not_in_lobby": playlist(s) can only be updated while in lobby
+   */
+  error: z.optional(z.literal(["not_host", "not_in_lobby"]))
 });
 
 export type ServerUpdatePlaylistMessage = z.infer<typeof ServerUpdatePlaylistMessageSchema>;
@@ -82,7 +89,14 @@ export const UpdateMessageSchema = z.object({
   /**
    * True, if the receiver is the host
    */
-  isHost: z.boolean()
+  isHost: z.boolean(),
+
+  /**
+   * Optional error information:
+   * - "not_host": only the host can perform the requested operation
+   * - "not_in_lobby": the requested operation can only be performed in the lobby
+   */
+  error: z.optional(z.literal(["not_host", "not_in_lobby"]))
 });
 
 export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;

@@ -1,11 +1,12 @@
 import type * as Party from "partykit/server";
-import { fetchGetRoom, fetchPostRoom, type PostCreateRoomResponse, type RoomInfoResponse } from "../messages/RoomHTTPMessages";
-import { ClientMessageSchema } from "../messages/RoomMessages";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import z from "zod";
-import { type GameState, type PlayerState, type ServerUpdatePlaylistMessage, type UpdateMessage } from "../messages/RoomServerMessages";
-import type { Song } from "../messages/RoomClientMessages";
-import type { Playlist, ErrorMessage } from "../messages/RoomSharedMessages";
+import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
+import type { Song } from "../schemas/RoomClientMessageSchemas";
+import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
+import { ClientMessageSchema } from "../schemas/RoomMessageSchemas";
+import type { GameState, PlayerState, UpdateMessage, ServerUpdatePlaylistMessage } from "../schemas/RoomServerMessageSchemas";
+import type { Playlist, GeneralErrorMessage } from "../schemas/RoomSharedMessageSchemas";
 
 
 const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
@@ -76,7 +77,7 @@ export default class Server implements Party.Server {
     this.initConnection(conn);
 
     // send the first update to the connection (and inform all other connections about the new player)
-    this.broadcastUpdate();
+    this.broadcastUpdateMessage();
   }
 
   onMessage(message: string, conn: Party.Connection) {
@@ -99,7 +100,7 @@ export default class Server implements Party.Server {
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
       this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
-      this.sendError(conn, z.prettifyError(result.error));
+      this.sendError(conn, `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
 
@@ -108,20 +109,29 @@ export default class Server implements Party.Server {
     // handle each message type
     switch(msg.type) {
       case "error":
-        this.log(`Client ${conn.id} reported an error:\n${msg.error}`, "warn");
+        this.log(`Client ${conn.id} reported an error:\n${msg.error_message}`, "warn");
         break;
       case "change_username":
-        if (!this.performLobbyCheck(conn, msg.type)) return;
+        if (this.state !== "lobby") {
+          conn.send(this.getUpdateMessage(conn, "not_in_lobby"));
+          return;
+        }
 
         // username is already validated
         (conn.state as PlayerState).username = msg.username;
 
         // this not only informs all other users about the name change but also the tells the connection
-        // that the name change was successful
-        this.broadcastUpdate();
+        // that the name change was successfuls
+        this.broadcastUpdateMessage();
         break;
       case "host_update_playlists":
-        if (!this.performHostCheck(conn, msg.type) || !this.performLobbyCheck(conn, msg.type)) return;
+        if (this.hostConnection !== conn) {
+          conn.send(this.getPlaylistUpdateMessage("not_host"));
+          return;
+        } else if (this.state !== "lobby") {
+          conn.send(this.getPlaylistUpdateMessage("not_in_lobby"));
+          return;
+        }
 
         this.playlists = msg.playlists;
         this.songs = msg.songs;
@@ -160,7 +170,7 @@ export default class Server implements Party.Server {
       this.log("Last client left, room will close in 5 seconds if no one joins...");
     } else {
       // inform all clients about changes, including possible host transfer
-      this.broadcastUpdate();
+      this.broadcastUpdateMessage();
     }
   }
 
@@ -245,93 +255,6 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Sends an {@link UpdateMessage} with the current room/connection states to the connection.
-   */
-  private sendUpdate(conn: Party.Connection) {
-    let connState = conn.state as PlayerState;
-
-    let update: UpdateMessage = {
-      type: "update",
-      state: this.state,
-      players: this.getUsernamesWithColors(),
-      username: connState.username,
-      color: connState.color,
-      isHost: conn === this.hostConnection
-    };
-
-    conn.send(JSON.stringify(update));
-  }
-
-  /**
-   * Construct a playlist update message with the current playlist array.
-   * 
-   * @returns a JSON string of a {@link ServerUpdatePlaylistMessage}
-   */
-  private getPlaylistUpdateMessage(): string {
-    let update: ServerUpdatePlaylistMessage = {
-      type: "server_update_playlists",
-      playlists: this.playlists
-    };
-
-    return JSON.stringify(update);
-  }
-
-  /**
-   * Sends an error and an update to a player.
-   * 
-   * @param conn The connection of the player that should receive the messages
-   * @param error A description of the error
-   * @see {@link sendUpdate}
-   */
-  private sendError(conn: Party.Connection, error: string) {
-    let resp: ErrorMessage = {
-      type: "error",
-      error: error
-    }
-    conn.send(JSON.stringify(resp));
-    this.sendUpdate(conn);
-  }
-
-  /**
-   * Checks if a player is the host. If not, send an error.
-   * 
-   * @param conn The connection of the player to check
-   * @returns true if the connection is the host
-   * @see {@link sendError}
-   */
-  private performHostCheck(conn: Party.Connection, action: string = "this action"): boolean {
-    if (conn !== this.hostConnection) {
-      this.sendError(conn, `Only host can perform ${action}.`);
-    }
-    return conn === this.hostConnection;
-  }
-
-  /**
-   * Checks if room is in lobby state. If not, send an error.
-   * 
-   * @param conn The connection that should receive the (possible) error.
-   * @returns true if room state is lobby
-   * @see {@link sendError}
-   */
-  private performLobbyCheck(conn: Party.Connection, action: string = "this action"): boolean {
-    if (this.state !== "lobby") {
-      this.sendError(conn, `Can only perform ${action} while in lobby.`);
-    }
-    return this.state === "lobby";
-  }
-
-  /**
-   * Broadcast an update to all connected clients.
-   * 
-   * @see {@link sendUpdate}
-   */
-  private broadcastUpdate() {
-    for (const conn of this.room.getConnections()) {
-      this.sendUpdate(conn);
-    }
-  }
-
-  /**
    * Set initial random username and unused color for a player.
    * 
    * @param conn The connection of the player
@@ -354,6 +277,72 @@ export default class Server implements Party.Server {
 
     // send the current playlist to the connection
     conn.send(this.getPlaylistUpdateMessage());
+  }
+
+  /**
+   * Sends a general error message and an update to a player.
+   * 
+   * @param conn The connection of the player that should receive the messages
+   * @param error A description of the errors
+   * @see {@link sendUpdate}
+   */
+  private sendError(conn: Party.Connection, error: string) {
+    let resp: GeneralErrorMessage = {
+      type: "error",
+      error_message: error
+    }
+    conn.send(JSON.stringify(resp));
+    conn.send(this.getUpdateMessage(conn));
+  }
+
+  /**
+   * Constructs an update message with the current room/connection states to the connection.
+   * 
+   * @param conn the connection to send the update to
+   * @param error if this update was the result of an error, this specifies the reason
+   * @returns a JSON string of the constructed {@link UpdateMessage}
+   */
+  private getUpdateMessage(conn: Party.Connection, error?: UpdateMessage["error"]): string {
+    let connState = conn.state as PlayerState;
+
+    let msg: UpdateMessage = {
+      type: "update",
+      state: this.state,
+      players: this.getUsernamesWithColors(),
+      username: connState.username,
+      color: connState.color,
+      isHost: conn === this.hostConnection,
+      error: error
+    };
+
+    return JSON.stringify(msg);
+  }
+
+  /**
+   * Broadcast an update to all connected clients.
+   * 
+   * @see {@link sendUpdate}
+   */
+  private broadcastUpdateMessage() {
+    for (const conn of this.room.getConnections()) {
+      conn.send(this.getUpdateMessage(conn));
+    }
+  }
+
+  /**
+   * Constructs a playlist update message with the current playlist array.
+   * 
+   * @param error if this update was the result of an error, this specifies the reason
+   * @returns a JSON string of the constructed {@link ServerUpdatePlaylistMessage}
+   */
+  private getPlaylistUpdateMessage(error?: ServerUpdatePlaylistMessage["error"]): string {
+    let update: ServerUpdatePlaylistMessage = {
+      type: "server_update_playlists",
+      playlists: this.playlists,
+      error: error
+    };
+
+    return JSON.stringify(update);
   }
 
   //

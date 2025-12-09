@@ -17,16 +17,16 @@ export const PlaylistSchema = z.object({
 export type Playlist = z.infer<typeof PlaylistSchema>;
 
 
-export const ErrorMessageSchema = z.object({
+export const GeneralErrorMessageSchema = z.object({
   type: z.literal("error"),
 
   /**
    * A string describing what went wrong.
    */
-  error: z.string()
+  error_message: z.string()
 });
 
-export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
+export type GeneralErrorMessage = z.infer<typeof GeneralErrorMessageSchema>;
 
 
 /**

@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, createContext, useContext, useRef, useEffect, use } from "react";
+import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
 import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
-import { set } from "zod";
 
 const RoomContext = createContext<RoomController | null>(null);
 
@@ -22,7 +21,7 @@ function SearchBar() {
 
   useRoomControllerListener(controller, listener);
 
-  if (!isHost) return null;
+  //if (!isHost) return null;
  
   return (
     <>
