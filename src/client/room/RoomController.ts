@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
 import type { Song, HostUpdatePlaylistMessage } from "../../schemas/RoomClientMessageSchemas";
-import { ServerMessageSchema } from "../../schemas/RoomServerMessageSchemas";
+import { ServerMessageSchema, type ServerMessage } from "../../schemas/RoomServerMessageSchemas";
 
 
 declare const PARTYKIT_HOST: string;
@@ -25,7 +25,7 @@ export class RoomController {
   /**
    * Listeners that are called whenever the state of the room changes.
    */
-  private stateChangeEventListeners: ((instance: RoomController) => void)[] = [];
+  private stateChangeEventListeners: ((msg: ServerMessage) => void)[] = [];
 
   /**
    * Whether we are the host of the room.
@@ -59,10 +59,10 @@ export class RoomController {
   /**
    * Registers a listener that will be called whenever the state of the room changes.
    * 
-   * @param listener A callback function that receives the current instance of RoomController as an argument.
+   * @param listener A callback function that receives the sent {@link ServerMessage} as an argument.
    * @returns A function to unregister the listener.
    */
-  public registerOnStateChangeListener(listener: (instance: RoomController) => void) {
+  public registerOnStateChangeListener(listener: (msg: ServerMessage) => void) {
     this.stateChangeEventListeners.push(listener);
     return () => this.unregisterOnStateChangeListener(listener);
   }
@@ -71,16 +71,18 @@ export class RoomController {
    * Unregisters a previously registered state change listener.
    * @param listener The listener to unregister.
    */
-  public unregisterOnStateChangeListener(listener: (instance: RoomController) => void) {
+  public unregisterOnStateChangeListener(listener: (msg: ServerMessage) => void) {
     this.stateChangeEventListeners = this.stateChangeEventListeners.filter(l => l !== listener);
   }
   
   /**
    * Calls all registered state change listeners.
+   * 
+   * @param msg the received {@link ServerMessage} that caused the state change
    */
-  private callOnStateChange() {
+  private callOnStateChange(msg: ServerMessage) {
     for (const listener of this.stateChangeEventListeners) {
-      listener(this);
+      listener(msg);
     }
   }
 
@@ -132,7 +134,7 @@ export class RoomController {
       return;
     }
 
-    let msg = result.data;
+    let msg: ServerMessage = result.data;
 
     // handle each message type
     switch (msg.type) {
@@ -141,7 +143,7 @@ export class RoomController {
         break;
       case "update":
         this.isHost = msg.isHost;
-        this.callOnStateChange();
+        this.callOnStateChange(msg);
         break;
       default:
         console.error(`Invalid message type: ${msg.type}`);
@@ -208,8 +210,6 @@ export class RoomController {
       songs: songs
     };
     this.socket.send(JSON.stringify(req));
-
-    this.callOnStateChange();
   }
 
   /**
@@ -277,7 +277,7 @@ export function useRoomController(roomID: string) {
  * @param controller The RoomController instance to listen to.
  * @param cb A callback function that receives the RoomController instance when its state changes.
  */
-export function useRoomControllerListener(controller: RoomController, cb: (c: RoomController) => void) {
+export function useRoomControllerListener(controller: RoomController, cb: (msg: ServerMessage) => void) {
   useEffect(() => {
     return controller.registerOnStateChangeListener(cb);
   }, [controller, cb]);

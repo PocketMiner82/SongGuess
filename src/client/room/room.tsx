@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
 import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
+import type { ServerMessage } from "../../schemas/RoomServerMessageSchemas";
 
 const RoomContext = createContext<RoomController | null>(null);
 
@@ -15,9 +16,9 @@ function SearchBar() {
   const [isHost, setIsHost] = useState(false);
   const [searchText, setSearchText] = useState("");
 
-  const listener = useCallback((c: RoomController) => {
-    setIsHost(c.isHost);
-  }, []);
+  const listener = useCallback((msg: ServerMessage) => {
+    setIsHost(controller.isHost);
+  }, [controller.isHost]);
 
   useRoomControllerListener(controller, listener);
 
@@ -43,8 +44,8 @@ function Audio() {
   const ref = useRef<HTMLAudioElement | null>(null);
   const controller = useController();
 
-  const listener = useCallback((c: RoomController) => {
-    const currentSong = c.getCurrentSong();
+  const listener = useCallback((msg: ServerMessage|null) => {
+    const currentSong = controller.getCurrentSong();
     const audio = ref.current;
     if (!audio) return;
 
@@ -58,13 +59,13 @@ function Audio() {
       audio.removeAttribute("src");
       audio.load();
     }
-  }, []);
+  }, [controller]);
 
   useRoomControllerListener(controller, listener);
 
   // initialize once from current controller state
   useEffect(() => {
-    listener(controller);
+    listener(null);
   }, [controller, listener]);
 
   return (
