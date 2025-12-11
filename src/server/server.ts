@@ -270,7 +270,7 @@ export default class Server implements Party.Server {
     let username = uniqueUsernameGenerator({
       dictionaries: [adjectives, nouns],
       style: "titleCase",
-      length: 16
+      length: 15
     });
 
     let color = this.getUnusedColors()[0];
