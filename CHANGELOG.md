@@ -1,3 +1,10 @@
+# [2.0.0-dev.26](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.25...2.0.0-dev.26) (2025-12-11)
+
+
+### Features
+
+* implement audio control ([056d588](https://github.com/PocketMiner82/SongGuess/commit/056d5889395a52dbd543a9853bb328bc7e6ce350))
+
 # [2.0.0-dev.25](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.24...2.0.0-dev.25) (2025-12-06)
 
 
