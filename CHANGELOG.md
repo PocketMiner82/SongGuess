@@ -1,3 +1,10 @@
+# [2.0.0-dev.29](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.28...2.0.0-dev.29) (2025-12-11)
+
+
+### Features
+
+* add players and playlists react components ([bffdce2](https://github.com/PocketMiner82/SongGuess/commit/bffdce25e62fde3f7cc3b63514763436d98621e6))
+
 # [2.0.0-dev.28](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.27...2.0.0-dev.28) (2025-12-11)
 
 
