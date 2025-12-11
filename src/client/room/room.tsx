@@ -43,6 +43,7 @@ function SearchBar() {
 function Audio() {
   const ref = useRef<HTMLAudioElement | null>(null);
   const controller = useController();
+  const [volume, setVolume] = useState(0.2);
 
   const listener = useCallback((msg: ServerMessage|null) => {
     const audio = ref.current;
@@ -58,7 +59,7 @@ function Audio() {
       return;
     }
 
-    audio.volume = 0.2;
+    audio.volume = volume;
 
     // perform requested action
     switch (msg.action) {
@@ -76,12 +77,34 @@ function Audio() {
         audio.load();
         break;
     }
-  }, []);
+  }, [volume]);
 
   useRoomControllerListener(controller, listener);
 
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (ref.current) {
+      ref.current.volume = newVolume;
+    }
+  };
+
   return (
-    <audio ref={ref} />
+    <>
+      <audio ref={ref} />
+      <div className="fixed bottom-4 left-4 flex items-center gap-2">
+        <span className="material-icons text-gray-100">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={volume}
+          onChange={handleVolumeChange}
+          className="w-24"
+        />
+      </div>
+    </>
   );
 }
 
