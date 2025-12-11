@@ -1,3 +1,10 @@
+# [2.0.0-dev.28](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.27...2.0.0-dev.28) (2025-12-11)
+
+
+### Features
+
+* add volume slider ([b0b6212](https://github.com/PocketMiner82/SongGuess/commit/b0b6212bf3eb91a7c2fe81fab98862d5c9cdc2f7))
+
 # [2.0.0-dev.27](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.26...2.0.0-dev.27) (2025-12-11)
 
 
