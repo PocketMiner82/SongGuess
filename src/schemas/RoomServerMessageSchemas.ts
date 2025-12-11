@@ -1,5 +1,36 @@
 import z from "zod";
 import { GeneralErrorMessageSchema, PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
+import { SongSchema } from "./RoomClientMessageSchemas";
+
+
+export const AudioControlMessageSchema = z.union([
+  z.object({
+    type: z.literal("audio_control"),
+
+    /**
+     * - "load": Downloads the music.
+     */
+    action: z.literal("load"),
+
+    /**
+     * URL to load music from.
+     * @see {@link SongSchema.shape.audioURL}
+     */
+    audioURL: SongSchema.shape.audioURL
+  }),
+  z.object({
+    type: z.literal("audio_control"),
+
+    /**
+     * - "play": Starts playback of the music.
+     * - "pause": Pauses playback of the music.
+     */
+    action: z.literal(["play", "pause"])
+  })
+
+]);
+
+export type AudioControlMessage = z.infer<typeof AudioControlMessageSchema>;
 
 
 export const CountdownMessageSchema = z.object({
@@ -109,7 +140,8 @@ export const ServerMessageSchema = z.union([
   GeneralErrorMessageSchema,
   UpdateMessageSchema,
   ServerUpdatePlaylistMessageSchema,
-  CountdownMessageSchema
+  CountdownMessageSchema,
+  AudioControlMessageSchema
 ]);
 
 export type ServerMessage = z.infer<typeof ServerMessageSchema>;

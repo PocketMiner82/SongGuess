@@ -4,7 +4,7 @@ import z from "zod";
 import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import { ClientMessageSchema, type Song } from "../schemas/RoomClientMessageSchemas";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import type { GameState, PlayerState, UpdateMessage, ServerUpdatePlaylistMessage } from "../schemas/RoomServerMessageSchemas";
+import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistMessage, type AudioControlMessage } from "../schemas/RoomServerMessageSchemas";
 import type { Playlist, GeneralErrorMessage } from "../schemas/RoomSharedMessageSchemas";
 
 
@@ -137,6 +137,12 @@ export default class Server implements Party.Server {
 
         // send the update to all players, including sender (for confirmation)
         this.room.broadcast(this.getPlaylistUpdateMessage());
+
+        // test playback
+        if (this.songs[0]) {
+          conn.send(this.getAudioControlMessage("load", this.songs[0].audioURL));
+          setTimeout(() => conn.send(this.getAudioControlMessage("play")), 5000);
+        }
         break;
       default:
         this.sendError(conn, `Invalid message type: ${msg.type}`);
@@ -342,6 +348,42 @@ export default class Server implements Party.Server {
     };
 
     return JSON.stringify(update);
+  }
+
+  /**
+   * Constructs an audio control load message.
+   * 
+   * @param action must be "load" for a load message.
+   * @param audioURL an {@link Song["audioURL"]} to a music file that the client should pre-load.
+   * @returns a JSON string of the constructed {@link AudioControlMessage}
+   */
+  private getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): string;
+  /**
+   * Constructs an audio control message.
+   * 
+   * @param action the {@link AudioControlMessage["action"]} that should be performed.
+   * @param audioURL can only be provided for load action.
+   * @returns a JSON string of the constructed {@link AudioControlMessage}
+   */
+  private getAudioControlMessage(action: Exclude<AudioControlMessage["action"], "load">, audioURL?: never): string;
+  private getAudioControlMessage(action: AudioControlMessage["action"], audioURL?: Song["audioURL"]): string {
+    let msg: AudioControlMessage;
+
+    if (action === "load") {
+      // load requires an audio URL
+      msg = {
+        type: "audio_control",
+        action: "load",
+        audioURL: audioURL!
+      };
+    } else {
+      msg = {
+        type: "audio_control",
+        action: action
+      };
+    }
+
+    return JSON.stringify(msg);
   }
 
   //

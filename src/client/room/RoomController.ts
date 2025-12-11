@@ -3,7 +3,7 @@ import { lookup, type Entities, type Media, type Options, type ResultMusicTrack,
 import { useEffect, useState, useRef } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
-import type { Song, HostUpdatePlaylistMessage } from "../../schemas/RoomClientMessageSchemas";
+import type { HostUpdatePlaylistMessage } from "../../schemas/RoomClientMessageSchemas";
 import { ServerMessageSchema, type ServerMessage } from "../../schemas/RoomServerMessageSchemas";
 
 
@@ -146,13 +146,9 @@ export class RoomController {
         this.callOnStateChange(msg);
         break;
       default:
-        console.error(`Invalid message type: ${msg.type}`);
+        this.callOnStateChange(msg);
+        break;
     }
-  }
-
-  public getCurrentSong(): Song|null {
-    // TODO: implement current song retrieval
-    return null;
   }
 
   /**

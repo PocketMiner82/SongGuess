@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
+import { useState, useCallback, createContext, useContext, useRef } from "react";
 import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
 import type { ServerMessage } from "../../schemas/RoomServerMessageSchemas";
 
@@ -45,28 +45,40 @@ function Audio() {
   const controller = useController();
 
   const listener = useCallback((msg: ServerMessage|null) => {
-    const currentSong = controller.getCurrentSong();
     const audio = ref.current;
     if (!audio) return;
 
-    if (currentSong && currentSong.audioURL) {
-      if (audio.src !== currentSong.audioURL) audio.src = currentSong.audioURL;
-      audio.load();
-      audio.volume = 0.2;
-      audio.play().catch(() => {/* ignore play promise errors */});
-    } else {
+    // TODO: check if needed
+    if (!msg) {
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
+      return;
+    } else if (msg.type !== "audio_control") {
+      return;
     }
-  }, [controller]);
+
+    audio.volume = 0.2;
+
+    // perform requested action
+    switch (msg.action) {
+      case "pause":
+        audio.pause();
+        return;
+      case "play":
+        audio.play().catch(() => {/* ignore play promise errors */});
+        return;
+      case "load":
+        const currentAudioURL = msg.audioURL;
+        // avoid resetting src if it is already correct
+        if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
+
+        audio.load();
+        break;
+    }
+  }, []);
 
   useRoomControllerListener(controller, listener);
-
-  // initialize once from current controller state
-  useEffect(() => {
-    listener(null);
-  }, [controller, listener]);
 
   return (
     <audio ref={ref} />
