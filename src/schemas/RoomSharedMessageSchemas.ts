@@ -1,17 +1,19 @@
 import z from "zod";
 
 
+export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
+
 export const PlaylistSchema = z.object({
   /**
    * Name of the playlist
    */
-  playlistName: z.string(),
+  name: z.string(),
 
   /**
    * Cover URL of the playlist.
    * Currently only cover arts by Apple Music are allowed.
    */
-  playlistCover: z.nullable(z.url({pattern: /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/}))
+  cover: z.nullable(z.url({pattern: /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/}))
 });
 
 export type Playlist = z.infer<typeof PlaylistSchema>;

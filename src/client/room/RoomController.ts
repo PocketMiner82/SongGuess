@@ -200,8 +200,8 @@ export class RoomController {
     const req: HostUpdatePlaylistMessage = {
       type: "host_update_playlists",
       playlists: [{
-        playlistName: playlistName,
-        playlistCover: playlistCover
+        name: playlistName,
+        cover: playlistCover
       }],
       songs: songs
     };

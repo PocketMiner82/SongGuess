@@ -5,10 +5,8 @@ import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import { ClientMessageSchema, type Song } from "../schemas/RoomClientMessageSchemas";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
 import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistMessage, type AudioControlMessage } from "../schemas/RoomServerMessageSchemas";
-import type { Playlist, GeneralErrorMessage } from "../schemas/RoomSharedMessageSchemas";
+import { type Playlist, type GeneralErrorMessage, COLORS } from "../schemas/RoomSharedMessageSchemas";
 
-
-const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
 
 export default class Server implements Party.Server {
   /**
@@ -54,6 +52,8 @@ export default class Server implements Party.Server {
   //
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    this.log(`${conn.id} connected.`);
+
     // kick player if room is not created yet
     if (!this.isValidRoom) {
       conn.close(4000, "Room ID not found");
@@ -71,9 +71,10 @@ export default class Server implements Party.Server {
       this.hostConnection = conn;
     }
 
-    this.log(`${conn.id} connected.`);
-
-    this.initConnection(conn);
+    if (!this.initConnection(conn)) {
+      conn.close(4002, "Room is full.");
+      return;
+    }
 
     // send the first update to the connection (and inform all other connections about the new player)
     this.broadcastUpdateMessage();
@@ -263,8 +264,9 @@ export default class Server implements Party.Server {
    * Set initial random username and unused color for a player.
    * 
    * @param conn The connection of the player
+   * @returns whether the init was successful (room was not full)
    */
-  private initConnection(conn: Party.Connection) {
+  private initConnection(conn: Party.Connection): boolean {
     let username = uniqueUsernameGenerator({
       dictionaries: [adjectives, nouns],
       style: "titleCase",
@@ -272,6 +274,10 @@ export default class Server implements Party.Server {
     });
 
     let color = this.getUnusedColors()[0];
+
+    if (!color) {
+      return false;
+    }
 
     let connState: PlayerState = {
       username: username,
@@ -282,6 +288,8 @@ export default class Server implements Party.Server {
 
     // send the current playlist to the connection
     conn.send(this.getPlaylistUpdateMessage());
+
+    return true;
   }
 
   /**
