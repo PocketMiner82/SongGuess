@@ -1,3 +1,10 @@
+# [2.0.0-dev.30](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.29...2.0.0-dev.30) (2025-12-11)
+
+
+### Bug Fixes
+
+* **room.tsx:** set profile for artists to foreground color ([3ecde61](https://github.com/PocketMiner82/SongGuess/commit/3ecde61b31a6e5c96f9b071f4264fbf0ea40062b))
+
 # [2.0.0-dev.29](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.28...2.0.0-dev.29) (2025-12-11)
 
 
