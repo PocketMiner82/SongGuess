@@ -140,8 +140,8 @@ export default class Server implements Party.Server {
 
         // test playback
         if (this.songs[0]) {
-          conn.send(this.getAudioControlMessage("load", this.songs[0].audioURL));
-          setTimeout(() => conn.send(this.getAudioControlMessage("play")), 5000);
+          this.room.broadcast(this.getAudioControlMessage("load", this.songs[0].audioURL));
+          setTimeout(() => this.room.broadcast(this.getAudioControlMessage("play")), 5000);
         }
         break;
       default:
