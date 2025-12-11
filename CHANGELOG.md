@@ -1,3 +1,10 @@
+# [2.0.0-dev.27](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.26...2.0.0-dev.27) (2025-12-11)
+
+
+### Bug Fixes
+
+* **audio control:** broadcast message instead of sending only to host ([c3b8539](https://github.com/PocketMiner82/SongGuess/commit/c3b8539ef6de1cc19d598c01b106767b725bf3a8))
+
 # [2.0.0-dev.26](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.25...2.0.0-dev.26) (2025-12-11)
 
 
