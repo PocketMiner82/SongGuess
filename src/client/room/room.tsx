@@ -140,7 +140,7 @@ function PlaylistList() {
                 <img src={pl.cover} alt="Album Cover" className={COVER_IMG_CLASS} />
               ) : (
                 <div className={COVER_PLACEHOLDER_CLASS}>
-                  <svg viewBox="0 0 24 24" className="w-12 h-12 text-gray-600" fill="currentColor" aria-hidden>
+                  <svg viewBox="0 0 24 24" className="w-12 h-12 text-gray-400" fill="currentColor" aria-hidden>
                     <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v1h20v-1c0-3.3-6.7-5-10-5z"/>
                   </svg>
                 </div>
