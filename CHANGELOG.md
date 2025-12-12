@@ -1,3 +1,10 @@
+# [2.0.0-dev.31](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.30...2.0.0-dev.31) (2025-12-12)
+
+
+### Features
+
+* add loading indicator to search bar + add set button + only show lobby components if in lobby ([474014e](https://github.com/PocketMiner82/SongGuess/commit/474014e54e670391f1806602d5c373c0aed68e1e))
+
 # [2.0.0-dev.30](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.29...2.0.0-dev.30) (2025-12-11)
 
 
