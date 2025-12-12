@@ -357,6 +357,23 @@ function Loading() {
   );
 }
 
+function Countdown() {
+  const [countdown, setCountdown] = useState(0);
+
+  const listener = useCallback((msg: ServerMessage|null) => {
+    if (!msg || msg.type !== "countdown") return;
+    setCountdown(msg.countdown);
+  }, []);
+
+  useRoomControllerListener(useController(), listener);
+
+  return (
+    <div className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black/75 ${countdown > 0 ? 'block' : 'hidden'}`}>
+      <div className="text-white text-9xl font-bold">{countdown}</div>
+    </div>
+  );
+}
+
 function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
   const { getController, isReady } = useRoomController(roomID);
@@ -372,6 +389,7 @@ function App() {
     <RoomContext.Provider value={controller}>
       <Audio />
       <Lobby />
+      <Countdown />
     </RoomContext.Provider>
   );
 }
