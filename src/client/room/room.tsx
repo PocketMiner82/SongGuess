@@ -100,7 +100,7 @@ function SearchBar() {
         <button
           onClick={() => handleSearch(searchText)}
           disabled={!isValidURL || searchStatus === "loading"}
-          className="px-2 py-1 bg-pink-600 text-white rounded hover:bg-pink-700 disabled:bg-gray-600 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+          className="px-2 py-1 bg-pink-600 text-white rounded hover:bg-pink-700 disabled:bg-gray-600 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer transition-colors"
         >
           Set
         </button>
@@ -211,6 +211,53 @@ function PlaylistList() {
   );
 }
 
+function StartGame() {
+  const controller = useController();
+  const [isHost, setIsHost] = useState(false);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const listener = useCallback((msg: ServerMessage) => {
+    if (msg.type === "update") {
+      setIsHost(msg.isHost);
+      if (msg.error) {
+        setError(msg.error);
+      } else {
+        setError(null);
+      }
+    } else if (msg.type === "server_update_playlists") {
+      setPlaylists(msg.playlists);
+    }
+  }, []);
+
+  useRoomControllerListener(controller, listener);
+
+  if (!isHost) return null;
+
+  return (
+    <div className="mb-12 mx-auto text-center">
+      <div
+        className="flex items-center justify-center mb-2 text-sm text-red-800 rounded-lg dark:text-red-400"
+        style={error ? undefined : {visibility: "hidden"}}
+        role="alert"
+      >
+        <span className="material-icons mr-1">error</span>
+        <div>
+          <span className="font-medium">{error}</span>
+        </div>
+      </div>
+
+      <button
+        disabled={playlists.length === 0}
+        onClick={() => controller.startGame()}
+        className="text-white bg-pink-600 rounded hover:bg-pink-700 disabled:bg-gray-600 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer font-bold text-lg py-2 px-4 transition-colors"
+      >
+        Start Game
+      </button>
+    </div>
+  );
+}
+
 function Audio() {
   const ref = useRef<HTMLAudioElement | null>(null);
   const controller = useController();
@@ -297,6 +344,7 @@ function Lobby() {
       <SearchBar />
       <PlayerList />
       <PlaylistList />
+      <StartGame />
     </div>
   );
 }

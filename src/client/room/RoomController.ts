@@ -3,7 +3,7 @@ import { lookup, type Entities, type Media, type Options, type ResultMusicTrack,
 import { useEffect, useState, useRef } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
-import type { HostUpdatePlaylistMessage } from "../../schemas/RoomClientMessageSchemas";
+import type { HostUpdatePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
 import { ServerMessageSchema, type ServerMessage } from "../../schemas/RoomServerMessageSchemas";
 
 
@@ -150,6 +150,16 @@ export class RoomController {
         this.callOnStateChange(msg);
         break;
     }
+  }
+
+  /**
+   * Requests the server to start the game.
+   */
+  public startGame() {
+    let msg: StartGameMessage = {
+      type: "start_game"
+    };
+    this.socket.send(JSON.stringify(msg));
   }
 
   /**

@@ -37,7 +37,7 @@ export const CountdownMessageSchema = z.object({
   type: z.literal("countdown"),
 
   /**
-   * The current countdown number. <0 to hide.
+   * The current countdown number. 0 to hide.
    */
   countdown: z.uint32()
 });
@@ -129,7 +129,7 @@ export const UpdateMessageSchema = z.object({
    * - "not_host": only the host can perform the requested operation
    * - "not_in_lobby": the requested operation can only be performed in the lobby
    */
-  error: z.optional(z.literal(["not_host", "not_in_lobby"]))
+  error: z.optional(z.literal(["not_host", "not_in_lobby", "Game already running"]))
 });
 
 export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;

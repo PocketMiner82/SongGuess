@@ -2,10 +2,11 @@ import type * as Party from "partykit/server";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import z from "zod";
 import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
-import { ClientMessageSchema, type Song } from "../schemas/RoomClientMessageSchemas";
+import { ClientMessageSchema, type ClientMessage, type Song } from "../schemas/RoomClientMessageSchemas";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistMessage, type AudioControlMessage } from "../schemas/RoomServerMessageSchemas";
+import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
 import { type Playlist, type GeneralErrorMessage, COLORS } from "../schemas/RoomSharedMessageSchemas";
+import { setInterval, setTimeout, clearInterval } from "node:timers";
 
 
 export default class Server implements Party.Server {
@@ -44,7 +45,22 @@ export default class Server implements Party.Server {
    */
   songs: Song[] = [];
 
+  /**
+   * The current countdown interval function
+   */
+  countdownInterval: NodeJS.Timeout|null = null;
 
+  /**
+   * The current countdown value. 0 to hide
+   */
+  countdown: CountdownMessage["countdown"] = 0;
+
+
+  /**
+   * Creates a new room server.
+   * 
+   * @param room The room to serve
+   */
   constructor(readonly room: Party.Room) {}
 
   //
@@ -138,15 +154,24 @@ export default class Server implements Party.Server {
 
         // send the update to all players, including sender (for confirmation)
         this.room.broadcast(this.getPlaylistUpdateMessage());
-
-        // test playback
-        if (this.songs[0]) {
-          this.room.broadcast(this.getAudioControlMessage("load", this.songs[0].audioURL));
-          setTimeout(() => this.room.broadcast(this.getAudioControlMessage("play")), 5000);
+        break;
+      case "start_game":
+        if (this.hostConnection !== conn) {
+          conn.send(this.getUpdateMessage(conn, "not_host"));
+          return;
+        } else if (this.state !== "lobby") {
+          conn.send(this.getUpdateMessage(conn, "not_in_lobby"));
+          return;
+        } else if (this.countdownInterval !== null) {
+          conn.send(this.getUpdateMessage(conn, "Game already running"));
+          return;
         }
+
+        this.broadcastUpdateMessage();
+        this.startGame();
         break;
       default:
-        this.sendError(conn, `Invalid message type: ${msg.type}`);
+        this.sendError(conn, `Invalid message type: ${(msg as ClientMessage).type}`);
         break;
     }
   }
@@ -183,6 +208,36 @@ export default class Server implements Party.Server {
   //
   // NORMAL FUNCTIONS
   //
+  
+  private startGame() {
+    const decrementCountdown = () => {
+      this.room.broadcast(this.getCountdownMessage());
+
+      if (this.countdown === 0) {
+        clearInterval(this.countdownInterval!);
+        this.countdownInterval = null;
+        //this.state = "ingame_question";
+        //this.broadcastUpdateMessage();
+
+        // test playback
+        if (this.songs[0]) {
+          this.room.broadcast(this.getAudioControlMessage("play"));
+        }
+        return;
+      }
+
+      this.countdown--;
+    }
+
+    // test loading
+    if (this.songs[0]) {
+      this.room.broadcast(this.getAudioControlMessage("load", this.songs[0].audioURL));
+    }
+
+    this.countdown = 3;
+    decrementCountdown();
+    this.countdownInterval = setInterval(decrementCountdown, 1000);
+  }
 
   /**
    * Invalidates the room if no players join within 5 seconds.
@@ -356,6 +411,22 @@ export default class Server implements Party.Server {
     };
 
     return JSON.stringify(update);
+  }
+
+  /**
+   * Returns a JSON string representing a countdown message.
+   * The countdown message is sent to connected clients when the countdown is updated.
+   * 
+   * @returns a JSON string representing the countdown message.
+   * @see {@link CountdownMessage}
+   */
+  private getCountdownMessage(): string {
+    let msg: CountdownMessage = {
+      type: "countdown",
+      countdown: this.countdown
+    };
+
+    return JSON.stringify(msg);
   }
 
   /**
