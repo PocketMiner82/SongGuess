@@ -28,11 +28,6 @@ export class RoomController {
   private stateChangeEventListeners: ((msg: ServerMessage) => void)[] = [];
 
   /**
-   * Whether we are the host of the room.
-   */
-  public isHost: boolean = false;
-
-  /**
    * Creates a new RoomController instance and initializes the socket connection.
    * 
    * @param roomID The ID of the room to connect to.
@@ -40,7 +35,8 @@ export class RoomController {
   constructor(roomID: string) {
     this.socket = new PartySocket({
       host: PARTYKIT_HOST,
-      room: roomID
+      room: roomID,
+      maxRetries: 0
     });
 
     this.socket.addEventListener("message", this.onMessage.bind(this));
@@ -54,6 +50,13 @@ export class RoomController {
    */
   public destroy() {
     this.socket.close();
+  }
+
+  /**
+   * (Re)connect to the PartyKit server.
+   */
+  public reconnect() {
+    this.socket.reconnect();
   }
 
   /**
@@ -100,6 +103,7 @@ export class RoomController {
    */
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
+    window.location.href = "/";
   }
 
   /**
@@ -109,6 +113,7 @@ export class RoomController {
    */
   private onError(ev: ErrorEvent) {
     console.error(`Cannot connect to ${this.socket.room}:`, ev);
+    window.location.href = "/";
   }
 
   /**
@@ -141,10 +146,6 @@ export class RoomController {
       case "error":
         console.error(`Server reported an error:\n${msg.error_message}`);
         break;
-      case "update":
-        this.isHost = msg.isHost;
-        this.callOnStateChange(msg);
-        break;
       default:
         this.callOnStateChange(msg);
         break;
@@ -156,7 +157,7 @@ export class RoomController {
    * 
    * @param text The search text to query.
    */
-  public async performSearch(text: string) {
+  public async performSearch(text: string): Promise<boolean> {
     let playlistName = "";
     let playlistCover = null;
 
@@ -165,7 +166,7 @@ export class RoomController {
         entity: "musicArtist",
         limit: 1
       });
-      if (artists.length === 0) return;
+      if (artists.length === 0) return false;
       let artist = artists[0];
       
       playlistName = artist.artistName;
@@ -174,14 +175,14 @@ export class RoomController {
         entity: "album",
         limit: 1
       });
-      if (albums.length === 0) return;
+      if (albums.length === 0) return false;
       let album = albums[0];
       
       playlistName = album.collectionName;
       playlistCover = album.artworkUrl100;
     } else {
       // not a valid apple music URL
-      return;
+      return false;
     }
 
     let results: ResultMusicTrack[] = await this.lookupURL(text, {
@@ -189,7 +190,7 @@ export class RoomController {
       limit: 50
     });
 
-    if (results.length === 0) return;
+    if (results.length === 0) return false;
 
     // filter only music tracks and map to our internal format
     const songs = results.filter(r => r.wrapperType === "track").map(r => ({
@@ -206,6 +207,8 @@ export class RoomController {
       songs: songs
     };
     this.socket.send(JSON.stringify(req));
+    
+    return true;
   }
 
   /**

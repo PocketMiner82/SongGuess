@@ -61,7 +61,7 @@ export default class Server implements Party.Server {
     }
 
     // also kick if room is already ingame
-    if (this.state === "ingame") {
+    if (this.state !== "lobby") {
       conn.close(4001, "Game is already running");
       return;
     }

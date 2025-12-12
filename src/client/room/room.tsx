@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { useState, useCallback, createContext, useContext, useRef } from "react";
 import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
-import type { ServerMessage, PlayerState } from "../../schemas/RoomServerMessageSchemas";
+import type { ServerMessage, PlayerState, GameState } from "../../schemas/RoomServerMessageSchemas";
 import { COLORS, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
 import chroma from "chroma-js";
 
@@ -29,25 +29,82 @@ function SearchBar() {
   const controller = useController();
   const [isHost, setIsHost] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/;
+  const albumRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/;
 
   const listener = useCallback((msg: ServerMessage) => {
-    setIsHost(controller.isHost);
-  }, [controller.isHost]);
+    if (msg.type === "update") {
+      setIsHost(msg.isHost);
+    } else if (msg.type === "server_update_playlists") {
+      if (msg.playlists.length > 0 && searchText) {
+        setSearchStatus(msg.error ? "error" : "success");
+      }
+    }
+  }, [searchText]);
 
   useRoomControllerListener(controller, listener);
 
   if (!isHost) return null;
- 
+
+  const isValidURL = artistRegex.test(searchText) || albumRegex.test(searchText);
+
+  const handleSearch = (text: string) => {
+    if (isValidURL) {
+      setSearchStatus("loading");
+      controller.performSearch(text).then(success => {
+        if (!success) {
+          setSearchStatus("error");
+        }
+      }).catch(() => {
+        setSearchStatus("error");
+      });
+    }
+  };
+
+  const getStatusIcon = () => {
+    switch (searchStatus) {
+      case "loading":
+        return <span className="material-symbols-outlined animate-spin text-gray-400">progress_activity</span>;
+      case "success":
+        return <span className="material-icons text-green-400">check_circle</span>;
+      case "error":
+        return <span className="material-icons text-red-400">error</span>;
+      case "idle":
+        return <span className="material-icons text-red-400" style={searchText && !isValidURL ? undefined : {visibility: "hidden"}}>error</span>;
+    }
+  };
+
   return (
     <>
       <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 underline">Search Apple Music</a>
-      <input 
-        placeholder="Enter apple music URL" 
-        className="w-full outline-0 focus:outline-0 border-b-2 border-b-gray-400  focus:border-b-cyan-600 pb-1 mt-6 mb-12" 
-        value={searchText} 
-        onChange={e => {setSearchText(e.target.value)}} 
-        onKeyDown={e => {if (e.key === "Enter") controller.performSearch(searchText);}}
-      />
+      <div className="relative mt-6 mb-12 flex gap-2">
+        <input 
+          placeholder="Enter apple music artist or album URL" 
+          className="flex-1 outline-0 focus:outline-0 border-b-2 border-b-gray-400 focus:border-b-cyan-600 pb-1 pr-10" 
+          value={searchText} 
+          onChange={e => {
+            setSearchText(e.target.value);
+            setSearchStatus("idle");
+          }} 
+          onKeyDown={e => {
+            if (e.key === "Enter" && isValidURL && searchStatus !== "loading") {
+              handleSearch(searchText);
+            }
+          }}
+        />
+        <div className="bottom-1 flex items-center">
+          {getStatusIcon()}
+        </div>
+        <button
+          onClick={() => handleSearch(searchText)}
+          disabled={!isValidURL || searchStatus === "loading"}
+          className="px-2 py-1 bg-pink-600 text-white rounded hover:bg-pink-700 disabled:bg-gray-600 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+        >
+          Set
+        </button>
+      </div>
     </>
   );
 }
@@ -222,22 +279,51 @@ function Audio() {
   );
 }
 
+function Lobby() {
+  const controller = useController();
+  const [state, setState] = useState<GameState>("lobby");
+
+  const listener = useCallback((msg: ServerMessage) => {
+    if (msg.type === "update") {
+      setState(msg.state);
+    }
+  }, []);
+  useRoomControllerListener(controller, listener);
+
+  if (state !== "lobby") return null;
+
+  return (
+    <div className="lg:max-w-3/4 mx-auto">
+      <SearchBar />
+      <PlayerList />
+      <PlaylistList />
+    </div>
+  );
+}
+
+function Loading() {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="text-2xl text-gray-200">Loading...</div>
+    </div>
+  );
+}
+
 function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
   const { getController, isReady } = useRoomController(roomID);
 
-  if (!isReady) return null;
+  if (!isReady) return <Loading />;
 
   const controller = getController();
+
+  // TODO: prevent accidental navigation away
+  //window.onbeforeunload = () => true;
 
   return (
     <RoomContext.Provider value={controller}>
       <Audio />
-      <div className="max-w-3/4 mx-auto">
-        <SearchBar />
-        <PlayerList />
-        <PlaylistList />
-      </div>
+      <Lobby />
     </RoomContext.Provider>
   );
 }

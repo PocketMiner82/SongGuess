@@ -37,7 +37,7 @@ export const CountdownMessageSchema = z.object({
   type: z.literal("countdown"),
 
   /**
-   * The current countdown number.
+   * The current countdown number. <0 to hide.
    */
   countdown: z.uint32()
 });
@@ -69,7 +69,9 @@ export type ServerUpdatePlaylistMessage = z.infer<typeof ServerUpdatePlaylistMes
  */
 const GameStateSchema = z.literal([
   "lobby",
-  "ingame",
+  "ingame_question",
+  "ingame_guessing",
+  "ingame_results",
   "results"
 ]);
 
