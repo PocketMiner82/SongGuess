@@ -1,3 +1,235 @@
+# [2.0.0-dev.32](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.31...2.0.0-dev.32) (2025-12-12)
+
+
+### Features
+
+* add countdown ([6f7f0f1](https://github.com/PocketMiner82/SongGuess/commit/6f7f0f14134d3ee2730738329d7817d10a501d1c))
+* add start game button ([066c55b](https://github.com/PocketMiner82/SongGuess/commit/066c55b160bfe6e719c2125bc37fffe1060f8d0a))
+
+# [2.0.0-dev.31](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.30...2.0.0-dev.31) (2025-12-12)
+
+
+### Features
+
+* add loading indicator to search bar + add set button + only show lobby components if in lobby ([474014e](https://github.com/PocketMiner82/SongGuess/commit/474014e54e670391f1806602d5c373c0aed68e1e))
+
+# [2.0.0-dev.30](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.29...2.0.0-dev.30) (2025-12-11)
+
+
+### Bug Fixes
+
+* **room.tsx:** set profile for artists to foreground color ([3ecde61](https://github.com/PocketMiner82/SongGuess/commit/3ecde61b31a6e5c96f9b071f4264fbf0ea40062b))
+
+# [2.0.0-dev.29](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.28...2.0.0-dev.29) (2025-12-11)
+
+
+### Features
+
+* add players and playlists react components ([bffdce2](https://github.com/PocketMiner82/SongGuess/commit/bffdce25e62fde3f7cc3b63514763436d98621e6))
+
+# [2.0.0-dev.28](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.27...2.0.0-dev.28) (2025-12-11)
+
+
+### Features
+
+* add volume slider ([b0b6212](https://github.com/PocketMiner82/SongGuess/commit/b0b6212bf3eb91a7c2fe81fab98862d5c9cdc2f7))
+
+# [2.0.0-dev.27](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.26...2.0.0-dev.27) (2025-12-11)
+
+
+### Bug Fixes
+
+* **audio control:** broadcast message instead of sending only to host ([c3b8539](https://github.com/PocketMiner82/SongGuess/commit/c3b8539ef6de1cc19d598c01b106767b725bf3a8))
+
+# [2.0.0-dev.26](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.25...2.0.0-dev.26) (2025-12-11)
+
+
+### Features
+
+* implement audio control ([056d588](https://github.com/PocketMiner82/SongGuess/commit/056d5889395a52dbd543a9853bb328bc7e6ce350))
+
+# [2.0.0-dev.25](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.24...2.0.0-dev.25) (2025-12-06)
+
+
+### Features
+
+* test to autoplay first song ([4f999bd](https://github.com/PocketMiner82/SongGuess/commit/4f999bd57a65e9e4998b57d2ff7e9cf19c25697c))
+
+# [2.0.0-dev.24](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.23...2.0.0-dev.24) (2025-12-05)
+
+
+### Bug Fixes
+
+* this is just a test ([cccb00b](https://github.com/PocketMiner82/SongGuess/commit/cccb00bee20d7f564f6eebe8c999ba3c29021428))
+
+# [2.0.0-dev.23](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.22...2.0.0-dev.23) (2025-12-05)
+
+
+### Bug Fixes
+
+* type errors + cleanup ([c1786bd](https://github.com/PocketMiner82/SongGuess/commit/c1786bde602fe8f39ce5d71226c998ee7eac5f2d))
+
+# [2.0.0-dev.22](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.21...2.0.0-dev.22) (2025-12-05)
+
+
+### Features
+
+* create react hook for room controller to simplify partykit communication + cleanup server code ([ba1224c](https://github.com/PocketMiner82/SongGuess/commit/ba1224c0671df26401eea668735fb32ff0c9d3a7))
+
+# [2.0.0-dev.21](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.20...2.0.0-dev.21) (2025-12-04)
+
+
+### Features
+
+* start implementing some messages + close room after 5 seconds if last player left + first attempt to sync something: search bar updates for all players when the host updates it ([27caa71](https://github.com/PocketMiner82/SongGuess/commit/27caa71ccf56257af1651d8cb3e09e236c36b086))
+
+# [2.0.0-dev.20](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.19...2.0.0-dev.20) (2025-12-04)
+
+
+### Bug Fixes
+
+* transfer host instead of kicking all players ([a84cb95](https://github.com/PocketMiner82/SongGuess/commit/a84cb95b913dcb2c45dd316cfd382411d4feda71))
+
+# [2.0.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.18...2.0.0-dev.19) (2025-12-03)
+
+
+### Features
+
+* wip implemtation of room messages and server side code ([2f8eac9](https://github.com/PocketMiner82/SongGuess/commit/2f8eac983676824a891bf72ac428000303c34361))
+
+# [2.0.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.17...2.0.0-dev.18) (2025-12-02)
+
+
+### Bug Fixes
+
+* styling on mobile ([b8eae30](https://github.com/PocketMiner82/SongGuess/commit/b8eae309f0f763edd23495b7e2a8f0c438bb179b))
+
+# [2.0.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.16...2.0.0-dev.17) (2025-12-01)
+
+
+### Bug Fixes
+
+* **room:** wrong var assignment for itunes search ([a5374d6](https://github.com/PocketMiner82/SongGuess/commit/a5374d67992acd433ca111126aac0a6fb3e59de6))
+
+# [2.0.0-dev.16](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.15...2.0.0-dev.16) (2025-12-01)
+
+
+### Bug Fixes
+
+* add array check to results null check ([e029f3d](https://github.com/PocketMiner82/SongGuess/commit/e029f3d6c1a249a8c0691a1b55731f0eecb19dc0))
+
+# [2.0.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.14...2.0.0-dev.15) (2025-12-01)
+
+
+### Features
+
+* use more robust fetch method for createRoom ([d36812b](https://github.com/PocketMiner82/SongGuess/commit/d36812b0e8ae200fae65fe23483ce5d39ba53426))
+
+# [2.0.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.13...2.0.0-dev.14) (2025-12-01)
+
+
+### Features
+
+* send searched text instead of ping interval ([b6e061c](https://github.com/PocketMiner82/SongGuess/commit/b6e061cbc028f016b9d92e89bce322c20bac210b))
+
+# [2.0.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.12...2.0.0-dev.13) (2025-12-01)
+
+
+### Bug Fixes
+
+* **server:** move connection kick on invalid room id to onConnect ([e3cd3e4](https://github.com/PocketMiner82/SongGuess/commit/e3cd3e4fbc4b815d2dfbe90cea79e890a5c9860d))
+
+# [2.0.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.11...2.0.0-dev.12) (2025-12-01)
+
+
+### Bug Fixes
+
+* don't use edge workers for room creation ([3b6abd9](https://github.com/PocketMiner82/SongGuess/commit/3b6abd92f0ef993b98305e58428106618b3990b4))
+
+# [2.0.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.10...2.0.0-dev.11) (2025-12-01)
+
+
+### Bug Fixes
+
+* add global_fetch_private_origin compatibility flag to attempt to make fetch work ([e331075](https://github.com/PocketMiner82/SongGuess/commit/e331075a33fb81189304fd6f53a9ef80ec06b949))
+
+# [2.0.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.9...2.0.0-dev.10) (2025-12-01)
+
+
+### Bug Fixes
+
+* add larger timeout to fetch requests ([c1b9259](https://github.com/PocketMiner82/SongGuess/commit/c1b9259c2bc809ece268416c9bb5871c6dad8f06))
+
+# [2.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.8...2.0.0-dev.9) (2025-12-01)
+
+
+### Bug Fixes
+
+* attempt to make room management work for worker environment ([d71b8bb](https://github.com/PocketMiner82/SongGuess/commit/d71b8bb17103c4d30c7868cfb0268f145e72cdd7))
+
+
+### Features
+
+* add basic room management ([c8bd564](https://github.com/PocketMiner82/SongGuess/commit/c8bd564fc5a19cecbec224f7dbdbecce5d6f4d4d))
+
+# [2.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.8...2.0.0-dev.9) (2025-12-01)
+
+
+### Features
+
+* add basic room management ([c8bd564](https://github.com/PocketMiner82/SongGuess/commit/c8bd564fc5a19cecbec224f7dbdbecce5d6f4d4d))
+
+# [2.0.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.7...2.0.0-dev.8) (2025-11-28)
+
+
+### Bug Fixes
+
+* update metadata in html files to correct values ([599cbd5](https://github.com/PocketMiner82/SongGuess/commit/599cbd5242baeb53d13aec22b3dab18b09199d99))
+
+# [2.0.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.6...2.0.0-dev.7) (2025-11-28)
+
+# [2.0.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.5...2.0.0-dev.6) (2025-11-28)
+
+# [2.0.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.4...2.0.0-dev.5) (2025-11-28)
+
+
+### Features
+
+* add styling via tailwindcss ([ee4ac15](https://github.com/PocketMiner82/SongGuess/commit/ee4ac15a0616e606c639d3dfa3bc4e697f63d95c))
+
+# [2.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.3...2.0.0-dev.4) (2025-11-28)
+
+
+### Features
+
+* convert index.ts to use React ([b6f4805](https://github.com/PocketMiner82/SongGuess/commit/b6f48057bf7fe54f92f2aba31e137a63d9b5665d))
+
+# [2.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.2...2.0.0-dev.3) (2025-11-26)
+
+
+### Bug Fixes
+
+* increase textbox size + test returning 200 results ([7232c2a](https://github.com/PocketMiner82/SongGuess/commit/7232c2ac535ca33d4dc47b7ff5d731ff0d5212c3))
+
+# [2.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.1...2.0.0-dev.2) (2025-11-26)
+
+
+### Features
+
+* split room and main page + fix CORS error ([b7bbd62](https://github.com/PocketMiner82/SongGuess/commit/b7bbd62794ecc3145c79688b788c80a6a6f45fd8))
+
+# [2.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.1...2.0.0-dev.1) (2025-11-26)
+
+
+### Features
+
+* Switch to apple music from Spotify ([0b38aaa](https://github.com/PocketMiner82/SongGuess/commit/0b38aaadb8f1ff950192bf59b33cef2e96e93a67))
+
+
+### BREAKING CHANGES
+
+* this removes spotify and auth entirely
+
 ## [1.3.1](https://github.com/PocketMiner82/SongGuess/compare/1.3.0...1.3.1) (2025-11-25)
 
 
