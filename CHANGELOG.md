@@ -1,3 +1,10 @@
+# [2.0.0-dev.36](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.35...2.0.0-dev.36) (2025-12-14)
+
+
+### Bug Fixes
+
+* add preload to audio ([1de4c4f](https://github.com/PocketMiner82/SongGuess/commit/1de4c4ffe273f578d1667120b241815e86c58232))
+
 # [2.0.0-dev.35](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.34...2.0.0-dev.35) (2025-12-14)
 
 
