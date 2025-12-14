@@ -1,3 +1,11 @@
+# [2.0.0-dev.32](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.31...2.0.0-dev.32) (2025-12-12)
+
+
+### Features
+
+* add countdown ([6f7f0f1](https://github.com/PocketMiner82/SongGuess/commit/6f7f0f14134d3ee2730738329d7817d10a501d1c))
+* add start game button ([066c55b](https://github.com/PocketMiner82/SongGuess/commit/066c55b160bfe6e719c2125bc37fffe1060f8d0a))
+
 # [2.0.0-dev.31](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.30...2.0.0-dev.31) (2025-12-12)
 
 
