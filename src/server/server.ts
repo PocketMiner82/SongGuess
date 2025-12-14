@@ -147,8 +147,8 @@ export default class Server implements Party.Server {
         }
         (conn.state as PlayerState).username = msg.username;
 
-        // this not only informs all other users about the name change but also the tells the connection
-        // that the name change was (un)successful
+        // inform all players about the username change + send confirmation to the user
+        this.sendConfirmationOrError(conn, "change_username");
         this.broadcastUpdateMessage();
         break;
       case "host_update_playlists":
