@@ -346,7 +346,7 @@ function Audio() {
 
   return (
     <>
-      <audio ref={ref} />
+      <audio ref={ref} preload="auto" />
       <div className="fixed bottom-4 left-4 flex items-center gap-2">
         <span className="material-icons text-gray-100">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
         <input
