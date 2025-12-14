@@ -1,3 +1,10 @@
+# [2.0.0-dev.34](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.33...2.0.0-dev.34) (2025-12-14)
+
+
+### Features
+
+* implement name selecting + refactor error handling ([e239589](https://github.com/PocketMiner82/SongGuess/commit/e239589c05c4038217289fa06546ee44c5bca91b))
+
 # [2.0.0-dev.33](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.32...2.0.0-dev.33) (2025-12-14)
 
 
