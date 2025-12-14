@@ -3,6 +3,9 @@ import z from "zod";
 
 export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
 
+export const artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/
+export const albumRegex =  /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/
+
 export const PlaylistSchema = z.object({
   /**
    * Name of the playlist
@@ -17,6 +20,11 @@ export const PlaylistSchema = z.object({
 });
 
 export type Playlist = z.infer<typeof PlaylistSchema>;
+
+export const UnknownPlaylist: Playlist = {
+  name: "Unknown",
+  cover: null
+};
 
 
 export const GeneralErrorMessageSchema = z.object({

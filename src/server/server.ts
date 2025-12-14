@@ -5,7 +5,7 @@ import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import { ClientMessageSchema, type ClientMessage, type Song } from "../schemas/RoomClientMessageSchemas";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
 import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
-import { type Playlist, type GeneralErrorMessage, COLORS } from "../schemas/RoomSharedMessageSchemas";
+import { type Playlist, type GeneralErrorMessage, COLORS, albumRegex, artistRegex, UnknownPlaylist } from "../schemas/RoomSharedMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 
 
@@ -475,6 +475,15 @@ export default class Server implements Party.Server {
     // handle room creation
     if (url.pathname.endsWith("/createRoom")) {
       return await Server.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
+    // handle playlist info request
+    } else if (url.pathname.endsWith("/playlistInfo")) {
+      // fetch playlist info
+      let playlistURL = url.searchParams.get("url");
+      if (!playlistURL) {
+        return new Response("Missing url parameter.", { status: 400 });
+      }
+
+      return Response.json(await Server.getPlaylistInfo(playlistURL));
     // respond with JSON containing the current online count and if the room is valid
     } else if (req.method === "GET") {
       let json: RoomInfoResponse = {
@@ -519,6 +528,44 @@ export default class Server implements Party.Server {
   //
   // STATIC FUNCTIONS
   //
+
+  /**
+   * Fetches playlist information from an Apple Music URL.
+   * 
+   * @param url The Apple Music URL of the playlist.
+   * @returns A Promise resolving to the Playlist information.
+   */
+  private static async getPlaylistInfo(url: string): Promise<Playlist> {
+    if (!artistRegex.test(url) && !albumRegex.test(url)) {
+      return UnknownPlaylist;
+    }
+
+    let page = await fetch(url);
+    let text = await page.text();
+
+    // get content of schema.org tag <script id=schema:music-[...] type="application/ld+json">
+    let regex = /<script\s+id="?schema:music-[^" ]*"?\s+type="?application\/ld\+json"?\s*>(?<json>[\s\S]*?)<\/script>/i;
+    let match = regex.exec(text);
+    if (!match || !match.groups) {
+      return UnknownPlaylist;
+    }
+    let json = match.groups["json"];
+
+    try {
+      let data = JSON.parse(json);
+      let name: string = data["name"];
+      let cover: string|null = null;
+      if (data["image"] && typeof data["image"] === "string") {
+        cover = data["image"];
+      }
+      return {
+        name: name,
+        cover: cover
+      };
+    } catch {
+      return UnknownPlaylist;
+    }
+  }
 
   /**
    * Generates a unique 6-character room ID that does not currently exist on the server.

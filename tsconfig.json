@@ -1,4 +1,11 @@
 {
+  "exclude": [
+    "node_modules",
+    ".git",
+    "public/dist",
+    ".vscode",
+    ".partykit"
+  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 

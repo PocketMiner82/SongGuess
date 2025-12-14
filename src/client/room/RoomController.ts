@@ -5,6 +5,7 @@ import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
 import type { HostUpdatePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
 import { ServerMessageSchema, type ServerMessage } from "../../schemas/RoomServerMessageSchemas";
+import { albumRegex, artistRegex, UnknownPlaylist, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
 
 
 declare const PARTYKIT_HOST: string;
@@ -14,9 +15,6 @@ declare const PARTYKIT_HOST: string;
  * Manages the connection and state of a room.
  */
 export class RoomController {
-  private artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/
-  private albumRegex =  /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/
-
   /**
    * The PartySocket instance used for server communication.
    */
@@ -163,39 +161,18 @@ export class RoomController {
   }
 
   /**
-   * Performs a search using the iTunes Store API and updates the search results.
+   * Performs a search for songs based on the provided Apple Music URL.
+   * If the URL is valid and songs are found, it sends an update to the server.
    * 
-   * @param text The search text to query.
+   * @param url The Apple Music URL to search for.
+   * @returns A Promise resolving to true if the search was successful and songs were found, false otherwise.
    */
-  public async performSearch(text: string): Promise<boolean> {
-    let playlistName = "";
-    let playlistCover = null;
-
-    if (this.artistRegex.test(text)) {
-      let artists = await this.lookupURL(text, {
-        entity: "musicArtist",
-        limit: 1
-      });
-      if (artists.length === 0) return false;
-      let artist = artists[0];
-      
-      playlistName = artist.artistName;
-    } else if (this.albumRegex.test(text)) {
-      let albums = await this.lookupURL(text, {
-        entity: "album",
-        limit: 1
-      });
-      if (albums.length === 0) return false;
-      let album = albums[0];
-      
-      playlistName = album.collectionName;
-      playlistCover = album.artworkUrl100;
-    } else {
-      // not a valid apple music URL
+  public async performSearch(url: string): Promise<boolean> {
+    if (!artistRegex.test(url) && !albumRegex.test(url)) {
       return false;
     }
 
-    let results: ResultMusicTrack[] = await this.lookupURL(text, {
+    let results: ResultMusicTrack[] = await this.lookupURL(url, {
       entity: "song",
       limit: 50
     });
@@ -210,15 +187,22 @@ export class RoomController {
 
     const req: HostUpdatePlaylistMessage = {
       type: "host_update_playlists",
-      playlists: [{
-        name: playlistName,
-        cover: playlistCover
-      }],
+      playlists: [await this.getPlaylistInfo(url)],
       songs: songs
     };
     this.socket.send(JSON.stringify(req));
     
     return true;
+  }
+
+  private async getPlaylistInfo(url: string): Promise<Playlist> {
+    try {
+      let page = await fetch("/parties/main/playlistInfo?url=" + encodeURIComponent(url));
+      let data: Playlist = await page.json();
+      return data;
+    } catch {
+      return UnknownPlaylist;
+    }
   }
 
   /**
