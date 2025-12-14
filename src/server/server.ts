@@ -244,19 +244,18 @@ export default class Server implements Party.Server {
         //this.state = "ingame_question";
         //this.broadcastUpdateMessage();
 
-        // test playback
-        if (this.songs[0]) {
-          this.room.broadcast(this.getAudioControlMessage("play"));
-        }
+        this.room.broadcast(this.getAudioControlMessage("play"));
         return;
       }
 
       this.countdown--;
     }
 
-    // test loading
-    if (this.songs[0]) {
-      this.room.broadcast(this.getAudioControlMessage("load", this.songs[0].audioURL));
+    // test loading random song
+    if (this.songs.length > 0) {
+      let randomIndex = Math.floor(Math.random() * this.songs.length);
+      let song = this.songs[randomIndex];
+      this.room.broadcast(this.getAudioControlMessage("load", song.audioURL));
     }
 
     this.countdown = 3;
