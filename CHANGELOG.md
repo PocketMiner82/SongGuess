@@ -1,3 +1,10 @@
+# [2.0.0-dev.35](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.34...2.0.0-dev.35) (2025-12-14)
+
+
+### Bug Fixes
+
+* test load random song instead of first ([6364c80](https://github.com/PocketMiner82/SongGuess/commit/6364c801ea1c123a8ac08b252587c16485deb80b))
+
 # [2.0.0-dev.34](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.33...2.0.0-dev.34) (2025-12-14)
 
 
