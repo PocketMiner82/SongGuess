@@ -1,9 +1,8 @@
 import z from "zod";
-import { GeneralErrorMessageSchema, PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
-import { SongSchema } from "./RoomClientMessageSchemas";
+import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
-export const AudioControlMessageSchema = z.union([
+export const AudioControlMessageSchema = z.discriminatedUnion("action", [
   z.object({
     type: z.literal("audio_control"),
 
@@ -51,14 +50,7 @@ export const ServerUpdatePlaylistMessageSchema = z.object({
   /**
    * Currently selected playlist(s)
    */
-  playlists: z.array(PlaylistSchema),
-
-  /**
-   * Optional error information:
-   * - "not_host": only the host can update playlist(s)
-   * - "not_in_lobby": playlist(s) can only be updated while in lobby
-   */
-  error: z.optional(z.literal(["not_host", "not_in_lobby"]))
+  playlists: z.array(PlaylistSchema)
 });
 
 export type ServerUpdatePlaylistMessage = z.infer<typeof ServerUpdatePlaylistMessageSchema>;
@@ -122,28 +114,7 @@ export const UpdateMessageSchema = z.object({
   /**
    * True, if the receiver is the host
    */
-  isHost: z.boolean(),
-
-  /**
-   * Optional error information:
-   * - "not_host": only the host can perform the requested operation
-   * - "not_in_lobby": the requested operation can only be performed in the lobby
-   */
-  error: z.optional(z.literal(["not_host", "not_in_lobby", "Game already running"]))
+  isHost: z.boolean()
 });
 
 export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;
-
-
-/**
- * A message sent from the server.
- */
-export const ServerMessageSchema = z.union([
-  GeneralErrorMessageSchema,
-  UpdateMessageSchema,
-  ServerUpdatePlaylistMessageSchema,
-  CountdownMessageSchema,
-  AudioControlMessageSchema
-]);
-
-export type ServerMessage = z.infer<typeof ServerMessageSchema>;

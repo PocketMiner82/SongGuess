@@ -3,9 +3,9 @@ import { lookup, type Entities, type Media, type Options, type ResultMusicTrack,
 import { useEffect, useState, useRef } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
-import type { HostUpdatePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
-import { ServerMessageSchema, type ServerMessage } from "../../schemas/RoomServerMessageSchemas";
+import type { ChangeUsernameMessage, HostUpdatePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
 import { albumRegex, artistRegex, UnknownPlaylist, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
+import { type ServerMessage, ServerMessageSchema } from "../../schemas/RoomMessageSchemas";
 
 
 declare const PARTYKIT_HOST: string;
@@ -139,15 +139,20 @@ export class RoomController {
 
     let msg: ServerMessage = result.data;
 
-    // handle each message type
-    switch (msg.type) {
-      case "error":
-        console.error(`Server reported an error:\n${msg.error_message}`);
-        break;
-      default:
-        this.callOnStateChange(msg);
-        break;
+    if (msg.type === "confirmation" && msg.error) {
+      console.error(`Server reported an error for ${msg.source}:\n${msg.error}`);
     }
+
+    // call listeners
+    this.callOnStateChange(msg);
+  }
+
+  public updateUsername(newName: string) {
+    let msg: ChangeUsernameMessage = {
+      type: "change_username",
+      username: newName
+    };
+    this.socket.send(JSON.stringify(msg));
   }
 
   /**
@@ -185,10 +190,12 @@ export class RoomController {
       audioURL: r.previewUrl,
     }));
 
+    const playlist: Playlist = await this.getPlaylistInfo(url);
+    playlist.songs = songs;
+
     const req: HostUpdatePlaylistMessage = {
       type: "host_update_playlists",
-      playlists: [await this.getPlaylistInfo(url)],
-      songs: songs
+      playlists: [playlist]
     };
     this.socket.send(JSON.stringify(req));
     

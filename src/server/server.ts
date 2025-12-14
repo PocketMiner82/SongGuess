@@ -2,11 +2,11 @@ import type * as Party from "partykit/server";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import z from "zod";
 import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
-import { ClientMessageSchema, type ClientMessage, type Song } from "../schemas/RoomClientMessageSchemas";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
 import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
-import { type Playlist, type GeneralErrorMessage, COLORS, albumRegex, artistRegex, UnknownPlaylist } from "../schemas/RoomSharedMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
+import { ClientMessageSchema, type ClientMessage, type ConfirmationMessage } from "../schemas/RoomMessageSchemas";
+import { type Playlist, type Song, COLORS, artistRegex, albumRegex, UnknownPlaylist } from "../schemas/RoomSharedMessageSchemas";
 
 
 export default class Server implements Party.Server {
@@ -108,7 +108,7 @@ export default class Server implements Party.Server {
     try {
       var json = JSON.parse(message);
     } catch {
-      this.sendError(conn, "Message is not JSON.");
+      this.sendConfirmationOrError(conn, "other", "Message is not JSON.");
       return;
     }
 
@@ -116,7 +116,7 @@ export default class Server implements Party.Server {
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
       this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
-      this.sendError(conn, `Parsing error:\n${z.prettifyError(result.error)}`);
+      this.sendConfirmationOrError(conn, "other", `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
 
@@ -124,54 +124,79 @@ export default class Server implements Party.Server {
 
     // handle each message type
     switch(msg.type) {
-      case "error":
-        this.log(`Client ${conn.id} reported an error:\n${msg.error_message}`, "warn");
+      case "confirmation":
+        if (msg.error) {
+          this.log(`Client reported an error for ${msg.source}:\n${msg.error}`, "warn");
+        }
         break;
       case "change_username":
         if (this.state !== "lobby") {
-          conn.send(this.getUpdateMessage(conn, "not_in_lobby"));
+          conn.send(this.getUpdateMessage(conn));
+          this.sendConfirmationOrError(conn, "change_username", "Cannot change username while game is running.");
           return;
         }
 
-        // username is already validated
+        // username is already validated, just check if it's used by another player
+        for (let connection of this.room.getConnections()) {
+          let state = connection.state as PlayerState;
+          if (connection !== conn && state.username === msg.username) {
+            conn.send(this.getUpdateMessage(conn));
+            this.sendConfirmationOrError(conn, "change_username", "Username is already taken.");
+            return;
+          }
+        }
         (conn.state as PlayerState).username = msg.username;
 
         // this not only informs all other users about the name change but also the tells the connection
-        // that the name change was successfuls
+        // that the name change was (un)successful
         this.broadcastUpdateMessage();
         break;
       case "host_update_playlists":
         if (this.hostConnection !== conn) {
-          conn.send(this.getPlaylistUpdateMessage("not_host"));
+          conn.send(this.getPlaylistUpdateMessage());
+          this.sendConfirmationOrError(conn, "host_update_playlists", "Only the host can change the playlist.");
           return;
         } else if (this.state !== "lobby") {
-          conn.send(this.getPlaylistUpdateMessage("not_in_lobby"));
+          conn.send(this.getPlaylistUpdateMessage());
+          this.sendConfirmationOrError(conn, "host_update_playlists", "Cannot change playlist while game is running.");
           return;
         }
 
         this.playlists = msg.playlists;
-        this.songs = msg.songs;
+        this.songs = [];
+        for (let playlist of this.playlists) {
+          if (!playlist.songs) {
+            continue;
+          }
+          this.songs.push(...playlist.songs);
+        }
 
-        // send the update to all players, including sender (for confirmation)
+        // send the update to all players + confirmation to the host
         this.room.broadcast(this.getPlaylistUpdateMessage());
+        this.sendConfirmationOrError(conn, "host_update_playlists");
         break;
       case "start_game":
         if (this.hostConnection !== conn) {
-          conn.send(this.getUpdateMessage(conn, "not_host"));
+          conn.send(this.getUpdateMessage(conn));
+          this.sendConfirmationOrError(conn, "start_game", "Only the host can start the game.");
           return;
         } else if (this.state !== "lobby") {
-          conn.send(this.getUpdateMessage(conn, "not_in_lobby"));
+          conn.send(this.getUpdateMessage(conn));
+          this.sendConfirmationOrError(conn, "start_game", "Game is already running.");
           return;
         } else if (this.countdownInterval !== null) {
-          conn.send(this.getUpdateMessage(conn, "Game already running"));
+          conn.send(this.getUpdateMessage(conn));
+          this.sendConfirmationOrError(conn, "start_game", "Countdown is already running.");
           return;
         }
 
+        // inform all players about the game start + send confirmation to the host
         this.broadcastUpdateMessage();
+        this.sendConfirmationOrError(conn, "start_game");
         this.startGame();
         break;
       default:
-        this.sendError(conn, `Invalid message type: ${(msg as ClientMessage).type}`);
+        this.sendConfirmationOrError(conn, "other", `Invalid message type: ${(msg as ClientMessage).type}`);
         break;
     }
   }
@@ -348,29 +373,30 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Sends a general error message and an update to a player.
+   * Sends a confirmation or error message to the player, along with an update message.
    * 
    * @param conn The connection of the player that should receive the messages
-   * @param error A description of the errors
+   * @param source The source/type of the confirmation message
+   * @param error An optional error message to include in the confirmation
    * @see {@link sendUpdate}
    */
-  private sendError(conn: Party.Connection, error: string) {
-    let resp: GeneralErrorMessage = {
-      type: "error",
-      error_message: error
+  private sendConfirmationOrError(conn: Party.Connection, source: ConfirmationMessage["source"], error?: string) {
+    let resp: ConfirmationMessage = {
+      type: "confirmation",
+      source: source,
+      error: error
     }
-    conn.send(JSON.stringify(resp));
     conn.send(this.getUpdateMessage(conn));
+    conn.send(JSON.stringify(resp));
   }
 
   /**
    * Constructs an update message with the current room/connection states to the connection.
    * 
    * @param conn the connection to send the update to
-   * @param error if this update was the result of an error, this specifies the reason
    * @returns a JSON string of the constructed {@link UpdateMessage}
    */
-  private getUpdateMessage(conn: Party.Connection, error?: UpdateMessage["error"]): string {
+  private getUpdateMessage(conn: Party.Connection): string {
     let connState = conn.state as PlayerState;
 
     let msg: UpdateMessage = {
@@ -379,8 +405,7 @@ export default class Server implements Party.Server {
       players: this.getUsernamesWithColors(),
       username: connState.username,
       color: connState.color,
-      isHost: conn === this.hostConnection,
-      error: error
+      isHost: conn === this.hostConnection
     };
 
     return JSON.stringify(msg);
@@ -403,11 +428,16 @@ export default class Server implements Party.Server {
    * @param error if this update was the result of an error, this specifies the reason
    * @returns a JSON string of the constructed {@link ServerUpdatePlaylistMessage}
    */
-  private getPlaylistUpdateMessage(error?: ServerUpdatePlaylistMessage["error"]): string {
+  private getPlaylistUpdateMessage(): string {
+    let playlists = this.playlists;
+    for (let p of playlists) {
+      // do not send songs in playlist updates
+      delete p.songs;
+    }
+
     let update: ServerUpdatePlaylistMessage = {
       type: "server_update_playlists",
-      playlists: this.playlists,
-      error: error
+      playlists: this.playlists
     };
 
     return JSON.stringify(update);
@@ -560,7 +590,8 @@ export default class Server implements Party.Server {
       }
       return {
         name: name,
-        cover: cover
+        cover: cover,
+        songs: []
       };
     } catch {
       return UnknownPlaylist;

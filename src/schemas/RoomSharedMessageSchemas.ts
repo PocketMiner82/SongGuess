@@ -6,6 +6,21 @@ export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black
 export const artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/
 export const albumRegex =  /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/
 
+export const SongSchema = z.object({
+  /**
+   * The name of the song
+   */
+  name: z.string(),
+
+  /**
+   * A URL to the audio file of the song.
+   * Currently only audio previews from apple music are allowed.
+   */
+  audioURL: z.url({pattern: /^https:\/\/audio-ssl\.itunes\.apple\.com\/itunes-assets\/AudioPreview.*\.m4a$/})
+});
+
+export type Song = z.infer<typeof SongSchema>;
+
 export const PlaylistSchema = z.object({
   /**
    * Name of the playlist
@@ -16,27 +31,21 @@ export const PlaylistSchema = z.object({
    * Cover URL of the playlist.
    * Currently only cover arts by Apple Music are allowed.
    */
-  cover: z.nullable(z.url({pattern: /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/}))
+  cover: z.nullable(z.url({pattern: /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/})),
+
+  /**
+   * A list of song names and music urls
+   */
+  songs: z.optional(z.array(SongSchema))
 });
 
 export type Playlist = z.infer<typeof PlaylistSchema>;
 
 export const UnknownPlaylist: Playlist = {
   name: "Unknown",
-  cover: null
+  cover: null,
+  songs: []
 };
-
-
-export const GeneralErrorMessageSchema = z.object({
-  type: z.literal("error"),
-
-  /**
-   * A string describing what went wrong.
-   */
-  error_message: z.string()
-});
-
-export type GeneralErrorMessage = z.infer<typeof GeneralErrorMessageSchema>;
 
 
 /**

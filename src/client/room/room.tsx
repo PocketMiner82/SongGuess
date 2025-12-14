@@ -1,9 +1,10 @@
 import { createRoot } from "react-dom/client";
 import { useState, useCallback, createContext, useContext, useRef } from "react";
 import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
-import type { ServerMessage, PlayerState, GameState } from "../../schemas/RoomServerMessageSchemas";
+import type { PlayerState, GameState } from "../../schemas/RoomServerMessageSchemas";
 import { COLORS, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
 import chroma from "chroma-js";
+import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 
 const ITEM_BASE = "p-3 bg-gray-700 rounded-lg";
 const PLAYER_ITEM_CLASS = `flex items-center gap-4 ${ITEM_BASE}`;
@@ -37,12 +38,12 @@ function SearchBar() {
   const listener = useCallback((msg: ServerMessage) => {
     if (msg.type === "update") {
       setIsHost(msg.isHost);
-    } else if (msg.type === "server_update_playlists") {
-      if (msg.playlists.length > 0 && searchText) {
+    } else if (msg.type === "confirmation") {
+      if (msg.source === "host_update_playlists") {
         setSearchStatus(msg.error ? "error" : "success");
       }
     }
-  }, [searchText]);
+  }, []);
 
   useRoomControllerListener(controller, listener);
 
@@ -78,7 +79,7 @@ function SearchBar() {
 
   return (
     <>
-      <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 underline">Search Apple Music</a>
+      <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 hover:underline">Search Apple Music</a>
       <div className="relative mt-6 mb-12 flex gap-2">
         <input 
           placeholder="Enter apple music artist or album URL" 
@@ -111,15 +112,26 @@ function SearchBar() {
 
 function PlayerList() {
   const controller = useController();
+  const [username, setUsername] = useState("");
   const [players, setPlayers] = useState<PlayerState[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState("");
 
   const listener = useCallback((msg: ServerMessage) => {
     if (msg.type === "update") {
       setPlayers(msg.players);
+      setUsername(msg.username);
     }
   }, []);
 
   useRoomControllerListener(controller, listener);
+
+  const handleNameUpdate = () => {
+    if (editedName.trim() && editedName !== username) {
+      controller.updateUsername(editedName.trim());
+    }
+    setIsEditing(false);
+  };
 
   const maxPlayers = COLORS.length;
   const emptySlots = Math.max(0, maxPlayers - players.length);
@@ -143,7 +155,33 @@ function PlayerList() {
                 >
                   {p.username.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-lg text-gray-100 font-medium wrap-break-word">{p.username}</span>
+                <div className="flex items-center gap-2">
+                  {p.username === username && isEditing ? (
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      onBlur={handleNameUpdate}
+                      onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
+                      autoFocus
+                      maxLength={16}
+                      className="text-lg text-gray-100 bg-transparent border-b border-gray-400 focus:outline-none focus:border-cyan-500"
+                    />
+                  ) : (
+                    <span 
+                      className={"text-lg text-gray-100 font-medium" + (p.username === username && " cursor-pointer hover:underline")}
+                      onClick={() => {
+                        if (p.username === username) {
+                          setEditedName(username);
+                          setIsEditing(true);
+                        }
+                      }}
+                    >
+                      {p.username}
+                      {p.username === username && " (You)"}
+                    </span>
+                  )}
+                </div>
               </>
             ) : (
               <>
@@ -220,13 +258,12 @@ function StartGame() {
   const listener = useCallback((msg: ServerMessage) => {
     if (msg.type === "update") {
       setIsHost(msg.isHost);
-      if (msg.error) {
-        setError(msg.error);
-      } else {
-        setError(null);
-      }
     } else if (msg.type === "server_update_playlists") {
       setPlaylists(msg.playlists);
+    } else if (msg.type === "confirmation") {
+      if (msg.source === "start_game") {
+        setError(msg.error ?? null);
+      }
     }
   }, []);
 
@@ -341,9 +378,9 @@ function Lobby() {
 
   return (
     <div className="lg:max-w-3/4 mx-auto">
-      <SearchBar />
       <PlayerList />
       <PlaylistList />
+      <SearchBar />
       <StartGame />
     </div>
   );
