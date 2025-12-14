@@ -1,3 +1,10 @@
+# [2.0.0-dev.33](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.32...2.0.0-dev.33) (2025-12-14)
+
+
+### Bug Fixes
+
+* also retrieve artist artwork using more standardized approach ([5687135](https://github.com/PocketMiner82/SongGuess/commit/5687135214a29f1dafd0d136fc7d42527267b82a))
+
 # [2.0.0-dev.32](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.31...2.0.0-dev.32) (2025-12-12)
 
 
