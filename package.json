@@ -10,7 +10,7 @@
     "clean": "rm -rf public/dist"
   },
   "dependencies": {
-    "@tailwindcss/cli": "^4.1.17",
+    "@tailwindcss/cli": "^4.1.18",
     "chroma-js": "^3.2.0",
     "cookie": "^1.1.1",
     "itunes-store-api": "^2.1.0",
