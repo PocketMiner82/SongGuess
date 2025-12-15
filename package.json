@@ -16,7 +16,7 @@
     "itunes-store-api": "^2.1.0",
     "partysocket": "^1.1.6",
     "react": "^19.2.3",
-    "react-dom": "^19.2.1",
+    "react-dom": "^19.2.3",
     "tailwindcss": "^4.1.18",
     "unique-username-generator": "^1.5.1",
     "zod": "^4.1.13"
