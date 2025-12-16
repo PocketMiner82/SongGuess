@@ -101,7 +101,7 @@ export class RoomController {
    */
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
-    //window.location.href = "/";
+    window.location.href = "/";
   }
 
   /**
@@ -111,7 +111,7 @@ export class RoomController {
    */
   private onError(ev: ErrorEvent) {
     console.error(`Cannot connect to ${this.socket.room}:`, ev);
-    //window.location.href = "/";
+    window.location.href = "/";
   }
 
   /**
