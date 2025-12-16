@@ -1,3 +1,10 @@
+# [2.0.0-dev.40](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.39...2.0.0-dev.40) (2025-12-16)
+
+
+### Bug Fixes
+
+* **PlayerListEntry:** empty string instead of bool ([1f4ec01](https://github.com/PocketMiner82/SongGuess/commit/1f4ec01afe03ed9f09005a0ba04074b7ba665114))
+
 # [2.0.0-dev.39](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.38...2.0.0-dev.39) (2025-12-16)
 
 
