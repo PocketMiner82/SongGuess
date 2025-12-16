@@ -9,6 +9,12 @@ import { ClientMessageSchema, type ClientMessage, type ConfirmationMessage } fro
 import { type Playlist, type Song, COLORS, artistRegex, albumRegex, UnknownPlaylist } from "../schemas/RoomSharedMessageSchemas";
 
 
+/**
+ * The time (in seconds) after which an empty room is cleaned up.
+ */
+const ROOM_CLEANUP_TIMEOUT = 10;
+
+
 export default class Server implements Party.Server {
   /**
    * True, if this room was created by a request to /createRoom
@@ -55,6 +61,11 @@ export default class Server implements Party.Server {
    */
   countdown: CountdownMessage["countdown"] = 0;
 
+  /**
+   * Timeout to cleanup the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
+   */
+  cleanupTimeout: NodeJS.Timeout|null = null;
+
 
   /**
    * Creates a new room server.
@@ -68,6 +79,11 @@ export default class Server implements Party.Server {
   //
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    if (this.cleanupTimeout) {
+      clearTimeout(this.cleanupTimeout);
+      this.cleanupTimeout = null;
+    }
+
     this.log(`${conn.id} connected.`);
 
     // kick player if room is not created yet
@@ -165,6 +181,7 @@ export default class Server implements Party.Server {
         this.playlists = msg.playlists;
         this.songs = [];
         for (let playlist of this.playlists) {
+          playlist.subtitle = `${playlist.songs ? playlist.songs.length : 0} songs`;
           if (!playlist.songs) {
             continue;
           }
@@ -223,7 +240,7 @@ export default class Server implements Party.Server {
       this.hostConnection = null;
       this.delayedCleanup();
 
-      this.log("Last client left, room will close in 5 seconds if no one joins...");
+      this.log(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
     } else {
       // inform all clients about changes, including possible host transfer
       this.broadcastUpdateMessage();
@@ -264,15 +281,17 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Invalidates the room if no players join within 5 seconds.
+   * Invalidates the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
   private delayedCleanup() {
-    setTimeout(() => {
+    this.cleanupTimeout = setTimeout(() => {
       if (this.getOnlineCount() === 0) {
         this.isValidRoom = false;
         this.log("Room closed due to timeout.");
+      } else {
+        this.cleanupTimeout = null;
       }
-    }, 5000);
+    }, ROOM_CLEANUP_TIMEOUT * 1000);
   }
 
   /**
