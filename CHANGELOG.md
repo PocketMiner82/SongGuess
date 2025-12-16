@@ -1,3 +1,10 @@
+# [2.0.0-dev.38](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.37...2.0.0-dev.38) (2025-12-16)
+
+
+### Features
+
+* use common react components between index and room ([2a5ad40](https://github.com/PocketMiner82/SongGuess/commit/2a5ad40fef9b6d224bd83f16eaa10be367439397))
+
 # [2.0.0-dev.37](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.36...2.0.0-dev.37) (2025-12-16)
 
 
