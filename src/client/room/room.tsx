@@ -6,18 +6,6 @@ import { COLORS, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
 import chroma from "chroma-js";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 
-const ITEM_BASE = "p-3 bg-gray-700 rounded-lg";
-const PLAYER_ITEM_CLASS = `flex items-center gap-4 ${ITEM_BASE}`;
-const PLAYLIST_ITEM_CLASS = `flex items-center gap-6 ${ITEM_BASE}`;
-const AVATAR_CLASS = "w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold";
-
-// new shared classes to remove duplication
-const EMPTY_AVATAR_CLASS = "w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center";
-const EMPTY_AVATAR_ICON = "text-gray-500 text-xl";
-const COVER_IMG_CLASS = "w-24 h-24 rounded-xl object-cover";
-const COVER_PLACEHOLDER_CLASS = "w-24 h-24 rounded-xl bg-gray-600 flex items-center justify-center";
-const COVER_ICON_CLASS = "text-gray-500 text-2xl";
-
 const RoomContext = createContext<RoomController | null>(null);
 
 function useController() {
@@ -67,23 +55,23 @@ function SearchBar() {
   const getStatusIcon = () => {
     switch (searchStatus) {
       case "loading":
-        return <span className="material-symbols-outlined animate-spin text-gray-400">progress_activity</span>;
+        return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
       case "success":
         return <span className="material-icons text-green-400">check_circle</span>;
       case "error":
-        return <span className="material-icons text-red-400">error</span>;
+        return <span className="material-icons text-error">error</span>;
       case "idle":
-        return <span className="material-icons text-red-400" style={searchText && !isValidURL ? undefined : {visibility: "hidden"}}>error</span>;
+        return <span className="material-icons text-error" style={searchText && !isValidURL ? undefined : {visibility: "hidden"}}>error</span>;
     }
   };
 
   return (
     <>
-      <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-pink-600 hover:underline">Search Apple Music</a>
+      <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-primary hover:underline">Search Apple Music</a>
       <div className="relative mt-6 mb-12 flex gap-2">
         <input 
           placeholder="Enter apple music artist or album URL" 
-          className="flex-1 outline-0 focus:outline-0 border-b-2 border-b-gray-400 focus:border-b-cyan-600 pb-1 pr-10" 
+          className="flex-1 outline-0 focus:outline-0 border-b-2 border-gray-500 focus:border-secondary pb-1 pr-10" 
           value={searchText} 
           onChange={e => {
             setSearchText(e.target.value);
@@ -101,7 +89,7 @@ function SearchBar() {
         <button
           onClick={() => handleSearch(searchText)}
           disabled={!isValidURL || searchStatus === "loading"}
-          className="px-2 py-1 bg-pink-600 text-white rounded hover:bg-pink-700 disabled:bg-gray-600 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer transition-colors"
+          className="px-2 py-1 bg-primary text-white rounded hover:bg-primary-hover disabled:bg-disabled-bg disabled:text-disabled-text disabled:cursor-not-allowed cursor-pointer"
         >
           Set
         </button>
@@ -139,14 +127,14 @@ function PlayerList() {
 
   return (
     <div className="mb-12">
-      <h3 className="text-2xl font-semibold text-gray-200 mb-3">Players</h3>
+      <h3 className="text-2xl font-semibold text-default mb-3">Players</h3>
       <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
         {slots.map((p, idx) => (
-          <li key={idx} className={PLAYER_ITEM_CLASS}>
+          <li key={idx} className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
             {p ? (
               <>
                 <div
-                  className={AVATAR_CLASS}
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold"
                   style={{ 
                     backgroundColor: p.color ?? "#9ca3af",
                     color: getMaxContrastColor(p.color ?? "#9ca3af")
@@ -165,11 +153,11 @@ function PlayerList() {
                       onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
                       autoFocus
                       maxLength={16}
-                      className="text-lg text-gray-100 bg-transparent border-b border-gray-400 focus:outline-none focus:border-cyan-500"
+                      className="text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none focus:border-secondary"
                     />
                   ) : (
                     <span 
-                      className={"text-lg text-gray-100 font-medium" + (p.username === username && " cursor-pointer hover:underline")}
+                      className={"text-lg font-medium" + (p.username === username && " cursor-pointer hover:underline")}
                       onClick={() => {
                         if (p.username === username) {
                           setEditedName(username);
@@ -185,10 +173,10 @@ function PlayerList() {
               </>
             ) : (
               <>
-                <div className={EMPTY_AVATAR_CLASS}>
-                  <span className={EMPTY_AVATAR_ICON}>+</span>
+                <div className="w-12 h-12 rounded-full bg-disabled-bg flex items-center justify-center">
+                  <span className="text-disabled-text text-xl">+</span>
                 </div>
-                <span className="text-lg text-gray-500">Empty slot</span>
+                <span className="text-lg text-disabled-text">Empty slot</span>
               </>
             )}
           </li>
@@ -219,28 +207,26 @@ function PlaylistList() {
 
   return (
     <div className="mb-12">
-      <h3 className="text-2xl font-semibold text-gray-200 mb-3">Playlists</h3>
+      <h3 className="text-2xl font-semibold text-default mb-3">Playlists</h3>
       <ul className="space-y-4 max-h-[33vh] overflow-auto">
         {playlists.length === 0 ? (
-          <li key="empty" className={PLAYLIST_ITEM_CLASS}>
-            <div className={COVER_PLACEHOLDER_CLASS}>
-              <span className={COVER_ICON_CLASS}>?</span>
+          <li key="empty" className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
+            <div className="w-24 h-24 rounded-xl bg-disabled-bg flex items-center justify-center">
+              <span className="text-disabled-text text-2xl">?</span>
             </div>
-            <span className="text-lg text-gray-500">No playlist selected</span>
+            <span className="text-lg text-disabled-text">No playlist selected</span>
           </li>
         ) : (
           playlists.map((pl, idx) => (
-            <li key={idx} className={PLAYLIST_ITEM_CLASS}>
+            <li key={idx} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
               {pl.cover ? (
-                <img src={pl.cover} alt="Album Cover" className={COVER_IMG_CLASS} />
+                <img src={pl.cover} alt="Album Cover" className="w-24 h-24 rounded-xl object-cover" />
               ) : (
-                <div className={COVER_PLACEHOLDER_CLASS}>
-                  <div className={COVER_PLACEHOLDER_CLASS}>
-                    <span className={COVER_ICON_CLASS}>?</span>
-                  </div>
+                <div className="w-24 h-24 rounded-xl bg-disabled-bg flex items-center justify-center">
+                  <span className="text-disabled-text text-2xl">?</span>
                 </div>
               )}
-              <span className="text-lg text-gray-100 font-medium wrap-break-word">{pl.name}</span>
+              <span className="text-lg font-medium wrap-break-word">{pl.name}</span>
             </li>
           ))
         )}
@@ -274,7 +260,7 @@ function StartGame() {
   return (
     <div className="mb-12 mx-auto text-center">
       <div
-        className="flex items-center justify-center mb-2 text-sm text-red-800 rounded-lg dark:text-red-400"
+        className="flex items-center justify-center mb-2 text-sm text-error rounded-lg"
         style={error ? undefined : {visibility: "hidden"}}
         role="alert"
       >
@@ -287,7 +273,7 @@ function StartGame() {
       <button
         disabled={playlists.length === 0}
         onClick={() => controller.startGame()}
-        className="text-white bg-pink-600 rounded hover:bg-pink-700 disabled:bg-gray-600 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer font-bold text-lg py-2 px-4 transition-colors"
+        className="text-white bg-primary rounded hover:bg-primary-hover disabled:bg-disabled-bg disabled:text-disabled-text disabled:cursor-not-allowed cursor-pointer font-bold text-lg py-2 px-4"
       >
         Start Game
       </button>
@@ -348,7 +334,7 @@ function Audio() {
     <>
       <audio ref={ref} preload="auto" />
       <div className="fixed bottom-4 left-4 flex items-center gap-2">
-        <span className="material-icons text-gray-100">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
+        <span className="material-icons text-default">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
         <input
           type="range"
           min="0"
@@ -389,7 +375,7 @@ function Lobby() {
 function Loading() {
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="text-2xl text-gray-200">Loading...</div>
+      <div className="text-2xl">Loading...</div>
     </div>
   );
 }
