@@ -171,7 +171,7 @@ const PlayerListEntry = memo(function PlayerListEntry({
                 }
               }}
             >
-              {player.username + (player.username === username && " (You)")}
+              {player.username + (player.username === username ? " (You)" : "")}
             </span>
           )}
         </div>
