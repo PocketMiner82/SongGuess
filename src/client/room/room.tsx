@@ -127,7 +127,7 @@ function PlayerList() {
 
   return (
     <div className="mb-12">
-      <h3 className="text-2xl font-semibold text-default mb-3">Players</h3>
+      <h3 className="text-xl font-bold text-default mb-3">Players</h3>
       <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
         {slots.map((p, idx) => (
           <li key={idx} className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
@@ -193,6 +193,24 @@ function getMaxContrastColor(colorName: string): string {
   return withBlack > withWhite ? "#000" : "#fff";
 }
 
+function PlaylistItem({index, title, subtitle, coverURL}: {index: string, title: string, subtitle?: string, coverURL?: string|null}) {
+  return (
+    <li key={index} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
+      {coverURL ? (
+        <img src={coverURL} alt="Album Cover" className="w-25 h-25 lg:w-30 lg:h-30 2xl:w-40 2xl:h-40 rounded-xl object-cover" />
+      ) : (
+        <div className="w-25 h-25 lg:w-30 lg:h-30 2xl:w-40 2xl:h-40 rounded-xl bg-disabled-bg flex items-center justify-center">
+          <span className="text-disabled-text text-4xl">?</span>
+        </div>
+      )}
+      <div>
+        <span className="text-xl font-medium wrap-break-word">{title}</span>
+        {subtitle && <span className="text-sm text-disabled-text block">{subtitle}</span>}
+      </div>
+    </li>
+  );
+}
+
 function PlaylistList() {
   const controller = useController();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -207,27 +225,13 @@ function PlaylistList() {
 
   return (
     <div className="mb-12">
-      <h3 className="text-2xl font-semibold text-default mb-3">Playlists</h3>
+      <h3 className="text-xl font-bold text-default mb-3">Playlists</h3>
       <ul className="space-y-4 max-h-[33vh] overflow-auto">
         {playlists.length === 0 ? (
-          <li key="empty" className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
-            <div className="w-24 h-24 rounded-xl bg-disabled-bg flex items-center justify-center">
-              <span className="text-disabled-text text-2xl">?</span>
-            </div>
-            <span className="text-lg text-disabled-text">No playlist selected</span>
-          </li>
+          <PlaylistItem index="no-playlist" title="No playlists added" />
         ) : (
           playlists.map((pl, idx) => (
-            <li key={idx} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
-              {pl.cover ? (
-                <img src={pl.cover} alt="Album Cover" className="w-24 h-24 rounded-xl object-cover" />
-              ) : (
-                <div className="w-24 h-24 rounded-xl bg-disabled-bg flex items-center justify-center">
-                  <span className="text-disabled-text text-2xl">?</span>
-                </div>
-              )}
-              <span className="text-lg font-medium wrap-break-word">{pl.name}</span>
-            </li>
+            <PlaylistItem index={idx.toString()} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
           ))
         )}
       </ul>
@@ -342,7 +346,7 @@ function Audio() {
           step="0.01"
           value={volume}
           onChange={handleVolumeChange}
-          className="w-24"
+          className="w-25"
         />
       </div>
     </>
@@ -391,7 +395,7 @@ function Countdown() {
   useRoomControllerListener(useController(), listener);
 
   return (
-    <div className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black/75 ${countdown > 0 ? 'block' : 'hidden'}`}>
+    <div className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black/85 ${countdown > 0 ? 'block' : 'hidden'}`}>
       <div className="text-white text-9xl font-bold">{countdown}</div>
     </div>
   );
@@ -410,9 +414,9 @@ function App() {
 
   return (
     <RoomContext.Provider value={controller}>
-      <Audio />
       <Lobby />
       <Countdown />
+      <Audio />
     </RoomContext.Provider>
   );
 }

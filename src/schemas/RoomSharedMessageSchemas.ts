@@ -28,6 +28,11 @@ export const PlaylistSchema = z.object({
   name: z.string(),
 
   /**
+   * An optional subtitle with additional information about the playlist
+   */
+  subtitle: z.optional(z.string()),
+
+  /**
    * Cover URL of the playlist.
    * Currently only cover arts by Apple Music are allowed.
    */
