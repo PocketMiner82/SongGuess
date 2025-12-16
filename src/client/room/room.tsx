@@ -5,6 +5,8 @@ import type { PlayerState, GameState } from "../../schemas/RoomServerMessageSche
 import { COLORS, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
 import chroma from "chroma-js";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
+import { Button } from "../components/Button";
+import { ErrorLabel } from "../components/ErrorLabel";
 
 const RoomContext = createContext<RoomController | null>(null);
 
@@ -61,7 +63,7 @@ function SearchBar() {
       case "error":
         return <span className="material-icons text-error">error</span>;
       case "idle":
-        return <span className="material-icons text-error" style={searchText && !isValidURL ? undefined : {visibility: "hidden"}}>error</span>;
+        return <span className={`material-icons text-error ${searchText && !isValidURL ? "visible" : "invisible"}`}>error</span>;
     }
   };
 
@@ -86,13 +88,13 @@ function SearchBar() {
         <div className="bottom-1 flex items-center">
           {getStatusIcon()}
         </div>
-        <button
+        <Button
           onClick={() => handleSearch(searchText)}
           disabled={!isValidURL || searchStatus === "loading"}
-          className="px-2 py-1 bg-primary text-white rounded hover:bg-primary-hover disabled:bg-disabled-bg disabled:text-disabled-text disabled:cursor-not-allowed cursor-pointer"
+          className=""
         >
           Set
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -127,7 +129,7 @@ function PlayerList() {
 
   return (
     <div className="mb-12">
-      <h3 className="text-xl font-bold text-default mb-3">Players</h3>
+      <h3 className="text-xl font-bold mb-3">Players</h3>
       <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
         {slots.map((p, idx) => (
           <li key={idx} className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
@@ -225,7 +227,7 @@ function PlaylistList() {
 
   return (
     <div className="mb-12">
-      <h3 className="text-xl font-bold text-default mb-3">Playlists</h3>
+      <h3 className="text-xl font-bold mb-3">Playlists</h3>
       <ul className="space-y-4 max-h-[33vh] overflow-auto">
         {playlists.length === 0 ? (
           <PlaylistItem index="no-playlist" title="No playlists added" />
@@ -263,24 +265,14 @@ function StartGame() {
 
   return (
     <div className="mb-12 mx-auto text-center">
-      <div
-        className="flex items-center justify-center mb-2 text-sm text-error rounded-lg"
-        style={error ? undefined : {visibility: "hidden"}}
-        role="alert"
-      >
-        <span className="material-icons mr-1">error</span>
-        <div>
-          <span className="font-medium">{error}</span>
-        </div>
-      </div>
+      <ErrorLabel error={error} />
 
-      <button
+      <Button
         disabled={playlists.length === 0}
         onClick={() => controller.startGame()}
-        className="text-white bg-primary rounded hover:bg-primary-hover disabled:bg-disabled-bg disabled:text-disabled-text disabled:cursor-not-allowed cursor-pointer font-bold text-lg py-2 px-4"
       >
         Start Game
-      </button>
+      </Button>
     </div>
   );
 }
@@ -338,7 +330,7 @@ function Audio() {
     <>
       <audio ref={ref} preload="auto" />
       <div className="fixed bottom-4 left-4 flex items-center gap-2">
-        <span className="material-icons text-default">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
+        <span className="material-icons">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
         <input
           type="range"
           min="0"
