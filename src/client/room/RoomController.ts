@@ -1,11 +1,12 @@
 import PartySocket from "partysocket";
 import { lookup, type Entities, type Media, type Options, type ResultMusicTrack, type Results } from "itunes-store-api";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
 import type { ChangeUsernameMessage, HostUpdatePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
 import { albumRegex, artistRegex, UnknownPlaylist, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
 import { type ServerMessage, ServerMessageSchema } from "../../schemas/RoomMessageSchemas";
+import type { PlayerState } from "../../schemas/RoomServerMessageSchemas";
 
 
 declare const PARTYKIT_HOST: string;
@@ -281,4 +282,49 @@ export function useRoomControllerListener(controller: RoomController, cb: (msg: 
   useEffect(() => {
     return controller.registerOnStateChangeListener(cb);
   }, [controller, cb]);
+}
+
+/**
+ * Custom React hook to manage and provide the list of players and the username
+ * of the current user in a room.
+ * 
+ * @param controller The RoomController instance to listen to.
+ * @returns An object containing the list of players and the current user's username.
+ */
+export function usePlayers(controller: RoomController) {
+  const [players, setPlayers] = useState<PlayerState[]>([]);
+  const [username, setUsername] = useState("");
+
+  const listener = useCallback((msg: ServerMessage) => {
+    if (msg.type === "update") {
+      setPlayers(msg.players);
+      setUsername(msg.username);
+    }
+  }, []);
+
+  useRoomControllerListener(controller, listener);
+
+  return { players, username };
+}
+
+export function usePlaylists(controller: RoomController) {
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  
+  useRoomControllerListener(controller, useCallback((msg) => {
+    if (msg.type === "server_update_playlists") {
+      setPlaylists(msg.playlists);
+    }
+  }, []));
+
+  return playlists;
+}
+
+export function useIsHost(controller: RoomController) {
+  const [isHost, setIsHost] = useState(false);
+  
+  useRoomControllerListener(controller, useCallback((msg) => {
+    if (msg.type === "update") setIsHost(msg.isHost);
+  }, []));
+
+  return isHost;
 }

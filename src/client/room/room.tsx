@@ -1,8 +1,8 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, createContext, useContext, useRef } from "react";
-import { RoomController, useRoomController, useRoomControllerListener } from "./RoomController";
+import { useState, useCallback, createContext, useContext, useRef, useMemo, memo } from "react";
+import { RoomController, useIsHost, usePlayers, usePlaylists, useRoomController, useRoomControllerListener } from "./RoomController";
 import type { PlayerState, GameState } from "../../schemas/RoomServerMessageSchemas";
-import { COLORS, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
+import { COLORS } from "../../schemas/RoomSharedMessageSchemas";
 import chroma from "chroma-js";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Button } from "../components/Button";
@@ -18,7 +18,7 @@ function useController() {
 
 function SearchBar() {
   const controller = useController();
-  const [isHost, setIsHost] = useState(false);
+  const isHost = useIsHost(controller);
   const [searchText, setSearchText] = useState("");
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -26,12 +26,8 @@ function SearchBar() {
   const albumRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/;
 
   const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "update") {
-      setIsHost(msg.isHost);
-    } else if (msg.type === "confirmation") {
-      if (msg.source === "host_update_playlists") {
-        setSearchStatus(msg.error ? "error" : "success");
-      }
+    if (msg.type === "confirmation" && msg.source === "host_update_playlists") {
+      setSearchStatus(msg.error ? "error" : "success");
     }
   }, []);
 
@@ -55,7 +51,9 @@ function SearchBar() {
   };
 
   const getStatusIcon = () => {
-    switch (searchStatus) {
+    let status = searchStatus === "idle" && searchText && !isValidURL ? "error" : searchStatus;
+
+    switch (status) {
       case "loading":
         return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
       case "success":
@@ -63,7 +61,7 @@ function SearchBar() {
       case "error":
         return <span className="material-icons text-error">error</span>;
       case "idle":
-        return <span className={`material-icons text-error ${searchText && !isValidURL ? "visible" : "invisible"}`}>error</span>;
+        return null;
     }
   };
 
@@ -100,21 +98,45 @@ function SearchBar() {
   );
 }
 
-function PlayerList() {
-  const controller = useController();
-  const [username, setUsername] = useState("");
-  const [players, setPlayers] = useState<PlayerState[]>([]);
+function PlayerAvatar({size, playerState} : {size: number, playerState: PlayerState|null}) {
+  return (
+    <>
+      {playerState ? (
+        <div
+          className="rounded-full flex items-center justify-center text-xl font-bold"
+          style={{ 
+            backgroundColor: playerState.color,
+            color: getMaxContrastColor(playerState.color),
+            width: size,
+            height: size
+          }}
+        >
+          {playerState.username.charAt(0).toUpperCase()}
+        </div>
+      ) : (
+        <div className="rounded-full bg-disabled-bg flex items-center justify-center"
+          style={{ 
+            width: size,
+            height: size
+          }}
+        >
+          <span className="text-disabled-text text-xl">+</span>
+        </div>
+      )}
+    </>
+  );
+}
+
+const PlayerListEntry = memo(function PlayerListEntry({
+  player,
+  username
+}: {
+  player: PlayerState|null;
+  username: string;
+}) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState("");
-
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "update") {
-      setPlayers(msg.players);
-      setUsername(msg.username);
-    }
-  }, []);
-
-  useRoomControllerListener(controller, listener);
+  const [editedName, setEditedName] = useState(username);
+  const controller = useController();
 
   const handleNameUpdate = () => {
     if (editedName.trim() && editedName !== username) {
@@ -123,65 +145,62 @@ function PlayerList() {
     setIsEditing(false);
   };
 
-  const maxPlayers = COLORS.length;
-  const emptySlots = Math.max(0, maxPlayers - players.length);
-  const slots = [...players, ...Array(emptySlots).fill(null)];
+  return (
+    <li className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
+      <PlayerAvatar size={48} playerState={player} />
+      {player ? (
+        <div className="flex items-center gap-2">
+          {isEditing ? (
+            <input
+              type="text"
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              onBlur={handleNameUpdate}
+              onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
+              autoFocus
+              maxLength={16}
+              className="text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none focus:border-secondary"
+            />
+          ) : (
+            <span 
+              className={`text-lg font-medium ${player.username === username ? "cursor-pointer hover:underline" : ""}`}
+              onClick={() => {
+                if (player.username === username) {
+                  setEditedName(username);
+                  setIsEditing(true);
+                }
+              }}
+            >
+              {player.username + (player.username === username && " (You)")}
+            </span>
+          )}
+        </div>
+      ) : (
+        <span className="text-lg text-disabled-text">Empty slot</span>
+      )}
+    </li>
+  );
+});
+
+function PlayerList() {
+  const controller = useController();
+  const { players, username } = usePlayers(controller);
+  
+  const slots = useMemo(() => {
+    const emptySlots = Math.max(0, COLORS.length - players.length);
+    return [...players, ...Array(emptySlots).fill(null)];
+  }, [players]);
 
   return (
     <div className="mb-12">
       <h3 className="text-xl font-bold mb-3">Players</h3>
       <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
-        {slots.map((p, idx) => (
-          <li key={idx} className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
-            {p ? (
-              <>
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold"
-                  style={{ 
-                    backgroundColor: p.color ?? "#9ca3af",
-                    color: getMaxContrastColor(p.color ?? "#9ca3af")
-                  }}
-                  aria-hidden
-                >
-                  {p.username.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex items-center gap-2">
-                  {p.username === username && isEditing ? (
-                    <input
-                      type="text"
-                      value={editedName}
-                      onChange={(e) => setEditedName(e.target.value)}
-                      onBlur={handleNameUpdate}
-                      onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
-                      autoFocus
-                      maxLength={16}
-                      className="text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none focus:border-secondary"
-                    />
-                  ) : (
-                    <span 
-                      className={"text-lg font-medium" + (p.username === username && " cursor-pointer hover:underline")}
-                      onClick={() => {
-                        if (p.username === username) {
-                          setEditedName(username);
-                          setIsEditing(true);
-                        }
-                      }}
-                    >
-                      {p.username}
-                      {p.username === username && " (You)"}
-                    </span>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-12 h-12 rounded-full bg-disabled-bg flex items-center justify-center">
-                  <span className="text-disabled-text text-xl">+</span>
-                </div>
-                <span className="text-lg text-disabled-text">Empty slot</span>
-              </>
-            )}
-          </li>
+        {slots.map((player, idx) => (
+          <PlayerListEntry
+            key={player?.username || `empty-${idx}`}
+            player={player}
+            username={username}
+          />
         ))}
       </ul>
     </div>
@@ -195,7 +214,7 @@ function getMaxContrastColor(colorName: string): string {
   return withBlack > withWhite ? "#000" : "#fff";
 }
 
-function PlaylistItem({index, title, subtitle, coverURL}: {index: string, title: string, subtitle?: string, coverURL?: string|null}) {
+function PlaylistListEntry({index, title, subtitle, coverURL}: {index: string, title: string, subtitle?: string, coverURL?: string|null}) {
   return (
     <li key={index} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
       {coverURL ? (
@@ -215,25 +234,17 @@ function PlaylistItem({index, title, subtitle, coverURL}: {index: string, title:
 
 function PlaylistList() {
   const controller = useController();
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
-
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "server_update_playlists") {
-      setPlaylists(msg.playlists);
-    }
-  }, []);
-
-  useRoomControllerListener(controller, listener);
+  const playlists = usePlaylists(controller);
 
   return (
     <div className="mb-12">
       <h3 className="text-xl font-bold mb-3">Playlists</h3>
       <ul className="space-y-4 max-h-[33vh] overflow-auto">
         {playlists.length === 0 ? (
-          <PlaylistItem index="no-playlist" title="No playlists added" />
+          <PlaylistListEntry index="no-playlist" title="No playlists added" />
         ) : (
           playlists.map((pl, idx) => (
-            <PlaylistItem index={idx.toString()} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
+            <PlaylistListEntry index={idx.toString()} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
           ))
         )}
       </ul>
@@ -243,19 +254,13 @@ function PlaylistList() {
 
 function StartGame() {
   const controller = useController();
-  const [isHost, setIsHost] = useState(false);
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const isHost = useIsHost(controller);
+  const playlists = usePlaylists(controller); // Reuse hook
   const [error, setError] = useState<string | null>(null);
 
   const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "update") {
-      setIsHost(msg.isHost);
-    } else if (msg.type === "server_update_playlists") {
-      setPlaylists(msg.playlists);
-    } else if (msg.type === "confirmation") {
-      if (msg.source === "start_game") {
-        setError(msg.error ?? null);
-      }
+    if (msg.type === "confirmation" && msg.source === "start_game") {
+      setError(msg.error ?? null);
     }
   }, []);
 
@@ -378,6 +383,7 @@ function Loading() {
 
 function Countdown() {
   const [countdown, setCountdown] = useState(0);
+  const visible = countdown > 0;
 
   const listener = useCallback((msg: ServerMessage|null) => {
     if (!msg || msg.type !== "countdown") return;
@@ -386,11 +392,11 @@ function Countdown() {
 
   useRoomControllerListener(useController(), listener);
 
-  return (
-    <div className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black/85 ${countdown > 0 ? 'block' : 'hidden'}`}>
+  return visible ? (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/85">
       <div className="text-white text-9xl font-bold">{countdown}</div>
     </div>
-  );
+  ) : null;
 }
 
 function App() {
