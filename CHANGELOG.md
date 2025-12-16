@@ -1,3 +1,10 @@
+# [2.0.0-dev.39](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.38...2.0.0-dev.39) (2025-12-16)
+
+
+### Features
+
+* simlyfy components ([110cfa3](https://github.com/PocketMiner82/SongGuess/commit/110cfa3118720c50c04330167a2e757b68df34c3))
+
 # [2.0.0-dev.38](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.37...2.0.0-dev.38) (2025-12-16)
 
 
