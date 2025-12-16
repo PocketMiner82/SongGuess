@@ -1,3 +1,15 @@
+# [2.0.0-dev.37](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.36...2.0.0-dev.37) (2025-12-16)
+
+
+### Bug Fixes
+
+* **server:** room cleanup ([c2ae649](https://github.com/PocketMiner82/SongGuess/commit/c2ae649d5301c8de48bf5bb54a98a591168c7c8d))
+
+
+### Features
+
+* **css:** use theme for more uniform styling ([fe4a039](https://github.com/PocketMiner82/SongGuess/commit/fe4a039a1e00bf12d58dfb06f65f7378f3c95289))
+
 # [2.0.0-dev.36](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.35...2.0.0-dev.36) (2025-12-14)
 
 
