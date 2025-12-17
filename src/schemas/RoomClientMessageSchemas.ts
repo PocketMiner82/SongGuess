@@ -9,16 +9,28 @@ export const StartGameMessageSchema = z.object({
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
 
 
-export const HostUpdatePlaylistMessageSchema = z.object({
-  type: z.literal("host_update_playlists"),
+export const HostAddPlaylistMessageSchema = z.object({
+  type: z.literal("host_add_playlist"),
 
   /**
-   * Currently selected playlist(s)
+   * The new playlist to add.
    */
-  playlists: z.array(PlaylistSchema)
+  playlist: PlaylistSchema
 });
 
-export type HostUpdatePlaylistMessage = z.infer<typeof HostUpdatePlaylistMessageSchema>;
+export type HostAddPlaylistMessage = z.infer<typeof HostAddPlaylistMessageSchema>;
+
+
+export const HostRemovePlaylistMessageSchema = z.object({
+  type: z.literal("host_remove_playlist"),
+
+  /**
+   * The playlist index to remove.
+   */
+  index: z.number().int().nonnegative()
+});
+
+export type HostRemovePlaylistMessage = z.infer<typeof HostRemovePlaylistMessageSchema>;
 
 
 export const ChangeUsernameMessageSchema = z.object({

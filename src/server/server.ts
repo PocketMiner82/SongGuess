@@ -3,7 +3,7 @@ import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-gene
 import z from "zod";
 import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
+import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistsMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import { ClientMessageSchema, type ClientMessage, type ConfirmationMessage } from "../schemas/RoomMessageSchemas";
 import { type Playlist, type Song, COLORS, artistRegex, albumRegex, UnknownPlaylist } from "../schemas/RoomSharedMessageSchemas";
@@ -167,18 +167,33 @@ export default class Server implements Party.Server {
         this.sendConfirmationOrError(conn, "change_username");
         this.broadcastUpdateMessage();
         break;
-      case "host_update_playlists":
+      case "host_add_playlist":
+      case "host_remove_playlist":
         if (this.hostConnection !== conn) {
           conn.send(this.getPlaylistUpdateMessage());
-          this.sendConfirmationOrError(conn, "host_update_playlists", "Only the host can change the playlist.");
+          this.sendConfirmationOrError(conn, msg.type, "Only the host can modify playlists.");
           return;
         } else if (this.state !== "lobby") {
           conn.send(this.getPlaylistUpdateMessage());
-          this.sendConfirmationOrError(conn, "host_update_playlists", "Cannot change playlist while game is running.");
+          this.sendConfirmationOrError(conn, msg.type, "Cannot modify playlists while game is running.");
           return;
         }
 
-        this.playlists = msg.playlists;
+        if (msg.type === "host_add_playlist"
+          && !this.playlists.some(p => p.name === msg.playlist.name && p.cover === msg.playlist.cover)
+          && msg.playlist.songs) {
+          this.playlists.push(msg.playlist);
+        } else if (msg.type === "host_remove_playlist") {
+          // remove at index
+          if (msg.index >= this.playlists.length) {
+            conn.send(this.getPlaylistUpdateMessage());
+            this.sendConfirmationOrError(conn, msg.type, `Index out of bounds: ${msg.index}`);
+            return;
+          }
+          this.playlists.splice(msg.index, 1);
+        }
+
+        // always update songs
         this.songs = [];
         for (let playlist of this.playlists) {
           playlist.subtitle = `${playlist.songs ? playlist.songs.length : 0} songs`;
@@ -190,7 +205,7 @@ export default class Server implements Party.Server {
 
         // send the update to all players + confirmation to the host
         this.room.broadcast(this.getPlaylistUpdateMessage());
-        this.sendConfirmationOrError(conn, "host_update_playlists");
+        this.sendConfirmationOrError(conn, msg.type);
         break;
       case "start_game":
         if (this.hostConnection !== conn) {
@@ -444,18 +459,18 @@ export default class Server implements Party.Server {
    * Constructs a playlist update message with the current playlist array.
    * 
    * @param error if this update was the result of an error, this specifies the reason
-   * @returns a JSON string of the constructed {@link ServerUpdatePlaylistMessage}
+   * @returns a JSON string of the constructed {@link ServerUpdatePlaylistsMessage}
    */
   private getPlaylistUpdateMessage(): string {
-    let playlists = this.playlists;
+    let playlists = structuredClone(this.playlists);
     for (let p of playlists) {
       // do not send songs in playlist updates
       delete p.songs;
     }
 
-    let update: ServerUpdatePlaylistMessage = {
+    let update: ServerUpdatePlaylistsMessage = {
       type: "server_update_playlists",
-      playlists: this.playlists
+      playlists: playlists
     };
 
     return JSON.stringify(update);

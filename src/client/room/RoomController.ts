@@ -3,7 +3,7 @@ import { lookup, type Entities, type Media, type Options, type ResultMusicTrack,
 import { useEffect, useState, useRef, useCallback } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
-import type { ChangeUsernameMessage, HostUpdatePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
+import type { ChangeUsernameMessage, HostAddPlaylistMessage, HostRemovePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
 import { albumRegex, artistRegex, UnknownPlaylist, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
 import { type ServerMessage, ServerMessageSchema } from "../../schemas/RoomMessageSchemas";
 import type { PlayerState } from "../../schemas/RoomServerMessageSchemas";
@@ -167,13 +167,26 @@ export class RoomController {
   }
 
   /**
-   * Performs a search for songs based on the provided Apple Music URL.
+   * Requests the server to remove a playlist from the list.
+   * @param index the index of the playlist to remove.
+   */
+  public removePlaylist(index: number) {
+    let req: HostRemovePlaylistMessage = {
+      type: "host_remove_playlist",
+      index: index
+    };
+
+    this.socket.send(JSON.stringify(req));
+  }
+
+  /**
+   * Attempts to add a playlist from the given Apple Music URL.
    * If the URL is valid and songs are found, it sends an update to the server.
    * 
-   * @param url The Apple Music URL to search for.
-   * @returns A Promise resolving to true if the search was successful and songs were found, false otherwise.
+   * @param url The Apple Music URL of the artist or album.
+   * @returns A Promise resolving to true if the playlist was added, false otherwise.
    */
-  public async performSearch(url: string): Promise<boolean> {
+  public async tryAddPlaylist(url: string): Promise<boolean> {
     if (!artistRegex.test(url) && !albumRegex.test(url)) {
       return false;
     }
@@ -194,9 +207,9 @@ export class RoomController {
     const playlist: Playlist = await this.getPlaylistInfo(url);
     playlist.songs = songs;
 
-    const req: HostUpdatePlaylistMessage = {
-      type: "host_update_playlists",
-      playlists: [playlist]
+    const req: HostAddPlaylistMessage = {
+      type: "host_add_playlist",
+      playlist: playlist
     };
     this.socket.send(JSON.stringify(req));
     

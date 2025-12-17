@@ -16,17 +16,17 @@ function useController() {
   return controller;
 }
 
-function SearchBar() {
+function AddPlaylistInput() {
   const controller = useController();
   const isHost = useIsHost(controller);
-  const [searchText, setSearchText] = useState("");
+  const [playlistURL, setPlaylistURL] = useState("");
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/;
   const albumRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/;
 
   const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "confirmation" && msg.source === "host_update_playlists") {
+    if (msg.type === "confirmation" && msg.source === "host_add_playlist") {
       setSearchStatus(msg.error ? "error" : "success");
     }
   }, []);
@@ -35,12 +35,12 @@ function SearchBar() {
 
   if (!isHost) return null;
 
-  const isValidURL = artistRegex.test(searchText) || albumRegex.test(searchText);
+  const isValidURL = artistRegex.test(playlistURL) || albumRegex.test(playlistURL);
 
-  const handleSearch = (text: string) => {
+  const handleAdd = (text: string) => {
     if (isValidURL) {
       setSearchStatus("loading");
-      controller.performSearch(text).then(success => {
+      controller.tryAddPlaylist(text).then(success => {
         if (!success) {
           setSearchStatus("error");
         }
@@ -51,7 +51,7 @@ function SearchBar() {
   };
 
   const getStatusIcon = () => {
-    let status = searchStatus === "idle" && searchText && !isValidURL ? "error" : searchStatus;
+    let status = searchStatus === "idle" && playlistURL && !isValidURL ? "error" : searchStatus;
 
     switch (status) {
       case "loading":
@@ -72,14 +72,14 @@ function SearchBar() {
         <input 
           placeholder="Enter apple music artist or album URL" 
           className="flex-1 outline-0 focus:outline-0 border-b-2 border-gray-500 focus:border-secondary pb-1 pr-10" 
-          value={searchText} 
+          value={playlistURL} 
           onChange={e => {
-            setSearchText(e.target.value);
+            setPlaylistURL(e.target.value);
             setSearchStatus("idle");
           }} 
           onKeyDown={e => {
             if (e.key === "Enter" && isValidURL && searchStatus !== "loading") {
-              handleSearch(searchText);
+              handleAdd(playlistURL);
             }
           }}
         />
@@ -87,11 +87,11 @@ function SearchBar() {
           {getStatusIcon()}
         </div>
         <Button
-          onClick={() => handleSearch(searchText)}
+          onClick={() => handleAdd(playlistURL)}
           disabled={!isValidURL || searchStatus === "loading"}
           className=""
         >
-          Set
+          Add
         </Button>
       </div>
     </>
@@ -214,7 +214,9 @@ function getMaxContrastColor(colorName: string): string {
   return withBlack > withWhite ? "#000" : "#fff";
 }
 
-function PlaylistListEntry({index, title, subtitle, coverURL}: {index: string, title: string, subtitle?: string, coverURL?: string|null}) {
+function PlaylistListEntry({index, title, subtitle, coverURL}: {index: number, title: string, subtitle?: string, coverURL?: string|null}) {
+  const controller = useController();
+
   return (
     <li key={index} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
       {coverURL ? (
@@ -224,10 +226,18 @@ function PlaylistListEntry({index, title, subtitle, coverURL}: {index: string, t
           <span className="text-disabled-text text-4xl">?</span>
         </div>
       )}
-      <div>
-        <span className="text-xl font-medium wrap-break-word">{title}</span>
-        {subtitle && <span className="text-sm text-disabled-text block">{subtitle}</span>}
+      <div className="w-full">
+        <div className="text-xl font-medium wrap-break-word">{title}</div>
+        {subtitle && <div className="text-sm text-disabled-text block">{subtitle}</div>}
       </div>
+      {index >= 0 ?
+        <Button
+          onClick={() => controller.removePlaylist(index)}
+          className="items-center flex justify-center"
+        >
+          <span className="material-symbols-outlined">delete</span>
+        </Button>
+      : null}
     </li>
   );
 }
@@ -241,10 +251,10 @@ function PlaylistList() {
       <h3 className="text-xl font-bold mb-3">Playlists</h3>
       <ul className="space-y-4 max-h-[33vh] overflow-auto">
         {playlists.length === 0 ? (
-          <PlaylistListEntry index="no-playlist" title="No playlists added" />
+          <PlaylistListEntry index={-1} title="No playlists added" />
         ) : (
           playlists.map((pl, idx) => (
-            <PlaylistListEntry index={idx.toString()} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
+            <PlaylistListEntry index={idx} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
           ))
         )}
       </ul>
@@ -367,7 +377,7 @@ function Lobby() {
     <div className="lg:max-w-3/4 mx-auto">
       <PlayerList />
       <PlaylistList />
-      <SearchBar />
+      <AddPlaylistInput />
       <StartGame />
     </div>
   );
