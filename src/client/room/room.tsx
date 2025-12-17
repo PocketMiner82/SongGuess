@@ -216,6 +216,7 @@ function getMaxContrastColor(colorName: string): string {
 
 function PlaylistListEntry({index, title, subtitle, coverURL}: {index: number, title: string, subtitle?: string, coverURL?: string|null}) {
   const controller = useController();
+  const isHost = useIsHost(controller);
 
   return (
     <li key={index} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
@@ -230,7 +231,7 @@ function PlaylistListEntry({index, title, subtitle, coverURL}: {index: number, t
         <div className="text-xl font-medium wrap-break-word">{title}</div>
         {subtitle && <div className="text-sm text-disabled-text block">{subtitle}</div>}
       </div>
-      {index >= 0 ?
+      {isHost && index >= 0 ?
         <Button
           onClick={() => controller.removePlaylist(index)}
           className="items-center flex justify-center"
