@@ -1,3 +1,10 @@
+# [2.0.0-dev.42](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.41...2.0.0-dev.42) (2025-12-17)
+
+
+### Bug Fixes
+
+* **PlaylistListEntry:** only show delete button for host ([67e08bd](https://github.com/PocketMiner82/SongGuess/commit/67e08bdd7d4a9d097e5544dd9413d063a5c82198))
+
 # [2.0.0-dev.41](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.40...2.0.0-dev.41) (2025-12-17)
 
 
