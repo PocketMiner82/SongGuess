@@ -1,3 +1,10 @@
+# [2.0.0-dev.41](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.40...2.0.0-dev.41) (2025-12-17)
+
+
+### Features
+
+* allow adding multiple playlists ([f4d6b72](https://github.com/PocketMiner82/SongGuess/commit/f4d6b72b2dbdb2ebb89f3042afccd0db438f36a0))
+
 # [2.0.0-dev.40](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.39...2.0.0-dev.40) (2025-12-16)
 
 
