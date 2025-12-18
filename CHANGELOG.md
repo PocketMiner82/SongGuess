@@ -1,3 +1,10 @@
+# [2.0.0-dev.44](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.43...2.0.0-dev.44) (2025-12-18)
+
+
+### Features
+
+* **server:** start implementation of game loop ([097f65e](https://github.com/PocketMiner82/SongGuess/commit/097f65ebd7546a35051a5b116bec0a5f40c0243b))
+
 # [2.0.0-dev.43](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.42...2.0.0-dev.43) (2025-12-18)
 
 
