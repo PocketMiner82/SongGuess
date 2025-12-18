@@ -1,3 +1,10 @@
+# [2.0.0-dev.43](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.42...2.0.0-dev.43) (2025-12-18)
+
+
+### Features
+
+* cleanup code; move some components to own files ([b048a0f](https://github.com/PocketMiner82/SongGuess/commit/b048a0f320709ac5444b74a402149c14d8856370))
+
 # [2.0.0-dev.42](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.41...2.0.0-dev.42) (2025-12-17)
 
 
