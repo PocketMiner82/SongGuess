@@ -1,6 +1,6 @@
 import PartySocket from "partysocket";
 import { lookup, type Entities, type Media, type Options, type ResultMusicTrack, type Results } from "itunes-store-api";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, createContext, useContext } from "react";
 import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import z from "zod";
 import type { ChangeUsernameMessage, HostAddPlaylistMessage, HostRemovePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
@@ -76,7 +76,7 @@ export class RoomController {
   public unregisterOnStateChangeListener(listener: (msg: ServerMessage) => void) {
     this.stateChangeEventListeners = this.stateChangeEventListeners.filter(l => l !== listener);
   }
-  
+
   /**
    * Calls all registered state change listeners.
    * 
@@ -212,7 +212,7 @@ export class RoomController {
       playlist: playlist
     };
     this.socket.send(JSON.stringify(req));
-    
+
     return true;
   }
 
@@ -241,7 +241,7 @@ export class RoomController {
       } catch {
         // this attempts to fix a weird caching problem on Apple's side, where an old access-control-allow-origin header gets cached
         try {
-          let newOptions = {...options, magicnumber: Date.now()};
+          let newOptions = { ...options, magicnumber: Date.now() };
           // @ts-ignore
           results = (await lookup("url", url, newOptions)).results;
         } catch {
@@ -285,6 +285,20 @@ export function useRoomController(roomID: string) {
   };
 }
 
+export const RoomContext = createContext<RoomController | null>(null);
+
+/**
+ * Custom React hook to access the RoomController from the React context.
+ * 
+ * @returns The RoomController instance.
+ * @throws Error if used outside of a RoomProvider.
+ */
+export function useControllerContext() {
+  const controller = useContext(RoomContext);
+  if (!controller) throw new Error("useRoom must be used within RoomProvider");
+  return controller;
+}
+
 
 /**
  * Custom React hook to subscribe to state changes in a {@link RoomController}.
@@ -322,7 +336,7 @@ export function usePlayers(controller: RoomController) {
 
 export function usePlaylists(controller: RoomController) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  
+
   useRoomControllerListener(controller, useCallback((msg) => {
     if (msg.type === "server_update_playlists") {
       setPlaylists(msg.playlists);
@@ -334,7 +348,7 @@ export function usePlaylists(controller: RoomController) {
 
 export function useIsHost(controller: RoomController) {
   const [isHost, setIsHost] = useState(false);
-  
+
   useRoomControllerListener(controller, useCallback((msg) => {
     if (msg.type === "update") setIsHost(msg.isHost);
   }, []));
