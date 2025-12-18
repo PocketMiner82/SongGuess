@@ -2,6 +2,45 @@ import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
+export const QuestionMessageSchema = z.object({
+  type: z.literal("question"),
+
+  /**
+   * The question number, starting from one.
+   */
+  number: z.int().min(1),
+
+  /**
+   * The current 4 question answer options.
+   */
+  answerOptions: z.array(z.string()).length(4)
+});
+
+export type QuestionMessage = z.infer<typeof QuestionMessageSchema>;
+
+
+export const AnswerMessageSchema = z.object({
+  type: z.literal("answer"),
+
+  /**
+   * The question number, starting from one.
+   */
+  number: z.int().min(1),
+
+  /**
+   * The current 4 question answer options. 
+   */
+  answerOptions: z.array(z.string()).length(4),
+
+  /**
+   * The index of the correct answer.
+   */
+  correctAnswer: z.int().min(0).max(3)
+});
+
+export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
+
+
 export const AudioControlMessageSchema = z.discriminatedUnion("action", [
   z.object({
     type: z.literal("audio_control"),
@@ -38,7 +77,7 @@ export const CountdownMessageSchema = z.object({
   /**
    * The current countdown number. 0 to hide.
    */
-  countdown: z.uint32()
+  countdown: z.int().min(0)
 });
 
 export type CountdownMessage = z.infer<typeof CountdownMessageSchema>;
@@ -61,9 +100,7 @@ export type ServerUpdatePlaylistsMessage = z.infer<typeof ServerUpdatePlaylistsM
  */
 const GameStateSchema = z.literal([
   "lobby",
-  "ingame_question",
-  "ingame_guessing",
-  "ingame_results",
+  "ingame",
   "results"
 ]);
 

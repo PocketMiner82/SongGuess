@@ -1,6 +1,6 @@
 import z from "zod";
 import { ChangeUsernameMessageSchema, HostAddPlaylistMessageSchema, HostRemovePlaylistMessageSchema, StartGameMessageSchema } from "./RoomClientMessageSchemas";
-import { UpdateMessageSchema, ServerUpdatePlaylistsMessageSchema, CountdownMessageSchema, AudioControlMessageSchema } from "./RoomServerMessageSchemas";
+import { UpdateMessageSchema, ServerUpdatePlaylistsMessageSchema, CountdownMessageSchema, AudioControlMessageSchema, AnswerMessageSchema, QuestionMessageSchema } from "./RoomServerMessageSchemas";
 
 
 const _ClientMessageSchema = z.discriminatedUnion("type", [
@@ -13,7 +13,9 @@ const _ClientMessageSchema = z.discriminatedUnion("type", [
 const _ServerMessageSchema = z.discriminatedUnion("type", [
   UpdateMessageSchema,
   ServerUpdatePlaylistsMessageSchema,
-  CountdownMessageSchema
+  CountdownMessageSchema,
+  QuestionMessageSchema,
+  AnswerMessageSchema
 ]);
 
 export const ConfirmationMessageSchema = z.object({

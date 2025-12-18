@@ -240,7 +240,7 @@ function PlaylistList() {
           <PlaylistListEntry index={-1} title="No playlists added" />
         ) : (
           playlists.map((pl, idx) => (
-            <PlaylistListEntry index={idx} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
+            <PlaylistListEntry key={idx} index={idx} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
           ))
         )}
       </ul>

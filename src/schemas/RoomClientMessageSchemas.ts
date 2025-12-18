@@ -27,7 +27,7 @@ export const HostRemovePlaylistMessageSchema = z.object({
   /**
    * The playlist index to remove.
    */
-  index: z.number().int().nonnegative()
+  index: z.int().nonnegative()
 });
 
 export type HostRemovePlaylistMessage = z.infer<typeof HostRemovePlaylistMessageSchema>;

@@ -7,6 +7,7 @@ import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdate
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import { ClientMessageSchema, type ClientMessage, type ConfirmationMessage } from "../schemas/RoomMessageSchemas";
 import { type Playlist, type Song, COLORS, artistRegex, albumRegex, UnknownPlaylist } from "../schemas/RoomSharedMessageSchemas";
+import Question from "./Question";
 
 
 /**
@@ -14,6 +15,16 @@ import { type Playlist, type Song, COLORS, artistRegex, albumRegex, UnknownPlayl
  */
 const ROOM_CLEANUP_TIMEOUT = 10;
 
+const TRACK_LENGTH = 30;
+
+const QUESTION_COUNT = 3;
+
+const TIME_PER_QUESTION = 20;
+
+const ROUND_START = 0;
+const ROUND_START_MUSIC = 5;
+const ROUND_SHOW_ANSWER = ROUND_START_MUSIC + TIME_PER_QUESTION;
+const ROUND_START_NEXT = ROUND_SHOW_ANSWER + (TRACK_LENGTH - ROUND_SHOW_ANSWER);
 
 export default class Server implements Party.Server {
   /**
@@ -65,6 +76,14 @@ export default class Server implements Party.Server {
    * Timeout to cleanup the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
   cleanupTimeout: NodeJS.Timeout|null = null;
+
+  gameLoopInterval: NodeJS.Timeout|null = null;
+
+  roundTicks: number = 0;
+
+  questions: Question[] = [];
+
+  currentQuestion: number = 1;
 
 
   /**
@@ -146,36 +165,15 @@ export default class Server implements Party.Server {
         }
         break;
       case "change_username":
-        if (this.state !== "lobby") {
-          conn.send(this.getUpdateMessage(conn));
-          this.sendConfirmationOrError(conn, "change_username", "Cannot change username while game is running.");
+        if (!this.performChecks(conn, msg.type, "lobby")) {
           return;
         }
 
-        // username is already validated, just check if it's used by another player
-        for (let connection of this.room.getConnections()) {
-          let state = connection.state as PlayerState;
-          if (connection !== conn && state.username === msg.username) {
-            conn.send(this.getUpdateMessage(conn));
-            this.sendConfirmationOrError(conn, "change_username", "Username is already taken.");
-            return;
-          }
-        }
-        (conn.state as PlayerState).username = msg.username;
-
-        // inform all players about the username change + send confirmation to the user
-        this.sendConfirmationOrError(conn, "change_username");
-        this.broadcastUpdateMessage();
+        this.changeUsername(conn, msg.username);
         break;
       case "host_add_playlist":
       case "host_remove_playlist":
-        if (this.hostConnection !== conn) {
-          conn.send(this.getPlaylistUpdateMessage());
-          this.sendConfirmationOrError(conn, msg.type, "Only the host can modify playlists.");
-          return;
-        } else if (this.state !== "lobby") {
-          conn.send(this.getPlaylistUpdateMessage());
-          this.sendConfirmationOrError(conn, msg.type, "Cannot modify playlists while game is running.");
+        if (!this.performChecks(conn, msg.type, "host", "lobby", "countdown")) {
           return;
         }
 
@@ -208,22 +206,10 @@ export default class Server implements Party.Server {
         this.sendConfirmationOrError(conn, msg.type);
         break;
       case "start_game":
-        if (this.hostConnection !== conn) {
-          conn.send(this.getUpdateMessage(conn));
-          this.sendConfirmationOrError(conn, "start_game", "Only the host can start the game.");
-          return;
-        } else if (this.state !== "lobby") {
-          conn.send(this.getUpdateMessage(conn));
-          this.sendConfirmationOrError(conn, "start_game", "Game is already running.");
-          return;
-        } else if (this.countdownInterval !== null) {
-          conn.send(this.getUpdateMessage(conn));
-          this.sendConfirmationOrError(conn, "start_game", "Countdown is already running.");
+        if (!this.performChecks(conn, msg.type, "host", "lobby", "countdown", "min_song_count")) {
           return;
         }
 
-        // inform all players about the game start + send confirmation to the host
-        this.broadcastUpdateMessage();
         this.sendConfirmationOrError(conn, "start_game");
         this.startGame();
         break;
@@ -265,34 +251,213 @@ export default class Server implements Party.Server {
   //
   // NORMAL FUNCTIONS
   //
-  
-  private startGame() {
+
+  /**
+   * Performs one or more of the specified checks.
+   * 
+   * @param conn The connection to perform the checks for.
+   * @param action The action that caused the check.
+   * @param checks One of the following:
+   *               - "host": Checks whether the connection is the host.
+   *               - "lobby": Checks whether the game is currently in lobby.
+   *               - "countdown": Checks whether a countdown is currently running.
+   *               - "min_song_count": Checks whether the minimum song count is reached.
+   * @returns true, if ALL checks were successful, false otherwise.
+   */
+  private performChecks(conn: Party.Connection|null, action: ConfirmationMessage["source"], ...checks: ("host" | "lobby" | "countdown" | "min_song_count")[]): boolean {
+    let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, action, error) : (error: string) => {};
+    let successful: boolean = true;
+    
+    for (const element of checks) {
+      switch (element) {
+        case "host":
+          if (this.hostConnection !== conn) {
+            possibleErrorFunc("Action can only be used by host.");
+            successful = false;
+          }
+          break;
+
+        case "lobby":
+          if (this.state !== "lobby") {
+            possibleErrorFunc("Action can only be used in lobby.");
+            successful = false;
+          }
+          break;
+
+        case "countdown":
+          if (this.countdownInterval !== null) {
+            possibleErrorFunc("Action cannot be performed while countdown is running.");
+            successful = false;
+          }
+          break;
+        
+        case "min_song_count":
+          // todo: calculate this if implementing variable question count
+          if (this.songs.length < 30) {
+            possibleErrorFunc(`Required at least 30 songs. Selected: ${this.songs.length}`);
+            successful = false;
+          }
+          break;
+      }
+    }
+
+    // always send update when not successful
+    if (!successful && conn) {
+      conn.send(this.getUpdateMessage(conn));
+    }
+
+    return successful;
+  }
+
+  private changeUsername(conn: Party.Connection<unknown>, username: string) {
+    // username is already validated, just check if it's used by another player
+    for (let connection of this.room.getConnections()) {
+      let state = connection.state as PlayerState;
+      if (connection !== conn && state.username === username) {
+        conn.send(this.getUpdateMessage(conn));
+        this.sendConfirmationOrError(conn, "change_username", "Username is already taken.");
+        return;
+      }
+    }
+    (conn.state as PlayerState).username = username;
+
+    // inform all players about the username change + send confirmation to the user
+    this.sendConfirmationOrError(conn, "change_username");
+    this.broadcastUpdateMessage();
+  }
+
+  /**
+   * Stops a countdown if running.
+   */
+  private stopCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval!);
+      this.countdownInterval = null;
+      this.countdown = 0;
+    }
+  }
+
+  /**
+   * Starts a countdown that is shown for all players.
+   * @param from The number to count down from.
+   * @param callback A function to call as soon as the countdown finishes.
+   */
+  private startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
       this.room.broadcast(this.getCountdownMessage());
 
       if (this.countdown === 0) {
-        clearInterval(this.countdownInterval!);
-        this.countdownInterval = null;
-        //this.state = "ingame_question";
-        //this.broadcastUpdateMessage();
-
-        this.room.broadcast(this.getAudioControlMessage("play"));
+        this.stopCountdown();
+        callback();
         return;
       }
 
       this.countdown--;
     }
 
-    // test loading random song
-    if (this.songs.length > 0) {
-      let randomIndex = Math.floor(Math.random() * this.songs.length);
-      let song = this.songs[randomIndex];
-      this.room.broadcast(this.getAudioControlMessage("load", song.audioURL));
-    }
-
-    this.countdown = 3;
+    this.countdown = from;
     decrementCountdown();
     this.countdownInterval = setInterval(decrementCountdown, 1000);
+  }
+
+  /**
+   * Starts a countdown, then starts the game loop.
+   */
+  private startGame() {
+    /**
+     * The main game loop. Assumes that game is reset before called.
+     * @see {@link resetGame}
+     */
+    const gameLoop = () => {
+      if (this.roundTicks >= ROUND_START_NEXT) {
+        this.roundTicks = 0;
+        this.currentQuestion++;
+      }
+
+      let q = this.questions[this.currentQuestion - 1];
+      switch (this.roundTicks++) {
+        // send question directly at start
+        case ROUND_START:
+          this.room.broadcast(q.getQuestionMessage(this.currentQuestion));
+
+          // load audio of song to guess
+          this.room.broadcast(this.getAudioControlMessage("load", q.song.audioURL));
+          break;
+
+        // start playback of song to guess
+        case ROUND_START_MUSIC:
+          this.room.broadcast(this.getAudioControlMessage("play"));
+          break;
+        
+        // show results of current round
+        case ROUND_SHOW_ANSWER:
+          this.room.broadcast(q.getAnswerMessage(this.currentQuestion));
+          break;
+      }
+
+      if (this.currentQuestion > this.questions.length) {
+        this.endGame();
+      }
+    }
+
+    // inform all players about the game start
+    this.broadcastUpdateMessage();
+
+    this.startCountdown(3, () => {
+      this.state = "ingame";
+      this.broadcastUpdateMessage();
+
+      console.log("ingame");
+
+      this.resetGame();
+      console.log(this.questions);
+      gameLoop();
+      this.gameLoopInterval = setInterval(gameLoop, 1000);
+    });
+  }
+
+  /**
+   * Resets the game to the default state and adds random questions.
+   * 
+   * @param [skipQuestionAdding=false] whether to skip populating this.{@link questions} with random questions.
+   */
+  private resetGame(skipQuestionAdding: boolean = false) {
+    if (this.gameLoopInterval) {
+      clearInterval(this.gameLoopInterval);
+      this.gameLoopInterval = null;
+    }
+    this.stopCountdown();
+
+    this.roundTicks = 0;
+    this.questions = [];
+    this.currentQuestion = 1;
+
+    if (skipQuestionAdding) return;
+
+    let remainingSongs = this.songs;
+
+    // add 10 random questions
+    for (let i = 0; i < QUESTION_COUNT; i++) {
+      let randomIndex = Math.floor(Math.random() * remainingSongs.length);
+      this.questions.push(new Question(remainingSongs.splice(randomIndex, 1)[0]));
+    }
+
+    // add distractions to the questions
+    for (const q of this.questions) {
+      q.generateDistractions(remainingSongs);
+    }
+  }
+
+  private endGame() {
+    if (!this.gameLoopInterval) return;
+
+    clearInterval(this.gameLoopInterval);
+    this.gameLoopInterval = null;
+
+    this.room.broadcast(this.getAudioControlMessage("pause"));
+
+    this.state = "results";
+    this.broadcastUpdateMessage();
   }
 
   /**
@@ -419,6 +584,7 @@ export default class Server implements Party.Server {
       source: source,
       error: error
     }
+
     conn.send(this.getUpdateMessage(conn));
     conn.send(JSON.stringify(resp));
   }
