@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { RoomContext, useControllerContext, useRoomController, useRoomControllerListener } from "./RoomController";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";

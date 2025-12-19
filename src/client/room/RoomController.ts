@@ -1,14 +1,22 @@
 import PartySocket from "partysocket";
-import { lookup, type Entities, type Media, type Options, type ResultMusicTrack, type Results } from "itunes-store-api";
-import { useEffect, useState, useRef, useCallback, createContext, useContext } from "react";
-import type { CloseEvent, ErrorEvent } from "partysocket/ws";
+import {type Entities, lookup, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
+import {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
+import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
-import type { ChangeUsernameMessage, HostAddPlaylistMessage, HostRemovePlaylistMessage, StartGameMessage } from "../../schemas/RoomClientMessageSchemas";
-import { albumRegex, artistRegex, UnknownPlaylist, type Playlist } from "../../schemas/RoomSharedMessageSchemas";
-import { type ServerMessage, ServerMessageSchema } from "../../schemas/RoomMessageSchemas";
-import type { PlayerState } from "../../schemas/RoomServerMessageSchemas";
+import type {
+  ChangeUsernameMessage,
+  HostAddPlaylistMessage,
+  HostRemovePlaylistMessage,
+  StartGameMessage
+} from "../../schemas/RoomClientMessageSchemas";
+import {albumRegex, artistRegex, type Playlist, UnknownPlaylist} from "../../schemas/RoomSharedMessageSchemas";
+import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
+import type {PlayerState} from "../../schemas/RoomServerMessageSchemas";
 
 
+/**
+ * The PartyKit host URL for WebSocket connections.
+ */
 declare const PARTYKIT_HOST: string;
 
 
@@ -123,8 +131,9 @@ export class RoomController {
   private onMessage(ev: MessageEvent) {
     console.debug("Server sent:", ev.data);
 
-    // try to parse json
+    // try to parse JSON
     try {
+      // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(ev.data);
     } catch (e) {
       console.error("Server sent invalid JSON:", e);
@@ -148,6 +157,11 @@ export class RoomController {
     this.callOnStateChange(msg);
   }
 
+  /**
+   * Updates the username of the current player.
+   *
+   * @param newName The new username to set.
+   */
   public updateUsername(newName: string) {
     let msg: ChangeUsernameMessage = {
       type: "change_username",
@@ -216,11 +230,16 @@ export class RoomController {
     return true;
   }
 
+  /**
+   * Fetches playlist information from the server.
+   *
+   * @param url The Apple Music URL of the playlist.
+   * @returns A Promise resolving to the Playlist information.
+   */
   private async getPlaylistInfo(url: string): Promise<Playlist> {
     try {
       let page = await fetch("/parties/main/playlistInfo?url=" + encodeURIComponent(url));
-      let data: Playlist = await page.json();
-      return data;
+      return await page.json();
     } catch {
       return UnknownPlaylist;
     }
@@ -285,13 +304,16 @@ export function useRoomController(roomID: string) {
   };
 }
 
+/**
+ * React context for providing the RoomController instance to child components.
+ */
 export const RoomContext = createContext<RoomController | null>(null);
 
 /**
  * Custom React hook to access the RoomController from the React context.
  * 
  * @returns The RoomController instance.
- * @throws Error if used outside of a RoomProvider.
+ * @throws Error if used outside a RoomProvider.
  */
 export function useControllerContext() {
   const controller = useContext(RoomContext);
@@ -334,6 +356,12 @@ export function usePlayers(controller: RoomController) {
   return { players, username };
 }
 
+/**
+ * Custom React hook to manage and provide the list of playlists in a room.
+ * 
+ * @param controller The RoomController instance to listen to.
+ * @returns The current list of playlists.
+ */
 export function usePlaylists(controller: RoomController) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
@@ -346,6 +374,12 @@ export function usePlaylists(controller: RoomController) {
   return playlists;
 }
 
+/**
+ * Custom React hook to track whether the current user is the host.
+ * 
+ * @param controller The RoomController instance to listen to.
+ * @returns A boolean indicating whether the current user is the host.
+ */
 export function useIsHost(controller: RoomController) {
   const [isHost, setIsHost] = useState(false);
 

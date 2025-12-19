@@ -15,17 +15,42 @@ import Question from "./Question";
  */
 const ROOM_CLEANUP_TIMEOUT = 10;
 
+/**
+ * The length of each audio track in seconds.
+ */
 const TRACK_LENGTH = 30;
 
+/**
+ * The number of questions to generate per game.
+ */
 const QUESTION_COUNT = 3;
 
+/**
+ * The time allocated for each question in seconds.
+ */
 const TIME_PER_QUESTION = 20;
 
+/**
+ * The tick count when a round starts.
+ */
 const ROUND_START = 0;
+
+/**
+ * The tick count when music starts playing in a round.
+ */
 const ROUND_START_MUSIC = 5;
+
+/**
+ * The tick count when the answer is revealed in a round.
+ */
 const ROUND_SHOW_ANSWER = ROUND_START_MUSIC + TIME_PER_QUESTION;
+
+/**
+ * The tick count when the next round starts.
+ */
 const ROUND_START_NEXT = ROUND_SHOW_ANSWER + (TRACK_LENGTH - ROUND_SHOW_ANSWER);
 
+// noinspection JSUnusedGlobalSymbols
 export default class Server implements Party.Server {
   /**
    * True, if this room was created by a request to /createRoom
@@ -73,16 +98,28 @@ export default class Server implements Party.Server {
   countdown: CountdownMessage["countdown"] = 0;
 
   /**
-   * Timeout to cleanup the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
+   * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
   cleanupTimeout: NodeJS.Timeout|null = null;
 
+  /**
+   * The interval function for the main game loop.
+   */
   gameLoopInterval: NodeJS.Timeout|null = null;
 
+  /**
+   * The current tick count within the ongoing round.
+   */
   roundTicks: number = 0;
 
+  /**
+   * The list of questions for the current game.
+   */
   questions: Question[] = [];
 
+  /**
+   * The index of the current question (1-based).
+   */
   currentQuestion: number = 1;
 
 
@@ -97,7 +134,13 @@ export default class Server implements Party.Server {
   // ROOM WS EVENTS
   //
 
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+  /**
+   * Handles a new WebSocket connection to the room.
+   *
+   * @param conn The new connection.
+   * @param _ctx The connection context (unused).
+   */
+  onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
     if (this.cleanupTimeout) {
       clearTimeout(this.cleanupTimeout);
       this.cleanupTimeout = null;
@@ -131,6 +174,12 @@ export default class Server implements Party.Server {
     this.broadcastUpdateMessage();
   }
 
+  /**
+   * Handles incoming messages from a WebSocket connection.
+   *
+   * @param message The message content as a string.
+   * @param conn The connection that sent the message.
+   */
   onMessage(message: string, conn: Party.Connection) {
     // ignore all messages if room is not valid
     if (!this.isValidRoom) {
@@ -139,8 +188,9 @@ export default class Server implements Party.Server {
 
     this.log(`${conn.id} sent: ${message}`, "debug");
 
-    // try to parse json
+    // try to parse JSON
     try {
+      // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
       this.sendConfirmationOrError(conn, "other", "Message is not JSON.");
@@ -219,6 +269,11 @@ export default class Server implements Party.Server {
     }
   }
 
+  /**
+   * Handles a WebSocket connection closing.
+   *
+   * @param connection The connection that closed.
+   */
   onClose(connection: Party.Connection) {
     // ignore disconnects if room is not valid
     if (!this.isValidRoom) {
@@ -231,7 +286,7 @@ export default class Server implements Party.Server {
     if (this.hostConnection === connection) {
       let next = this.room.getConnections()[Symbol.iterator]().next();
       if (!next.done) {
-        this.log(`Host left, transfering host to ${next.value.id}`);
+        this.log(`Host left, transferring host to ${next.value.id}`);
         this.hostConnection = next.value;
       }
     }
@@ -265,7 +320,7 @@ export default class Server implements Party.Server {
    * @returns true, if ALL checks were successful, false otherwise.
    */
   private performChecks(conn: Party.Connection|null, action: ConfirmationMessage["source"], ...checks: ("host" | "lobby" | "countdown" | "min_song_count")[]): boolean {
-    let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, action, error) : (error: string) => {};
+    let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, action, error) : () => {};
     let successful: boolean = true;
     
     for (const element of checks) {
@@ -309,7 +364,13 @@ export default class Server implements Party.Server {
     return successful;
   }
 
-  private changeUsername(conn: Party.Connection<unknown>, username: string) {
+  /**
+   * Changes the username for a connected player.
+   *
+   * @param conn The connection of the player requesting the change.
+   * @param username The new username to assign.
+   */
+  private changeUsername(conn: Party.Connection, username: string) {
     // username is already validated, just check if it's used by another player
     for (let connection of this.room.getConnections()) {
       let state = connection.state as PlayerState;
@@ -448,6 +509,9 @@ export default class Server implements Party.Server {
     }
   }
 
+  /**
+   * Ends the current game and transitions to the results state.
+   */
   private endGame() {
     if (!this.gameLoopInterval) return;
 
@@ -467,6 +531,7 @@ export default class Server implements Party.Server {
     this.cleanupTimeout = setTimeout(() => {
       if (this.getOnlineCount() === 0) {
         this.isValidRoom = false;
+        this.resetGame(true);
         this.log("Room closed due to timeout.");
       } else {
         this.cleanupTimeout = null;
@@ -476,8 +541,9 @@ export default class Server implements Party.Server {
 
   /**
    * Logs a message with the {@link LOG_PREFIX}
-   * 
-   * @param text 
+   *
+   * @param text the text to log
+   * @param level the log level to use
    */
   private log(text: string, level: "debug"|"warn"|"error"|"info" = "info") {
     let logFunction: (...data: any) => void;
@@ -576,7 +642,7 @@ export default class Server implements Party.Server {
    * @param conn The connection of the player that should receive the messages
    * @param source The source/type of the confirmation message
    * @param error An optional error message to include in the confirmation
-   * @see {@link sendUpdate}
+   * @see {@link getUpdateMessage}
    */
   private sendConfirmationOrError(conn: Party.Connection, source: ConfirmationMessage["source"], error?: string) {
     let resp: ConfirmationMessage = {
@@ -613,7 +679,7 @@ export default class Server implements Party.Server {
   /**
    * Broadcast an update to all connected clients.
    * 
-   * @see {@link sendUpdate}
+   * @see {@link getUpdateMessage}
    */
   private broadcastUpdateMessage() {
     for (const conn of this.room.getConnections()) {
@@ -623,8 +689,7 @@ export default class Server implements Party.Server {
 
   /**
    * Constructs a playlist update message with the current playlist array.
-   * 
-   * @param error if this update was the result of an error, this specifies the reason
+   *
    * @returns a JSON string of the constructed {@link ServerUpdatePlaylistsMessage}
    */
   private getPlaylistUpdateMessage(): string {
@@ -662,7 +727,7 @@ export default class Server implements Party.Server {
    * Constructs an audio control load message.
    * 
    * @param action must be "load" for a load message.
-   * @param audioURL an {@link Song["audioURL"]} to a music file that the client should pre-load.
+   * @param audioURL an {@link Song["audioURL"]} to a music file that the client should preload.
    * @returns a JSON string of the constructed {@link AudioControlMessage}
    */
   private getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): string;
@@ -698,6 +763,12 @@ export default class Server implements Party.Server {
   // ROOM HTTP EVENTS
   //
 
+  /**
+   * Handles HTTP requests to the room endpoint.
+   *
+   * @param req The HTTP request to handle.
+   * @returns A Promise resolving to the HTTP response.
+   */
   async onRequest(req: Party.Request): Promise<Response> {
     let url: URL = new URL(req.url);
 
@@ -742,10 +813,18 @@ export default class Server implements Party.Server {
   // STATIC GLOBAL FETCH EVENTS
   //
 
-  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
+  /**
+   * Handles global fetch events for the PartyKit worker.
+   *
+   * @param req The fetch request.
+   * @param lobby The fetch lobby for asset serving.
+   * @param _ctx The execution context (unused).
+   * @returns A Promise resolving to the fetch response.
+   */
+  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, _ctx: Party.ExecutionContext) {
     let url: URL = new URL(req.url);
 
-    // if room url is requested without html extension, add it
+    // if room url is requested without HTML extension, add it
     if (url.pathname === "/room") {
       return lobby.assets.fetch("/room.html" + url.search);
     }
@@ -865,4 +944,5 @@ export default class Server implements Party.Server {
   }
 }
 
+// noinspection BadExpressionStatementJS
 Server satisfies Party.Worker;

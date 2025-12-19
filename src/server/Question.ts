@@ -3,6 +3,9 @@ import { shuffle } from "../Utils";
 import type { AnswerMessage, QuestionMessage } from "../schemas/RoomServerMessageSchemas";
 
 export default class Question {
+  /**
+   * The list of songs for this question (1 correct answer + 3 distractors).
+   */
   questions: Song[] = [];
 
   /**
@@ -15,6 +18,11 @@ export default class Question {
     this.questions.push(song);
   }
 
+  /**
+   * Adds 3 random distraction songs to the question and shuffles all options.
+   *
+   * @param possibleDistractions Array of songs to use as distraction options.
+   */
   public generateDistractions(possibleDistractions: Song[]) {
     for (let i = 0; i < 3; i++) {
       let randomIndex = Math.floor(Math.random() * possibleDistractions.length);
@@ -23,6 +31,12 @@ export default class Question {
     this.questions = shuffle(this.questions);
   }
 
+  /**
+   * Extracts song names from the questions array.
+   *
+   * @returns An array of song names for the answer options.
+   * @throws Error if generateDistractions() hasn't been called first.
+   */
   private getSongNames() {
     let songNames = this.questions.map(s => s.name);
 
@@ -33,6 +47,12 @@ export default class Question {
     return songNames;
   }
 
+  /**
+   * Creates a question message for sending to clients.
+   *
+   * @param n The question number.
+   * @returns A JSON string containing the question message.
+   */
   public getQuestionMessage(n: number): string {
     let questionMsg: QuestionMessage = {
       type: "question",
@@ -42,6 +62,12 @@ export default class Question {
     return JSON.stringify(questionMsg);
   }
 
+  /**
+   * Creates an answer message for sending to clients.
+   *
+   * @param n The question number.
+   * @returns A JSON string containing the answer message.
+   */
   public getAnswerMessage(n: number): string {
     let answerMsg: AnswerMessage = {
       type: "answer",
