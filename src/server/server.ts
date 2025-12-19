@@ -533,9 +533,8 @@ export default class Server implements Party.Server {
         this.isValidRoom = false;
         this.resetGame(true);
         this.log("Room closed due to timeout.");
-      } else {
-        this.cleanupTimeout = null;
       }
+      this.cleanupTimeout = null;
     }, ROOM_CLEANUP_TIMEOUT * 1000);
   }
 
