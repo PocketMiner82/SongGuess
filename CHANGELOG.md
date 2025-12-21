@@ -1,3 +1,16 @@
+# [2.0.0-dev.46](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.45...2.0.0-dev.46) (2025-12-21)
+
+
+### Bug Fixes
+
+* **RoomMessageSchema:** forgot to put "other" inside z.literal() ([f1de63f](https://github.com/PocketMiner82/SongGuess/commit/f1de63fad901d6b90ffd1c1093abacafc088259c))
+
+
+### Features
+
+* allow adding songs as well ([3a34c7c](https://github.com/PocketMiner82/SongGuess/commit/3a34c7c65a6c91dad7c2ea706405dd4ed83c0a45))
+* **server:** implement answer selecting ([23a9ee7](https://github.com/PocketMiner82/SongGuess/commit/23a9ee7ead981dc2a469679b7a3f1ffc31e0d2bb))
+
 # [2.0.0-dev.45](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.44...2.0.0-dev.45) (2025-12-19)
 
 
