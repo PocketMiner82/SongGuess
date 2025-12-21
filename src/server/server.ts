@@ -207,7 +207,7 @@ export default class Server implements Party.Server {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
-      this.sendConfirmationOrError(conn, OtherMessageSchema, "Message is not JSON.");
+      this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
 
@@ -215,7 +215,7 @@ export default class Server implements Party.Server {
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
       this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
-      this.sendConfirmationOrError(conn, OtherMessageSchema, `Parsing error:\n${z.prettifyError(result.error)}`);
+      this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
 

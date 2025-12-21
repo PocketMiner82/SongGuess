@@ -21,7 +21,7 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
 
 
 export const OtherMessageSchema = z.object({
-  type: z.literal("other")
+  type: z.literal("other").default("other")
 })
 
 
@@ -35,7 +35,7 @@ export type SourceMessage = z.infer<typeof SourceMessageSchema>;
 
 
 export const ConfirmationMessageSchema = z.object({
-  type: z.literal("confirmation"),
+  type: z.literal("confirmation").default("confirmation"),
 
   /**
    * The message that is being confirmed.

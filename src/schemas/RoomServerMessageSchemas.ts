@@ -3,7 +3,7 @@ import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedMessageS
 
 
 export const QuestionMessageSchema = z.object({
-  type: z.literal("question"),
+  type: z.literal("question").default("question"),
 
   /**
    * The question number, starting from one.
@@ -20,7 +20,7 @@ export type QuestionMessage = z.infer<typeof QuestionMessageSchema>;
 
 
 export const AnswerMessageSchema = z.object({
-  type: z.literal("answer"),
+  type: z.literal("answer").default("answer"),
 
   /**
    * The question number, starting from one.
@@ -35,7 +35,7 @@ export const AnswerMessageSchema = z.object({
   /**
    * The index of the correct answer.
    */
-  correctAnswer: z.int().min(0).max(3)
+  correctIndex: z.int().min(0).max(3)
 });
 
 export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
@@ -43,7 +43,7 @@ export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
 
 export const AudioControlMessageSchema = z.discriminatedUnion("action", [
   z.object({
-    type: z.literal("audio_control"),
+    type: z.literal("audio_control").default("audio_control"),
 
     /**
      * - "load": Downloads the music.
@@ -57,7 +57,7 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
     audioURL: SongSchema.shape.audioURL
   }),
   z.object({
-    type: z.literal("audio_control"),
+    type: z.literal("audio_control").default("audio_control"),
 
     /**
      * - "play": Starts playback of the music.
@@ -72,7 +72,7 @@ export type AudioControlMessage = z.infer<typeof AudioControlMessageSchema>;
 
 
 export const CountdownMessageSchema = z.object({
-  type: z.literal("countdown"),
+  type: z.literal("countdown").default("countdown"),
 
   /**
    * The current countdown number. 0 to hide.
@@ -84,7 +84,7 @@ export type CountdownMessage = z.infer<typeof CountdownMessageSchema>;
 
 
 export const UpdatePlaylistsMessageSchema = z.object({
-  type: z.literal("update_playlists"),
+  type: z.literal("update_playlists").default("update_playlists"),
 
   /**
    * Currently selected playlist(s)
@@ -126,7 +126,7 @@ export type PlayerState = z.infer<typeof PlayerStateSchema>;
 
 
 export const UpdateMessageSchema = z.object({
-  type: z.literal("update"),
+  type: z.literal("update").default("update"),
 
   /**
    * The current game state

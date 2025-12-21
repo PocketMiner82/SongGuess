@@ -73,7 +73,7 @@ export default class Question {
       type: "answer",
       number: n,
       answerOptions: this.getSongNames(),
-      correctAnswer: this.questions.indexOf(this.song)
+      correctIndex: this.questions.indexOf(this.song)
     }
     return JSON.stringify(answerMsg);
   }
