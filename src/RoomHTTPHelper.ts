@@ -37,7 +37,7 @@ export async function fetchPostRoom(urlParam: URL|string, token: string): Promis
     }
 
     // make sure correct response was returned
-    return (await resp.text()) === "ok" ? true : false;
+    return (await resp.text()) === "ok";
   } catch (error) {
     console.error(`Exception occurred while posting ${urlParam}:`, error);
     return false;

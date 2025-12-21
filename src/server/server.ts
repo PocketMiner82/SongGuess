@@ -3,7 +3,7 @@ import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-gene
 import z from "zod";
 import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistsMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
+import { type GameState, type PlayerState, type UpdateMessage, type UpdatePlaylistsMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import { ClientMessageSchema, type ClientMessage, type ConfirmationMessage } from "../schemas/RoomMessageSchemas";
 import {
@@ -229,17 +229,17 @@ export default class Server implements Party.Server {
 
         this.changeUsername(conn, msg.username);
         break;
-      case "host_add_playlist":
-      case "host_remove_playlist":
+      case "add_playlist":
+      case "remove_playlist":
         if (!this.performChecks(conn, msg.type, "host", "lobby", "countdown")) {
           return;
         }
 
-        if (msg.type === "host_add_playlist"
+        if (msg.type === "add_playlist"
           && !this.playlists.some(p => p.name === msg.playlist.name && p.cover === msg.playlist.cover)
           && msg.playlist.songs) {
           this.playlists.push(msg.playlist);
-        } else if (msg.type === "host_remove_playlist") {
+        } else if (msg.type === "remove_playlist") {
           // remove at index
           if (msg.index >= this.playlists.length) {
             conn.send(this.getPlaylistUpdateMessage());
@@ -697,7 +697,7 @@ export default class Server implements Party.Server {
   /**
    * Constructs a playlist update message with the current playlist array.
    *
-   * @returns a JSON string of the constructed {@link ServerUpdatePlaylistsMessage}
+   * @returns a JSON string of the constructed {@link UpdatePlaylistsMessage}
    */
   private getPlaylistUpdateMessage(): string {
     let playlists = structuredClone(this.playlists);
@@ -706,8 +706,8 @@ export default class Server implements Party.Server {
       delete p.songs;
     }
 
-    let update: ServerUpdatePlaylistsMessage = {
-      type: "server_update_playlists",
+    let update: UpdatePlaylistsMessage = {
+      type: "update_playlists",
       playlists: playlists
     };
 

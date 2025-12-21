@@ -4,7 +4,7 @@ import z from "zod";
 export const RoomInfoResponseSchema = z.object({
   /**
    * The amount of players online in the room
-   * @see {@link Serverr#getOnlineCount}
+   * @see {@link Server#getOnlineCount}
    */
   onlineCount: z.number(),
 

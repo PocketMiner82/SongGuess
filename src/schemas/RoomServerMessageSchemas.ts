@@ -83,8 +83,8 @@ export const CountdownMessageSchema = z.object({
 export type CountdownMessage = z.infer<typeof CountdownMessageSchema>;
 
 
-export const ServerUpdatePlaylistsMessageSchema = z.object({
-  type: z.literal("server_update_playlists"),
+export const UpdatePlaylistsMessageSchema = z.object({
+  type: z.literal("update_playlists"),
 
   /**
    * Currently selected playlist(s)
@@ -92,7 +92,7 @@ export const ServerUpdatePlaylistsMessageSchema = z.object({
   playlists: z.array(PlaylistSchema)
 });
 
-export type ServerUpdatePlaylistsMessage = z.infer<typeof ServerUpdatePlaylistsMessageSchema>;
+export type UpdatePlaylistsMessage = z.infer<typeof UpdatePlaylistsMessageSchema>;
 
 
 /**

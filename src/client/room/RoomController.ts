@@ -5,8 +5,8 @@ import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
 import type {
   ChangeUsernameMessage,
-  HostAddPlaylistMessage,
-  HostRemovePlaylistMessage,
+  AddPlaylistMessage,
+  RemovePlaylistMessage,
   StartGameMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
@@ -191,8 +191,8 @@ export class RoomController {
    * @param index the index of the playlist to remove.
    */
   public removePlaylist(index: number) {
-    let req: HostRemovePlaylistMessage = {
-      type: "host_remove_playlist",
+    let req: RemovePlaylistMessage = {
+      type: "remove_playlist",
       index: index
     };
 
@@ -234,8 +234,8 @@ export class RoomController {
     const playlist: Playlist = await this.getPlaylistInfo(url);
     playlist.songs = songs;
 
-    const req: HostAddPlaylistMessage = {
-      type: "host_add_playlist",
+    const req: AddPlaylistMessage = {
+      type: "add_playlist",
       playlist: playlist
     };
     this.socket.send(JSON.stringify(req));
@@ -379,7 +379,7 @@ export function usePlaylists(controller: RoomController) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
   useRoomControllerListener(controller, useCallback((msg) => {
-    if (msg.type === "server_update_playlists") {
+    if (msg.type === "update_playlists") {
       setPlaylists(msg.playlists);
     }
   }, []));

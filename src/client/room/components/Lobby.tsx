@@ -19,7 +19,7 @@ function AddPlaylistInput() {
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "confirmation" && msg.source === "host_add_playlist") {
+    if (msg.type === "confirmation" && msg.source === "add_playlist") {
       setSearchStatus(msg.error ? "error" : "success");
     }
   }, []);
