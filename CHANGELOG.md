@@ -1,3 +1,10 @@
+# [2.0.0-dev.45](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.44...2.0.0-dev.45) (2025-12-19)
+
+
+### Bug Fixes
+
+* **server:** wrong order in room cleanup ([2993067](https://github.com/PocketMiner82/SongGuess/commit/2993067354ddb026acee9df02bf092b8adf58827))
+
 # [2.0.0-dev.44](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.43...2.0.0-dev.44) (2025-12-18)
 
 
