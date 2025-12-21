@@ -2,6 +2,59 @@ import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
+/**
+ * The current state of a player.
+ */
+const PlayerStateSchema = z.object({
+  /**
+   * The player's username
+   */
+  username: UsernameSchema,
+
+  /**
+   * The player's color
+   */
+  color: z.string(),
+
+  /**
+   * How many points the player has since he joined the room.
+   */
+  points: z.number().default(0),
+});
+
+export type PlayerState = z.infer<typeof PlayerStateSchema>;
+
+
+export const PlayerDataSchema = z.object({
+  /**
+   * The player's username
+   */
+  username: UsernameSchema,
+
+  /**
+   * The player's color
+   */
+  color: z.string(),
+
+  /**
+   * How many points the player has since he joined the room.
+   */
+  points: z.number(),
+
+  /**
+   * The time in ms where the player answered a round question.
+   */
+  answerTimestamp: z.optional(z.number()),
+
+  /**
+   * The index of the question the player selected.
+   */
+  answerIndex: z.optional(z.int().min(0).max(3))
+});
+
+export type PlayerData = z.infer<typeof PlayerDataSchema>;
+
+
 export const QuestionMessageSchema = z.object({
   type: z.literal("question").default("question"),
 
@@ -35,7 +88,12 @@ export const AnswerMessageSchema = z.object({
   /**
    * The index of the correct answer.
    */
-  correctIndex: z.int().min(0).max(3)
+  correctIndex: z.int().min(0).max(3),
+
+  /**
+   * Information about which player selected which answer
+   */
+  playerAnswers: z.array(PlayerDataSchema)
 });
 
 export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
@@ -105,24 +163,6 @@ const GameStateSchema = z.literal([
 ]);
 
 export type GameState = z.infer<typeof GameStateSchema>;
-
-
-/**
- * The current state of a player.
- */
-const PlayerStateSchema = z.object({
-  /**
-   * The player's username
-   */
-  username: UsernameSchema,
-
-  /**
-   * The player's color
-   */
-  color: z.string()
-});
-
-export type PlayerState = z.infer<typeof PlayerStateSchema>;
 
 
 export const UpdateMessageSchema = z.object({

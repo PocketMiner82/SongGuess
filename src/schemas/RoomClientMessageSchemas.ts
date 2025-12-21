@@ -2,14 +2,16 @@ import z from "zod";
 import { PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
-export const QuestionVoteSchema = z.object({
-  type: z.literal("question_vote").default("question_vote"),
+export const SelectAnswerMessageSchema = z.object({
+  type: z.literal("select_answer").default("select_answer"),
 
   /**
-   * The index of the correct answer.
+   * The index of the selected answer.
    */
-  questionIndex: z.int().min(0).max(3)
+  answerIndex: z.int().min(0).max(3)
 })
+
+export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
 
 
 export const StartGameMessageSchema = z.object({

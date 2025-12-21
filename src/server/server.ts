@@ -3,7 +3,15 @@ import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-gene
 import z from "zod";
 import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import { type GameState, type PlayerState, type UpdateMessage, type UpdatePlaylistsMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
+import {
+  type GameState,
+  type PlayerData,
+  type UpdateMessage,
+  type UpdatePlaylistsMessage,
+  type AudioControlMessage,
+  type CountdownMessage,
+  type PlayerState
+} from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import {
   ClientMessageSchema,
@@ -21,18 +29,17 @@ import {
   songRegex
 } from "../schemas/RoomSharedMessageSchemas";
 import Question from "./Question";
-import type {ChangeUsernameMessage} from "../schemas/RoomClientMessageSchemas";
+import type {
+  AddPlaylistMessage,
+  ChangeUsernameMessage,
+  RemovePlaylistMessage, SelectAnswerMessage
+} from "../schemas/RoomClientMessageSchemas";
 
 
 /**
  * The time (in seconds) after which an empty room is cleaned up.
  */
 const ROOM_CLEANUP_TIMEOUT = 10;
-
-/**
- * The length of each audio track in seconds.
- */
-const TRACK_LENGTH = 30;
 
 /**
  * The number of questions to generate per game.
@@ -62,7 +69,14 @@ const ROUND_SHOW_ANSWER = ROUND_START_MUSIC + TIME_PER_QUESTION;
 /**
  * The tick count when the next round starts.
  */
-const ROUND_START_NEXT = ROUND_SHOW_ANSWER + (TRACK_LENGTH - ROUND_SHOW_ANSWER);
+const ROUND_START_NEXT = ROUND_SHOW_ANSWER + 5;
+
+/**
+ * How many points a player can get per question.
+ * Half of the points are for a correct answer, the other half is for the speed of the answer if correct.
+ */
+const POINTS_PER_QUESTION = 1000;
+
 
 // noinspection JSUnusedGlobalSymbols
 export default class Server implements Party.Server {
@@ -136,10 +150,15 @@ export default class Server implements Party.Server {
    */
   currentQuestion: number = 1;
 
+  /**
+   * The timestamp when the current round started.
+   */
+  roundStartTime: number = -1;
+
 
   /**
    * Creates a new room server.
-   * 
+   *
    * @param room The room to serve
    */
   constructor(readonly room: Party.Room) {}
@@ -241,29 +260,17 @@ export default class Server implements Party.Server {
           return;
         }
 
-        if (msg.type === "add_playlist"
-          && !this.playlists.some(p => p.name === msg.playlist.name && p.cover === msg.playlist.cover)
-          && msg.playlist.songs) {
-          this.playlists.push(msg.playlist);
-        } else if (msg.type === "remove_playlist") {
-          // remove at index
-          if (msg.index >= this.playlists.length) {
-            conn.send(this.getPlaylistUpdateMessage());
-            this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
-            return;
-          }
-          this.playlists.splice(msg.index, 1);
+        if (msg.type === "add_playlist" && !this.addPlaylist(msg)) {
+          conn.send(this.getPlaylistUpdateMessage());
+          this.sendConfirmationOrError(conn, msg, "Please provide a playlist with a unique name and album cover.");
+          return;
+        } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
+          conn.send(this.getPlaylistUpdateMessage());
+          this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
+          return;
         }
 
-        // always update songs
-        this.songs = [];
-        for (let playlist of this.playlists) {
-          playlist.subtitle = `${playlist.songs ? playlist.songs.length : 0} songs`;
-          if (!playlist.songs) {
-            continue;
-          }
-          this.songs.push(...playlist.songs);
-        }
+        this.updateSongs();
 
         // send the update to all players + confirmation to the host
         this.room.broadcast(this.getPlaylistUpdateMessage());
@@ -277,8 +284,16 @@ export default class Server implements Party.Server {
         this.sendConfirmationOrError(conn, msg);
         this.startGame();
         break;
+      case "select_answer":
+        if (!this.performChecks(conn, msg, "answer")) {
+          return;
+        }
+
+        this.selectAnswer(conn, msg);
+        break;
       default:
-        this.sendConfirmationOrError(conn, msg, `Invalid message type: ${(msg as ClientMessage).type}`);
+        // in case a message is defined but not yet implemented
+        this.sendConfirmationOrError(conn, msg, `Not implemented: ${(msg as ClientMessage).type}`);
         break;
     }
   }
@@ -323,7 +338,7 @@ export default class Server implements Party.Server {
 
   /**
    * Performs one or more of the specified checks.
-   * 
+   *
    * @param conn The connection to perform the checks for.
    * @param msg The message that caused the check.
    * @param checks One of the following:
@@ -333,10 +348,11 @@ export default class Server implements Party.Server {
    *               - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
-  private performChecks(conn: Party.Connection|null, msg: SourceMessage, ...checks: ("host" | "lobby" | "countdown" | "min_song_count")[]): boolean {
+  private performChecks(conn: Party.Connection|null, msg: SourceMessage, ...checks: ("host" | "lobby" | "countdown" | "min_song_count" | "answer")[]): boolean {
     let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, msg, error) : () => {};
     let successful: boolean = true;
-    
+    let connData: PlayerData = conn?.state as PlayerData;
+
     for (const element of checks) {
       switch (element) {
         case "host":
@@ -359,11 +375,21 @@ export default class Server implements Party.Server {
             successful = false;
           }
           break;
-        
+
         case "min_song_count":
           // todo: calculate this if implementing variable question count
           if (this.songs.length < 30) {
             possibleErrorFunc(`Required at least 30 songs. Selected: ${this.songs.length}`);
+            successful = false;
+          }
+          break;
+
+        case "answer":
+          if (this.roundTicks >= ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
+            possibleErrorFunc("Can only accept answering during questioning phase.");
+            successful = false;
+          } else if (conn && connData.answerIndex) {
+            possibleErrorFunc("You already selected an answer.");
             successful = false;
           }
           break;
@@ -379,6 +405,57 @@ export default class Server implements Party.Server {
   }
 
   /**
+   * Adds a playlist to the current game session.
+   *
+   * @param msg The message containing the playlist to add.
+   * @returns true if the playlist was added successfully, false if validation failed.
+   */
+  private addPlaylist(msg: AddPlaylistMessage): boolean {
+    if (!msg.playlist.songs || this.playlists.some(p =>
+        p.name === msg.playlist.name && p.cover === msg.playlist.cover
+    )) {
+      return false;
+    }
+
+    this.playlists.push(msg.playlist);
+    this.log(`The playlist "${msg.playlist.name}" has been added.`);
+    return true;
+  }
+
+  /**
+   * Removes a playlist from the current game session by index.
+   *
+   * @param msg The message containing the index of the playlist to remove.
+   * @returns true if the playlist was removed successfully, false if the index was out of bounds.
+   */
+  private removePlaylist(msg: RemovePlaylistMessage): boolean {
+    if (msg.index >= this.playlists.length) {
+      return false;
+    }
+
+    let playlistName = this.playlists[msg.index].name;
+    this.playlists.splice(msg.index, 1);
+    this.log(`The playlist "${playlistName}" has been removed.`);
+    return true;
+  }
+
+  /**
+   * Updates the songs array by collecting all songs from the current playlists.
+   * Also updates the subtitle of each playlist to show the song count.
+   */
+  private updateSongs() {
+    this.songs = [];
+    for (let playlist of this.playlists) {
+      let songCount = playlist.songs ? playlist.songs.length : 0;
+      playlist.subtitle = `${songCount} song${songCount === 1 ? "" : "s"}`;
+      if (!playlist.songs) {
+        continue;
+      }
+      this.songs.push(...playlist.songs);
+    }
+  }
+
+  /**
    * Changes the username for a connected player.
    *
    * @param conn The connection of the player requesting the change.
@@ -387,14 +464,14 @@ export default class Server implements Party.Server {
   private changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
     // username is already validated, just check if it's used by another player
     for (let connection of this.room.getConnections()) {
-      let state = connection.state as PlayerState;
+      let state = connection.state as PlayerData;
       if (connection !== conn && state.username === msg.username) {
         conn.send(this.getUpdateMessage(conn));
         this.sendConfirmationOrError(conn, msg, "Username is already taken.");
         return;
       }
     }
-    (conn.state as PlayerState).username = msg.username;
+    (conn.state as PlayerData).username = msg.username;
 
     // inform all players about the username change + send confirmation to the user
     this.sendConfirmationOrError(conn, msg);
@@ -449,6 +526,10 @@ export default class Server implements Party.Server {
         this.currentQuestion++;
       }
 
+      if (this.currentQuestion > this.questions.length) {
+        this.endGame();
+      }
+
       let q = this.questions[this.currentQuestion - 1];
       switch (this.roundTicks++) {
         // send question directly at start
@@ -461,17 +542,18 @@ export default class Server implements Party.Server {
 
         // start playback of song to guess
         case ROUND_START_MUSIC:
+          this.roundStartTime = Date.now();
           this.room.broadcast(this.getAudioControlMessage("play"));
           break;
-        
+
         // show results of current round
         case ROUND_SHOW_ANSWER:
-          this.room.broadcast(q.getAnswerMessage(this.currentQuestion));
+          this.calculatePoints();
+          this.room.broadcast(q.getAnswerMessage(this.currentQuestion, this.getAllPlayerData()));
+          for (let conn of this.room.getConnections()) {
+            this.resetPlayerAnswerData(conn);
+          }
           break;
-      }
-
-      if (this.currentQuestion > this.questions.length) {
-        this.endGame();
       }
     }
 
@@ -493,7 +575,7 @@ export default class Server implements Party.Server {
 
   /**
    * Resets the game to the default state and adds random questions.
-   * 
+   *
    * @param [skipQuestionAdding=false] whether to skip populating this.{@link questions} with random questions.
    */
   private resetGame(skipQuestionAdding: boolean = false) {
@@ -520,6 +602,40 @@ export default class Server implements Party.Server {
     // add distractions to the questions
     for (const q of this.questions) {
       q.generateDistractions(remainingSongs);
+    }
+  }
+
+  /**
+   * Save timestamp and index, when user selects an answer.
+   *
+   * @param conn
+   * @param msg
+   */
+  private selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
+    let playerData: PlayerData = conn.state as PlayerData;
+
+    playerData.answerTimestamp = Date.now();
+    playerData.answerIndex = msg.answerIndex;
+  }
+
+  /**
+   * Calculates the points for this round for all players that selected the correct answer.
+   */
+  private calculatePoints() {
+    for (let conn of this.room.getConnections()) {
+      let connData = conn.state as PlayerData;
+
+      if (connData.answerTimestamp && connData.answerIndex === this.questions[this.currentQuestion].getAnswerIndex()) {
+        // half the points for correct answer
+        connData.points += POINTS_PER_QUESTION / 2;
+
+        // remaining points depend on speed of answer
+        let factor = Math.max(0, (TIME_PER_QUESTION * 1000 - (connData.answerTimestamp - this.roundStartTime)))
+            / (TIME_PER_QUESTION * 1000);
+        connData.points += (POINTS_PER_QUESTION / 2) * factor;
+
+        connData.points = Math.round(connData.points);
+      }
     }
   }
 
@@ -588,38 +704,58 @@ export default class Server implements Party.Server {
     return Array.from(this.room.getConnections()).length;
   }
 
-  /**
-   * Get all usernames and there associated color
-   * 
-   * @returns A map containing the username as keys and their color as values
-   */
-  private getUsernamesWithColors(): PlayerState[] {
-    let states: PlayerState[] = [];
-    for (let connection of this.room.getConnections()) {
-      let state = connection.state as PlayerState;
-
-      if (state && state.username && state.color) {
-        states.push(state);
-      }
+  private getAllPlayerData(): PlayerData[] {
+    let data: PlayerData[] = [];
+    for (let conn of this.room.getConnections()) {
+      data.push(conn.state as PlayerData);
     }
 
-    return states;
+    return data;
+  }
+
+  /**
+   * Removes current answer data from a connection.
+   * @param connection the connection for which to clear the data.
+   * @private
+   */
+  private resetPlayerAnswerData(connection: Party.Connection): void {
+    const currentData = connection.state as PlayerData;
+    const playerData: PlayerData = {
+      username: currentData.username,
+      color: currentData.color,
+      points: currentData.points
+    };
+    connection.setState(playerData);
+  }
+
+  /**
+   * Get all usernames and there associated color
+   *
+   * @returns A map containing the username as keys and their color as values
+   */
+  private getAllPlayerStates(): PlayerState[] {
+    return this.getAllPlayerData()
+        .filter(d => d && d.username && d.color)
+        .map(d => ({
+          username: d.username,
+          color: d.color
+        } as PlayerState))
   }
 
   /**
    * Get all colors, which aren't used by any player
-   * 
+   *
    * @returns A string array of unused colors or an empty array if all colors are used.
    */
   private getUnusedColors(): string[] {
-    let usedColors = this.getUsernamesWithColors().map(item => item.color);
+    let usedColors = this.getAllPlayerStates().map(item => item.color);
 
     return COLORS.filter(item => usedColors.indexOf(item) < 0);
   }
 
   /**
    * Set initial random username and unused color for a player.
-   * 
+   *
    * @param conn The connection of the player
    * @returns whether the init was successful (room was not full)
    */
@@ -636,12 +772,13 @@ export default class Server implements Party.Server {
       return false;
     }
 
-    let connState: PlayerState = {
+    let connData: PlayerData = {
       username: username,
-      color: color
+      color: color,
+      points: 0
     };
 
-    conn.setState(connState);
+    conn.setState(connData);
 
     // send the current playlist to the connection
     conn.send(this.getPlaylistUpdateMessage());
@@ -651,7 +788,7 @@ export default class Server implements Party.Server {
 
   /**
    * Sends a confirmation or error message to the player, along with an update message.
-   * 
+   *
    * @param conn The connection of the player that should receive the messages
    * @param source The source/type of the confirmation message
    * @param error An optional error message to include in the confirmation
@@ -670,19 +807,19 @@ export default class Server implements Party.Server {
 
   /**
    * Constructs an update message with the current room/connection states to the connection.
-   * 
+   *
    * @param conn the connection to send the update to
    * @returns a JSON string of the constructed {@link UpdateMessage}
    */
   private getUpdateMessage(conn: Party.Connection): string {
-    let connState = conn.state as PlayerState;
+    let connData = conn.state as PlayerData;
 
     let msg: UpdateMessage = {
       type: "update",
       state: this.state,
-      players: this.getUsernamesWithColors(),
-      username: connState.username,
-      color: connState.color,
+      players: this.getAllPlayerStates(),
+      username: connData.username,
+      color: connData.color,
       isHost: conn === this.hostConnection
     };
 
@@ -691,7 +828,7 @@ export default class Server implements Party.Server {
 
   /**
    * Broadcast an update to all connected clients.
-   * 
+   *
    * @see {@link getUpdateMessage}
    */
   private broadcastUpdateMessage() {
@@ -723,7 +860,7 @@ export default class Server implements Party.Server {
   /**
    * Returns a JSON string representing a countdown message.
    * The countdown message is sent to connected clients when the countdown is updated.
-   * 
+   *
    * @returns a JSON string representing the countdown message.
    * @see {@link CountdownMessage}
    */
@@ -738,7 +875,7 @@ export default class Server implements Party.Server {
 
   /**
    * Constructs an audio control load message.
-   * 
+   *
    * @param action must be "load" for a load message.
    * @param audioURL an {@link Song["audioURL"]} to a music file that the client should preload.
    * @returns a JSON string of the constructed {@link AudioControlMessage}
@@ -746,7 +883,7 @@ export default class Server implements Party.Server {
   private getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): string;
   /**
    * Constructs an audio control message.
-   * 
+   *
    * @param action the {@link AudioControlMessage["action"]} that should be performed.
    * @param audioURL can only be provided for load action.
    * @returns a JSON string of the constructed {@link AudioControlMessage}
@@ -852,7 +989,7 @@ export default class Server implements Party.Server {
 
   /**
    * Fetches playlist information from an Apple Music URL.
-   * 
+   *
    * @param url The Apple Music URL of the playlist.
    * @returns A Promise resolving to the Playlist information.
    */
@@ -865,7 +1002,7 @@ export default class Server implements Party.Server {
     let text = await page.text();
 
     // get content of schema.org tag <script id=schema:music-[...] type="application/ld+json">
-    let regex = /<script\s+id="?schema:(music-artist|music-album|song)"?\s+type="?application\/ld\+json"?\s*>(?<json>[\s\S]*?)<\/script>/i;
+    let regex = /<script\s+id="?schema:(Music[^"]*|song)"?\s+type="?application\/ld\+json"?\s*>(?<json>[\s\S]*?)<\/script>/i;
     let match = regex.exec(text);
     if (!match || !match.groups) {
       return UnknownPlaylist;
@@ -916,7 +1053,7 @@ export default class Server implements Party.Server {
 
       return text;
     }
-    
+
     return null;
   }
 
@@ -952,7 +1089,7 @@ export default class Server implements Party.Server {
       roomID: roomID as string,
       error: errorMessage
     };
-    
+
     return Response.json(json, {status: statusCode});
   }
 }
