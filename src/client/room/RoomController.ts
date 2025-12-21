@@ -9,7 +9,13 @@ import type {
   HostRemovePlaylistMessage,
   StartGameMessage
 } from "../../schemas/RoomClientMessageSchemas";
-import {albumRegex, artistRegex, type Playlist, UnknownPlaylist} from "../../schemas/RoomSharedMessageSchemas";
+import {
+  albumRegex,
+  artistRegex,
+  type Playlist,
+  songRegex,
+  UnknownPlaylist
+} from "../../schemas/RoomSharedMessageSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
 import type {PlayerState} from "../../schemas/RoomServerMessageSchemas";
 
@@ -201,11 +207,18 @@ export class RoomController {
    * @returns A Promise resolving to true if the playlist was added, false otherwise.
    */
   public async tryAddPlaylist(url: string): Promise<boolean> {
-    if (!artistRegex.test(url) && !albumRegex.test(url)) {
+    let targetLookupUrl: string = url;
+    if (songRegex.test(targetLookupUrl)) {
+      targetLookupUrl = targetLookupUrl.replace(songRegex, (match, song, id) => {
+        return match.replace(id, `0?i=${id}`)
+            .replace(song, "album");
+      });
+      console.log(targetLookupUrl);
+    } else if (!artistRegex.test(targetLookupUrl) && !albumRegex.test(targetLookupUrl)) {
       return false;
     }
 
-    let results: ResultMusicTrack[] = await this.lookupURL(url, {
+    let results: ResultMusicTrack[] = await this.lookupURL(targetLookupUrl, {
       entity: "song",
       limit: 50
     });

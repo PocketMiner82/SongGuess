@@ -3,8 +3,9 @@ import z from "zod";
 
 export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
 
-export const artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/
-export const albumRegex =  /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/
+export const artistRegex = /^https?:\/\/music\.apple\.com\/[^/]+\/artist\/[^/]+\/(?<id>\d+)/
+export const albumRegex =  /^https?:\/\/music\.apple\.com\/[^/]+\/album\/[^/]+\/(?<id>\d+)(?:\?.*i=(?<trackId>\d+))?/
+export const songRegex =   /^https?:\/\/music\.apple\.com\/[^/]+\/(?<song>song)\/[^/]+\/(?<id>\d+)/
 
 export const SongSchema = z.object({
   /**
@@ -14,7 +15,7 @@ export const SongSchema = z.object({
 
   /**
    * A URL to the audio file of the song.
-   * Currently only audio previews from apple music are allowed.
+   * Currently only audio previews from Apple Music are allowed.
    */
   audioURL: z.url({pattern: /^https:\/\/audio-ssl\.itunes\.apple\.com\/itunes-assets\/AudioPreview.*\.m4a$/})
 });

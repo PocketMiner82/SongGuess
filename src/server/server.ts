@@ -6,7 +6,15 @@ import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHT
 import { type GameState, type PlayerState, type UpdateMessage, type ServerUpdatePlaylistsMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import { ClientMessageSchema, type ClientMessage, type ConfirmationMessage } from "../schemas/RoomMessageSchemas";
-import { type Playlist, type Song, COLORS, artistRegex, albumRegex, UnknownPlaylist } from "../schemas/RoomSharedMessageSchemas";
+import {
+  type Playlist,
+  type Song,
+  COLORS,
+  artistRegex,
+  albumRegex,
+  UnknownPlaylist,
+  songRegex
+} from "../schemas/RoomSharedMessageSchemas";
 import Question from "./Question";
 
 
@@ -843,7 +851,7 @@ export default class Server implements Party.Server {
    * @returns A Promise resolving to the Playlist information.
    */
   private static async getPlaylistInfo(url: string): Promise<Playlist> {
-    if (!artistRegex.test(url) && !albumRegex.test(url)) {
+    if (!artistRegex.test(url) && !albumRegex.test(url) && !songRegex.test(url)) {
       return UnknownPlaylist;
     }
 
@@ -851,7 +859,7 @@ export default class Server implements Party.Server {
     let text = await page.text();
 
     // get content of schema.org tag <script id=schema:music-[...] type="application/ld+json">
-    let regex = /<script\s+id="?schema:music-[^" ]*"?\s+type="?application\/ld\+json"?\s*>(?<json>[\s\S]*?)<\/script>/i;
+    let regex = /<script\s+id="?schema:(music-artist|music-album|song)"?\s+type="?application\/ld\+json"?\s*>(?<json>[\s\S]*?)<\/script>/i;
     let match = regex.exec(text);
     if (!match || !match.groups) {
       return UnknownPlaylist;

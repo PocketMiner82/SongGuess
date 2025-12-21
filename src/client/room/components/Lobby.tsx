@@ -1,7 +1,7 @@
 import { useState, useCallback, memo, useMemo } from "react";
 import type { ServerMessage } from "../../../schemas/RoomMessageSchemas";
 import type { PlayerState, GameState } from "../../../schemas/RoomServerMessageSchemas";
-import { COLORS } from "../../../schemas/RoomSharedMessageSchemas";
+import {albumRegex, artistRegex, COLORS, songRegex} from "../../../schemas/RoomSharedMessageSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
 import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext } from "../RoomController";
@@ -18,9 +18,6 @@ function AddPlaylistInput() {
   const [playlistURL, setPlaylistURL] = useState("");
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const artistRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/artist\/[^/]*\/(?<id>\d+)$/;
-  const albumRegex = /^https?:\/\/music\.apple\.com\/[^/]*\/album\/[^/]*\/(?<id>\d+)$/;
-
   const listener = useCallback((msg: ServerMessage) => {
     if (msg.type === "confirmation" && msg.source === "host_add_playlist") {
       setSearchStatus(msg.error ? "error" : "success");
@@ -31,7 +28,7 @@ function AddPlaylistInput() {
 
   if (!isHost) return null;
 
-  const isValidURL = artistRegex.test(playlistURL) || albumRegex.test(playlistURL);
+  const isValidURL = artistRegex.test(playlistURL) || albumRegex.test(playlistURL) || songRegex.test(playlistURL);
 
   const handleAdd = (text: string) => {
     if (isValidURL) {
