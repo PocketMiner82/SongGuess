@@ -23,7 +23,7 @@ export const PostCreateRoomResponseSchema = z.object({
   roomID: z.string(),
 
   /**
-   * If an error happend, this will contain the error message
+   * If an error happened, this will contain the error message
    */
   error: z.string()
 });

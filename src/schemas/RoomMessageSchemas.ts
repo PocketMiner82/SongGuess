@@ -14,23 +14,33 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
   UpdateMessageSchema,
   UpdatePlaylistsMessageSchema,
   CountdownMessageSchema,
+  AudioControlMessageSchema,
   QuestionMessageSchema,
   AnswerMessageSchema
 ]);
+
+
+export const OtherMessageSchema = z.object({
+  type: "other"
+})
+
+
+export const SourceMessageSchema = z.discriminatedUnion("type", [
+  _ServerMessageSchema,
+  _ClientMessageSchema,
+  OtherMessageSchema
+]);
+
+export type SourceMessage = z.infer<typeof SourceMessageSchema>;
+
 
 export const ConfirmationMessageSchema = z.object({
   type: z.literal("confirmation"),
 
   /**
-   * The message type that is being confirmed.
+   * The message that is being confirmed.
    */
-  source: z.literal([
-    ..._ClientMessageSchema.options.map(o => o.shape.type.value),
-    ..._ServerMessageSchema.options.map(o => o.shape.type.value),
-    // special case: AudioControlMessage is a discriminated union itself
-    ...AudioControlMessageSchema.options.map(o => o.shape.type.value),
-    "other"
-  ]),
+  sourceMessage: SourceMessageSchema,
 
   /**
    * Optional error message if the requested action could not be performed.
@@ -45,8 +55,7 @@ export type ConfirmationMessage = z.infer<typeof ConfirmationMessageSchema>;
  */
 export const ServerMessageSchema = z.discriminatedUnion("type", [
   ConfirmationMessageSchema,
-  _ServerMessageSchema,
-  AudioControlMessageSchema
+  _ServerMessageSchema
 ]);
 
 export type ServerMessage = z.infer<typeof ServerMessageSchema>;

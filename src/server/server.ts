@@ -5,7 +5,12 @@ import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
 import { type GameState, type PlayerState, type UpdateMessage, type UpdatePlaylistsMessage, type AudioControlMessage, type CountdownMessage } from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
-import { ClientMessageSchema, type ClientMessage, type ConfirmationMessage } from "../schemas/RoomMessageSchemas";
+import {
+  ClientMessageSchema,
+  type ClientMessage,
+  type ConfirmationMessage,
+  type SourceMessage, OtherMessageSchema
+} from "../schemas/RoomMessageSchemas";
 import {
   type Playlist,
   type Song,
@@ -16,6 +21,7 @@ import {
   songRegex
 } from "../schemas/RoomSharedMessageSchemas";
 import Question from "./Question";
+import type {ChangeUsernameMessage} from "../schemas/RoomClientMessageSchemas";
 
 
 /**
@@ -201,7 +207,7 @@ export default class Server implements Party.Server {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
-      this.sendConfirmationOrError(conn, "other", "Message is not JSON.");
+      this.sendConfirmationOrError(conn, OtherMessageSchema, "Message is not JSON.");
       return;
     }
 
@@ -209,7 +215,7 @@ export default class Server implements Party.Server {
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
       this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
-      this.sendConfirmationOrError(conn, "other", `Parsing error:\n${z.prettifyError(result.error)}`);
+      this.sendConfirmationOrError(conn, OtherMessageSchema, `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
 
@@ -219,19 +225,19 @@ export default class Server implements Party.Server {
     switch(msg.type) {
       case "confirmation":
         if (msg.error) {
-          this.log(`Client reported an error for ${msg.source}:\n${msg.error}`, "warn");
+          this.log(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`, "warn");
         }
         break;
       case "change_username":
-        if (!this.performChecks(conn, msg.type, "lobby")) {
+        if (!this.performChecks(conn, msg, "lobby")) {
           return;
         }
 
-        this.changeUsername(conn, msg.username);
+        this.changeUsername(conn, msg);
         break;
       case "add_playlist":
       case "remove_playlist":
-        if (!this.performChecks(conn, msg.type, "host", "lobby", "countdown")) {
+        if (!this.performChecks(conn, msg, "host", "lobby", "countdown")) {
           return;
         }
 
@@ -243,7 +249,7 @@ export default class Server implements Party.Server {
           // remove at index
           if (msg.index >= this.playlists.length) {
             conn.send(this.getPlaylistUpdateMessage());
-            this.sendConfirmationOrError(conn, msg.type, `Index out of bounds: ${msg.index}`);
+            this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
             return;
           }
           this.playlists.splice(msg.index, 1);
@@ -261,18 +267,18 @@ export default class Server implements Party.Server {
 
         // send the update to all players + confirmation to the host
         this.room.broadcast(this.getPlaylistUpdateMessage());
-        this.sendConfirmationOrError(conn, msg.type);
+        this.sendConfirmationOrError(conn, msg);
         break;
       case "start_game":
-        if (!this.performChecks(conn, msg.type, "host", "lobby", "countdown", "min_song_count")) {
+        if (!this.performChecks(conn, msg, "host", "lobby", "countdown", "min_song_count")) {
           return;
         }
 
-        this.sendConfirmationOrError(conn, "start_game");
+        this.sendConfirmationOrError(conn, msg);
         this.startGame();
         break;
       default:
-        this.sendConfirmationOrError(conn, "other", `Invalid message type: ${(msg as ClientMessage).type}`);
+        this.sendConfirmationOrError(conn, msg, `Invalid message type: ${(msg as ClientMessage).type}`);
         break;
     }
   }
@@ -319,7 +325,7 @@ export default class Server implements Party.Server {
    * Performs one or more of the specified checks.
    * 
    * @param conn The connection to perform the checks for.
-   * @param action The action that caused the check.
+   * @param msg The message that caused the check.
    * @param checks One of the following:
    *               - "host": Checks whether the connection is the host.
    *               - "lobby": Checks whether the game is currently in lobby.
@@ -327,8 +333,8 @@ export default class Server implements Party.Server {
    *               - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
-  private performChecks(conn: Party.Connection|null, action: ConfirmationMessage["source"], ...checks: ("host" | "lobby" | "countdown" | "min_song_count")[]): boolean {
-    let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, action, error) : () => {};
+  private performChecks(conn: Party.Connection|null, msg: SourceMessage, ...checks: ("host" | "lobby" | "countdown" | "min_song_count")[]): boolean {
+    let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, msg, error) : () => {};
     let successful: boolean = true;
     
     for (const element of checks) {
@@ -376,22 +382,22 @@ export default class Server implements Party.Server {
    * Changes the username for a connected player.
    *
    * @param conn The connection of the player requesting the change.
-   * @param username The new username to assign.
+   * @param msg The message with the username change request.
    */
-  private changeUsername(conn: Party.Connection, username: string) {
+  private changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
     // username is already validated, just check if it's used by another player
     for (let connection of this.room.getConnections()) {
       let state = connection.state as PlayerState;
-      if (connection !== conn && state.username === username) {
+      if (connection !== conn && state.username === msg.username) {
         conn.send(this.getUpdateMessage(conn));
-        this.sendConfirmationOrError(conn, "change_username", "Username is already taken.");
+        this.sendConfirmationOrError(conn, msg, "Username is already taken.");
         return;
       }
     }
-    (conn.state as PlayerState).username = username;
+    (conn.state as PlayerState).username = msg.username;
 
     // inform all players about the username change + send confirmation to the user
-    this.sendConfirmationOrError(conn, "change_username");
+    this.sendConfirmationOrError(conn, msg);
     this.broadcastUpdateMessage();
   }
 
@@ -651,10 +657,10 @@ export default class Server implements Party.Server {
    * @param error An optional error message to include in the confirmation
    * @see {@link getUpdateMessage}
    */
-  private sendConfirmationOrError(conn: Party.Connection, source: ConfirmationMessage["source"], error?: string) {
+  private sendConfirmationOrError(conn: Party.Connection, source: SourceMessage, error?: string) {
     let resp: ConfirmationMessage = {
       type: "confirmation",
-      source: source,
+      sourceMessage: source,
       error: error
     }
 

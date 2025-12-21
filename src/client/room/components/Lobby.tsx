@@ -19,7 +19,7 @@ function AddPlaylistInput() {
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "confirmation" && msg.source === "add_playlist") {
+    if (msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
       setSearchStatus(msg.error ? "error" : "success");
     }
   }, []);
@@ -256,7 +256,7 @@ function StartGame() {
   const [error, setError] = useState<string | null>(null);
 
   const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "confirmation" && msg.source === "start_game") {
+    if (msg.type === "confirmation" && msg.sourceMessage.type === "start_game") {
       setError(msg.error ?? null);
     }
   }, []);

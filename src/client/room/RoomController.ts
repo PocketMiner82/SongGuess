@@ -156,7 +156,7 @@ export class RoomController {
     let msg: ServerMessage = result.data;
 
     if (msg.type === "confirmation" && msg.error) {
-      console.error(`Server reported an error for ${msg.source}:\n${msg.error}`);
+      console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
     }
 
     // call listeners

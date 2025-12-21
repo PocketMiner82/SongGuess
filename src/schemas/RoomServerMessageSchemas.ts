@@ -139,7 +139,7 @@ export const UpdateMessageSchema = z.object({
   players: z.array(PlayerStateSchema),
 
   /**
-   * The friendly username of the player (which the user can reqest to change)
+   * The friendly username of the player (which the user can request to change)
    */
   username: UsernameSchema,
 
