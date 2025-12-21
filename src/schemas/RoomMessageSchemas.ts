@@ -21,7 +21,7 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
 
 
 export const OtherMessageSchema = z.object({
-  type: "other"
+  type: z.literal("other")
 })
 
 
