@@ -14,7 +14,7 @@
     "chroma-js": "^3.2.0",
     "cookie": "^1.1.1",
     "itunes-store-api": "^2.1.0",
-    "partysocket": "^1.1.6",
+    "partysocket": "^1.1.10",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
     "react": "^19.2.3",
