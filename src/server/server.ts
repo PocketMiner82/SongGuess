@@ -81,19 +81,20 @@ const POINTS_PER_QUESTION = 1000;
 // noinspection JSUnusedGlobalSymbols
 export default class Server implements Party.Server {
   /**
+   * Log messages are prefixed with this string.
+   */
+  readonly LOG_PREFIX: string = `[Room ${this.room.id}]`;
+
+
+  /**
    * True, if this room was created by a request to /createRoom
    */
   isValidRoom: boolean = false;
 
   /**
-   * Log messages are prefixed with this string.
+   * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
-  LOG_PREFIX: string = `[Room ${this.room.id}]`;
-
-  /**
-   * The current state of the game.
-   */
-  state: GameState = "lobby";
+  cleanupTimeout: NodeJS.Timeout|null = null;
 
   /**
    * This is the websocket connection of the host.
@@ -111,7 +112,7 @@ export default class Server implements Party.Server {
   playlists: Playlist[] = [];
 
   /**
-   * Songs of the currently selected playlist(s)
+   * All songs of the currently selected playlist(s)
    */
   songs: Song[] = [];
 
@@ -126,9 +127,14 @@ export default class Server implements Party.Server {
   countdown: CountdownMessage["countdown"] = 0;
 
   /**
-   * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
+   * The current state of the game.
    */
-  cleanupTimeout: NodeJS.Timeout|null = null;
+  state: GameState = "lobby";
+
+  /**
+   * The timestamp when the current round started.
+   */
+  roundStartTime: number = -1;
 
   /**
    * The interval function for the main game loop.
@@ -149,11 +155,6 @@ export default class Server implements Party.Server {
    * The index of the current question (1-based).
    */
   currentQuestion: number = 1;
-
-  /**
-   * The timestamp when the current round started.
-   */
-  roundStartTime: number = -1;
 
 
   /**
@@ -184,12 +185,6 @@ export default class Server implements Party.Server {
     // kick player if room is not created yet
     if (!this.isValidRoom) {
       conn.close(4000, "Room ID not found");
-      return;
-    }
-
-    // also kick if room is already ingame
-    if (this.state !== "lobby") {
-      conn.close(4001, "Game is already running");
       return;
     }
 
@@ -291,6 +286,14 @@ export default class Server implements Party.Server {
 
         this.selectAnswer(conn, msg);
         break;
+      case "return_to_lobby":
+        if (!this.performChecks(conn, msg, "host", "not_lobby")) {
+          return;
+        }
+
+        this.resetGame();
+        this.broadcastUpdateMessage();
+        break;
       default:
         // in case a message is defined but not yet implemented
         this.sendConfirmationOrError(conn, msg, `Not implemented: ${(msg as ClientMessage).type}`);
@@ -344,11 +347,12 @@ export default class Server implements Party.Server {
    * @param checks One of the following:
    *               - "host": Checks whether the connection is the host.
    *               - "lobby": Checks whether the game is currently in lobby.
+   *               - "not_lobby": Checks for the opposite.
    *               - "countdown": Checks whether a countdown is currently running.
    *               - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
-  private performChecks(conn: Party.Connection|null, msg: SourceMessage, ...checks: ("host" | "lobby" | "countdown" | "min_song_count" | "answer")[]): boolean {
+  private performChecks(conn: Party.Connection|null, msg: SourceMessage, ...checks: ("host" | "lobby" | "not_lobby" | "countdown" | "min_song_count" | "answer")[]): boolean {
     let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, msg, error) : () => {};
     let successful: boolean = true;
     let connData: PlayerData = conn?.state as PlayerData;
@@ -365,6 +369,13 @@ export default class Server implements Party.Server {
         case "lobby":
           if (this.state !== "lobby") {
             possibleErrorFunc("Action can only be used in lobby.");
+            successful = false;
+          }
+          break;
+
+        case "not_lobby":
+          if (this.state === "lobby") {
+            possibleErrorFunc("Action can only be used not in lobby.");
             successful = false;
           }
           break;
@@ -514,6 +525,9 @@ export default class Server implements Party.Server {
 
   /**
    * Starts a countdown, then starts the game loop.
+   * Will reset the game state before starting
+   * @see resetGame
+   * @see endGame
    */
   private startGame() {
     /**
@@ -549,6 +563,8 @@ export default class Server implements Party.Server {
         // show results of current round
         case ROUND_SHOW_ANSWER:
           this.calculatePoints();
+
+          // this also shows which player voted for which question
           this.room.broadcast(q.getAnswerMessage(this.currentQuestion, this.getAllPlayerData()));
           for (let conn of this.room.getConnections()) {
             this.resetPlayerAnswerData(conn);
@@ -561,36 +577,40 @@ export default class Server implements Party.Server {
     this.broadcastUpdateMessage();
 
     this.startCountdown(3, () => {
+      this.resetGame();
       this.state = "ingame";
       this.broadcastUpdateMessage();
 
-      console.log("ingame");
-
-      this.resetGame();
-      console.log(this.questions);
+      this.addRandomQuestions();
       gameLoop();
       this.gameLoopInterval = setInterval(gameLoop, 1000);
     });
   }
 
   /**
-   * Resets the game to the default state and adds random questions.
+   * Resets the game to the lobby state.
    *
-   * @param [skipQuestionAdding=false] whether to skip populating this.{@link questions} with random questions.
+   * @see endGame
    */
-  private resetGame(skipQuestionAdding: boolean = false) {
-    if (this.gameLoopInterval) {
-      clearInterval(this.gameLoopInterval);
-      this.gameLoopInterval = null;
-    }
+  private resetGame() {
+    this.endGame(false);
     this.stopCountdown();
 
     this.roundTicks = 0;
     this.questions = [];
     this.currentQuestion = 1;
+    this.state = "lobby";
 
-    if (skipQuestionAdding) return;
+    // reset points of all players
+    for (let conn of this.room.getConnections()) {
+      this.resetPlayerAnswerData(conn, true);
+    }
+  }
 
+  /**
+   * Add random song guessing questions to the room.
+   */
+  private addRandomQuestions() {
     let remainingSongs = this.songs;
 
     // add 10 random questions
@@ -640,9 +660,11 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Ends the current game and transitions to the results state.
+   * Ends the current game without resetting and transitions to the results state.
+   *
+   * @param sendUpdate whether to send an update that the game ended to the players.
    */
-  private endGame() {
+  private endGame(sendUpdate: boolean = true) {
     if (!this.gameLoopInterval) return;
 
     clearInterval(this.gameLoopInterval);
@@ -651,7 +673,9 @@ export default class Server implements Party.Server {
     this.room.broadcast(this.getAudioControlMessage("pause"));
 
     this.state = "results";
-    this.broadcastUpdateMessage();
+
+    // the update message always contains the points, displaying ranks is handled client-side
+    if (sendUpdate) this.broadcastUpdateMessage();
   }
 
   /**
@@ -661,7 +685,7 @@ export default class Server implements Party.Server {
     this.cleanupTimeout = setTimeout(() => {
       if (this.getOnlineCount() === 0) {
         this.isValidRoom = false;
-        this.resetGame(true);
+        this.resetGame();
         this.log("Room closed due to timeout.");
       }
       this.cleanupTimeout = null;
@@ -716,14 +740,16 @@ export default class Server implements Party.Server {
   /**
    * Removes current answer data from a connection.
    * @param connection the connection for which to clear the data.
+   * @param resetPoints whether to also reset the points of a player.
    * @private
    */
-  private resetPlayerAnswerData(connection: Party.Connection): void {
+  private resetPlayerAnswerData(connection: Party.Connection, resetPoints:boolean = false): void {
     const currentData = connection.state as PlayerData;
+    const points = resetPoints ? 0 : currentData.points;
     const playerData: PlayerData = {
       username: currentData.username,
       color: currentData.color,
-      points: currentData.points
+      points: points
     };
     connection.setState(playerData);
   }

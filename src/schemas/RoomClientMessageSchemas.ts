@@ -2,6 +2,13 @@ import z from "zod";
 import { PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
+export const ReturnToLobbyMessageSchema = z.object({
+  type: z.literal("return_to_lobby").default("return_to_lobby")
+});
+
+export type ReturnToLobbyMessage = z.infer<typeof ReturnToLobbyMessageSchema>;
+
+
 export const SelectAnswerMessageSchema = z.object({
   type: z.literal("select_answer").default("select_answer"),
 

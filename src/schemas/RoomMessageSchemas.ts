@@ -1,7 +1,7 @@
 import z from "zod";
 import {
   ChangeUsernameMessageSchema, AddPlaylistMessageSchema, RemovePlaylistMessageSchema, StartGameMessageSchema,
-  SelectAnswerMessageSchema
+  SelectAnswerMessageSchema, ReturnToLobbyMessageSchema
 } from "./RoomClientMessageSchemas";
 import { UpdateMessageSchema, UpdatePlaylistsMessageSchema, CountdownMessageSchema, AudioControlMessageSchema, AnswerMessageSchema, QuestionMessageSchema } from "./RoomServerMessageSchemas";
 
@@ -11,7 +11,8 @@ const _ClientMessageSchema = z.discriminatedUnion("type", [
   AddPlaylistMessageSchema,
   RemovePlaylistMessageSchema,
   StartGameMessageSchema,
-  SelectAnswerMessageSchema
+  SelectAnswerMessageSchema,
+  ReturnToLobbyMessageSchema
 ]);
 
 const _ServerMessageSchema = z.discriminatedUnion("type", [
