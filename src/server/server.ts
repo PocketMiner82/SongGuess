@@ -684,12 +684,33 @@ export default class Server implements Party.Server {
   private delayedCleanup() {
     this.cleanupTimeout = setTimeout(() => {
       if (this.getOnlineCount() === 0) {
-        this.isValidRoom = false;
-        this.resetGame();
+        this.resetRoom();
         this.log("Room closed due to timeout.");
       }
       this.cleanupTimeout = null;
     }, ROOM_CLEANUP_TIMEOUT * 1000);
+  }
+
+  /**
+   * Resets the room to its initial state.
+   * @private
+   */
+  private resetRoom() {
+    this.resetGame();
+
+    this.isValidRoom = false;
+    this.cleanupTimeout = null;
+    this.hostConnection = null;
+    this.playlists = [];
+    this.songs = [];
+    this.countdownInterval = null;
+    this.countdown = 0;
+    this.state = "lobby";
+    this.roundStartTime = -1;
+    this.gameLoopInterval = null;
+    this.roundTicks = 0;
+    this.questions = [];
+    this.currentQuestion = 1;
   }
 
   /**
