@@ -1,3 +1,10 @@
+# [2.0.0-dev.47](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.46...2.0.0-dev.47) (2025-12-27)
+
+
+### Features
+
+* **server:** add ability to go from results->lobby + improve reset logic ([ee17771](https://github.com/PocketMiner82/SongGuess/commit/ee17771b9a7438cb6f022f7f8da50adff86e85b5))
+
 # [2.0.0-dev.46](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.45...2.0.0-dev.46) (2025-12-21)
 
 
