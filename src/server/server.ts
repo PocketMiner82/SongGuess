@@ -395,10 +395,10 @@ export default class Server implements Party.Server {
           break;
 
         case "answer":
-          if (this.roundTicks >= ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
+          if (this.roundTicks > ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
             possibleErrorFunc("Can only accept answering during questioning phase.");
             successful = false;
-          } else if (conn && connState.answerIndex) {
+          } else if (conn && connState.answerIndex !== undefined) {
             possibleErrorFunc("You already selected an answer.");
             successful = false;
           }
@@ -636,6 +636,20 @@ export default class Server implements Party.Server {
 
     playerState.answerTimestamp = Date.now();
     playerState.answerIndex = msg.answerIndex;
+
+    let everyoneVoted = true;
+    for (let conn of this.room.getConnections()) {
+      let connState = conn.state as PlayerState;
+      if (connState.answerIndex === undefined) {
+        everyoneVoted = false;
+        break;
+      }
+    }
+
+    // show answers if everyone voted
+    if (everyoneVoted) {
+      this.roundTicks = ROUND_SHOW_ANSWER;
+    }
   }
 
   /**
