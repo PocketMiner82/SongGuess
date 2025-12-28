@@ -270,8 +270,8 @@ export class RoomController {
     }
 
     const playlist: Playlist = await this.getPlaylistInfo(url);
-      if (playlist.songs!.length === 0) {
-        let results: ResultMusicTrack[] = await this.lookupURL(targetLookupUrl, {
+    if (playlist.songs!.length === 0) {
+      let results: ResultMusicTrack[] = await this.lookupURL(targetLookupUrl, {
         entity: "song",
         limit: 50
       });
@@ -279,7 +279,7 @@ export class RoomController {
       if (results.length === 0) return false;
 
       // filter only music tracks and map to our internal format
-      const songs = results.filter(r => r.wrapperType === "track").map(r => ({
+      playlist.songs = results.filter(r => r.wrapperType === "track").map(r => ({
         name: r.trackName,
         audioURL: r.previewUrl,
       }));
