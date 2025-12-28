@@ -1,3 +1,10 @@
+# [2.0.0-dev.50](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.49...2.0.0-dev.50) (2025-12-28)
+
+
+### Features
+
+* **Lobby:** temporarily show points next to player ([0115215](https://github.com/PocketMiner82/SongGuess/commit/0115215e9c849d544c7e3152765129e949839fda))
+
 # [2.0.0-dev.49](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.48...2.0.0-dev.49) (2025-12-28)
 
 
