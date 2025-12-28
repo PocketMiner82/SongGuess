@@ -1,3 +1,10 @@
+# [2.0.0-dev.51](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.50...2.0.0-dev.51) (2025-12-28)
+
+
+### Bug Fixes
+
+* iTunes search api sometimes returned albums without tracks ([59c4b4a](https://github.com/PocketMiner82/SongGuess/commit/59c4b4a85419cd5f1c55f07125a07c6a2112b6b5))
+
 # [2.0.0-dev.50](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.49...2.0.0-dev.50) (2025-12-28)
 
 
