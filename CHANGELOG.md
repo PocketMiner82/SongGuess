@@ -1,3 +1,10 @@
+# [2.0.0-dev.48](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.47...2.0.0-dev.48) (2025-12-28)
+
+
+### Features
+
+* basic implementation of ingame component ([a77dd3b](https://github.com/PocketMiner82/SongGuess/commit/a77dd3bdd5ba2bc2669b91ceb084ecaf08cd8dbe))
+
 # [2.0.0-dev.47](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.46...2.0.0-dev.47) (2025-12-27)
 
 
