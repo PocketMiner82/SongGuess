@@ -40,7 +40,7 @@ const AnswerOption = memo(function AnswerOption({
       onClick={() => onSelect(index)}
       disabled={isDisabled}
       defaultColors={false}
-      className={`w-full text-center justify-start transition-colors ${getButtonStyle()}`}
+      className={`w-60 min-h-15 xl:w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
     >
       {option}
     </Button>
@@ -104,7 +104,7 @@ function QuestionDisplay() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => (
           <AnswerOption
             key={index}
