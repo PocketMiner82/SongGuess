@@ -7,7 +7,8 @@ import type {
   ChangeUsernameMessage,
   AddPlaylistMessage,
   RemovePlaylistMessage,
-  StartGameMessage
+  StartGameMessage,
+  SelectAnswerMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
   albumRegex,
@@ -182,6 +183,18 @@ export class RoomController {
   public startGame() {
     let msg: StartGameMessage = {
       type: "start_game"
+    };
+    this.socket.send(JSON.stringify(msg));
+  }
+
+  /**
+   * Sends the selected answer to the server.
+   * @param answerIndex The index of the selected answer (0-3).
+   */
+  public selectAnswer(answerIndex: number) {
+    let msg: SelectAnswerMessage = {
+      type: "select_answer",
+      answerIndex
     };
     this.socket.send(JSON.stringify(msg));
   }

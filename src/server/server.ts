@@ -673,6 +673,7 @@ export default class Server implements Party.Server {
     this.room.broadcast(this.getAudioControlMessage("pause"));
 
     this.state = "results";
+    this.state = "lobby";
 
     // the update message always contains the points, displaying ranks is handled client-side
     if (sendUpdate) this.broadcastUpdateMessage();

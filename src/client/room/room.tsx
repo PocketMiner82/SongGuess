@@ -3,6 +3,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { RoomContext, useControllerContext, useRoomController, useRoomControllerListener } from "./RoomController";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";
+import {Ingame} from "./components/Ingame";
 
 
 function Loading() {
@@ -113,6 +114,7 @@ function App() {
   return (
     <RoomContext.Provider value={controller}>
       <Lobby />
+      <Ingame />
       <Countdown />
       <Audio />
     </RoomContext.Provider>
