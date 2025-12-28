@@ -1,3 +1,11 @@
+# [2.0.0-dev.49](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.48...2.0.0-dev.49) (2025-12-28)
+
+
+### Bug Fixes
+
+* **client:** changing volume no longer stops playback + update styling ([70ec9a1](https://github.com/PocketMiner82/SongGuess/commit/70ec9a1b22e27b6fb4020f6118f49ff623d394a8))
+* **client:** changing volume no longer stops playback + update styling ([5e45674](https://github.com/PocketMiner82/SongGuess/commit/5e45674be37b3b95351954a5ce4ffd3e3e2b83a8))
+
 # [2.0.0-dev.48](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.47...2.0.0-dev.48) (2025-12-28)
 
 
