@@ -269,21 +269,21 @@ export class RoomController {
       return false;
     }
 
-    let results: ResultMusicTrack[] = await this.lookupURL(targetLookupUrl, {
-      entity: "song",
-      limit: 50
-    });
-
-    if (results.length === 0) return false;
-
-    // filter only music tracks and map to our internal format
-    const songs = results.filter(r => r.wrapperType === "track").map(r => ({
-      name: r.trackName,
-      audioURL: r.previewUrl,
-    }));
-
     const playlist: Playlist = await this.getPlaylistInfo(url);
-    playlist.songs = songs;
+      if (playlist.songs!.length === 0) {
+        let results: ResultMusicTrack[] = await this.lookupURL(targetLookupUrl, {
+        entity: "song",
+        limit: 50
+      });
+
+      if (results.length === 0) return false;
+
+      // filter only music tracks and map to our internal format
+      const songs = results.filter(r => r.wrapperType === "track").map(r => ({
+        name: r.trackName,
+        audioURL: r.previewUrl,
+      }));
+    }
 
     const req: AddPlaylistMessage = {
       type: "add_playlist",

@@ -43,7 +43,7 @@ const ROOM_CLEANUP_TIMEOUT = 10;
 /**
  * The number of questions to generate per game.
  */
-const QUESTION_COUNT = 3;
+const QUESTION_COUNT = 10;
 
 /**
  * The time allocated for each question in seconds.
@@ -1047,13 +1047,26 @@ export default class Server implements Party.Server {
       let data = JSON.parse(json);
       let name: string = data["name"];
       let cover: string|null = null;
+      let songs: Song[] = [];
       if (data["image"] && typeof data["image"] === "string") {
         cover = data["image"];
       }
+
+      if (data["@type"] && data["@type"] === "MusicAlbum" && data["tracks"]) {
+        songs = data["tracks"].map((e: any) => 
+          e["audio"] && e["audio"]["contentUrl"] && e["audio"]["name"]
+          ? {
+              "name": e["audio"]["name"],
+              "audioURL": e["audio"]["contentUrl"]
+            }
+          : null
+          ).filter((e: any) => e !== null);
+      }
+
       return {
         name: name,
         cover: cover,
-        songs: []
+        songs: songs
       };
     } catch {
       return UnknownPlaylist;
