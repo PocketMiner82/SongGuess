@@ -4,7 +4,7 @@ import {albumRegex, artistRegex, COLORS, songRegex} from "../../../schemas/RoomS
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
 import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext } from "../RoomController";
-import { PlayerAvatar } from "./PlayerAvatar";
+import {PlayerCard} from "./PlayerCard";
 
 
 /**
@@ -89,69 +89,6 @@ function AddPlaylistInput() {
 }
 
 /**
- * Interactive list entry for a single player. Allows the current user
- * to edit their username by clicking on it.
- * 
- * @param player The player's state or null for empty slot
- * @param username The current user's username
- */
-const PlayerListEntry = memo(function PlayerListEntry({
-  player,
-  username
-}: {
-  player: PlayerState|null;
-  username: string;
-}) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(username);
-  const controller = useControllerContext();
-
-  const handleNameUpdate = () => {
-    if (editedName.trim() && editedName !== username) {
-      controller.updateUsername(editedName.trim());
-    }
-    setIsEditing(false);
-  };
-
-  return (
-    <li className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
-      <PlayerAvatar size={48} playerState={player} />
-      {player ? (
-        <div className="flex items-center gap-2">
-          {isEditing ? (
-            <input
-              type="text"
-              value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
-              onBlur={handleNameUpdate}
-              onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
-              autoFocus
-              maxLength={16}
-              className="text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none focus:border-secondary"
-            />
-          ) : (
-            <span 
-              className={`text-lg font-medium ${player.username === username ? "cursor-pointer hover:underline" : ""}`}
-              onClick={() => {
-                if (player.username === username) {
-                  setEditedName(username);
-                  setIsEditing(true);
-                }
-              }}
-            >
-              {player.username + (player.username === username ? " (You)" : "")}
-            </span>
-          )}
-        </div>
-      ) : (
-        <span className="text-lg text-disabled-text">Empty slot</span>
-      )}
-    </li>
-  );
-});
-
-
-/**
  * Displays all players in the room as a grid. Shows empty slots
  * if there are available colors remaining.
  */
@@ -169,7 +106,7 @@ function PlayerList() {
       <h3 className="text-xl font-bold mb-3">Players</h3>
       <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
         {slots.map((player, idx) => (
-          <PlayerListEntry
+          <PlayerCard
             key={player?.username || `empty-${idx}`}
             player={player}
             username={username}
@@ -198,7 +135,7 @@ function PlaylistListEntry({index, title, subtitle, coverURL}: {index: number, t
       {coverURL ? (
         <img src={coverURL} alt="Album Cover" className="w-25 h-25 lg:w-30 lg:h-30 2xl:w-40 2xl:h-40 rounded-xl object-cover" />
       ) : (
-        <div className="w-25 h-25 lg:w-30 lg:h-30 2xl:w-40 2xl:h-40 rounded-xl bg-disabled-bg flex items-center justify-center">
+        <div className="min-w-25 min-h-25 lg:min-w-30 lg:min-h-30 2xl:min-w-40 2xl:min-h-40 rounded-xl bg-disabled-bg flex items-center justify-center">
           <span className="text-disabled-text text-4xl">?</span>
         </div>
       )}

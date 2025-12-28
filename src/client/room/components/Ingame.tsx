@@ -30,9 +30,9 @@ const AnswerOption = memo(function AnswerOption({
       return "bg-error text-white";
     }
     if (isSelected) {
-      return "bg-secondary text-white hover:bg-secondary-hover";
+      return "bg-secondary text-white";
     }
-    return "bg-card-bg text-default hover:bg-card-hover-bg";
+    return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
   };
 
   return (
@@ -40,9 +40,9 @@ const AnswerOption = memo(function AnswerOption({
       onClick={() => onSelect(index)}
       disabled={isDisabled}
       defaultColors={false}
-      className={`w-full text-left justify-start transition-colors ${getButtonStyle()}`}
+      className={`w-full text-center justify-start transition-colors ${getButtonStyle()}`}
     >
-      <span className="font-medium">{String.fromCharCode(65 + index)}.</span> {option}
+      {option}
     </Button>
   );
 });
@@ -61,29 +61,30 @@ function QuestionDisplay() {
   useRoomControllerListener(controller, useCallback(msg => {
     setCurrentQuestion(controller.currentQuestion);
     setCurrentAnswer(controller.currentAnswer);
-    setCanAnswer(controller.currentQuestion !== null);
+    setCanAnswer(false);
 
     if (msg?.type === "question") {
       setSelectedAnswer(null);
+    } else if (msg?.type === "audio_control" && msg.action === "play") {
+      setCanAnswer(true);
     }
   }, [controller.currentAnswer, controller.currentQuestion]));
 
   const handleAnswerSelect = useCallback((answerIndex: number) => {
-    if (!canAnswer || selectedAnswer !== null) return;
+    if (!canAnswer) return;
     
     setSelectedAnswer(answerIndex);
+    setCanAnswer(false);
     
     controller.selectAnswer(answerIndex);
-  }, [canAnswer, selectedAnswer, controller]);
+  }, [canAnswer, controller]);
 
   if (!currentQuestion && !currentAnswer) {
     return (
-        <div className="flex items-center justify-center h-screen p-4">
-          <div className="m-auto justify-items-center text-center max-w-full">
-            <div className="material-symbols-outlined animate-spin text-gray-500 mb-8">progress_activity</div>
-            <div className="text-2xl">Waiting for next question...</div>
-          </div>
-        </div>
+        <>
+          <div className="material-symbols-outlined animate-spin text-gray-500 mb-8">progress_activity</div>
+          <div className="text-2xl">Waiting for next question...</div>
+        </>
     );
   }
 
@@ -103,7 +104,7 @@ function QuestionDisplay() {
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => (
           <AnswerOption
             key={index}
@@ -137,8 +138,10 @@ export function Ingame() {
   if (state !== "ingame") return null;
 
   return (
-    <div className="lg:max-w-3/4 mx-auto p-4 h-screen">
-      <QuestionDisplay />
+    <div className="lg:max-w-3/4 mx-auto h-screen flex items-center justify-center p-4">
+      <div className="m-auto justify-items-center text-center max-w-full">
+        <QuestionDisplay />
+      </div>
     </div>
   );
 }

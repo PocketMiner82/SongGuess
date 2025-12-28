@@ -33,21 +33,12 @@ function Countdown() {
 }
 
 function Audio() {
-  const ref = useRef<HTMLAudioElement | null>(null);
+  const audio = document.getElementById("audio") as HTMLAudioElement;
   const controller = useControllerContext();
   const [volume, setVolume] = useState(0.2);
 
   const listener = useCallback((msg: ServerMessage|null) => {
-    const audio = ref.current;
-    if (!audio) return;
-
-    // TODO: check if needed
-    if (!msg) {
-      audio.pause();
-      audio.removeAttribute("src");
-      audio.load();
-      return;
-    } else if (msg.type !== "audio_control") {
+    if (!msg || msg.type !== "audio_control") {
       return;
     }
 
@@ -69,21 +60,18 @@ function Audio() {
         audio.load();
         break;
     }
-  }, [volume]);
+  }, [audio, volume]);
 
   useRoomControllerListener(controller, listener);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    if (ref.current) {
-      ref.current.volume = newVolume;
-    }
+    audio.volume = newVolume;
   };
 
   return (
     <>
-      <audio ref={ref} preload="auto" />
       <div className="fixed bottom-4 left-4 flex items-center gap-2">
         <span className="material-icons">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
         <input
