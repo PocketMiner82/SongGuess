@@ -1,3 +1,10 @@
+# [2.0.0-dev.52](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.51...2.0.0-dev.52) (2025-12-28)
+
+
+### Bug Fixes
+
+* forgot to set songs if not album ([b2d6c74](https://github.com/PocketMiner82/SongGuess/commit/b2d6c740857edb93c9e2062c694c7794fe49864e))
+
 # [2.0.0-dev.51](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.50...2.0.0-dev.51) (2025-12-28)
 
 
