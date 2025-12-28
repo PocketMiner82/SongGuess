@@ -1,5 +1,4 @@
-import { useState, useCallback, memo } from "react";
-import type { ServerMessage } from "../../../schemas/RoomMessageSchemas";
+import React, { useState, useCallback, memo } from "react";
 import type { QuestionMessage, AnswerMessage, GameState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
 import { useControllerContext, useRoomControllerListener } from "../RoomController";
@@ -19,28 +18,29 @@ const AnswerOption = memo(function AnswerOption({
   option: string;
   index: number;
   isSelected: boolean;
-  isCorrect: boolean;
+  isCorrect: boolean|null;
   isDisabled: boolean;
   onSelect: (index: number) => void;
 }) {
   const getButtonStyle = () => {
-    if (isDisabled && isCorrect) {
-      return "bg-green-500 text-white hover:bg-green-600";
+    if (isCorrect) {
+      return "bg-success text-white";
     }
-    if (isDisabled && isSelected && !isCorrect) {
-      return "bg-red-500 text-white hover:bg-red-600";
+    if (isSelected && isCorrect === false) {
+      return "bg-error text-white";
     }
     if (isSelected) {
       return "bg-secondary text-white hover:bg-secondary-hover";
     }
-    return "bg-card-bg text-default hover:bg-gray-200 dark:hover:bg-gray-700";
+    return "bg-card-bg text-default hover:bg-card-hover-bg";
   };
 
   return (
     <Button
       onClick={() => onSelect(index)}
       disabled={isDisabled}
-      className={`w-full p-4 text-left justify-start transition-colors ${getButtonStyle()}`}
+      defaultColors={false}
+      className={`w-full text-left justify-start transition-colors ${getButtonStyle()}`}
     >
       <span className="font-medium">{String.fromCharCode(65 + index)}.</span> {option}
     </Button>
@@ -58,19 +58,15 @@ function QuestionDisplay() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [canAnswer, setCanAnswer] = useState(false);
 
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "question") {
-      setCurrentQuestion(msg);
-      setCurrentAnswer(null);
-      setSelectedAnswer(null);
-      setCanAnswer(true);
-    } else if (msg.type === "answer") {
-      setCurrentAnswer(msg);
-      setCanAnswer(false);
-    }
-  }, []);
+  useRoomControllerListener(controller, useCallback(msg => {
+    setCurrentQuestion(controller.currentQuestion);
+    setCurrentAnswer(controller.currentAnswer);
+    setCanAnswer(controller.currentQuestion !== null);
 
-  useRoomControllerListener(controller, listener);
+    if (msg?.type === "question") {
+      setSelectedAnswer(null);
+    }
+  }, [controller.currentAnswer, controller.currentQuestion]));
 
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (!canAnswer || selectedAnswer !== null) return;
@@ -80,23 +76,27 @@ function QuestionDisplay() {
     controller.selectAnswer(answerIndex);
   }, [canAnswer, selectedAnswer, controller]);
 
-  if (!currentQuestion) {
+  if (!currentQuestion && !currentAnswer) {
     return (
-      <div className="text-center text-disabled-text">
-        <p>Waiting for question...</p>
-      </div>
+        <div className="flex items-center justify-center h-screen p-4">
+          <div className="m-auto justify-items-center text-center max-w-full">
+            <div className="material-symbols-outlined animate-spin text-gray-500 mb-8">progress_activity</div>
+            <div className="text-2xl">Waiting for next question...</div>
+          </div>
+        </div>
     );
   }
 
-  const answerOptions = currentAnswer?.answerOptions || currentQuestion.answerOptions;
+  const answerOptions = currentAnswer?.answerOptions || currentQuestion?.answerOptions;
   const correctIndex = currentAnswer?.correctIndex;
+  const questionNumber = currentQuestion?.number || currentAnswer?.number;
   const isDisabled = !canAnswer;
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">
-          Question {currentQuestion.number}
+          Question {questionNumber!}
         </h2>
         <p className="text-disabled-text">
           Select the correct song title
@@ -104,47 +104,18 @@ function QuestionDisplay() {
       </div>
 
       <div className="space-y-3">
-        {answerOptions.map((option, index) => (
+        {answerOptions!.map((option, index) => (
           <AnswerOption
             key={index}
             option={option}
             index={index}
             isSelected={selectedAnswer === index}
-            isCorrect={correctIndex === index}
+            isCorrect={correctIndex !== undefined ? correctIndex === index : null}
             isDisabled={isDisabled}
             onSelect={handleAnswerSelect}
           />
         ))}
       </div>
-
-      {currentAnswer && (
-        <div className="text-center space-y-4">
-          <div className="text-lg">
-            {selectedAnswer === correctIndex ? (
-              <span className="text-green-500 font-medium">✓ Correct!</span>
-            ) : (
-              <span className="text-red-500 font-medium">✗ Wrong answer</span>
-            )}
-          </div>
-          
-          <div className="text-sm text-disabled-text">
-            <p>Players who answered correctly:</p>
-            <ul className="mt-2 space-y-1">
-              {currentAnswer.playerAnswers
-                .filter(player => player.answerIndex === correctIndex)
-                .map(player => (
-                  <li key={player.username} className="flex items-center justify-center gap-2">
-                    <span 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: player.color }}
-                    />
-                    <span>{player.username}</span>
-                  </li>
-                ))}
-            </ul>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -157,18 +128,16 @@ export function Ingame() {
   const controller = useControllerContext();
   const [state, setState] = useState<GameState>("lobby");
 
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "update") {
-      setState(msg.state);
+  useRoomControllerListener(controller, useCallback(msg => {
+    if (!msg || msg.type === "update") {
+      setState(controller.state);
     }
-  }, []);
-
-  useRoomControllerListener(controller, listener);
+  }, [controller.state]));
 
   if (state !== "ingame") return null;
 
   return (
-    <div className="lg:max-w-3/4 mx-auto">
+    <div className="lg:max-w-3/4 mx-auto p-4 h-screen">
       <QuestionDisplay />
     </div>
   );

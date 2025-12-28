@@ -2,30 +2,7 @@ import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
-/**
- * The current state of a player.
- */
-const PlayerStateSchema = z.object({
-  /**
-   * The player's username
-   */
-  username: UsernameSchema,
-
-  /**
-   * The player's color
-   */
-  color: z.string(),
-
-  /**
-   * How many points the player has since he joined the room.
-   */
-  points: z.number().default(0),
-});
-
-export type PlayerState = z.infer<typeof PlayerStateSchema>;
-
-
-export const PlayerDataSchema = z.object({
+export const PlayerStateSchema = z.object({
   /**
    * The player's username
    */
@@ -52,7 +29,7 @@ export const PlayerDataSchema = z.object({
   answerIndex: z.optional(z.int().min(0).max(3))
 });
 
-export type PlayerData = z.infer<typeof PlayerDataSchema>;
+export type PlayerState = z.infer<typeof PlayerStateSchema>;
 
 
 export const QuestionMessageSchema = z.object({
@@ -93,7 +70,7 @@ export const AnswerMessageSchema = z.object({
   /**
    * Information about which player selected which answer
    */
-  playerAnswers: z.array(PlayerDataSchema)
+  playerAnswers: z.array(PlayerStateSchema)
 });
 
 export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;

@@ -26,7 +26,7 @@ function App() {
 
   return (
     <>
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-screen p-4">
       <div className="m-auto justify-items-center text-center max-w-full">
         <div className="text-6xl md:text-8xl lg:text-9xl font-extrabold mb-8 md:mb-16 lg:mb-24">
           SongGuess

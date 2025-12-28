@@ -18,7 +18,7 @@ import {
   UnknownPlaylist
 } from "../../schemas/RoomSharedMessageSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
-import type {PlayerState} from "../../schemas/RoomServerMessageSchemas";
+import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
 
 
 /**
@@ -39,7 +39,21 @@ export class RoomController {
   /**
    * Listeners that are called whenever the state of the room changes.
    */
-  private stateChangeEventListeners: ((msg: ServerMessage) => void)[] = [];
+  private stateChangeEventListeners: ((msg: ServerMessage|null) => void)[] = [];
+
+  players: PlayerState[] = [];
+
+  username: string = "Unknown";
+
+  isHost: boolean = false;
+
+  playlists: Playlist[] = [];
+
+  state: GameState = "lobby";
+
+  currentQuestion: QuestionMessage|null = null;
+
+  currentAnswer: AnswerMessage|null = null;
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -79,7 +93,7 @@ export class RoomController {
    * @param listener A callback function that receives the sent {@link ServerMessage} as an argument.
    * @returns A function to unregister the listener.
    */
-  public registerOnStateChangeListener(listener: (msg: ServerMessage) => void) {
+  public registerOnStateChangeListener(listener: (msg: ServerMessage|null) => void) {
     this.stateChangeEventListeners.push(listener);
     return () => this.unregisterOnStateChangeListener(listener);
   }
@@ -97,7 +111,7 @@ export class RoomController {
    * 
    * @param msg the received {@link ServerMessage} that caused the state change
    */
-  private callOnStateChange(msg: ServerMessage) {
+  private callOnStateChange(msg: ServerMessage|null) {
     for (const listener of this.stateChangeEventListeners) {
       listener(msg);
     }
@@ -117,7 +131,9 @@ export class RoomController {
    */
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
-    window.location.href = "/";
+
+    // if port is set, this is probably a dev environment: don't redirect
+    if (!window.location.port) window.location.href = "/";
   }
 
   /**
@@ -127,7 +143,8 @@ export class RoomController {
    */
   private onError(ev: ErrorEvent) {
     console.error(`Cannot connect to ${this.socket.room}:`, ev);
-    window.location.href = "/";
+    // if port is set, this is probably a dev environment: don't redirect
+    if (!window.location.port) window.location.href = "/";
   }
 
   /**
@@ -156,8 +173,29 @@ export class RoomController {
 
     let msg: ServerMessage = result.data;
 
-    if (msg.type === "confirmation" && msg.error) {
-      console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
+    switch (msg.type) {
+      case "confirmation":
+        if (msg.error) {
+          console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
+        }
+        break;
+      case "update":
+        this.username = msg.username;
+        this.players = msg.players;
+        this.isHost = msg.isHost;
+        this.state = msg.state;
+        break;
+      case "update_playlists":
+        this.playlists = msg.playlists;
+        break;
+      case "question":
+        this.currentQuestion = msg;
+        this.currentAnswer = null;
+        break;
+      case "answer":
+        this.currentAnswer = msg;
+        this.currentQuestion = null;
+        break;
     }
 
     // call listeners
@@ -353,8 +391,9 @@ export function useControllerContext() {
  * @param controller The RoomController instance to listen to.
  * @param cb A callback function that receives the RoomController instance when its state changes.
  */
-export function useRoomControllerListener(controller: RoomController, cb: (msg: ServerMessage) => void) {
+export function useRoomControllerListener(controller: RoomController, cb: (msg: ServerMessage|null) => void) {
   useEffect(() => {
+    cb(null);
     return controller.registerOnStateChangeListener(cb);
   }, [controller, cb]);
 }
@@ -370,12 +409,12 @@ export function usePlayers(controller: RoomController) {
   const [players, setPlayers] = useState<PlayerState[]>([]);
   const [username, setUsername] = useState("");
 
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "update") {
-      setPlayers(msg.players);
-      setUsername(msg.username);
+  const listener = useCallback((msg: ServerMessage|null) => {
+    if (!msg || msg.type === "update") {
+      setPlayers(controller.players);
+      setUsername(controller.username);
     }
-  }, []);
+  }, [controller.players, controller.username]);
 
   useRoomControllerListener(controller, listener);
 
@@ -392,10 +431,10 @@ export function usePlaylists(controller: RoomController) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
   useRoomControllerListener(controller, useCallback((msg) => {
-    if (msg.type === "update_playlists") {
-      setPlaylists(msg.playlists);
+    if (!msg || msg.type === "update_playlists") {
+      setPlaylists(controller.playlists);
     }
-  }, []));
+  }, [controller.playlists]));
 
   return playlists;
 }
@@ -410,8 +449,8 @@ export function useIsHost(controller: RoomController) {
   const [isHost, setIsHost] = useState(false);
 
   useRoomControllerListener(controller, useCallback((msg) => {
-    if (msg.type === "update") setIsHost(msg.isHost);
-  }, []));
+    if (!msg || msg.type === "update") setIsHost(controller.isHost);
+  }, [controller.isHost]));
 
   return isHost;
 }

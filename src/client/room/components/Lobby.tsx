@@ -1,6 +1,5 @@
 import { useState, useCallback, memo, useMemo } from "react";
-import type { ServerMessage } from "../../../schemas/RoomMessageSchemas";
-import type { PlayerState, GameState } from "../../../schemas/RoomServerMessageSchemas";
+import type {GameState, PlayerState} from "../../../schemas/RoomServerMessageSchemas";
 import {albumRegex, artistRegex, COLORS, songRegex} from "../../../schemas/RoomSharedMessageSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
@@ -18,13 +17,11 @@ function AddPlaylistInput() {
   const [playlistURL, setPlaylistURL] = useState("");
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
+  useRoomControllerListener(controller, useCallback(msg => {
+    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
       setSearchStatus(msg.error ? "error" : "success");
     }
-  }, []);
-
-  useRoomControllerListener(controller, listener);
+  }, []));
 
   if (!isHost) return null;
 
@@ -50,7 +47,7 @@ function AddPlaylistInput() {
       case "loading":
         return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
       case "success":
-        return <span className="material-icons text-green-400">check_circle</span>;
+        return <span className="material-icons text-success">check_circle</span>;
       case "error":
         return <span className="material-icons text-error">error</span>;
       case "idle":
@@ -255,13 +252,11 @@ function StartGame() {
   const playlists = usePlaylists(controller); // Reuse hook
   const [error, setError] = useState<string | null>(null);
 
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "confirmation" && msg.sourceMessage.type === "start_game") {
+  useRoomControllerListener(controller, useCallback(msg => {
+    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "start_game") {
       setError(msg.error ?? null);
     }
-  }, []);
-
-  useRoomControllerListener(controller, listener);
+  }, []));
 
   if (!isHost) return null;
 
@@ -287,17 +282,16 @@ export function Lobby() {
   const controller = useControllerContext();
   const [state, setState] = useState<GameState>("lobby");
 
-  const listener = useCallback((msg: ServerMessage) => {
-    if (msg.type === "update") {
-      setState(msg.state);
+  useRoomControllerListener(controller, useCallback(msg => {
+    if (!msg || msg.type === "update") {
+      setState(controller.state);
     }
-  }, []);
-  useRoomControllerListener(controller, listener);
+  }, [controller.state]));
 
   if (state !== "lobby") return null;
 
   return (
-    <div className="lg:max-w-3/4 mx-auto">
+    <div className="lg:max-w-3/4 mx-auto p-4 h-screen">
       <PlayerList />
       <PlaylistList />
       <AddPlaylistInput />

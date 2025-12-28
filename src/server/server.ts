@@ -5,12 +5,11 @@ import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
 import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
 import {
   type GameState,
-  type PlayerData,
+  type PlayerState,
   type UpdateMessage,
   type UpdatePlaylistsMessage,
   type AudioControlMessage,
-  type CountdownMessage,
-  type PlayerState
+  type CountdownMessage
 } from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import {
@@ -152,9 +151,9 @@ export default class Server implements Party.Server {
   questions: Question[] = [];
 
   /**
-   * The index of the current question (1-based).
+   * The index of the current question.
    */
-  currentQuestion: number = 1;
+  currentQuestion: number = 0;
 
 
   /**
@@ -355,7 +354,7 @@ export default class Server implements Party.Server {
   private performChecks(conn: Party.Connection|null, msg: SourceMessage, ...checks: ("host" | "lobby" | "not_lobby" | "countdown" | "min_song_count" | "answer")[]): boolean {
     let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, msg, error) : () => {};
     let successful: boolean = true;
-    let connData: PlayerData = conn?.state as PlayerData;
+    let connState: PlayerState = conn?.state as PlayerState;
 
     for (const element of checks) {
       switch (element) {
@@ -399,7 +398,7 @@ export default class Server implements Party.Server {
           if (this.roundTicks >= ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
             possibleErrorFunc("Can only accept answering during questioning phase.");
             successful = false;
-          } else if (conn && connData.answerIndex) {
+          } else if (conn && connState.answerIndex) {
             possibleErrorFunc("You already selected an answer.");
             successful = false;
           }
@@ -475,14 +474,14 @@ export default class Server implements Party.Server {
   private changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
     // username is already validated, just check if it's used by another player
     for (let connection of this.room.getConnections()) {
-      let state = connection.state as PlayerData;
+      let state = connection.state as PlayerState;
       if (connection !== conn && state.username === msg.username) {
         conn.send(this.getUpdateMessage(conn));
         this.sendConfirmationOrError(conn, msg, "Username is already taken.");
         return;
       }
     }
-    (conn.state as PlayerData).username = msg.username;
+    (conn.state as PlayerState).username = msg.username;
 
     // inform all players about the username change + send confirmation to the user
     this.sendConfirmationOrError(conn, msg);
@@ -540,15 +539,16 @@ export default class Server implements Party.Server {
         this.currentQuestion++;
       }
 
-      if (this.currentQuestion > this.questions.length) {
+      if (this.currentQuestion >= this.questions.length) {
         this.endGame();
+        return;
       }
 
-      let q = this.questions[this.currentQuestion - 1];
+      let q = this.questions[this.currentQuestion];
       switch (this.roundTicks++) {
         // send question directly at start
         case ROUND_START:
-          this.room.broadcast(q.getQuestionMessage(this.currentQuestion));
+          this.room.broadcast(q.getQuestionMessage(this.currentQuestion + 1));
 
           // load audio of song to guess
           this.room.broadcast(this.getAudioControlMessage("load", q.song.audioURL));
@@ -565,7 +565,7 @@ export default class Server implements Party.Server {
           this.calculatePoints();
 
           // this also shows which player voted for which question
-          this.room.broadcast(q.getAnswerMessage(this.currentQuestion, this.getAllPlayerData()));
+          this.room.broadcast(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
           for (let conn of this.room.getConnections()) {
             this.resetPlayerAnswerData(conn);
           }
@@ -598,7 +598,7 @@ export default class Server implements Party.Server {
 
     this.roundTicks = 0;
     this.questions = [];
-    this.currentQuestion = 1;
+    this.currentQuestion = 0;
     this.state = "lobby";
 
     // reset points of all players
@@ -611,7 +611,7 @@ export default class Server implements Party.Server {
    * Add random song guessing questions to the room.
    */
   private addRandomQuestions() {
-    let remainingSongs = this.songs;
+    let remainingSongs = new Array(...this.songs);
 
     // add 10 random questions
     for (let i = 0; i < QUESTION_COUNT; i++) {
@@ -632,10 +632,10 @@ export default class Server implements Party.Server {
    * @param msg
    */
   private selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
-    let playerData: PlayerData = conn.state as PlayerData;
+    let playerState: PlayerState = conn.state as PlayerState;
 
-    playerData.answerTimestamp = Date.now();
-    playerData.answerIndex = msg.answerIndex;
+    playerState.answerTimestamp = Date.now();
+    playerState.answerIndex = msg.answerIndex;
   }
 
   /**
@@ -643,18 +643,18 @@ export default class Server implements Party.Server {
    */
   private calculatePoints() {
     for (let conn of this.room.getConnections()) {
-      let connData = conn.state as PlayerData;
+      let connState = conn.state as PlayerState;
 
-      if (connData.answerTimestamp && connData.answerIndex === this.questions[this.currentQuestion].getAnswerIndex()) {
+      if (connState.answerTimestamp && connState.answerIndex === this.questions[this.currentQuestion].getAnswerIndex()) {
         // half the points for correct answer
-        connData.points += POINTS_PER_QUESTION / 2;
+        connState.points += POINTS_PER_QUESTION / 2;
 
         // remaining points depend on speed of answer
-        let factor = Math.max(0, (TIME_PER_QUESTION * 1000 - (connData.answerTimestamp - this.roundStartTime)))
+        let factor = Math.max(0, (TIME_PER_QUESTION * 1000 - (connState.answerTimestamp - this.roundStartTime)))
             / (TIME_PER_QUESTION * 1000);
-        connData.points += (POINTS_PER_QUESTION / 2) * factor;
+        connState.points += (POINTS_PER_QUESTION / 2) * factor;
 
-        connData.points = Math.round(connData.points);
+        connState.points = Math.round(connState.points);
       }
     }
   }
@@ -711,7 +711,7 @@ export default class Server implements Party.Server {
     this.gameLoopInterval = null;
     this.roundTicks = 0;
     this.questions = [];
-    this.currentQuestion = 1;
+    this.currentQuestion = 0;
   }
 
   /**
@@ -750,13 +750,13 @@ export default class Server implements Party.Server {
     return Array.from(this.room.getConnections()).length;
   }
 
-  private getAllPlayerData(): PlayerData[] {
-    let data: PlayerData[] = [];
+  private getAllPlayerStates(): PlayerState[] {
+    let states: PlayerState[] = [];
     for (let conn of this.room.getConnections()) {
-      data.push(conn.state as PlayerData);
+      states.push(conn.state as PlayerState);
     }
 
-    return data;
+    return states.filter(d => d && d.username && d.color && d.points !== undefined);
   }
 
   /**
@@ -766,28 +766,14 @@ export default class Server implements Party.Server {
    * @private
    */
   private resetPlayerAnswerData(connection: Party.Connection, resetPoints:boolean = false): void {
-    const currentData = connection.state as PlayerData;
-    const points = resetPoints ? 0 : currentData.points;
-    const playerData: PlayerData = {
-      username: currentData.username,
-      color: currentData.color,
+    const currentState = connection.state as PlayerState;
+    const points = resetPoints ? 0 : currentState.points;
+    const playerState: PlayerState = {
+      username: currentState.username,
+      color: currentState.color,
       points: points
     };
-    connection.setState(playerData);
-  }
-
-  /**
-   * Get all usernames and there associated color
-   *
-   * @returns A map containing the username as keys and their color as values
-   */
-  private getAllPlayerStates(): PlayerState[] {
-    return this.getAllPlayerData()
-        .filter(d => d && d.username && d.color)
-        .map(d => ({
-          username: d.username,
-          color: d.color
-        } as PlayerState))
+    connection.setState(playerState);
   }
 
   /**
@@ -811,7 +797,7 @@ export default class Server implements Party.Server {
     let username = uniqueUsernameGenerator({
       dictionaries: [adjectives, nouns],
       style: "titleCase",
-      length: 15
+      length: 16
     });
 
     let color = this.getUnusedColors()[0];
@@ -820,13 +806,13 @@ export default class Server implements Party.Server {
       return false;
     }
 
-    let connData: PlayerData = {
+    let connState: PlayerState = {
       username: username,
       color: color,
       points: 0
     };
 
-    conn.setState(connData);
+    conn.setState(connState);
 
     // send the current playlist to the connection
     conn.send(this.getPlaylistUpdateMessage());
@@ -860,14 +846,14 @@ export default class Server implements Party.Server {
    * @returns a JSON string of the constructed {@link UpdateMessage}
    */
   private getUpdateMessage(conn: Party.Connection): string {
-    let connData = conn.state as PlayerData;
+    let connState = conn.state as PlayerState;
 
     let msg: UpdateMessage = {
       type: "update",
       state: this.state,
       players: this.getAllPlayerStates(),
-      username: connData.username,
-      color: connData.color,
+      username: connState.username,
+      color: connState.color,
       isHost: conn === this.hostConnection
     };
 

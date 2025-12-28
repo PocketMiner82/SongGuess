@@ -8,7 +8,7 @@ import {Ingame} from "./components/Ingame";
 
 function Loading() {
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-full p-4">
       <div className="text-2xl">Loading...</div>
     </div>
   );
@@ -108,8 +108,8 @@ function App() {
 
   const controller = getController();
 
-  // TODO: prevent accidental navigation away
-  //window.onbeforeunload = () => true;
+  // if port is set, this is probably a dev environment: prevent accidental reloads
+  if (!window.location.port) window.onbeforeunload = () => true;
 
   return (
     <RoomContext.Provider value={controller}>
