@@ -1,3 +1,11 @@
+# [2.0.0-dev.53](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.52...2.0.0-dev.53) (2025-12-28)
+
+
+### Features
+
+* allow bulk adding playlist URLs ([2b8c503](https://github.com/PocketMiner82/SongGuess/commit/2b8c503875766b4e3ecf922e519fd2db485ad3af))
+* end round if all players answered ([133e016](https://github.com/PocketMiner82/SongGuess/commit/133e0160e8dc2651353395c13f67182496361df8))
+
 # [2.0.0-dev.52](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.51...2.0.0-dev.52) (2025-12-28)
 
 
