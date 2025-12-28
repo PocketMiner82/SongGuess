@@ -110,6 +110,8 @@ function PlayerList() {
             key={player?.username || `empty-${idx}`}
             player={player}
             username={username}
+            // TODO: remove when results is finished!
+            showPoints={true}
           />
         ))}
       </ul>
