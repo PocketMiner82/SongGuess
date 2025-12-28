@@ -251,6 +251,20 @@ export class RoomController {
   }
 
   /**
+   * Attempts to add multiple playlists from a given list (newline-separated) of Apple Music URLs.
+   * @see tryAddPlaylist
+   */
+  public async tryAddPlaylists(url: string): Promise<boolean> {
+    let urls: string[] = url.split(";");
+
+    const results: boolean[] = await Promise.all(
+      urls.map(u => this.tryAddPlaylist(u))
+    );
+
+    return results.every(result => result === true);
+  }
+
+  /**
    * Attempts to add a playlist from the given Apple Music URL.
    * If the URL is valid and songs are found, it sends an update to the server.
    * 
