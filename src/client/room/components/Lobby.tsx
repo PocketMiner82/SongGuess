@@ -30,7 +30,7 @@ function AddPlaylistInput() {
   const handleAdd = (text: string) => {
     if (isValidURL) {
       setSearchStatus("loading");
-      controller.tryAddPlaylist(text).then(success => {
+      controller.tryAddPlaylists(text).then(success => {
         if (!success) {
           setSearchStatus("error");
         }
@@ -110,6 +110,8 @@ function PlayerList() {
             key={player?.username || `empty-${idx}`}
             player={player}
             username={username}
+            // TODO: remove when results is finished!
+            showPoints={true}
           />
         ))}
       </ul>

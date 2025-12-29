@@ -1,3 +1,40 @@
+# [2.0.0-dev.53](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.52...2.0.0-dev.53) (2025-12-28)
+
+
+### Features
+
+* allow bulk adding playlist URLs ([2b8c503](https://github.com/PocketMiner82/SongGuess/commit/2b8c503875766b4e3ecf922e519fd2db485ad3af))
+* end round if all players answered ([133e016](https://github.com/PocketMiner82/SongGuess/commit/133e0160e8dc2651353395c13f67182496361df8))
+
+# [2.0.0-dev.52](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.51...2.0.0-dev.52) (2025-12-28)
+
+
+### Bug Fixes
+
+* forgot to set songs if not album ([b2d6c74](https://github.com/PocketMiner82/SongGuess/commit/b2d6c740857edb93c9e2062c694c7794fe49864e))
+
+# [2.0.0-dev.51](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.50...2.0.0-dev.51) (2025-12-28)
+
+
+### Bug Fixes
+
+* iTunes search api sometimes returned albums without tracks ([59c4b4a](https://github.com/PocketMiner82/SongGuess/commit/59c4b4a85419cd5f1c55f07125a07c6a2112b6b5))
+
+# [2.0.0-dev.50](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.49...2.0.0-dev.50) (2025-12-28)
+
+
+### Features
+
+* **Lobby:** temporarily show points next to player ([0115215](https://github.com/PocketMiner82/SongGuess/commit/0115215e9c849d544c7e3152765129e949839fda))
+
+# [2.0.0-dev.49](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.48...2.0.0-dev.49) (2025-12-28)
+
+
+### Bug Fixes
+
+* **client:** changing volume no longer stops playback + update styling ([70ec9a1](https://github.com/PocketMiner82/SongGuess/commit/70ec9a1b22e27b6fb4020f6118f49ff623d394a8))
+* **client:** changing volume no longer stops playback + update styling ([5e45674](https://github.com/PocketMiner82/SongGuess/commit/5e45674be37b3b95351954a5ce4ffd3e3e2b83a8))
+
 # [2.0.0-dev.48](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.47...2.0.0-dev.48) (2025-12-28)
 
 
