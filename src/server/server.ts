@@ -628,8 +628,8 @@ export default class Server implements Party.Server {
   /**
    * Save timestamp and index, when user selects an answer.
    *
-   * @param conn
-   * @param msg
+   * @param conn the player that selected an answer.
+   * @param msg the {@link SelectAnswerMessage} containing the selected index.
    */
   private selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
     let playerState: PlayerState = conn.state as PlayerState;
@@ -777,7 +777,7 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Get all colors, which aren't used by any player
+   * Get all colors, which aren't used by any player.
    *
    * @returns A string array of unused colors or an empty array if all colors are used.
    */
