@@ -25,11 +25,18 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
 ]);
 
 
+/**
+ * Schema for a fallback message type used when the message type is not recognized.
+ */
 export const OtherMessageSchema = z.object({
   type: z.literal("other").default("other")
 })
 
 
+/**
+ * Schema for messages that can be either server messages, client messages, or other messages.
+ * Used as a discriminated union to handle different message types.
+ */
 export const SourceMessageSchema = z.discriminatedUnion("type", [
   _ServerMessageSchema,
   _ClientMessageSchema,
@@ -39,6 +46,9 @@ export const SourceMessageSchema = z.discriminatedUnion("type", [
 export type SourceMessage = z.infer<typeof SourceMessageSchema>;
 
 
+/**
+ * Schema for confirmation messages sent in response to client actions.
+ */
 export const ConfirmationMessageSchema = z.object({
   type: z.literal("confirmation").default("confirmation"),
 

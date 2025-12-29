@@ -5,9 +5,17 @@ import { Button } from "./components/Button";
 import { ErrorLabel } from "./components/ErrorLabel";
 
 
+/**
+ * Main application component for the landing page.
+ * Displays the SongGuess title and a button to create a new room.
+ */
 function App() {
   const [error, setError] = useState<string|null>(null);
 
+  /**
+   * Handles room creation button click.
+   * Creates a new room via API and redirects to the room page.
+   */
   const buttonClick = async () => {
     const resp = await fetchPostCreateRoom("/parties/main/createRoom");
 

@@ -1,10 +1,22 @@
 import z from "zod";
 
 
+/**
+ * Available player colors that can be assigned to players in the game room.
+ */
 export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
 
+/**
+ * Regular expression to validate Apple Music artist URLs.
+ */
 export const artistRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/artist\/[^/]+\/(?<id>\d+);?)+$/
+/**
+ * Regular expression to validate Apple Music album URLs.
+ */
 export const albumRegex =  /^(https?:\/\/music\.apple\.com\/[^/]+\/album\/[^/]+\/(?<id>\d+)(?:\?.*i=(?<trackId>\d+))?;?)+$/
+/**
+ * Regular expression to validate Apple Music song URLs.
+ */
 export const songRegex =   /^(https?:\/\/music\.apple\.com\/[^/]+\/(?<song>song)\/[^/]+\/(?<id>\d+);?)+$/
 
 export const SongSchema = z.object({
@@ -47,6 +59,9 @@ export const PlaylistSchema = z.object({
 
 export type Playlist = z.infer<typeof PlaylistSchema>;
 
+/**
+ * Default playlist object used when playlist information cannot be retrieved or is invalid.
+ */
 export const UnknownPlaylist: Playlist = {
   name: "Unknown",
   cover: null,

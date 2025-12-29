@@ -41,18 +41,39 @@ export class RoomController {
    */
   private stateChangeEventListeners: ((msg: ServerMessage|null) => void)[] = [];
 
+  /**
+   * The current list of players in the room.
+   */
   players: PlayerState[] = [];
 
+  /**
+   * The current username of the player.
+   */
   username: string = "Unknown";
 
+  /**
+   * Whether the current player is the host of the room.
+   */
   isHost: boolean = false;
 
+  /**
+   * The current list of playlists selected for the game.
+   */
   playlists: Playlist[] = [];
 
+  /**
+   * The current game state.
+   */
   state: GameState = "lobby";
 
+  /**
+   * The current question being asked to players.
+   */
   currentQuestion: QuestionMessage|null = null;
 
+  /**
+   * The current answer information revealed after question ends.
+   */
   currentAnswer: AnswerMessage|null = null;
 
   /**
@@ -261,7 +282,7 @@ export class RoomController {
       urls.map(u => this.tryAddPlaylist(u))
     );
 
-    return results.every(result => result === true);
+    return results.every(result => result);
   }
 
   /**
