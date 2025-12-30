@@ -8,7 +8,8 @@ import type {
   AddPlaylistMessage,
   RemovePlaylistMessage,
   StartGameMessage,
-  SelectAnswerMessage
+  SelectAnswerMessage,
+  ReturnToLobbyMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
   albumRegex,
@@ -41,18 +42,39 @@ export class RoomController {
    */
   private stateChangeEventListeners: ((msg: ServerMessage|null) => void)[] = [];
 
+  /**
+   * The current list of players in the room.
+   */
   players: PlayerState[] = [];
 
+  /**
+   * The current username of the player.
+   */
   username: string = "Unknown";
 
+  /**
+   * Whether the current player is the host of the room.
+   */
   isHost: boolean = false;
 
+  /**
+   * The current list of playlists selected for the game.
+   */
   playlists: Playlist[] = [];
 
+  /**
+   * The current game state.
+   */
   state: GameState = "lobby";
 
+  /**
+   * The current question being asked to players.
+   */
   currentQuestion: QuestionMessage|null = null;
 
+  /**
+   * The current answer information revealed after question ends.
+   */
   currentAnswer: AnswerMessage|null = null;
 
   /**
@@ -225,14 +247,24 @@ export class RoomController {
     this.socket.send(JSON.stringify(msg));
   }
 
-  /**
-   * Sends the selected answer to the server.
-   * @param answerIndex The index of the selected answer (0-3).
-   */
+   /**
+    * Sends the selected answer to the server.
+    * @param answerIndex The index of the selected answer (0-3).
+    */
   public selectAnswer(answerIndex: number) {
     let msg: SelectAnswerMessage = {
       type: "select_answer",
       answerIndex
+    };
+    this.socket.send(JSON.stringify(msg));
+  }
+
+  /**
+    * Requests the server to return to the lobby.
+    */
+  public returnToLobby() {
+    let msg: ReturnToLobbyMessage = {
+      type: "return_to_lobby"
     };
     this.socket.send(JSON.stringify(msg));
   }
@@ -261,7 +293,7 @@ export class RoomController {
       urls.map(u => this.tryAddPlaylist(u))
     );
 
-    return results.every(result => result === true);
+    return results.every(result => result);
   }
 
   /**
@@ -467,4 +499,22 @@ export function useIsHost(controller: RoomController) {
   }, [controller.isHost]));
 
   return isHost;
+}
+
+/**
+ * Custom React hook to track the current game state.
+ * 
+ * @param controller The RoomController instance to listen to.
+ * @returns The current GameState.
+ */
+export function useGameState(controller: RoomController) {
+  const [state, setState] = useState<GameState>("lobby");
+
+  useRoomControllerListener(controller, useCallback((msg) => {
+    if (!msg || msg.type === "update") {
+      setState(controller.state);
+    }
+  }, [controller.state]));
+
+  return state;
 }

@@ -1,11 +1,15 @@
 import { createRoot } from "react-dom/client";
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { RoomContext, useControllerContext, useRoomController, useRoomControllerListener } from "./RoomController";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";
 import {Ingame} from "./components/Ingame";
+import {Results} from "./components/Results";
 
 
+/**
+ * Loading component displayed while the room controller is initializing.
+ */
 function Loading() {
   return (
     <div className="flex items-center justify-center h-full p-4">
@@ -14,6 +18,10 @@ function Loading() {
   );
 }
 
+/**
+ * Countdown overlay component that displays a countdown number centered on screen.
+ * Listens for countdown messages from the server and shows/hides accordingly.
+ */
 function Countdown() {
   const [countdown, setCountdown] = useState(0);
   const visible = countdown > 0;
@@ -32,6 +40,10 @@ function Countdown() {
   ) : null;
 }
 
+/**
+ * Audio controller component that manages audio playback and volume.
+ * Handles audio control messages from the server to play, pause, and load audio files.
+ */
 function Audio() {
   const audio = document.getElementById("audio") as HTMLAudioElement;
   const controller = useControllerContext();
@@ -88,6 +100,10 @@ function Audio() {
   );
 }
 
+/**
+ * Main application component for the game room.
+ * Manages room initialization, routing between game states, and global room providers.
+ */
 function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
   const { getController, isReady } = useRoomController(roomID);
@@ -103,6 +119,7 @@ function App() {
     <RoomContext.Provider value={controller}>
       <Lobby />
       <Ingame />
+      <Results />
       <Countdown />
       <Audio />
     </RoomContext.Provider>

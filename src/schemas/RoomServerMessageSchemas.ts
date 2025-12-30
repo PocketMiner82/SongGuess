@@ -2,6 +2,9 @@ import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
 
 
+/**
+ * Schema for representing the current state of a player in the game room.
+ */
 export const PlayerStateSchema = z.object({
   /**
    * The player's username
@@ -14,7 +17,7 @@ export const PlayerStateSchema = z.object({
   color: z.string(),
 
   /**
-   * How many points the player has since he joined the room.
+   * How many points player has since he joined the room.
    */
   points: z.number(),
 
@@ -32,6 +35,9 @@ export const PlayerStateSchema = z.object({
 export type PlayerState = z.infer<typeof PlayerStateSchema>;
 
 
+/**
+ * Schema for messages containing a song guessing question.
+ */
 export const QuestionMessageSchema = z.object({
   type: z.literal("question").default("question"),
 
@@ -49,6 +55,9 @@ export const QuestionMessageSchema = z.object({
 export type QuestionMessage = z.infer<typeof QuestionMessageSchema>;
 
 
+/**
+ * Schema for messages containing the answer to a question and player responses.
+ */
 export const AnswerMessageSchema = z.object({
   type: z.literal("answer").default("answer"),
 
@@ -76,6 +85,9 @@ export const AnswerMessageSchema = z.object({
 export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
 
 
+/**
+ * Schema for messages controlling audio playback during the game.
+ */
 export const AudioControlMessageSchema = z.discriminatedUnion("action", [
   z.object({
     type: z.literal("audio_control").default("audio_control"),
@@ -98,7 +110,12 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
      * - "play": Starts playback of the music.
      * - "pause": Pauses playback of the music.
      */
-    action: z.literal(["play", "pause"])
+    action: z.literal(["play", "pause"]),
+
+    /**
+     * The length in seconds of the max time for this question.
+     */
+    length: z.number().nonnegative()
   })
 
 ]);
@@ -106,6 +123,9 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
 export type AudioControlMessage = z.infer<typeof AudioControlMessageSchema>;
 
 
+/**
+ * Schema for messages containing the current countdown value.
+ */
 export const CountdownMessageSchema = z.object({
   type: z.literal("countdown").default("countdown"),
 
@@ -118,6 +138,9 @@ export const CountdownMessageSchema = z.object({
 export type CountdownMessage = z.infer<typeof CountdownMessageSchema>;
 
 
+/**
+ * Schema for messages containing updates to the current playlists.
+ */
 export const UpdatePlaylistsMessageSchema = z.object({
   type: z.literal("update_playlists").default("update_playlists"),
 
@@ -142,6 +165,9 @@ const GameStateSchema = z.literal([
 export type GameState = z.infer<typeof GameStateSchema>;
 
 
+/**
+ * Schema for messages containing the current room state update.
+ */
 export const UpdateMessageSchema = z.object({
   type: z.literal("update").default("update"),
 

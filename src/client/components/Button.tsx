@@ -1,13 +1,41 @@
 import { type ReactNode } from 'react';
 
+/**
+ * Props for the Button component.
+ */
 type ButtonProps = {
+  /**
+   * Click event handler for the button.
+   */
   onClick?: () => void;
+  
+  /**
+   * Whether the button is disabled.
+   */
   disabled?: boolean;
+  
+  /**
+   * Additional CSS classes to apply to the button.
+   */
   className?: string;
+  
+  /**
+   * Whether to use default button colors (primary theme colors).
+   */
   defaultColors?: boolean;
+  
+  /**
+   * Content to render inside the button.
+   */
   children: ReactNode;
 };
 
+/**
+ * A reusable button component with customizable styling and behavior.
+ * 
+ * @param props The button props including onClick handler, disabled state, and styling options.
+ * @returns A styled button element.
+ */
 export function Button({
   onClick,
   disabled = false,
@@ -28,7 +56,9 @@ export function Button({
         cursor-pointer font-bold text-lg py-2 px-4 ${className}`}
       onClick={onClick}
     >
-      {children}
+      <div className="flex items-center text-center justify-center">
+        {children}
+      </div>
     </button>
   );
 }

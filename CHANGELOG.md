@@ -1,3 +1,13 @@
+# [2.0.0-dev.54](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.53...2.0.0-dev.54) (2025-12-30)
+
+
+### Features
+
+* add progress bar ([3cb270a](https://github.com/PocketMiner82/SongGuess/commit/3cb270ac47fc08679b90344c57d7a12089a5bcf8))
+* **Ingame:** show votes of players on answer ([c618fca](https://github.com/PocketMiner82/SongGuess/commit/c618fca733ea5dcfccc25f9210f89677746d5d27))
+* **Results:** add buttons for host ([7cfa3e7](https://github.com/PocketMiner82/SongGuess/commit/7cfa3e76ea47d8e76a21cc9c56c7ff46c1b6edc5))
+* **Results:** first implementation ([9c9ec26](https://github.com/PocketMiner82/SongGuess/commit/9c9ec26522a35d41febf02b9df3c34ed7f1e3ec9))
+
 # [2.0.0-dev.53](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.52...2.0.0-dev.53) (2025-12-28)
 
 

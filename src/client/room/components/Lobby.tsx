@@ -1,92 +1,10 @@
-import { useState, useCallback, memo, useMemo } from "react";
-import type {GameState, PlayerState} from "../../../schemas/RoomServerMessageSchemas";
+import { useState, useCallback, useMemo } from "react";
 import {albumRegex, artistRegex, COLORS, songRegex} from "../../../schemas/RoomSharedMessageSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
-import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext } from "../RoomController";
+import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext, useGameState } from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
 
-
-/**
- * Input component for hosts to add Apple Music playlists by URL.
- * Handles validation and loading states.
- */
-function AddPlaylistInput() {
-  const controller = useControllerContext();
-  const isHost = useIsHost(controller);
-  const [playlistURL, setPlaylistURL] = useState("");
-  const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
-      setSearchStatus(msg.error ? "error" : "success");
-    }
-  }, []));
-
-  if (!isHost) return null;
-
-  const isValidURL = artistRegex.test(playlistURL) || albumRegex.test(playlistURL) || songRegex.test(playlistURL);
-
-  const handleAdd = (text: string) => {
-    if (isValidURL) {
-      setSearchStatus("loading");
-      controller.tryAddPlaylists(text).then(success => {
-        if (!success) {
-          setSearchStatus("error");
-        }
-      }).catch(() => {
-        setSearchStatus("error");
-      });
-    }
-  };
-
-  const getStatusIcon = () => {
-    let status = searchStatus === "idle" && playlistURL && !isValidURL ? "error" : searchStatus;
-
-    switch (status) {
-      case "loading":
-        return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
-      case "success":
-        return <span className="material-icons text-success">check_circle</span>;
-      case "error":
-        return <span className="material-icons text-error">error</span>;
-      case "idle":
-        return null;
-    }
-  };
-
-  return (
-    <>
-      <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-primary hover:underline">Search Apple Music</a>
-      <div className="relative mt-6 mb-12 flex gap-2">
-        <input 
-          placeholder="Enter apple music artist or album URL" 
-          className="flex-1 outline-0 focus:outline-0 border-b-2 border-gray-500 focus:border-secondary pb-1 pr-10" 
-          value={playlistURL} 
-          onChange={e => {
-            setPlaylistURL(e.target.value);
-            setSearchStatus("idle");
-          }} 
-          onKeyDown={e => {
-            if (e.key === "Enter" && isValidURL && searchStatus !== "loading") {
-              handleAdd(playlistURL);
-            }
-          }}
-        />
-        <div className="bottom-1 flex items-center">
-          {getStatusIcon()}
-        </div>
-        <Button
-          onClick={() => handleAdd(playlistURL)}
-          disabled={!isValidURL || searchStatus === "loading"}
-          className=""
-        >
-          Add
-        </Button>
-      </div>
-    </>
-  );
-}
 
 /**
  * Displays all players in the room as a grid. Shows empty slots
@@ -104,14 +22,12 @@ function PlayerList() {
   return (
     <div className="mb-12">
       <h3 className="text-xl font-bold mb-3">Players</h3>
-      <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
+      <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] lg:max-h-none overflow-auto">
         {slots.map((player, idx) => (
           <PlayerCard
             key={player?.username || `empty-${idx}`}
             player={player}
             username={username}
-            // TODO: remove when results is finished!
-            showPoints={true}
           />
         ))}
       </ul>
@@ -166,9 +82,9 @@ function PlaylistList() {
   const playlists = usePlaylists(controller);
 
   return (
-    <div className="mb-12">
+    <div>
       <h3 className="text-xl font-bold mb-3">Playlists</h3>
-      <ul className="space-y-4 max-h-[33vh] overflow-auto">
+      <ul className="space-y-4 overflow-auto">
         {playlists.length === 0 ? (
           <PlaylistListEntry index={-1} title="No playlists added" />
         ) : (
@@ -182,13 +98,132 @@ function PlaylistList() {
 }
 
 /**
+ * Input component for hosts to add Apple Music playlists by URL.
+ * Handles validation and loading states.
+ */
+function AddPlaylistInput() {
+  const controller = useControllerContext();
+  const [playlistURL, setPlaylistURL] = useState("");
+  const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  useRoomControllerListener(controller, useCallback(msg => {
+    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
+      setSearchStatus(msg.error ? "error" : "success");
+    }
+  }, []));
+
+  const isValidURL = artistRegex.test(playlistURL) || albumRegex.test(playlistURL) || songRegex.test(playlistURL);
+
+  const handleAdd = (text: string) => {
+    if (isValidURL) {
+      setSearchStatus("loading");
+      controller.tryAddPlaylists(text).then(success => {
+        if (!success) {
+          setSearchStatus("error");
+        }
+      }).catch(() => {
+        setSearchStatus("error");
+      });
+    }
+  };
+
+  const getStatusIcon = () => {
+    let status = searchStatus === "idle" && playlistURL && !isValidURL ? "error" : searchStatus;
+
+    switch (status) {
+      case "loading":
+        return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
+      case "success":
+        return <span className="material-icons text-success">check_circle</span>;
+      case "error":
+        return <span className="material-icons text-error">error</span>;
+      case "idle":
+        return null;
+    }
+  };
+
+  return (
+    <div>
+      <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-primary hover:underline">Search Apple Music</a>
+      <div className="relative mt-6 flex gap-2">
+        <input
+            placeholder="Enter apple music artist or album URL"
+            className="flex-1 outline-0 focus:outline-0 border-b-2 border-gray-500 focus:border-secondary pb-1 pr-10"
+            value={playlistURL}
+            onChange={e => {
+              setPlaylistURL(e.target.value);
+              setSearchStatus("idle");
+            }}
+            onKeyDown={e => {
+              if (e.key === "Enter" && isValidURL && searchStatus !== "loading") {
+                handleAdd(playlistURL);
+              }
+            }}
+        />
+        <div className="bottom-1 flex items-center">
+          {getStatusIcon()}
+        </div>
+        <Button
+            onClick={() => handleAdd(playlistURL)}
+            disabled={!isValidURL || searchStatus === "loading"}
+            className=""
+        >
+          Add
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Host-only component to start the game. Shows validation errors
  * and handles the start game confirmation from the server.
  */
 function StartGame() {
   const controller = useControllerContext();
-  const isHost = useIsHost(controller);
-  const playlists = usePlaylists(controller); // Reuse hook
+  const playlists = usePlaylists(controller);
+
+  return (
+    <Button
+      disabled={playlists.length === 0}
+      onClick={() => controller.startGame()}
+    >
+      Start Game
+    </Button>
+  );
+}
+
+/**
+ * Button component that copies the current page URL to clipboard.
+ * Shows feedback when the link is successfully copied.
+ */
+function CopyLink() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
+  };
+
+  return (
+    <Button
+      onClick={handleCopyLink}
+    >
+      <span className="material-symbols-outlined mr-2">
+        {copied ? "check" : "content_copy"}
+      </span>
+      {copied ? "Copied!" : "Copy Link"}
+    </Button>
+  );
+}
+
+function Settings() {
+  const controller = useControllerContext();
   const [error, setError] = useState<string | null>(null);
 
   useRoomControllerListener(controller, useCallback(msg => {
@@ -197,18 +232,17 @@ function StartGame() {
     }
   }, []));
 
-  if (!isHost) return null;
-
   return (
-    <div className="mb-12 mx-auto text-center">
-      <ErrorLabel error={error} />
-
-      <Button
-        disabled={playlists.length === 0}
-        onClick={() => controller.startGame()}
-      >
-        Start Game
-      </Button>
+    <div>
+      <h3 className="text-xl font-bold mb-3">Settings</h3>
+      <div className="grid gap-4">
+        <AddPlaylistInput />
+        <div className="grid grid-cols-2 gap-4">
+          <CopyLink />
+          <StartGame />
+        </div>
+        <ErrorLabel error={error} />
+      </div>
     </div>
   );
 }
@@ -219,22 +253,23 @@ function StartGame() {
  */
 export function Lobby() {
   const controller = useControllerContext();
-  const [state, setState] = useState<GameState>("lobby");
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (!msg || msg.type === "update") {
-      setState(controller.state);
-    }
-  }, [controller.state]));
+  const isHost = useIsHost(controller);
+  const state = useGameState(controller);
 
   if (state !== "lobby") return null;
 
   return (
     <div className="lg:max-w-3/4 mx-auto p-4 h-screen">
       <PlayerList />
-      <PlaylistList />
-      <AddPlaylistInput />
-      <StartGame />
+      <div className={`grid gap-4 grid-cols-1 ${isHost ? "lg:grid-cols-2" : ""}`}>
+        <div className="lg:order-last">
+          {isHost && <Settings />}
+        </div>
+
+        <div className="lg:order-first">
+          <PlaylistList />
+        </div>
+      </div>
     </div>
   );
 }

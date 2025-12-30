@@ -1,7 +1,8 @@
-import React, { useState, useCallback, memo } from "react";
-import type { QuestionMessage, AnswerMessage, GameState } from "../../../schemas/RoomServerMessageSchemas";
+import React, { useState, useCallback, memo, useEffect, useRef } from "react";
+import type { QuestionMessage, AnswerMessage, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
-import { useControllerContext, useRoomControllerListener } from "../RoomController";
+import { PlayerAvatar } from "./PlayerAvatar";
+import { useControllerContext, useRoomControllerListener, useGameState } from "../RoomController";
 
 /**
  * Individual answer option button that handles selection and styling.
@@ -13,7 +14,8 @@ const AnswerOption = memo(function AnswerOption({
   isSelected,
   isCorrect,
   isDisabled,
-  onSelect
+  onSelect,
+  playerAnswers
 }: {
   option: string;
   index: number;
@@ -21,6 +23,7 @@ const AnswerOption = memo(function AnswerOption({
   isCorrect: boolean|null;
   isDisabled: boolean;
   onSelect: (index: number) => void;
+  playerAnswers: PlayerState[] | null;
 }) {
   const getButtonStyle = () => {
     if (isCorrect) {
@@ -35,15 +38,96 @@ const AnswerOption = memo(function AnswerOption({
     return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
   };
 
+  // Filter and sort players who selected this answer
+  const playersForThisAnswer = playerAnswers
+    ? playerAnswers
+        .filter(player => player.answerIndex === index)
+        .sort((a, b) => (a.answerTimestamp || 0) - (b.answerTimestamp || 0))
+    : [];
+
   return (
-    <Button
-      onClick={() => onSelect(index)}
-      disabled={isDisabled}
-      defaultColors={false}
-      className={`w-60 min-h-15 xl:w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
-    >
-      {option}
-    </Button>
+    <div className="relative">
+      <Button
+        onClick={() => onSelect(index)}
+        disabled={isDisabled}
+        defaultColors={false}
+        className={`w-60 min-h-15 xl:w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
+      >
+        {option}
+      </Button>
+      
+      {/* Show player avatars during answer phase */}
+      {isCorrect !== null && playersForThisAnswer.length > 0 && (
+        <div className="absolute -top-2 -right-2 flex">
+          {playersForThisAnswer.map((player, playerIndex) => (
+            <div
+              key={player.username}
+              className="rounded-full border-2 border-card-bg"
+              style={{
+                marginLeft: playerIndex > 0 ? '-8px' : '0',
+                zIndex: playersForThisAnswer.length - playerIndex
+              }}
+            >
+              <PlayerAvatar size={24} player={player} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
+/**
+ * Progress bar component that shows time remaining for the current question.
+ */
+const ProgressBar = memo(function ProgressBar({ 
+  duration, 
+  isPlaying 
+}: { 
+  duration: number; 
+  isPlaying: boolean; 
+}) {
+  const [progress, setProgress] = useState(100);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isPlaying && duration > 0) {
+      // Reset to full when starting
+      setProgress(100);
+      
+      // Update progress every 100ms for smooth animation
+      const intervalTime = 100;
+      const decrement = (100 / duration) * (intervalTime / 1000);
+      
+      intervalRef.current = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = prev - decrement;
+          return newProgress <= 0 ? 0 : newProgress;
+        });
+      }, intervalTime);
+    } else {
+      // Clear interval when not playing
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setProgress(0);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isPlaying, duration]);
+
+  return (
+    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div 
+        className="h-full bg-blue-500 transition-all duration-100 ease-linear"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
   );
 });
 
@@ -57,19 +141,34 @@ function QuestionDisplay() {
   const [currentAnswer, setCurrentAnswer] = useState<AnswerMessage | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [canAnswer, setCanAnswer] = useState(false);
+  const [audioLength, setAudioLength] = useState<number>(1);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useRoomControllerListener(controller, useCallback(msg => {
     setCurrentQuestion(controller.currentQuestion);
     setCurrentAnswer(controller.currentAnswer);
-    setCanAnswer(false);
 
     if (msg?.type === "question") {
+      // reset selection
       setSelectedAnswer(null);
-    } else if (msg?.type === "audio_control" && msg.action === "play") {
-      setCanAnswer(true);
+      setIsPlaying(false);
+    } else if (msg?.type === "audio_control") {
+      if (msg.action === "play") {
+        // allow answering when music starts
+        setCanAnswer(true);
+        setIsPlaying(true);
+        setAudioLength(msg.length);
+      } else {
+        setIsPlaying(false);
+      }
+    } else if (msg?.type === "answer") {
+      // answering no longer allowed when server publishes correct answer
+      setCanAnswer(false);
+      setIsPlaying(false);
     }
   }, [controller.currentAnswer, controller.currentQuestion]));
 
+  // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (!canAnswer) return;
     
@@ -104,6 +203,13 @@ function QuestionDisplay() {
         </p>
       </div>
 
+      {/* Progress bar */}
+      {audioLength > 0 && (
+        <div className="mx-auto w-3/4">
+          <ProgressBar duration={audioLength} isPlaying={isPlaying} />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => (
           <AnswerOption
@@ -114,6 +220,7 @@ function QuestionDisplay() {
             isCorrect={correctIndex !== undefined ? correctIndex === index : null}
             isDisabled={isDisabled}
             onSelect={handleAnswerSelect}
+            playerAnswers={currentAnswer?.playerAnswers || null}
           />
         ))}
       </div>
@@ -127,13 +234,7 @@ function QuestionDisplay() {
  */
 export function Ingame() {
   const controller = useControllerContext();
-  const [state, setState] = useState<GameState>("lobby");
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (!msg || msg.type === "update") {
-      setState(controller.state);
-    }
-  }, [controller.state]));
+  const state = useGameState(controller);
 
   if (state !== "ingame") return null;
 
