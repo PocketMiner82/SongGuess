@@ -1,5 +1,5 @@
 import React, { useState, useCallback, memo } from "react";
-import type { QuestionMessage, AnswerMessage, GameState, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
+import type { QuestionMessage, AnswerMessage, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
 import { PlayerAvatar } from "./PlayerAvatar";
 import { useControllerContext, useRoomControllerListener, useGameState } from "../RoomController";

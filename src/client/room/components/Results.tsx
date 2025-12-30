@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import type { PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { PlayerCard } from "./PlayerCard";
 import { Button } from "../../components/Button";
 import { useControllerContext, useGameState, useIsHost } from "../RoomController";
