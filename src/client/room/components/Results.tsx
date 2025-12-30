@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useMemo } from "react";
-import type { PlayerState, GameState } from "../../../schemas/RoomServerMessageSchemas";
+import type { GameState } from "../../../schemas/RoomServerMessageSchemas";
 import { PlayerCard } from "./PlayerCard";
-import { useControllerContext, useRoomControllerListener } from "../RoomController";
+import { Button } from "../../components/Button";
+import { useControllerContext, useRoomControllerListener, useIsHost } from "../RoomController";
 
 /**
  * Component for displaying game results after all questions are answered.
@@ -10,6 +11,7 @@ import { useControllerContext, useRoomControllerListener } from "../RoomControll
 function Results() {
   const controller = useControllerContext();
   const [state, setState] = useState<GameState>("lobby");
+  const isHost = useIsHost(controller);
 
   useRoomControllerListener(controller, useCallback(msg => {
     if (!msg || msg.type === "update") {
@@ -47,7 +49,7 @@ function Results() {
           {rankedPlayers.map((player, index) => (
             <div key={player.username} className="flex items-center gap-4">
               {/* Rank number */}
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-card-bg text-lg font-bold">
+              <div className="flex items-center justify-center min-w-12 min-h-12 rounded-full bg-card-bg text-lg font-bold">
                 {index + 1}
               </div>
               
@@ -72,6 +74,18 @@ function Results() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Host-only buttons */}
+      {isHost && (
+        <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8">
+          <Button onClick={() => controller.startGame()}>
+            Play Again
+          </Button>
+          <Button onClick={() => controller.returnToLobby()}>
+            Return to Lobby
+          </Button>
         </div>
       )}
     </div>
