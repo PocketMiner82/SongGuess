@@ -1,6 +1,7 @@
 import React, { useState, useCallback, memo } from "react";
-import type { QuestionMessage, AnswerMessage, GameState } from "../../../schemas/RoomServerMessageSchemas";
+import type { QuestionMessage, AnswerMessage, GameState, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
+import { PlayerAvatar } from "./PlayerAvatar";
 import { useControllerContext, useRoomControllerListener } from "../RoomController";
 
 /**
@@ -13,7 +14,8 @@ const AnswerOption = memo(function AnswerOption({
   isSelected,
   isCorrect,
   isDisabled,
-  onSelect
+  onSelect,
+  playerAnswers
 }: {
   option: string;
   index: number;
@@ -21,6 +23,7 @@ const AnswerOption = memo(function AnswerOption({
   isCorrect: boolean|null;
   isDisabled: boolean;
   onSelect: (index: number) => void;
+  playerAnswers: PlayerState[] | null;
 }) {
   const getButtonStyle = () => {
     if (isCorrect) {
@@ -35,15 +38,42 @@ const AnswerOption = memo(function AnswerOption({
     return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
   };
 
+  // Filter and sort players who selected this answer
+  const playersForThisAnswer = playerAnswers
+    ? playerAnswers
+        .filter(player => player.answerIndex === index)
+        .sort((a, b) => (a.answerTimestamp || 0) - (b.answerTimestamp || 0))
+    : [];
+
   return (
-    <Button
-      onClick={() => onSelect(index)}
-      disabled={isDisabled}
-      defaultColors={false}
-      className={`w-60 min-h-15 xl:w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
-    >
-      {option}
-    </Button>
+    <div className="relative">
+      <Button
+        onClick={() => onSelect(index)}
+        disabled={isDisabled}
+        defaultColors={false}
+        className={`w-60 min-h-15 xl:w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
+      >
+        {option}
+      </Button>
+      
+      {/* Show player avatars during answer phase */}
+      {isCorrect !== null && playersForThisAnswer.length > 0 && (
+        <div className="absolute -top-2 -right-2 flex">
+          {playersForThisAnswer.map((player, playerIndex) => (
+            <div
+              key={player.username}
+              className="rounded-full border-2 border-card-bg"
+              style={{
+                marginLeft: playerIndex > 0 ? '-8px' : '0',
+                zIndex: playersForThisAnswer.length - playerIndex
+              }}
+            >
+              <PlayerAvatar size={24} player={player} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 });
 
@@ -114,6 +144,7 @@ function QuestionDisplay() {
             isCorrect={correctIndex !== undefined ? correctIndex === index : null}
             isDisabled={isDisabled}
             onSelect={handleAnswerSelect}
+            playerAnswers={currentAnswer?.playerAnswers || null}
           />
         ))}
       </div>
