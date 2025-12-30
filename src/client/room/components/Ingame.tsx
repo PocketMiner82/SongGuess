@@ -2,7 +2,7 @@ import React, { useState, useCallback, memo } from "react";
 import type { QuestionMessage, AnswerMessage, GameState, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
 import { PlayerAvatar } from "./PlayerAvatar";
-import { useControllerContext, useRoomControllerListener } from "../RoomController";
+import { useControllerContext, useRoomControllerListener, useGameState } from "../RoomController";
 
 /**
  * Individual answer option button that handles selection and styling.
@@ -163,13 +163,7 @@ function QuestionDisplay() {
  */
 export function Ingame() {
   const controller = useControllerContext();
-  const [state, setState] = useState<GameState>("lobby");
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (!msg || msg.type === "update") {
-      setState(controller.state);
-    }
-  }, [controller.state]));
+  const state = useGameState(controller);
 
   if (state !== "ingame") return null;
 

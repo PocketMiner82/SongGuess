@@ -500,3 +500,21 @@ export function useIsHost(controller: RoomController) {
 
   return isHost;
 }
+
+/**
+ * Custom React hook to track the current game state.
+ * 
+ * @param controller The RoomController instance to listen to.
+ * @returns The current GameState.
+ */
+export function useGameState(controller: RoomController) {
+  const [state, setState] = useState<GameState>("lobby");
+
+  useRoomControllerListener(controller, useCallback((msg) => {
+    if (!msg || msg.type === "update") {
+      setState(controller.state);
+    }
+  }, [controller.state]));
+
+  return state;
+}

@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useMemo } from "react";
-import type { GameState } from "../../../schemas/RoomServerMessageSchemas";
+import React, { useMemo } from "react";
+import type { PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { PlayerCard } from "./PlayerCard";
 import { Button } from "../../components/Button";
-import { useControllerContext, useRoomControllerListener, useIsHost } from "../RoomController";
+import { useControllerContext, useGameState, useIsHost } from "../RoomController";
 
 /**
  * Component for displaying game results after all questions are answered.
@@ -10,14 +10,8 @@ import { useControllerContext, useRoomControllerListener, useIsHost } from "../R
  */
 function Results() {
   const controller = useControllerContext();
-  const [state, setState] = useState<GameState>("lobby");
+  const state = useGameState(controller);
   const isHost = useIsHost(controller);
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (!msg || msg.type === "update") {
-      setState(controller.state);
-    }
-  }, [controller.state]));
 
   // Filter active players and sort by descending points
   const rankedPlayers = useMemo(() => {

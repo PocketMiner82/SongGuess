@@ -3,7 +3,7 @@ import type {GameState, PlayerState} from "../../../schemas/RoomServerMessageSch
 import {albumRegex, artistRegex, COLORS, songRegex} from "../../../schemas/RoomSharedMessageSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
-import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext } from "../RoomController";
+import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext, useGameState } from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
 
 
@@ -219,13 +219,7 @@ function StartGame() {
  */
 export function Lobby() {
   const controller = useControllerContext();
-  const [state, setState] = useState<GameState>("lobby");
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (!msg || msg.type === "update") {
-      setState(controller.state);
-    }
-  }, [controller.state]));
+  const state = useGameState(controller);
 
   if (state !== "lobby") return null;
 
