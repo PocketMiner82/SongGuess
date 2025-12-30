@@ -1,23 +1,43 @@
-import React, { useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { PlayerCard } from "./PlayerCard";
 import { Button } from "../../components/Button";
-import { useControllerContext, useGameState, useIsHost } from "../RoomController";
+import { useControllerContext, useGameState, useIsHost, useRoomControllerListener } from "../RoomController";
+import type { ServerMessage } from "../../../schemas/RoomMessageSchemas";
+import type { PlayerState } from "../../../schemas/RoomServerMessageSchemas";
+import type { RoomController } from "../RoomController";
+
+/**
+ * Custom React hook to manage and provide the ranked list of players.
+ * 
+ * @param controller The RoomController instance to listen to.
+ * @returns The current ranked list of players sorted by points.
+ */
+function useRankedPlayers(controller: RoomController) {
+  const [rankedPlayers, setRankedPlayers] = useState<PlayerState[]>([]);
+
+  const listener = useCallback((msg: ServerMessage|null) => {
+    if (!msg || msg.type === "update") {
+      const ranked = controller.players
+        .filter(player => player.points >= 0) // Only show players who played
+        .sort((a, b) => b.points - a.points); // Sort by descending score
+      setRankedPlayers(ranked);
+    }
+  }, [controller.players]);
+
+  useRoomControllerListener(controller, listener);
+
+  return rankedPlayers;
+}
 
 /**
  * Component for displaying game results after all questions are answered.
  * Shows ranked list of players who played the game with their points.
  */
-function Results() {
+export function Results() {
   const controller = useControllerContext();
   const state = useGameState(controller);
   const isHost = useIsHost(controller);
-
-  // Filter active players and sort by descending points
-  const rankedPlayers = useMemo(() => {
-    return controller.players
-      .filter(player => player.points >= 0) // Only show players who played
-      .sort((a, b) => b.points - a.points); // Sort by descending score
-  }, [controller.players]);
+  const rankedPlayers = useRankedPlayers(controller);
 
   if (state !== "results") return null;
 
@@ -84,5 +104,3 @@ function Results() {
     </div>
   );
 }
-
-export { Results };

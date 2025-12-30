@@ -43,7 +43,7 @@ const ROOM_CLEANUP_TIMEOUT = 10;
 /**
  * The number of questions to generate per game.
  */
-const QUESTION_COUNT = 3;
+const QUESTION_COUNT = 10;
 
 /**
  * The time allocated for each question in seconds.
@@ -250,7 +250,7 @@ export default class Server implements Party.Server {
         break;
       case "add_playlist":
       case "remove_playlist":
-        if (!this.performChecks(conn, msg, "host", "lobby", "countdown")) {
+        if (!this.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
           return;
         }
 
@@ -271,7 +271,7 @@ export default class Server implements Party.Server {
         this.sendConfirmationOrError(conn, msg);
         break;
       case "start_game":
-        if (!this.performChecks(conn, msg, "host", "lobby", "countdown", "min_song_count")) {
+        if (!this.performChecks(conn, msg, "host", "not_ingame", "not_contdown", "min_song_count")) {
           return;
         }
 
@@ -347,12 +347,15 @@ export default class Server implements Party.Server {
    *               - "host": Checks whether the connection is the host.
    *               - "lobby": Checks whether the game is currently in lobby.
    *               - "not_lobby": Checks for the opposite.
-   *               - "countdown": Checks whether a countdown is currently running.
+   *               - "not_contdown": Checks whether a countdown is currently running.
    *               - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
-  private performChecks(conn: Party.Connection|null, msg: SourceMessage, ...checks: ("host" | "lobby" | "not_lobby" | "countdown" | "min_song_count" | "answer")[]): boolean {
-    let possibleErrorFunc = conn ? (error: string) => this.sendConfirmationOrError(conn, msg, error) : () => {};
+  private performChecks(conn: Party.Connection|null, msg: SourceMessage,
+        ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count" | "answer")[]): boolean {
+    let possibleErrorFunc = conn
+        ? (error: string)=>this.sendConfirmationOrError(conn, msg, error)
+        : () => {};
     let successful: boolean = true;
     let connState: PlayerState = conn?.state as PlayerState;
 
@@ -374,14 +377,21 @@ export default class Server implements Party.Server {
 
         case "not_lobby":
           if (this.state === "lobby") {
-            possibleErrorFunc("Action can only be used not in lobby.");
+            possibleErrorFunc("Action can only be used when not in lobby.");
             successful = false;
           }
           break;
 
-        case "countdown":
+        case "not_contdown":
           if (this.countdownInterval !== null) {
             possibleErrorFunc("Action cannot be performed while countdown is running.");
+            successful = false;
+          }
+          break;
+
+        case "not_ingame":
+          if (this.state === "ingame") {
+            possibleErrorFunc("Action can only be used when not ingame.");
             successful = false;
           }
           break;

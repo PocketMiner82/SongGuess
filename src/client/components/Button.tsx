@@ -56,7 +56,9 @@ export function Button({
         cursor-pointer font-bold text-lg py-2 px-4 ${className}`}
       onClick={onClick}
     >
-      {children}
+      <div className="flex items-center text-center justify-center">
+        {children}
+      </div>
     </button>
   );
 }

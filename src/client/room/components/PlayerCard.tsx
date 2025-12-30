@@ -35,7 +35,7 @@ export const PlayerCard = memo(function PlayerCard({
     <li className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
       <PlayerAvatar size={48} player={player} />
       {player ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between flex-1">
           {isEditing ? (
             <input
             type="text"
@@ -49,7 +49,7 @@ export const PlayerCard = memo(function PlayerCard({
           ) : (
             <>
               <span
-              className={`text-lg font-medium w-full ${player.username === username ? "cursor-pointer hover:underline" : ""}`}
+              className={`text-lg font-medium ${player.username === username ? "cursor-pointer hover:underline" : ""}`}
               onClick={() => {
                 if (player.username === username) {
                   setEditedName(username);
@@ -60,7 +60,7 @@ export const PlayerCard = memo(function PlayerCard({
               </span>
               {showPoints ? (
                 <span
-                className="text-lg font-medium text-right">
+                className="text-lg font-medium ml-3 mr-3">
                   {player.points}
                 </span>
               ) : null}
