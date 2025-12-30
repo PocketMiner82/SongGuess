@@ -91,15 +91,20 @@ function QuestionDisplay() {
   useRoomControllerListener(controller, useCallback(msg => {
     setCurrentQuestion(controller.currentQuestion);
     setCurrentAnswer(controller.currentAnswer);
-    setCanAnswer(false);
 
     if (msg?.type === "question") {
+      // reset selection
       setSelectedAnswer(null);
     } else if (msg?.type === "audio_control" && msg.action === "play") {
+      // allow answering when music starts
       setCanAnswer(true);
+    } else if (msg?.type === "answer") {
+      // answering no longer allowed when server publishes correct answer
+      setCanAnswer(false);
     }
   }, [controller.currentAnswer, controller.currentQuestion]));
 
+  // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (!canAnswer) return;
     

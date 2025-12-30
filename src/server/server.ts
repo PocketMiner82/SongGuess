@@ -43,7 +43,7 @@ const ROOM_CLEANUP_TIMEOUT = 10;
 /**
  * The number of questions to generate per game.
  */
-const QUESTION_COUNT = 10;
+const QUESTION_COUNT = 3;
 
 /**
  * The time allocated for each question in seconds.
@@ -687,7 +687,6 @@ export default class Server implements Party.Server {
     this.room.broadcast(this.getAudioControlMessage("pause"));
 
     this.state = "results";
-    this.state = "lobby";
 
     // the update message always contains the points, displaying ranks is handled client-side
     if (sendUpdate) this.broadcastUpdateMessage();
