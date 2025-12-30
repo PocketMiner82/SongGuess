@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, memo, useEffect, useRef } from "react";
 import type { QuestionMessage, AnswerMessage, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
 import { PlayerAvatar } from "./PlayerAvatar";
@@ -78,6 +78,60 @@ const AnswerOption = memo(function AnswerOption({
 });
 
 /**
+ * Progress bar component that shows time remaining for the current question.
+ */
+const ProgressBar = memo(function ProgressBar({ 
+  duration, 
+  isPlaying 
+}: { 
+  duration: number; 
+  isPlaying: boolean; 
+}) {
+  const [progress, setProgress] = useState(100);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isPlaying && duration > 0) {
+      // Reset to full when starting
+      setProgress(100);
+      
+      // Update progress every 100ms for smooth animation
+      const intervalTime = 100;
+      const decrement = (100 / duration) * (intervalTime / 1000);
+      
+      intervalRef.current = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = prev - decrement;
+          return newProgress <= 0 ? 0 : newProgress;
+        });
+      }, intervalTime);
+    } else {
+      // Clear interval when not playing
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setProgress(0);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isPlaying, duration]);
+
+  return (
+    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div 
+        className="h-full bg-blue-500 transition-all duration-100 ease-linear"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  );
+});
+
+/**
  * Displays the current question with answer options.
  * Handles answer selection and shows results when answer is revealed.
  */
@@ -87,6 +141,8 @@ function QuestionDisplay() {
   const [currentAnswer, setCurrentAnswer] = useState<AnswerMessage | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [canAnswer, setCanAnswer] = useState(false);
+  const [audioLength, setAudioLength] = useState<number>(1);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useRoomControllerListener(controller, useCallback(msg => {
     setCurrentQuestion(controller.currentQuestion);
@@ -95,12 +151,20 @@ function QuestionDisplay() {
     if (msg?.type === "question") {
       // reset selection
       setSelectedAnswer(null);
-    } else if (msg?.type === "audio_control" && msg.action === "play") {
-      // allow answering when music starts
-      setCanAnswer(true);
+      setIsPlaying(false);
+    } else if (msg?.type === "audio_control") {
+      if (msg.action === "play") {
+        // allow answering when music starts
+        setCanAnswer(true);
+        setIsPlaying(true);
+        setAudioLength(msg.length);
+      } else {
+        setIsPlaying(false);
+      }
     } else if (msg?.type === "answer") {
       // answering no longer allowed when server publishes correct answer
       setCanAnswer(false);
+      setIsPlaying(false);
     }
   }, [controller.currentAnswer, controller.currentQuestion]));
 
@@ -138,6 +202,13 @@ function QuestionDisplay() {
           Select the correct song title
         </p>
       </div>
+
+      {/* Progress bar */}
+      {audioLength > 0 && (
+        <div className="mx-auto w-3/4">
+          <ProgressBar duration={audioLength} isPlaying={isPlaying} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => (

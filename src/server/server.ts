@@ -959,7 +959,8 @@ export default class Server implements Party.Server {
     } else {
       msg = {
         type: "audio_control",
-        action: action
+        action: action,
+        length: TIME_PER_QUESTION
       };
     }
 
