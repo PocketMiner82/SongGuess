@@ -260,7 +260,7 @@ export function Lobby() {
 
   return (
     <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
-      <div className="mb-12 flex-shrink-0">
+      <div className="mb-12 shrink-0">
         <PlayerList />
       </div>
       <div className={`grid gap-4 grid-cols-1 flex-1 ${isHost ? "lg:grid-cols-2" : ""}`}>
