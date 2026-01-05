@@ -239,7 +239,7 @@ export function Ingame() {
   if (state !== "ingame") return null;
 
   return (
-    <div className="lg:max-w-3/4 mx-auto h-screen flex items-center justify-center p-4 pt-20 pb-20">
+    <div className="lg:max-w-3/4 mx-auto h-full flex items-center justify-center p-4">
       <div className="m-auto justify-items-center text-center max-w-full">
         <QuestionDisplay />
       </div>

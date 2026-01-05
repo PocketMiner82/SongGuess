@@ -34,9 +34,9 @@ function App() {
   };
 
   return (
-    <>
+    <div className="flex flex-col h-screen">
       <TopBar />
-      <div className="flex items-center justify-center h-screen p-4 pt-16">
+      <div className="flex items-center justify-center flex-1 p-4">
         <div className="m-auto justify-items-center text-center max-w-full">
           <ErrorLabel error={error} />
           <Button
@@ -46,7 +46,7 @@ function App() {
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
