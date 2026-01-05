@@ -1,3 +1,10 @@
+# [2.0.0-dev.55](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.54...2.0.0-dev.55) (2026-01-05)
+
+
+### Bug Fixes
+
+* copy array to generate distractions ([cb6ec4f](https://github.com/PocketMiner82/SongGuess/commit/cb6ec4f6ca06ba2186d5772009d0868771e29df7))
+
 # [2.0.0-dev.54](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.53...2.0.0-dev.54) (2025-12-30)
 
 
