@@ -1,3 +1,10 @@
+# [2.0.0-dev.57](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.56...2.0.0-dev.57) (2026-01-05)
+
+
+### Bug Fixes
+
+* reset remaining songs when returning to lobby ([f6fb218](https://github.com/PocketMiner82/SongGuess/commit/f6fb218f729ab8d8e5b9ee02b1cb5fa8c555db68))
+
 # [2.0.0-dev.56](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.55...2.0.0-dev.56) (2026-01-05)
 
 
