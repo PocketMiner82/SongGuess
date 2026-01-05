@@ -31,6 +31,7 @@ export function BottomBar({
   const audio = document.getElementById("audio") as HTMLAudioElement;
   const controller = useControllerContext();
   const [volume, setVolume] = useState(0.2);
+  const [isMuted, setIsMuted] = useState(audio.muted);
 
   const listener = useCallback((msg: ServerMessage|null) => {
     if (!msg || msg.type !== "audio_control") {
@@ -63,9 +64,21 @@ export function BottomBar({
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
     audio.volume = newVolume;
+    // Unmute if volume is increased from 0
+    if (newVolume > 0) {
+      audio.muted = false;
+      setIsMuted(false);
+    }
+  };
+
+  const handleMuteToggle = () => {
+    const newMutedState = !audio.muted;
+    audio.muted = newMutedState;
+    setIsMuted(newMutedState);
   };
 
   const getVolumeIcon = () => {
+    if (isMuted) return 'volume_off';
     if (volume === 0) return "volume_mute";
     if (volume <= 0.5) return "volume_down";
     return "volume_up";
@@ -75,7 +88,14 @@ export function BottomBar({
     <div className={`fixed bottom-0 left-0 right-0 bg-default-bg border-t border-gray-300 dark:border-gray-700 z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex items-center gap-2">
-          <span className="material-icons text-default">{getVolumeIcon()}</span>
+          <button
+            onClick={handleMuteToggle}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <span className="material-icons text-default">
+              {getVolumeIcon()}
+            </span>
+          </button>
           <input
             type="range"
             min="0"
