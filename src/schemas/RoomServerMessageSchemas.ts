@@ -110,7 +110,12 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
      * - "play": Starts playback of the music.
      * - "pause": Pauses playback of the music.
      */
-    action: z.literal(["play", "pause"])
+    action: z.literal(["play", "pause"]),
+
+    /**
+     * The length in seconds of the max time for this question.
+     */
+    length: z.number().nonnegative()
   })
 
 ]);

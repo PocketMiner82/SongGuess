@@ -4,6 +4,7 @@ import { RoomContext, useControllerContext, useRoomController, useRoomController
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";
 import {Ingame} from "./components/Ingame";
+import {Results} from "./components/Results";
 
 
 /**
@@ -118,6 +119,7 @@ function App() {
     <RoomContext.Provider value={controller}>
       <Lobby />
       <Ingame />
+      <Results />
       <Countdown />
       <Audio />
     </RoomContext.Provider>
