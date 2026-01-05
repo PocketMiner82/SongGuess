@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { RoomContext, useControllerContext, useRoomController, useRoomControllerListener } from "./RoomController";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";
@@ -7,6 +7,7 @@ import {Ingame} from "./components/Ingame";
 import {Results} from "./components/Results";
 import { BottomBar } from "./components/BottomBar";
 import { TopBar } from "../components/TopBar";
+import { Audio } from "./components/Audio";
 
 
 /**
@@ -66,7 +67,9 @@ function App() {
       <Ingame />
       <Results />
       <Countdown />
-      <BottomBar />
+      <BottomBar>
+        <Audio />
+      </BottomBar>
     </RoomContext.Provider>
   );
 }
