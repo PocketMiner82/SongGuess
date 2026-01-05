@@ -62,14 +62,18 @@ function App() {
 
   return (
     <RoomContext.Provider value={controller}>
-      <TopBar />
-      <Lobby />
-      <Ingame />
-      <Results />
-      <Countdown />
-      <BottomBar>
-        <Audio />
-      </BottomBar>
+      <div className="flex flex-col h-screen">
+        <TopBar />
+        <main className="flex-1 overflow-auto">
+          <Lobby />
+          <Ingame />
+          <Results />
+          <Countdown />
+        </main>
+        <BottomBar>
+          <Audio />
+        </BottomBar>
+      </div>
     </RoomContext.Provider>
   );
 }

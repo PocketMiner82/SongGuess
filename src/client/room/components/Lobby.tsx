@@ -22,7 +22,7 @@ function PlayerList() {
   return (
     <div className="mb-12">
       <h3 className="text-xl font-bold mb-3">Players</h3>
-      <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] lg:max-h-none overflow-auto">
+      <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
         {slots.map((player, idx) => (
           <PlayerCard
             key={player?.username || `empty-${idx}`}
@@ -82,9 +82,9 @@ function PlaylistList() {
   const playlists = usePlaylists(controller);
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <h3 className="text-xl font-bold mb-3">Playlists</h3>
-      <ul className="space-y-4 overflow-auto">
+      <ul className="space-y-4 overflow-auto flex-1">
         {playlists.length === 0 ? (
           <PlaylistListEntry index={-1} title="No playlists added" />
         ) : (
@@ -259,14 +259,16 @@ export function Lobby() {
   if (state !== "lobby") return null;
 
   return (
-    <div className="lg:max-w-3/4 mx-auto p-4 h-screen pt-20 pb-20">
-      <PlayerList />
-      <div className={`grid gap-4 grid-cols-1 ${isHost ? "lg:grid-cols-2" : ""}`}>
+    <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
+      <div className="mb-12 flex-shrink-0">
+        <PlayerList />
+      </div>
+      <div className={`grid gap-4 grid-cols-1 flex-1 ${isHost ? "lg:grid-cols-2" : ""}`}>
         <div className="lg:order-last">
           {isHost && <Settings />}
         </div>
 
-        <div className="lg:order-first">
+        <div className="lg:order-first min-h-0">
           <PlaylistList />
         </div>
       </div>

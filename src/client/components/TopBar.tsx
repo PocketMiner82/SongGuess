@@ -32,7 +32,7 @@ export function TopBar({
   };
 
   return (
-    <div className={`fixed top-0 left-0 right-0 bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
+    <div className={`bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex-1" />
         
