@@ -73,7 +73,7 @@ export function Audio() {
       <div className="flex items-center gap-2">
         <button
           onClick={handleMuteToggle}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
         >
           <span className="material-icons text-default">
             {getVolumeIcon()}
@@ -86,7 +86,7 @@ export function Audio() {
           step="0.01"
           value={volume}
           onChange={handleVolumeChange}
-          className="w-25"
+          className="w-25 align-middle"
         />
       </div>
     </>
