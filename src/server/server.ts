@@ -122,6 +122,11 @@ export default class Server implements Party.Server {
    */
   currentQuestion: number = 0;
 
+  /**
+   * A list of songs still available for use in the next round.
+   */
+  remainingSongs: Song[] = [];
+
 
   /**
    * Creates a new room server.
@@ -209,7 +214,7 @@ export default class Server implements Party.Server {
         }
         break;
       case "change_username":
-        if (!this.performChecks(conn, msg, "lobby")) {
+        if (!this.performChecks(conn, msg, "not_ingame")) {
           return;
         }
 
@@ -588,12 +593,15 @@ export default class Server implements Party.Server {
    * Add random song guessing questions to the room.
    */
   private addRandomQuestions() {
-    let remainingSongs = [...this.songs];
-
     // add 10 random questions
     for (let i = 0; i < QUESTION_COUNT; i++) {
-      let randomIndex = Math.floor(Math.random() * remainingSongs.length);
-      this.questions.push(new Question(remainingSongs.splice(randomIndex, 1)[0]));
+      if (this.remainingSongs.length === 0) {
+        const usedAudioUrls = new Set(this.questions.map(q => q.song.audioURL));
+        this.remainingSongs = this.songs.filter(song => !usedAudioUrls.has(song.audioURL));
+      }
+
+      let randomIndex = Math.floor(Math.random() * this.remainingSongs.length);
+      this.questions.push(new Question(this.remainingSongs.splice(randomIndex, 1)[0]))
     }
 
     // add distractions to the questions
@@ -702,6 +710,7 @@ export default class Server implements Party.Server {
     this.roundTicks = 0;
     this.questions = [];
     this.currentQuestion = 0;
+    this.remainingSongs = [];
   }
 
   /**
