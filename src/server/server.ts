@@ -33,48 +33,15 @@ import type {
   ChangeUsernameMessage,
   RemovePlaylistMessage, SelectAnswerMessage
 } from "../schemas/RoomClientMessageSchemas";
-
-
-/**
- * The time (in seconds) after which an empty room is cleaned up.
- */
-const ROOM_CLEANUP_TIMEOUT = 10;
-
-/**
- * The number of questions to generate per game.
- */
-const QUESTION_COUNT = 10;
-
-/**
- * The time allocated for each question in seconds.
- */
-const TIME_PER_QUESTION = 20;
-
-/**
- * The tick count when a round starts.
- */
-const ROUND_START = 0;
-
-/**
- * The tick count when music starts playing in a round.
- */
-const ROUND_START_MUSIC = 5;
-
-/**
- * The tick count when the answer is revealed in a round.
- */
-const ROUND_SHOW_ANSWER = ROUND_START_MUSIC + TIME_PER_QUESTION;
-
-/**
- * The tick count when the next round starts.
- */
-const ROUND_START_NEXT = ROUND_SHOW_ANSWER + 5;
-
-/**
- * How many points a player can get per question.
- * Half of the points are for a correct answer, the other half is for the speed of the answer if correct.
- */
-const POINTS_PER_QUESTION = 1000;
+import {
+  POINTS_PER_QUESTION,
+  QUESTION_COUNT,
+  ROOM_CLEANUP_TIMEOUT,
+  ROUND_SHOW_ANSWER,
+  ROUND_START,
+  ROUND_START_MUSIC,
+  ROUND_START_NEXT, TIME_PER_QUESTION
+} from "./ServerConstants";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -388,8 +355,8 @@ export default class Server implements Party.Server {
 
         case "min_song_count":
           // todo: calculate this if implementing variable question count
-          if (this.songs.length < 30) {
-            possibleErrorFunc(`Required at least 30 songs. Selected: ${this.songs.length}`);
+          if (this.songs.length < QUESTION_COUNT) {
+            possibleErrorFunc(`Required at least ${QUESTION_COUNT} songs. Selected: ${this.songs.length}`);
             successful = false;
           }
           break;
@@ -611,7 +578,7 @@ export default class Server implements Party.Server {
    * Add random song guessing questions to the room.
    */
   private addRandomQuestions() {
-    let remainingSongs = new Array(...this.songs);
+    let remainingSongs = [...this.songs];
 
     // add 10 random questions
     for (let i = 0; i < QUESTION_COUNT; i++) {
@@ -621,7 +588,7 @@ export default class Server implements Party.Server {
 
     // add distractions to the questions
     for (const q of this.questions) {
-      q.generateDistractions(remainingSongs);
+      q.generateDistractions(this.songs);
     }
   }
 

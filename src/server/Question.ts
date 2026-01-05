@@ -21,12 +21,15 @@ export default class Question {
   /**
    * Adds 3 random distraction songs to the question and shuffles all options.
    *
-   * @param possibleDistractions Array of songs to use as distraction options.
+   * @param possibleDistractions Array of songs to use as distraction options. Will be copied, so no items are removed.
    */
   public generateDistractions(possibleDistractions: Song[]) {
+    const distractions = possibleDistractions.filter(s =>
+      s.audioURL !== this.song.audioURL);
+
     for (let i = 0; i < 3; i++) {
-      let randomIndex = Math.floor(Math.random() * possibleDistractions.length);
-      this.questions.push(possibleDistractions.splice(randomIndex, 1)[0]);
+      let randomIndex = Math.floor(Math.random() * distractions.length);
+      this.questions.push(distractions.splice(randomIndex, 1)[0]);
     }
     this.questions = shuffle(this.questions);
   }
