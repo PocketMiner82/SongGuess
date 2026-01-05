@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { type ReactNode } from 'react';
 import { useControllerContext, useRoomControllerListener } from '../RoomController';
 import type { ServerMessage } from '../../../schemas/RoomMessageSchemas';
@@ -9,7 +9,7 @@ import type { ServerMessage } from '../../../schemas/RoomMessageSchemas';
 type BottomBarProps = {
   /**
    * Additional elements to render on the right side of the bottom bar.
-   * These can be positioned independently from the audio controls.
+   * These can be positioned independently of the audio controls.
    */
   children?: ReactNode;
   
@@ -28,16 +28,24 @@ export function BottomBar({
   children,
   className = ''
 }: BottomBarProps) {
-  const audio = document.getElementById("audio") as HTMLAudioElement;
+  const audioRef = useRef<HTMLAudioElement>(null);
   const controller = useControllerContext();
   const [volume, setVolume] = useState(0.2);
-  const [isMuted, setIsMuted] = useState(audio.muted);
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = isMuted;
+    }
+  }, [volume, isMuted]);
 
   const listener = useCallback((msg: ServerMessage|null) => {
-    if (!msg || msg.type !== "audio_control") {
+    if (!msg || msg.type !== "audio_control" || !audioRef.current) {
       return;
     }
 
+    const audio = audioRef.current;
     audio.volume = volume;
 
     // perform requested action
@@ -56,25 +64,21 @@ export function BottomBar({
         audio.load();
         break;
     }
-  }, [audio, volume]);
+  }, [volume]);
 
   useRoomControllerListener(controller, listener);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    audio.volume = newVolume;
     // Unmute if volume is increased from 0
     if (newVolume > 0) {
-      audio.muted = false;
       setIsMuted(false);
     }
   };
 
   const handleMuteToggle = () => {
-    const newMutedState = !audio.muted;
-    audio.muted = newMutedState;
-    setIsMuted(newMutedState);
+    setIsMuted(!isMuted);
   };
 
   const getVolumeIcon = () => {
@@ -85,32 +89,35 @@ export function BottomBar({
   };
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-default-bg border-t border-gray-300 dark:border-gray-700 z-50 ${className}`}>
-      <div className="flex items-center justify-between h-16 px-4">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleMuteToggle}
-            className="cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            <span className="material-icons text-default">
-              {getVolumeIcon()}
-            </span>
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={handleVolumeChange}
-            className="w-25"
-          />
-        </div>
-        
-        <div className="flex-1 flex justify-end">
-          {children}
+    <>
+      <audio ref={audioRef} preload="auto" />
+      <div className={`fixed bottom-0 left-0 right-0 bg-default-bg border-t border-gray-300 dark:border-gray-700 z-50 ${className}`}>
+        <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleMuteToggle}
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <span className="material-icons text-default">
+                {getVolumeIcon()}
+              </span>
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-25"
+            />
+          </div>
+          
+          <div className="flex-1 flex justify-end">
+            {children}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
