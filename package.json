@@ -24,7 +24,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251229.0",
+    "@cloudflare/workers-types": "^4.20260103.0",
     "@types/chroma-js": "^3.1.2",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
