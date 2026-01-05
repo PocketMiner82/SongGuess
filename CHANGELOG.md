@@ -1,3 +1,10 @@
+# [2.0.0-dev.56](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.55...2.0.0-dev.56) (2026-01-05)
+
+
+### Features
+
+* don't use same songs when starting new game from results screen when possible ([4acd63e](https://github.com/PocketMiner82/SongGuess/commit/4acd63ecd8eb41cbb416258c21d202ae0c262bbc))
+
 # [2.0.0-dev.55](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.54...2.0.0-dev.55) (2026-01-05)
 
 
