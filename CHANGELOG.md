@@ -1,3 +1,18 @@
+# [2.0.0-dev.58](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.57...2.0.0-dev.58) (2026-01-05)
+
+
+### Bug Fixes
+
+* avoid bottom bar overlapping playlists ([6194a88](https://github.com/PocketMiner82/SongGuess/commit/6194a88a41cdb2b1ed2f51f9b887a7d5e593e8b2))
+* center speaker and slider ([1d24065](https://github.com/PocketMiner82/SongGuess/commit/1d24065940903e991534fd1f18c2cc56db40b229))
+
+
+### Features
+
+* add ability to mute by clicking speaker icon ([256911f](https://github.com/PocketMiner82/SongGuess/commit/256911fad6825ebfa258f8ffe27d23a457e1dc07))
+* add end game button ([ee7c1a9](https://github.com/PocketMiner82/SongGuess/commit/ee7c1a99bc2e0269faf7efaece1df51e4fe9b1dd))
+* add top and bottom bars ([f570f4d](https://github.com/PocketMiner82/SongGuess/commit/f570f4d5dac9a49676a6b8a5771ec2d991158b9d))
+
 # [2.0.0-dev.57](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.56...2.0.0-dev.57) (2026-01-05)
 
 
