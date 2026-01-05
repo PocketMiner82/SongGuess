@@ -43,7 +43,7 @@ export function TopBar({
           <span className="text-2xl font-bold text-default">SongGuess</span>
         </div>
         
-        <div className="flex-1 flex justify-start">
+        <div className="flex-1 flex justify-end">
           {children}
         </div>
       </div>

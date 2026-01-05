@@ -1,12 +1,13 @@
 import { createRoot } from "react-dom/client";
 import { useState, useCallback } from "react";
-import { RoomContext, useControllerContext, useRoomController, useRoomControllerListener } from "./RoomController";
+import { RoomContext, useControllerContext, useRoomController, useRoomControllerListener, useIsHost, useGameState } from "./RoomController";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";
 import {Ingame} from "./components/Ingame";
 import {Results} from "./components/Results";
 import { BottomBar } from "./components/BottomBar";
 import { TopBar } from "../components/TopBar";
+import { Button } from "../components/Button";
 import { Audio } from "./components/Audio";
 
 
@@ -43,7 +44,37 @@ function Countdown() {
   ) : null;
 }
 
+function Room() {
+  const controller = useControllerContext();
+  const isHost = useIsHost(controller);
+  const gameState = useGameState(controller);
 
+  // if port is set, this is probably a dev environment: prevent accidental reloads
+  if (!window.location.port) window.onbeforeunload = () => true;
+
+  return (
+      <RoomContext.Provider value={controller}>
+        <div className="flex flex-col h-screen">
+          <TopBar>
+            {isHost && gameState === "ingame" && (
+                <Button onClick={() => controller.returnToLobby()}>
+                  End Game
+                </Button>
+            )}
+          </TopBar>
+          <main className="flex-1 overflow-auto">
+            <Lobby />
+            <Ingame />
+            <Results />
+            <Countdown />
+          </main>
+          <BottomBar>
+            <Audio />
+          </BottomBar>
+        </div>
+      </RoomContext.Provider>
+  );
+}
 
 /**
  * Main application component for the game room.
@@ -62,18 +93,7 @@ function App() {
 
   return (
     <RoomContext.Provider value={controller}>
-      <div className="flex flex-col h-screen">
-        <TopBar />
-        <main className="flex-1 overflow-auto">
-          <Lobby />
-          <Ingame />
-          <Results />
-          <Countdown />
-        </main>
-        <BottomBar>
-          <Audio />
-        </BottomBar>
-      </div>
+      <Room />
     </RoomContext.Provider>
   );
 }
