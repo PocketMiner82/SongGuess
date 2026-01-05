@@ -263,6 +263,9 @@ export default class Server implements Party.Server {
         }
 
         this.resetGame();
+        // returning to lobby will force to include all songs again
+        this.remainingSongs = [];
+
         this.broadcastUpdateMessage();
         break;
       default:
