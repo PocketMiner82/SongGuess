@@ -35,14 +35,14 @@ export function TopBar({
     <div className={`bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex-1" />
-        
-        <div 
+
+        <div
           className="flex-1 text-center cursor-pointer hover:opacity-80 transition-opacity"
           onClick={handleTitleClick}
         >
           <span className="text-2xl font-bold text-default">SongGuess</span>
         </div>
-        
+
         <div className="flex-1 flex justify-end">
           {children}
         </div>

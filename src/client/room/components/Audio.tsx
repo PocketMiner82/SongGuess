@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useControllerContext, useRoomControllerListener } from '../RoomController';
 import type { ServerMessage } from '../../../schemas/RoomMessageSchemas';
 
