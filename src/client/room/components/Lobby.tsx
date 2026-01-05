@@ -259,7 +259,7 @@ export function Lobby() {
   if (state !== "lobby") return null;
 
   return (
-    <div className="lg:max-w-3/4 mx-auto p-4 h-screen">
+    <div className="lg:max-w-3/4 mx-auto p-4 h-screen pt-20 pb-20">
       <PlayerList />
       <div className={`grid gap-4 grid-cols-1 ${isHost ? "lg:grid-cols-2" : ""}`}>
         <div className="lg:order-last">

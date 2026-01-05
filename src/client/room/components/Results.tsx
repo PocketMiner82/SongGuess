@@ -42,7 +42,7 @@ export function Results() {
   if (state !== "results") return null;
 
   return (
-    <div className="space-y-6 lg:max-w-3/4 2xl:max-w-1/2 mx-auto p-4 h-screen">
+    <div className="space-y-6 lg:max-w-3/4 2xl:max-w-1/2 mx-auto p-4 h-screen pt-20 pb-20">
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-2">
           Game Results

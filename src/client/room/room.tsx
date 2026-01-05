@@ -5,6 +5,8 @@ import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";
 import {Ingame} from "./components/Ingame";
 import {Results} from "./components/Results";
+import { BottomBar } from "./components/BottomBar";
+import { TopBar } from "../components/TopBar";
 
 
 /**
@@ -40,65 +42,7 @@ function Countdown() {
   ) : null;
 }
 
-/**
- * Audio controller component that manages audio playback and volume.
- * Handles audio control messages from the server to play, pause, and load audio files.
- */
-function Audio() {
-  const audio = document.getElementById("audio") as HTMLAudioElement;
-  const controller = useControllerContext();
-  const [volume, setVolume] = useState(0.2);
 
-  const listener = useCallback((msg: ServerMessage|null) => {
-    if (!msg || msg.type !== "audio_control") {
-      return;
-    }
-
-    audio.volume = volume;
-
-    // perform requested action
-    switch (msg.action) {
-      case "pause":
-        audio.pause();
-        return;
-      case "play":
-        audio.play().catch(() => {/* ignore play promise errors */});
-        return;
-      case "load":
-        const currentAudioURL = msg.audioURL;
-        // avoid resetting src if it is already correct
-        if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
-
-        audio.load();
-        break;
-    }
-  }, [audio, volume]);
-
-  useRoomControllerListener(controller, listener);
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    audio.volume = newVolume;
-  };
-
-  return (
-    <>
-      <div className="fixed bottom-4 left-4 flex items-center gap-2">
-        <span className="material-icons">{volume > 0 ? (volume > 0.5 ? "volume_up" : "volume_down") : "volume_mute"}</span>
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={handleVolumeChange}
-          className="w-25"
-        />
-      </div>
-    </>
-  );
-}
 
 /**
  * Main application component for the game room.
@@ -117,11 +61,12 @@ function App() {
 
   return (
     <RoomContext.Provider value={controller}>
+      <TopBar />
       <Lobby />
       <Ingame />
       <Results />
       <Countdown />
-      <Audio />
+      <BottomBar />
     </RoomContext.Provider>
   );
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { fetchPostCreateRoom } from "../RoomHTTPHelper";
 import { Button } from "./components/Button";
 import { ErrorLabel } from "./components/ErrorLabel";
+import { TopBar } from "./components/TopBar";
 
 
 /**
@@ -34,20 +35,17 @@ function App() {
 
   return (
     <>
-    <div className="flex items-center justify-center h-screen p-4">
-      <div className="m-auto justify-items-center text-center max-w-full">
-        <div className="text-6xl md:text-8xl lg:text-9xl font-extrabold mb-8 md:mb-16 lg:mb-24">
-          SongGuess
+      <TopBar />
+      <div className="flex items-center justify-center h-screen p-4 pt-16">
+        <div className="m-auto justify-items-center text-center max-w-full">
+          <ErrorLabel error={error} />
+          <Button
+          onClick={buttonClick}
+          className="md:text-3xl lg:text-4xl py-2 px-4 md:py-3 md:px-6 lg:py-4 lg:px-8">
+            Create Room
+          </Button>
         </div>
-        
-        <ErrorLabel error={error} />
-        <Button
-        onClick={buttonClick}
-        className="md:text-3xl lg:text-4xl py-2 px-4 md:py-3 md:px-6 lg:py-4 lg:px-8">
-          Create Room
-        </Button>
       </div>
-    </div>
     </>
   );
 }
