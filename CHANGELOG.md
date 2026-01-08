@@ -1,3 +1,10 @@
+# [2.0.0-dev.60](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.59...2.0.0-dev.60) (2026-01-08)
+
+
+### Features
+
+* show answer speed of players + fix styling on mobile ([745c435](https://github.com/PocketMiner82/SongGuess/commit/745c435b12fe092db3adc3edad9fb9247783e925))
+
 # [2.0.0-dev.59](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.58...2.0.0-dev.59) (2026-01-08)
 
 
