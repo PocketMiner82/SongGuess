@@ -1,3 +1,10 @@
+# [2.0.0-dev.59](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.58...2.0.0-dev.59) (2026-01-08)
+
+
+### Features
+
+* implement cookies to store username + volume; add host transfer delay ([67d4bb3](https://github.com/PocketMiner82/SongGuess/commit/67d4bb346aef3c443c3f17fb6d06955c0e602815))
+
 # [2.0.0-dev.58](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.57...2.0.0-dev.58) (2026-01-05)
 
 
