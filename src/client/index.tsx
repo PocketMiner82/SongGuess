@@ -4,6 +4,7 @@ import { fetchPostCreateRoom } from "../RoomHTTPHelper";
 import { Button } from "./components/Button";
 import { ErrorLabel } from "./components/ErrorLabel";
 import { TopBar } from "./components/TopBar";
+import {CookieConsent} from "react-cookie-consent";
 
 
 /**
@@ -35,6 +36,10 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen">
+      <CookieConsent location="bottom" buttonText="I understand" overlay >
+        This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
+      </CookieConsent>
+
       <TopBar />
       <div className="flex items-center justify-center flex-1 p-4">
         <div className="m-auto justify-items-center text-center max-w-full">

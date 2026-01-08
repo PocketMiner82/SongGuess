@@ -1,6 +1,8 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { useControllerContext, useRoomControllerListener } from '../RoomController';
 import type { ServerMessage } from '../../../schemas/RoomMessageSchemas';
+import {useCookies} from "react-cookie";
+import type CookieProps from "../../../types/CookieProps";
 
 /**
  * Audio component that handles audio playback and controls.
@@ -9,23 +11,22 @@ import type { ServerMessage } from '../../../schemas/RoomMessageSchemas';
 export function Audio() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const controller = useControllerContext();
-  const [volume, setVolume] = useState(0.2);
-  const [isMuted, setIsMuted] = useState(false);
+  const [cookies, setCookie] = useCookies<"audioVolume"|"audioMuted", CookieProps>(["audioVolume", "audioMuted"]);
+  if (cookies.audioVolume === undefined) setCookie('audioVolume', 0.2);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-      audioRef.current.muted = isMuted;
+    if (audioRef.current && cookies.audioVolume !== undefined) {
+      audioRef.current.volume = cookies.audioVolume;
+      audioRef.current.muted = cookies.audioMuted === true;
     }
-  }, [volume, isMuted]);
+  }, [cookies.audioMuted, cookies.audioVolume]);
 
-  const listener = useCallback((msg: ServerMessage|null) => {
+  useRoomControllerListener(controller, useCallback((msg: ServerMessage|null) => {
     if (!msg || msg.type !== "audio_control" || !audioRef.current) {
       return;
     }
 
     const audio = audioRef.current;
-    audio.volume = volume;
 
     // perform requested action
     switch (msg.action) {
@@ -43,27 +44,12 @@ export function Audio() {
         audio.load();
         break;
     }
-  }, [volume]);
-
-  useRoomControllerListener(controller, listener);
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    // Unmute if volume is increased from 0
-    if (newVolume > 0) {
-      setIsMuted(false);
-    }
-  };
-
-  const handleMuteToggle = () => {
-    setIsMuted(!isMuted);
-  };
+  }, []));
 
   const getVolumeIcon = () => {
-    if (isMuted) return 'volume_off';
-    if (volume === 0) return "volume_mute";
-    if (volume <= 0.5) return "volume_down";
+    if (cookies.audioMuted) return 'volume_off';
+    if (cookies.audioVolume === 0) return "volume_mute";
+    if (cookies.audioVolume! <= 0.5) return "volume_down";
     return "volume_up";
   };
 
@@ -72,7 +58,7 @@ export function Audio() {
       <audio ref={audioRef} preload="auto" />
       <div className="flex items-center gap-2">
         <button
-          onClick={handleMuteToggle}
+          onClick={() => setCookie("audioMuted", !cookies.audioMuted)}
           className="flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
         >
           <span className="material-icons text-default">
@@ -84,8 +70,8 @@ export function Audio() {
           min="0"
           max="1"
           step="0.01"
-          value={volume}
-          onChange={handleVolumeChange}
+          value={cookies.audioVolume}
+          onChange={e => setCookie("audioVolume", parseFloat(e.target.value))}
           className="w-25 align-middle"
         />
       </div>

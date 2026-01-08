@@ -64,13 +64,27 @@ export default class Server implements Party.Server {
 
   /**
    * This is the websocket connection of the host.
-   * If the host leaves, the room will close.
+   *
+   * Can be:
+   *  - undefined: No host is set.
+   *  - null: Host left. If he doesn't reconnect within 3 seconds, another player will get host.
+   *  - the actual {@link Party.Connection} object if the host is online.
+   *
    * A host can:
+   *  - Select playlists
    *  - Start the game
-   *  - Select a playlist
-   *  - Kick players
+   *  - End the game / Return all players to lobby
    */
-  hostConnection: Party.Connection|null = null;
+  hostConnection: Party.Connection|null|undefined = undefined;
+
+  /**
+   * The id of the current host.
+   */
+  hostID: string|undefined = undefined;
+
+  hostTransferTimeout: NodeJS.Timeout|null = null;
+
+  cachedStates: Map<string, PlayerState> = new Map();
 
   /**
    * Currently selected playlist(s)
@@ -159,9 +173,17 @@ export default class Server implements Party.Server {
       return;
     }
 
-    // first player connected, this must be the host
-    if (this.getOnlineCount() === 1) {
+    if (this.hostConnection === undefined) {
       this.hostConnection = conn;
+      this.hostID = conn.id;
+    } else if (this.hostConnection === null && this.hostID === conn.id) {
+      // host joined again within timeout
+      this.hostConnection = conn;
+
+      if (this.hostTransferTimeout) {
+        clearTimeout(this.hostTransferTimeout);
+        this.hostTransferTimeout = null;
+      }
     }
 
     if (!this.initConnection(conn)) {
@@ -214,10 +236,6 @@ export default class Server implements Party.Server {
         }
         break;
       case "change_username":
-        if (!this.performChecks(conn, msg, "not_ingame")) {
-          return;
-        }
-
         this.changeUsername(conn, msg);
         break;
       case "add_playlist":
@@ -278,28 +296,26 @@ export default class Server implements Party.Server {
   /**
    * Handles a WebSocket connection closing.
    *
-   * @param connection The connection that closed.
+   * @param conn The connection that closed.
    */
-  onClose(connection: Party.Connection) {
+  onClose(conn: Party.Connection) {
     // ignore disconnects if room is not valid
     if (!this.isValidRoom) {
       return;
     }
 
-    this.log(`${connection.id} left.`);
+    this.log(`${conn.id} left.`);
 
-    // host left, attempt to transfer host to another client
-    if (this.hostConnection === connection) {
-      let next = this.room.getConnections()[Symbol.iterator]().next();
-      if (!next.done) {
-        this.log(`Host left, transferring host to ${next.value.id}`);
-        this.hostConnection = next.value;
-      }
+    // cache state of connection
+    this.cachedStates.set(conn.id, conn.state as PlayerState);
+
+    // host left
+    if (this.hostConnection === conn) {
+      this.delayedHostTransfer();
     }
 
     // no more players left
     if (this.getOnlineCount() === 0) {
-      this.hostConnection = null;
       this.delayedCleanup();
 
       this.log(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
@@ -681,6 +697,30 @@ export default class Server implements Party.Server {
   }
 
   /**
+   * Transfers host to another client after 3 seconds if the client does not join again.
+   */
+  private delayedHostTransfer() {
+    this.hostConnection = null;
+
+    this.hostTransferTimeout = setTimeout(() => {
+      if (this.hostConnection === null) {
+        let next = this.room.getConnections()[Symbol.iterator]().next();
+        if (!next.done) {
+          this.log(`Host left, transferring host to ${next.value.id}`);
+          this.hostConnection = next.value;
+          this.hostConnection.send(this.getUpdateMessage(this.hostConnection));
+          this.hostID = this.hostConnection.id;
+        } else {
+          this.hostConnection = undefined;
+          this.hostID = undefined;
+        }
+      }
+
+      this.hostTransferTimeout = null;
+    }, 3000);
+  }
+
+  /**
    * Invalidates the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
   private delayedCleanup() {
@@ -702,7 +742,10 @@ export default class Server implements Party.Server {
 
     this.isValidRoom = false;
     this.cleanupTimeout = null;
-    this.hostConnection = null;
+    this.hostConnection = undefined;
+    this.hostID = undefined;
+    this.hostTransferTimeout = null;
+    this.cachedStates = new Map();
     this.playlists = [];
     this.songs = [];
     this.countdownInterval = null;
@@ -808,11 +851,11 @@ export default class Server implements Party.Server {
       return false;
     }
 
-    let connState: PlayerState = {
-      username: username,
-      color: color,
-      points: 0
-    };
+    // load state if there is one from previous connect
+    let connState = this.cachedStates.get(conn.id) ?? {} as PlayerState;
+    connState.username = username;
+    connState.color = color;
+    connState.points = connState.points ?? 0;
 
     conn.setState(connState);
 

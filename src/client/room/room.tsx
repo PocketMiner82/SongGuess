@@ -9,6 +9,9 @@ import { BottomBar } from "./components/BottomBar";
 import { TopBar } from "../components/TopBar";
 import { Button } from "../components/Button";
 import { Audio } from "./components/Audio";
+import {CookieConsent} from "react-cookie-consent";
+import {CookiesProvider, useCookies} from "react-cookie";
+import type CookieProps from "../../types/CookieProps";
 
 
 /**
@@ -53,26 +56,28 @@ function Room() {
   if (!window.location.port) window.onbeforeunload = () => true;
 
   return (
-      <RoomContext.Provider value={controller}>
-        <div className="flex flex-col h-screen">
-          <TopBar>
-            {isHost && gameState === "ingame" && (
-                <Button onClick={() => controller.returnToLobby()}>
-                  End Game
-                </Button>
-            )}
-          </TopBar>
-          <main className="flex-1 overflow-auto">
-            <Lobby />
-            <Ingame />
-            <Results />
-            <Countdown />
-          </main>
-          <BottomBar>
-            <Audio />
-          </BottomBar>
-        </div>
-      </RoomContext.Provider>
+      <div className="flex flex-col h-screen">
+        <CookieConsent location="bottom" buttonText="I understand" overlay >
+          This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
+        </CookieConsent>
+
+        <TopBar>
+          {isHost && gameState === "ingame" && (
+              <Button onClick={() => controller.returnToLobby()}>
+                End Game
+              </Button>
+          )}
+        </TopBar>
+        <main className="flex-1 overflow-auto">
+          <Lobby />
+          <Ingame />
+          <Results />
+          <Countdown />
+        </main>
+        <BottomBar>
+          <Audio />
+        </BottomBar>
+      </div>
   );
 }
 
@@ -82,7 +87,8 @@ function Room() {
  */
 function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
-  const { getController, isReady } = useRoomController(roomID);
+  const [cookies, setCookie] = useCookies<"userID"|"userName", CookieProps>(["userID", "userName"]);
+  const { getController, isReady } = useRoomController(roomID, () => cookies, setCookie);
 
   if (!isReady) return <Loading />;
 
@@ -92,10 +98,18 @@ function App() {
   if (!window.location.port) window.onbeforeunload = () => true;
 
   return (
-    <RoomContext.Provider value={controller}>
-      <Room />
-    </RoomContext.Provider>
+      <RoomContext.Provider value={controller}>
+        <Room />
+      </RoomContext.Provider>
   );
 }
 
-createRoot(document.getElementById("app")!).render(<App />);
+createRoot(document.getElementById("app")!).render(
+    <CookiesProvider defaultSetOptions={{
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax"
+    }}>
+      <App />
+    </CookiesProvider>
+);

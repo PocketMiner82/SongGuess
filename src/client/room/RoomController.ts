@@ -20,6 +20,9 @@ import {
 } from "../../schemas/RoomSharedMessageSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
+import type CookieProps from "../../types/CookieProps";
+import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
+import {v4 as uuidv4} from "uuid";
 
 
 /**
@@ -79,15 +82,25 @@ export class RoomController {
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
-   * 
+   *
    * @param roomID The ID of the room to connect to.
+   * @param getCookies What cookies are currently set.
+   * @param setCookies A function to allow updating cookies.
    */
-  constructor(roomID: string) {
+  constructor(roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
+    // generate uuid if not set via cookie
+    let id = getCookies().userID ? getCookies().userID : uuidv4();
+
     this.socket = new PartySocket({
       host: PARTYKIT_HOST,
       room: roomID,
-      maxRetries: 0
+      maxRetries: 0,
+      id: id
     });
+
+    if (!getCookies().userID) {
+      this.setCookies("userID", id);
+    }
 
     this.socket.addEventListener("message", this.onMessage.bind(this));
     this.socket.addEventListener("open", this.onOpen.bind(this));
@@ -144,6 +157,11 @@ export class RoomController {
    */
   private onOpen() {
     console.log(`Connected to ${this.socket.room}`);
+
+    // send username cookie if saved
+    if (this.getCookies().userName) {
+      this.updateUsername(this.getCookies().userName!);
+    }
   }
 
   /**
@@ -203,6 +221,7 @@ export class RoomController {
         break;
       case "update":
         this.username = msg.username;
+        this.setCookies("userName", msg.username);
         this.players = msg.players;
         this.isHost = msg.isHost;
         this.state = msg.state;
@@ -389,23 +408,27 @@ export class RoomController {
 /**
  * Custom React hook that provides a {@link RoomController} instance for managing
  * the connection and state of a room.
- * 
+ *
  * @param roomID The ID of the room to connect to.
+ * @param getCookies What cookies are currently set.
+ * @param setCookies A function to allow updating cookies.
  * @returns An object containing a `getController` method to access the `RoomController` instance.
  */
-export function useRoomController(roomID: string) {
+export function useRoomController(roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
   // hold the class instance so it persists across renders
   const controllerRef = useRef<RoomController | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // initialize the controller
-    controllerRef.current = new RoomController(roomID);
+    controllerRef.current = new RoomController(roomID, getCookies, setCookies);
     setIsReady(true);
 
     return () => {
       controllerRef.current?.destroy();
     };
+  // only update on roomID change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomID]);
 
   return {
