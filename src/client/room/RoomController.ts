@@ -20,7 +20,6 @@ import {
 } from "../../schemas/RoomSharedMessageSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
-import type CookieProps from "../../types/CookieProps";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
 
