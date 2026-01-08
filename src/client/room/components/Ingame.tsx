@@ -2,7 +2,8 @@ import React, { useState, useCallback, memo, useEffect, useRef } from "react";
 import type { QuestionMessage, AnswerMessage, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
 import { PlayerAvatar } from "./PlayerAvatar";
-import { useControllerContext, useRoomControllerListener, useGameState } from "../RoomController";
+import {useControllerContext, useRoomControllerListener, useGameState} from "../RoomController";
+import {ResultsPlayerList} from "./ResultsPlayerList";
 
 /**
  * Individual answer option button that handles selection and styling.
@@ -51,7 +52,7 @@ const AnswerOption = memo(function AnswerOption({
         onClick={() => onSelect(index)}
         disabled={isDisabled}
         defaultColors={false}
-        className={`w-60 min-h-15 xl:w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
+        className={`w-full min-w-75 min-h-15 xl:min-w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
       >
         {option}
       </Button>
@@ -228,6 +229,34 @@ function QuestionDisplay() {
   );
 }
 
+function AnswerResults() {
+  const controller = useControllerContext();
+  const [rankedPlayers, setRankedPlayers] = useState<PlayerState[]>([]);
+
+  useRoomControllerListener(controller, useCallback(e => {
+    if (e?.type === "answer") {
+      setRankedPlayers(e.playerAnswers
+          // remove wrong answers
+          .filter(p => p.answerIndex === e.correctIndex)
+          // sort by ascending time
+          .sort((a, b) => a.answerSpeed! - b.answerSpeed!));
+    } else if (e?.type === "question") {
+      setRankedPlayers([]);
+    }
+  }, []));
+
+  if (rankedPlayers.length === 0) return null;
+
+  return (
+      <div className="space-y-6 xl:max-w-3/4 mx-auto p-4 min-h-full mt-8">
+        <h2 className="text-2xl font-bold mb-2">
+          Player Answertimes
+        </h2>
+        <ResultsPlayerList rankedPlayers={rankedPlayers} showField="answerSpeed" />
+      </div>
+  );
+}
+
 /**
  * Main ingame component that only renders when game state is 'ingame'.
  * Displays the current question and handles answer selection.
@@ -240,8 +269,9 @@ export function Ingame() {
 
   return (
     <div className="lg:max-w-3/4 mx-auto h-full flex items-center justify-center p-4">
-      <div className="m-auto justify-items-center text-center max-w-full">
+      <div className="m-auto text-center max-w-full">
         <QuestionDisplay />
+        <AnswerResults />
       </div>
     </div>
   );

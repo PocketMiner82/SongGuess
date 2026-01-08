@@ -550,6 +550,7 @@ export default class Server implements Party.Server {
         // send question directly at start
         case ROUND_START:
           this.room.broadcast(q.getQuestionMessage(this.currentQuestion + 1));
+          this.broadcastUpdateMessage();
 
           // load audio of song to guess
           this.room.broadcast(this.getAudioControlMessage("load", q.song.audioURL));
@@ -639,6 +640,7 @@ export default class Server implements Party.Server {
     let playerState: PlayerState = conn.state as PlayerState;
 
     playerState.answerTimestamp = Date.now();
+    playerState.answerSpeed = playerState.answerTimestamp - this.roundStartTime;
     playerState.answerIndex = msg.answerIndex;
 
     let everyoneVoted = true;

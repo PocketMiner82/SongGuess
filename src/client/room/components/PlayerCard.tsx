@@ -1,4 +1,4 @@
-import {memo, useState} from "react";
+import {memo, type ReactNode, useState} from "react";
 import type {PlayerState} from "../../../schemas/RoomServerMessageSchemas";
 import {useControllerContext} from "../RoomController";
 import {PlayerAvatar} from "./PlayerAvatar";
@@ -9,16 +9,15 @@ import {PlayerAvatar} from "./PlayerAvatar";
  *
  * @param player The player's state or null for empty slot
  * @param username The current user's username
- * @param showPoints Whether to show the points in the player object.
  */
 export const PlayerCard = memo(function PlayerCard({
   player,
   username,
-  showPoints = false
+  children
 }: {
   player: PlayerState|null;
   username?: string|undefined;
-  showPoints?: boolean;
+  children?: ReactNode
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(username);
@@ -58,12 +57,12 @@ export const PlayerCard = memo(function PlayerCard({
               }}>
                 {player.username + (player.username === username ? " (You)" : "")}
               </span>
-              {showPoints ? (
+              {children &&
                 <span
                 className="text-lg font-medium ml-3 mr-3">
-                  {player.points}
+                  {children}
                 </span>
-              ) : null}
+              }
             </>
           )}
         </div>

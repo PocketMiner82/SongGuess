@@ -22,9 +22,14 @@ export const PlayerStateSchema = z.object({
   points: z.number(),
 
   /**
-   * The time in ms where the player answered a round question.
+   * The absolute time in ms where the player answered a round question.
    */
   answerTimestamp: z.optional(z.number()),
+
+  /**
+   * The relative time in ms a player took to answer a round question.
+   */
+  answerSpeed: z.optional(z.number()),
 
   /**
    * The index of the question the player selected.

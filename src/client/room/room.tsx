@@ -64,7 +64,7 @@ function Room() {
         <TopBar>
           {isHost && gameState === "ingame" && (
               <Button onClick={() => controller.returnToLobby()}>
-                End Game
+                Lobby
               </Button>
           )}
         </TopBar>

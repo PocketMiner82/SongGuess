@@ -235,6 +235,7 @@ export class RoomController {
       case "answer":
         this.currentAnswer = msg;
         this.currentQuestion = null;
+        this.players = msg.playerAnswers;
         break;
     }
 
@@ -481,6 +482,8 @@ export function usePlayers(controller: RoomController) {
     if (!msg || msg.type === "update") {
       setPlayers(controller.players);
       setUsername(controller.username);
+    } else if (msg.type === "answer") {
+      setPlayers(msg.playerAnswers);
     }
   }, [controller.players, controller.username]);
 
