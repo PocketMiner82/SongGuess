@@ -93,7 +93,7 @@ function DownloadPlaylists() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "SongGuessPlaylists.json";
+    a.download = "SongGuessPlaylists.sgjson";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -217,6 +217,80 @@ function AddPlaylistInput() {
 }
 
 /**
+ * Button component that imports playlists from a JSON file.
+ */
+function ImportPlaylists({ setError }: { setError: (error: string | null) => void }) {
+  const controller = useControllerContext();
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      const success = controller.importPlaylistsFromFile(content);
+      if (!success) {
+        setError("Failed to import playlists. Please check the file format.");
+        setTimeout(() => setError(null), 3000);
+      }
+      // Reset file input
+      event.target.value = "";
+    };
+    reader.onerror = () => {
+      setError("Failed to read file.");
+      setTimeout(() => setError(null), 3000);
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <div>
+      <input
+        type="file"
+        accept=".sgjson"
+        onChange={handleImport}
+        className="hidden"
+        id="playlist-import"
+      />
+      <Button
+        onClick={() => document.getElementById("playlist-import")?.click()}
+        className="min-w-full"
+      >
+        <span className="material-symbols-outlined mr-2">upload</span>
+        Import
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * Button component that clears all playlists after user confirmation.
+ */
+function ClearPlaylists() {
+  const controller = useControllerContext();
+  const playlists = usePlaylists(controller);
+
+  const handleClearPlaylists = () => {
+    const isConfirmed = window.confirm("Are you sure you want to clear all playlists?");
+    if (isConfirmed) {
+      controller.removePlaylist(null);
+    }
+  };
+
+  return (
+    <Button
+      onClick={handleClearPlaylists}
+      disabled={playlists.length === 0}
+      className="items-center flex justify-center"
+    >
+      <span className="material-symbols-outlined mr-2">delete</span>
+      Clear Playlists
+    </Button>
+  );
+}
+
+/**
  * Host-only component to start the game. Shows validation errors
  * and handles the start game confirmation from the server.
  */
@@ -279,6 +353,8 @@ function Settings() {
       <div className="grid gap-4">
         <AddPlaylistInput />
         <div className="grid grid-cols-2 gap-4">
+          <ClearPlaylists />
+          <ImportPlaylists setError={setError} />
           <CopyLink />
           <StartGame />
         </div>

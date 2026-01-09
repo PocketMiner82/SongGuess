@@ -291,6 +291,11 @@ export class RoomController {
     return JSON.stringify(data);
   }
 
+  /**
+   * Parses and imports playlists from a JSON string, validating the content against a schema.
+   * @param file - The raw JSON string containing the playlist data.
+   * @returns `true` if the import was successful and state was updated; `false` if parsing or validation failed.
+   */
   public importPlaylistsFromFile(file: string): boolean {
     // try to parse JSON
     try {
@@ -308,10 +313,13 @@ export class RoomController {
       return false;
     }
 
-    this.playlists = result.data.playlists;
-
-    // clear old playlists
-    this.removePlaylist(null);
+    if (this.playlists.length > 0) {
+      let isConfirmed = window.confirm("Do you want to clear the old playlists first?");
+      if (isConfirmed) {
+        // clear old playlists
+        this.removePlaylist(null);
+      }
+    }
 
     for (let playlist of result.data.playlists) {
       this.addPlaylist(playlist);
