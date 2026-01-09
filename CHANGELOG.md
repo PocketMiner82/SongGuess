@@ -1,3 +1,13 @@
+# [2.0.0-dev.61](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.60...2.0.0-dev.61) (2026-01-09)
+
+
+### Features
+
+* handle song array creation client side to allow importing/exporting playlists later ([64faa07](https://github.com/PocketMiner82/SongGuess/commit/64faa0784af17cd8b58300c9a20a15f6604057ac))
+* **Lobby:** add playlist export button ([a395999](https://github.com/PocketMiner82/SongGuess/commit/a395999342be9e371280a6e5a915625fa34d5a8d))
+* **Lobby:** add playlist import and clear buttons ([465f010](https://github.com/PocketMiner82/SongGuess/commit/465f01012c0c6179e9d2aa2b4b269e28508852f7))
+* **Lobby:** show added songs count ([39bdddf](https://github.com/PocketMiner82/SongGuess/commit/39bdddf1987c26671fbc4a49a2765af8dd860f8f))
+
 # [2.0.0-dev.60](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.59...2.0.0-dev.60) (2026-01-08)
 
 
