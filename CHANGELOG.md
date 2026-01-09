@@ -1,3 +1,10 @@
+# [2.0.0-dev.62](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.61...2.0.0-dev.62) (2026-01-09)
+
+
+### Bug Fixes
+
+* **RoomSharedSchemas:** regexes were wrong ([c2e7e2f](https://github.com/PocketMiner82/SongGuess/commit/c2e7e2f7f61c77fbdfe4d428dcd065c2bebc2f81))
+
 # [2.0.0-dev.61](https://github.com/PocketMiner82/SongGuess/compare/2.0.0-dev.60...2.0.0-dev.61) (2026-01-09)
 
 
