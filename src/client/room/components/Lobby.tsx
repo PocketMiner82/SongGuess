@@ -81,6 +81,37 @@ function PlaylistListEntry({index, title, subtitle, coverURL, hrefURL}: {index: 
 }
 
 /**
+ * Button component that downloads the current playlists as a JSON file.
+ */
+function DownloadPlaylists() {
+  const controller = useControllerContext();
+  const playlists = usePlaylists(controller);
+
+  const handleDownload = () => {
+    const content = controller.generatePlaylistsFile();
+    const blob = new Blob([content], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "SongGuessPlaylists.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <Button
+      onClick={handleDownload}
+      disabled={playlists.length === 0}
+      className="items-center flex justify-center"
+    >
+      <span className="material-symbols-outlined">download</span>
+    </Button>
+  );
+}
+
+/**
  * Lists all added playlists in a vertical stack. Shows a placeholder
  * message when no playlists are available.
  */
@@ -90,7 +121,10 @@ function PlaylistList() {
 
   return (
     <div className="h-full flex flex-col">
-      <h3 className="text-xl font-bold mb-3">Playlists</h3>
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-xl font-bold">Playlists</h3>
+        <DownloadPlaylists />
+      </div>
       <ul className="space-y-4 overflow-auto flex-1">
         {playlists.length === 0 ? (
           <PlaylistListEntry index={-1} title="No playlists added" />
