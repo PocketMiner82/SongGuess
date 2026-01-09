@@ -14,10 +14,10 @@ import type {
 import {
   albumRegex,
   artistRegex,
-  type Playlist,
+  type Playlist, type Song,
   songRegex,
   UnknownPlaylist
-} from "../../schemas/RoomSharedMessageSchemas";
+} from "../../schemas/RoomSharedSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
@@ -261,9 +261,23 @@ export class RoomController {
    */
   public startGame() {
     let msg: StartGameMessage = {
-      type: "start_game"
+      type: "start_game",
+      songs: this.getSongs()
     };
     this.socket.send(JSON.stringify(msg));
+  }
+
+  /**
+   * Updates the songs array by collecting all songs from the current playlists.
+   * Also updates the subtitle of each playlist to show the song count.
+   */
+  private getSongs(): Song[] {
+    let songs: Song[] = [];
+    for (let playlist of this.playlists) {
+      songs.push(...playlist.songs);
+    }
+
+    return songs;
   }
 
    /**
@@ -324,18 +338,26 @@ export class RoomController {
    */
   public async tryAddPlaylist(url: string): Promise<boolean> {
     let targetLookupUrl: string = url;
+    let type: "Artist"|"Song"|"Album" = "Song";
+
+
+    let match;
     if (songRegex.test(targetLookupUrl)) {
       targetLookupUrl = targetLookupUrl.replace(songRegex, (match, song, id) => {
         return match.replace(id, `0?i=${id}`)
             .replace(song, "album");
       });
-      console.log(targetLookupUrl);
-    } else if (!artistRegex.test(targetLookupUrl) && !albumRegex.test(targetLookupUrl)) {
+    } else if (artistRegex.test(targetLookupUrl)) {
+      type = "Artist";
+    } else if ((match = albumRegex.exec(targetLookupUrl))) {
+      // check if the track id is set, then it is also a song
+      type = match.groups?.trackId ? "Song" : "Album";
+    } else {
       return false;
     }
 
     const playlist: Playlist = await this.getPlaylistInfo(url);
-    if (playlist.songs!.length === 0) {
+    if (playlist.songs.length === 0) {
       let results: ResultMusicTrack[] = await this.lookupURL(targetLookupUrl, {
         entity: "song",
         limit: 50
@@ -347,8 +369,15 @@ export class RoomController {
       playlist.songs = results.filter(r => r.wrapperType === "track").map(r => ({
         name: r.trackName,
         audioURL: r.previewUrl,
-      }));
+        artist: r.artistName,
+        hrefURL: r.trackViewUrl,
+        cover: r.artworkUrl100.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
+      } satisfies Song));
     }
+
+    // add subtitle + show song count if not playlist is not song type
+    playlist.subtitle = type + (type !== "Song"
+        && ` | ${playlist.songs.length} song${playlist.songs.length !== 1 && "s"}`);
 
     const req: AddPlaylistMessage = {
       type: "add_playlist",

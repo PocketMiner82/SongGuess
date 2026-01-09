@@ -1,4 +1,4 @@
-import type { Song } from "../schemas/RoomSharedMessageSchemas";
+import type { Song } from "../schemas/RoomSharedSchemas";
 import { shuffle } from "../Utils";
 import type {AnswerMessage, PlayerState, QuestionMessage} from "../schemas/RoomServerMessageSchemas";
 

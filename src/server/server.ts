@@ -21,12 +21,11 @@ import {
 import {
   type Playlist,
   type Song,
-  COLORS,
   artistRegex,
   albumRegex,
   UnknownPlaylist,
   songRegex
-} from "../schemas/RoomSharedMessageSchemas";
+} from "../schemas/RoomSharedSchemas";
 import Question from "./Question";
 import type {
   AddPlaylistMessage,
@@ -34,6 +33,7 @@ import type {
   RemovePlaylistMessage, SelectAnswerMessage
 } from "../schemas/RoomClientMessageSchemas";
 import {
+  COLORS,
   POINTS_PER_QUESTION,
   QUESTION_COUNT,
   ROOM_CLEANUP_TIMEOUT,
@@ -263,14 +263,19 @@ export default class Server implements Party.Server {
           return;
         }
 
-        this.updateSongs();
-
         // send the update to all players + confirmation to the host
         this.room.broadcast(this.getPlaylistUpdateMessage());
         this.sendConfirmationOrError(conn, msg);
         break;
       case "start_game":
-        if (!this.performChecks(conn, msg, "host", "not_ingame", "not_contdown", "min_song_count")) {
+        if (!this.performChecks(conn, msg, "host", "not_ingame", "not_contdown")) {
+          return;
+        }
+
+        // update songs before checking for min count
+        this.songs = msg.songs;
+
+        if (!this.performChecks(conn, msg, "min_song_count")) {
           return;
         }
 
@@ -457,22 +462,6 @@ export default class Server implements Party.Server {
     this.playlists.splice(msg.index, 1);
     this.log(`The playlist "${playlistName}" has been removed.`);
     return true;
-  }
-
-  /**
-   * Updates the songs array by collecting all songs from the current playlists.
-   * Also updates the subtitle of each playlist to show the song count.
-   */
-  private updateSongs() {
-    this.songs = [];
-    for (let playlist of this.playlists) {
-      let songCount = playlist.songs ? playlist.songs.length : 0;
-      playlist.subtitle = `${songCount} song${songCount === 1 ? "" : "s"}`;
-      if (!playlist.songs) {
-        continue;
-      }
-      this.songs.push(...playlist.songs);
-    }
   }
 
   /**
@@ -942,10 +931,6 @@ export default class Server implements Party.Server {
    */
   private getPlaylistUpdateMessage(): string {
     let playlists = structuredClone(this.playlists);
-    for (let p of playlists) {
-      // do not send songs in playlist updates
-      delete p.songs;
-    }
 
     let update: UpdatePlaylistsMessage = {
       type: "update_playlists",
@@ -1110,26 +1095,31 @@ export default class Server implements Party.Server {
 
     try {
       let data = JSON.parse(json);
-      let name: string = data["name"];
-      let cover: string|null = null;
+      let name: string = data.name ?? url;
+      let cover: string|null = data.image ?? null;
       let songs: Song[] = [];
-      if (data["image"] && typeof data["image"] === "string") {
-        cover = data["image"];
-      }
 
-      if (data["@type"] && data["@type"] === "MusicAlbum" && data["tracks"]) {
-        songs = data["tracks"].map((e: any) => 
-          e["audio"] && e["audio"]["contentUrl"] && e["audio"]["name"]
-          ? {
-              "name": e["audio"]["name"],
-              "audioURL": e["audio"]["contentUrl"]
-            }
-          : null
-          ).filter((e: any) => e !== null);
+      // album always provides tracks
+      if (data["@type"] === "MusicAlbum" && data.tracks) {
+        let artist: string = data?.byArtist?.[0]?.name ?? "Unknown Artist";
+
+        songs = data.tracks.map((e: any) => (
+            e?.audio?.contentUrl ?
+                {
+                  name: e.audio.name ?? "Unknown Song",
+                  artist: artist,
+                  audioURL: e.audio.contentUrl,
+                  hrefURL: e.url ?? UnknownPlaylist.hrefURL,
+                  cover: e.thumbnailUrl ?? null
+                } satisfies Song
+            :
+                undefined
+        )).filter((e: any) => e);
       }
 
       return {
         name: name,
+        hrefURL: url,
         cover: cover,
         songs: songs
       };

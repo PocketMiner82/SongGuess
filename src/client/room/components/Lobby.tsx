@@ -1,9 +1,10 @@
 import { useState, useCallback, useMemo } from "react";
-import {albumRegex, artistRegex, COLORS, songRegex} from "../../../schemas/RoomSharedMessageSchemas";
+import {albumRegex, artistRegex, songRegex} from "../../../schemas/RoomSharedSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
 import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext, useGameState } from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
+import {COLORS} from "../../../server/ServerConstants";
 
 
 /**
@@ -38,13 +39,14 @@ function PlayerList() {
 /**
  * Displays a single playlist entry with cover art, title and subtitle.
  * Shows a delete button for hosts.
- * 
+ *
  * @param index The playlist's position in the list
  * @param title The primary display name
  * @param subtitle Optional secondary text
  * @param coverURL URL for the cover image or null
+ * @param hrefURL URL to open in new tab when clicking the title.
  */
-function PlaylistListEntry({index, title, subtitle, coverURL}: {index: number, title: string, subtitle?: string, coverURL?: string|null}) {
+function PlaylistListEntry({index, title, subtitle, coverURL, hrefURL}: {index: number, title: string, subtitle?: string, coverURL?: string|null, hrefURL?: string}) {
   const controller = useControllerContext();
   const isHost = useIsHost(controller);
 
@@ -58,7 +60,12 @@ function PlaylistListEntry({index, title, subtitle, coverURL}: {index: number, t
         </div>
       )}
       <div className="w-full">
-        <div className="text-xl font-medium wrap-break-word">{title}</div>
+        <a
+            target="_blank"
+            rel="noopener noreferrer" href={hrefURL}
+            className={`text-xl font-medium wrap-break-word ${hrefURL && "hover:underline hover:cursor-pointer"}`}>
+          {title}
+        </a>
         {subtitle && <div className="text-sm text-disabled-text block">{subtitle}</div>}
       </div>
       {isHost && index >= 0 ?
@@ -89,7 +96,7 @@ function PlaylistList() {
           <PlaylistListEntry index={-1} title="No playlists added" />
         ) : (
           playlists.map((pl, idx) => (
-            <PlaylistListEntry key={idx} index={idx} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} />
+            <PlaylistListEntry key={idx} index={idx} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} hrefURL={pl.hrefURL} />
           ))
         )}
       </ul>

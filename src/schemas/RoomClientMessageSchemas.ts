@@ -1,5 +1,5 @@
 import z from "zod";
-import { PlaylistSchema, UsernameSchema } from "./RoomSharedMessageSchemas";
+import {PlaylistSchema, SongSchema, UsernameSchema} from "./RoomSharedSchemas";
 
 
 /**
@@ -31,7 +31,12 @@ export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
  * Schema for messages requesting to start a new game.
  */
 export const StartGameMessageSchema = z.object({
-  type: z.literal("start_game").default("start_game")
+  type: z.literal("start_game").default("start_game"),
+
+  /**
+   * The (filtered) list of songs to play in this round.
+   */
+  songs: z.array(SongSchema)
 });
 
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
