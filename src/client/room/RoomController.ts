@@ -424,7 +424,7 @@ export class RoomController {
 
     // add subtitle + show song count if not playlist is not song type
     playlist.subtitle = type + (type !== "Song"
-        && ` | ${playlist.songs.length} song${playlist.songs.length !== 1 && "s"}`);
+        ? ` | ${playlist.songs.length} song${playlist.songs.length !== 1 ? "s" : ""}` : "");
 
     this.addPlaylist(playlist);
 
