@@ -118,11 +118,12 @@ function DownloadPlaylists() {
 function PlaylistList() {
   const controller = useControllerContext();
   const playlists = usePlaylists(controller);
+  const songCount = controller.getSongs().length;
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-xl font-bold">Playlists</h3>
+        <h3 className="text-xl font-bold">Playlists ({`${songCount} song${songCount !== 1 && "s"} total`})</h3>
         <DownloadPlaylists />
       </div>
       <ul className="space-y-4 overflow-auto flex-1">

@@ -271,7 +271,7 @@ export class RoomController {
    * Updates the songs array by collecting all songs from the current playlists.
    * Also updates the subtitle of each playlist to show the song count.
    */
-  private getSongs(): Song[] {
+  public getSongs(): Song[] {
     let songs: Song[] = [];
     for (let playlist of this.playlists) {
       songs.push(...playlist.songs);
