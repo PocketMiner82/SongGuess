@@ -82,8 +82,16 @@ export default class Server implements Party.Server {
    */
   hostID: string|undefined = undefined;
 
+  /**
+   * Timeout for host transfer when the current host disconnects.
+   * If the host doesn't reconnect within this timeout, another player becomes host.
+   */
   hostTransferTimeout: NodeJS.Timeout|null = null;
 
+  /**
+   * Cached player states for reconnection scenarios.
+   * Maps connection IDs to player states to preserve data when players disconnect and reconnect.
+   */
   cachedStates: Map<string, PlayerState> = new Map();
 
   /**
@@ -138,6 +146,7 @@ export default class Server implements Party.Server {
 
   /**
    * A list of songs still available for use in the next round.
+   * This pool is used to avoid repeating songs within a single game session.
    */
   remainingSongs: Song[] = [];
 
@@ -526,8 +535,8 @@ export default class Server implements Party.Server {
   /**
    * Starts a countdown, then starts the game loop.
    * Will reset the game state before starting
-   * @see resetGame
-   * @see endGame
+   * @see {@link resetGame}
+   * @see {@link endGame}
    */
   private startGame() {
     /**
@@ -592,7 +601,7 @@ export default class Server implements Party.Server {
   /**
    * Resets the game to the lobby state.
    *
-   * @see endGame
+   * @see {@link endGame}
    */
   private resetGame() {
     this.endGame(false);
@@ -611,9 +620,10 @@ export default class Server implements Party.Server {
 
   /**
    * Add random song guessing questions to the room.
+   * Creates {@link QUESTION_COUNT} random questions for the current game session.
    */
   private addRandomQuestions() {
-    // add 10 random questions
+    // add QUESTION_COUNT random questions
     for (let i = 0; i < QUESTION_COUNT; i++) {
       if (this.remainingSongs.length === 0) {
         const usedAudioUrls = new Set(this.questions.map(q => q.song.audioURL));
@@ -724,6 +734,7 @@ export default class Server implements Party.Server {
 
   /**
    * Invalidates the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
+   * Uses milliseconds for the setTimeout function (ROOM_CLEANUP_TIMEOUT * 1000).
    */
   private delayedCleanup() {
     this.cleanupTimeout = setTimeout(() => {
@@ -797,6 +808,12 @@ export default class Server implements Party.Server {
     return Array.from(this.room.getConnections()).length;
   }
 
+  /**
+   * Retrieves all valid player states from connected clients.
+   * Filters out incomplete or invalid player states that don't have required properties.
+   *
+   * @returns An array of valid PlayerState objects from all connected players.
+   */
   private getAllPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
     for (let conn of this.room.getConnections()) {
