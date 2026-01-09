@@ -14,7 +14,7 @@ import type {
 import {
   albumRegex,
   artistRegex,
-  type Playlist, type Song,
+  type Playlist, type PlaylistsFile, PlaylistsFileSchema, type Song,
   songRegex,
   UnknownPlaylist
 } from "../../schemas/RoomSharedSchemas";
@@ -280,6 +280,45 @@ export class RoomController {
     return songs;
   }
 
+  /**
+   * Serializes the current collection of playlists into a standardized JSON string.
+   */
+  public generatePlaylistsFile(): string {
+    let data: PlaylistsFile = {
+      version: "1.0",
+      playlists: this.playlists
+    };
+    return JSON.stringify(data);
+  }
+
+  public importPlaylistsFromFile(file: string): boolean {
+    // try to parse JSON
+    try {
+      // noinspection ES6ConvertVarToLetConst
+      var json = JSON.parse(file);
+    } catch (e) {
+      console.error("Invalid playlist JSON file:", e);
+      return false;
+    }
+
+    // check if received message is valid
+    const result = PlaylistsFileSchema.safeParse(json);
+    if (!result.success) {
+      console.error("Invalid playlist JSON file:\n%s", z.prettifyError(result.error));
+      return false;
+    }
+
+    this.playlists = result.data.playlists;
+
+    // clear old playlists
+    this.removePlaylist(null);
+
+    for (let playlist of result.data.playlists) {
+      this.addPlaylist(playlist);
+    }
+    return true;
+  }
+
    /**
     * Sends the selected answer to the server.
     * @param answerIndex The index of the selected answer (0-3).
@@ -304,9 +343,9 @@ export class RoomController {
 
   /**
    * Requests the server to remove a playlist from the list.
-   * @param index the index of the playlist to remove.
+   * @param index the index of the playlist to remove. null to remove all playlists.
    */
-  public removePlaylist(index: number) {
+  public removePlaylist(index: number|null) {
     let req: RemovePlaylistMessage = {
       type: "remove_playlist",
       index: index
@@ -379,13 +418,21 @@ export class RoomController {
     playlist.subtitle = type + (type !== "Song"
         && ` | ${playlist.songs.length} song${playlist.songs.length !== 1 && "s"}`);
 
+    this.addPlaylist(playlist);
+
+    return true;
+  }
+
+  /**
+   * Requests the server to add a playlist
+   * @param playlist the playlist to add
+   */
+  public addPlaylist(playlist: Playlist) {
     const req: AddPlaylistMessage = {
       type: "add_playlist",
       playlist: playlist
     };
     this.socket.send(JSON.stringify(req));
-
-    return true;
   }
 
   /**

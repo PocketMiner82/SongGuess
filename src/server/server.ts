@@ -454,13 +454,18 @@ export default class Server implements Party.Server {
    * @returns true if the playlist was removed successfully, false if the index was out of bounds.
    */
   private removePlaylist(msg: RemovePlaylistMessage): boolean {
-    if (msg.index >= this.playlists.length) {
+    if (msg.index && msg.index >= this.playlists.length) {
       return false;
     }
 
-    let playlistName = this.playlists[msg.index].name;
-    this.playlists.splice(msg.index, 1);
-    this.log(`The playlist "${playlistName}" has been removed.`);
+    if (msg.index) {
+      let playlistName = this.playlists[msg.index].name;
+      this.playlists.splice(msg.index, 1);
+      this.log(`The playlist "${playlistName}" has been removed.`);
+    } else {
+      this.playlists = [];
+      this.log(`All playlists have been removed.`);
+    }
     return true;
   }
 

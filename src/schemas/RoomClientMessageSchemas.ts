@@ -66,7 +66,7 @@ export const RemovePlaylistMessageSchema = z.object({
   /**
    * The playlist index to remove.
    */
-  index: z.int().nonnegative()
+  index: z.nullable(z.int().nonnegative())
 });
 
 export type RemovePlaylistMessage = z.infer<typeof RemovePlaylistMessageSchema>;

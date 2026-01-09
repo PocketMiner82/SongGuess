@@ -88,10 +88,21 @@ export const PlaylistSchema = z.object({
 
 export type Playlist = z.infer<typeof PlaylistSchema>;
 
-export const PlaylistFileSchema = z.object({
-  version: z.literal("1.0"),
+
+export const PlaylistsFileSchema = z.object({
+  /**
+   * Version of this export. Only used for validation.
+   */
+  version: z.literal("1.0").default("1.0"),
+
+  /**
+   * The playlists of this export.
+   */
   playlists: z.array(PlaylistSchema)
-})
+});
+
+export type PlaylistsFile = z.infer<typeof PlaylistsFileSchema>;
+
 
 /**
  * Default playlist object used when playlist information cannot be retrieved or is invalid.
