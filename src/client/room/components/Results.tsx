@@ -1,0 +1,53 @@
+import React from "react";
+import { Button } from "../../components/Button";
+import {
+  useControllerContext,
+  useGameState,
+  useIsHost, usePlayers
+} from "../RoomController";
+import {ResultsPlayerList} from "./ResultsPlayerList";
+
+
+/**
+ * Component for displaying game results after all questions are answered.
+ * Shows ranked list of players who played the game with their points.
+ */
+export function Results() {
+  const controller = useControllerContext();
+  const state = useGameState(controller);
+  const isHost = useIsHost(controller);
+  let {players: rankedPlayers} = usePlayers(controller);
+
+  if (state !== "results") return null;
+
+  // sort by descending score
+  rankedPlayers = rankedPlayers.sort((a, b) => b.points - a.points);
+
+  return (
+    <div className="space-y-6 lg:max-w-3/4 2xl:max-w-1/2 mx-auto p-4 min-h-full">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold mb-2">
+          Game Results
+        </h2>
+        <p className="text-disabled-text">
+          Final rankings and scores
+        </p>
+      </div>
+
+      <ResultsPlayerList
+          rankedPlayers={rankedPlayers}
+          showField="points"/>
+
+      {isHost && (
+        <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8">
+          <Button onClick={() => controller.startGame()}>
+            Play Again
+          </Button>
+          <Button onClick={() => controller.returnToLobby()}>
+            Return to Lobby
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

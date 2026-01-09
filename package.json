@@ -1,20 +1,41 @@
 {
   "name": "songguess",
-  "version": "1.3.1",
+  "version": "2.0.0-dev.62",
   "private": true,
   "scripts": {
-    "dev": "partykit dev --live",
-    "deploy": "partykit deploy"
+    "build": "postcss ./src/client/global.css -o ./public/dist/global.css",
+    "dev": "partykit dev --live --var VALIDATE_ROOM_TOKEN abc",
+    "deploy": "partykit deploy",
+    "dev-deploy": "partykit deploy --preview dev",
+    "clean": "rm -rf public/dist"
   },
   "dependencies": {
-    "cookie": "^1.0.2",
-    "partysocket": "^1.0.2"
+    "@tailwindcss/postcss": "^4.1.18",
+    "chroma-js": "^3.2.0",
+    "cookie": "^1.1.1",
+    "itunes-store-api": "^2.1.0",
+    "partysocket": "^1.1.10",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "react": "^19.2.3",
+    "react-cookie": "^8.0.1",
+    "react-cookie-consent": "^10.0.0",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.18",
+    "unique-username-generator": "^1.5.1",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251125.0",
-    "@types/node": "^24.10.1",
-    "@types/spotify-web-playback-sdk": "^0.1.19",
-    "partykit": "^0.0.110",
-    "typescript": "^5.5.4"
+    "@cloudflare/workers-types": "^4.20260103.0",
+    "@types/chroma-js": "^3.1.2",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^8.57.1",
+    "eslint-config-react-app": "^7.0.1",
+    "partykit": "^0.0.115",
+    "typescript": "^5.9.3"
   }
 }

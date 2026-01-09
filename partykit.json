@@ -1,13 +1,23 @@
 {
   "$schema": "https://www.partykit.io/schema.json",
   "name": "songguess",
-  "main": "src/server.ts",
-  // "parties": {
-  //   "auth": "src/auth.ts"
-  // },
+  "main": "src/server/server.ts",
   "compatibilityDate": "2025-11-22",
+  "compatibilityFlags": ["global_fetch_private_origin"],
   "serve": {
     "path": "public",
-    "build": "src/client.ts"
+    "build": {
+      "entry": [
+        "src/client/index.tsx",
+        "src/client/room/room.tsx"
+      ]
+    }
+  },
+  "build": {
+    "command": "npm run build",
+    "watch": [
+      "src",
+      "public/*.html"
+    ]
   }
 }
