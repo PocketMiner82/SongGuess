@@ -1,3 +1,12 @@
+# [2.1.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.0.0...2.1.0-dev.1) (2026-01-10)
+
+
+### Features
+
+* add playlist refreshing ([946cc89](https://github.com/PocketMiner82/SongGuess/commit/946cc8973c8a2dea6341cf8953d53869791b05f9))
+* also show points at ingame answers ([a221bc6](https://github.com/PocketMiner82/SongGuess/commit/a221bc66ec7615198c4bf6b68fbdc62e9371b1db))
+* show songs of last round on game end ([f7f0b60](https://github.com/PocketMiner82/SongGuess/commit/f7f0b60b0946a371801222c02583bf84eac6260d))
+
 # [2.0.0](https://github.com/PocketMiner82/SongGuess/compare/1.3.1...2.0.0) (2026-01-09)
 
 
