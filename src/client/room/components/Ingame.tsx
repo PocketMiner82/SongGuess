@@ -52,7 +52,7 @@ const AnswerOption = memo(function AnswerOption({
         onClick={() => onSelect(index)}
         disabled={isDisabled}
         defaultColors={false}
-        className={`w-full min-w-75 min-h-15 xl:min-w-100 xl:min-h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
+        className={`w-full min-w-75 min-h-15 xl:w-100 xl:h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
       >
         {option}
       </Button>
@@ -285,7 +285,7 @@ export function Ingame() {
 
   return (
     <div className="lg:max-w-3/4 mx-auto h-full flex items-center justify-center p-4">
-      <div className="m-auto text-center max-w-full">
+      <div className="m-auto text-center max-w-full w-full lg:w-auto">
         <QuestionDisplay />
         <AnswerResults />
       </div>
