@@ -1,5 +1,6 @@
 import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedSchemas";
+import { version } from "../../package.json";
 
 
 /**
@@ -192,6 +193,11 @@ export type GameState = z.infer<typeof GameStateSchema>;
  */
 export const UpdateMessageSchema = z.object({
   type: z.literal("update").default("update"),
+
+  /**
+   * The current {@link version} of the server.
+   */
+  version: z.literal(version).default(version),
 
   /**
    * The current game state

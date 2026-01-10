@@ -18,6 +18,7 @@ import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../..
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
 import {getPlaylistByURL} from "../../Utils";
+import { version } from "../../../package.json";
 
 
 /**
@@ -220,6 +221,20 @@ export class RoomController {
         }
         break;
       case "update":
+        // force hard reload when version is outdated
+        if (msg.version !== version) {
+          alert("Client outdated. Click OK to reload the page and try again.\n\n"
+              + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or delete all cookies and data from this page.");
+
+          // try reloading with refreshing cache
+          try {
+            // @ts-ignore
+            window.location.reload(true);
+          } catch {
+            window.location.reload();
+          }
+        }
+
         this.username = msg.username;
         this.setCookies("userName", msg.username);
         this.players = msg.players;

@@ -42,6 +42,7 @@ import {
   ROUND_START_MUSIC,
   ROUND_START_NEXT, TIME_PER_QUESTION
 } from "./ServerConstants";
+import { version } from "../../package.json";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -938,6 +939,7 @@ export default class Server implements Party.Server {
 
     let msg: UpdateMessage = {
       type: "update",
+      version: version,
       state: this.state,
       players: this.getAllPlayerStates(),
       username: connState.username,
