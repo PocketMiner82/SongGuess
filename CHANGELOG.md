@@ -1,3 +1,10 @@
+## [2.1.2-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.1.1...2.1.2-dev.1) (2026-01-10)
+
+
+### Bug Fixes
+
+* **Ingame:** wrong sorting of player answers ([f46f8ef](https://github.com/PocketMiner82/SongGuess/commit/f46f8efb26767a618f1a816167bb7eb7f25f0bb7))
+
 ## [2.1.1](https://github.com/PocketMiner82/SongGuess/compare/2.1.0...2.1.1) (2026-01-10)
 
 
