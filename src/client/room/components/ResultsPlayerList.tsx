@@ -3,7 +3,15 @@ import {PlayerCard} from "./PlayerCard";
 import {useControllerContext} from "../RoomController";
 import type {PlayerState} from "../../../schemas/RoomServerMessageSchemas";
 
-export function ResultsPlayerList({rankedPlayers, showField}: {rankedPlayers: PlayerState[], showField: keyof PlayerState}) {
+
+function getShowField(player: PlayerState, showField: keyof PlayerState) {
+  return (showField === "answerSpeed" ?
+      `${player.answerSpeed! / 1000} s` :
+      player[showField]);
+}
+
+export function ResultsPlayerList({rankedPlayers, showField, showField2}:
+      {rankedPlayers: PlayerState[], showField: keyof PlayerState, showField2?: keyof PlayerState}) {
   const controller = useControllerContext();
 
   rankedPlayers = rankedPlayers.filter(p => p[showField] !== undefined);
@@ -22,15 +30,17 @@ export function ResultsPlayerList({rankedPlayers, showField}: {rankedPlayers: Pl
                 {index + 1}
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1 flex items-center gap-2">
                 <PlayerCard
                     player={player}
                     username={controller.username}>
-                  {showField === "answerSpeed" ?
-                      `${player.answerSpeed! / 1000} s` :
-                      player[showField]
-                  }
+                  {getShowField(player, showField)}
                 </PlayerCard>
+                { showField2 && (
+                    <div>
+                      {getShowField(player, showField2)}
+                    </div>
+                )}
               </div>
             </div>
         ))}

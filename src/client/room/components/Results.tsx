@@ -9,6 +9,10 @@ import {ResultsPlayerList} from "./ResultsPlayerList";
 import {PlaylistCard} from "../../components/PlaylistCard";
 
 
+/**
+ * Component for displaying list of songs played during the game round.
+ * Shows all songs that were played with their title, artist, and cover art.
+ */
 function PlayedSongsList() {
   const controller = useControllerContext();
   const playedSongs = usePlayedSongs(controller);
@@ -16,9 +20,9 @@ function PlayedSongsList() {
   return playedSongs.length > 0 && (
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4 text-center">
-          Songs Played This Round
+          Songs played this round
         </h3>
-        <div className="space-y-2 max-w-md mx-auto">
+        <div className="space-y-2 mx-auto">
           {playedSongs.map((song, idx) => (
               <PlaylistCard
                   index={idx}
@@ -64,7 +68,7 @@ export function Results() {
           showField="points"/>
 
       {isHost && (
-          <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8">
+          <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
             <Button onClick={() => controller.startGame()}>
               Play Again
             </Button>

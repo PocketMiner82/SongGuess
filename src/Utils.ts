@@ -2,11 +2,14 @@ import {
   albumRegex,
   artistRegex,
   type Playlist,
+  type PlaylistsFile,
   type Song,
   songRegex,
-  UnknownPlaylist
+  UnknownPlaylist,
+  PlaylistsFileSchema
 } from "./schemas/RoomSharedSchemas";
 import {type Entities, lookup, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
+import z from "zod";
 
 /**
  * Shuffles an array in place using the Fisher-Yates algorithm.
@@ -130,4 +133,99 @@ try {
 }
 
 return results;
+}
+
+/**
+ * Downloads content as a file with the specified filename.
+ * @param content The content to download
+ * @param filename The filename to use
+ */
+export function downloadFile(content: string, filename: string): void {
+  const blob = new Blob([content], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Reads and parses a playlist file from an input file event.
+ * @param event The file input change event
+ * @returns Promise resolving to the parsed PlaylistsFile or null if failed
+ */
+export async function importPlaylistFile(event: React.ChangeEvent<HTMLInputElement>): Promise<PlaylistsFile | null> {
+  const file = event.target.files?.[0];
+  if (!file) return null;
+
+  try {
+    const content = await (file.text ? file.text() : new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    }));
+    
+    return JSON.parse(content);
+  } catch (e) {
+    console.error("Failed to read or parse playlist file:", e);
+    return null;
+  }
+}
+
+/**
+ * Validates a playlists file against the schema.
+ * @param data The data to validate
+ * @returns The validated PlaylistsFile or null if invalid
+ */
+export function validatePlaylistsFile(data: any): PlaylistsFile | null {
+  const result = PlaylistsFileSchema.safeParse(data);
+  if (!result.success) {
+    console.error("Invalid playlist JSON file:\n%s", z.prettifyError(result.error));
+    return null;
+  }
+  return result.data;
+}
+
+/**
+ * Refreshes playlists by fetching updated data for each hrefURL.
+ * @param playlists The playlists to refresh
+ * @param onProgress Optional progress callback
+ * @returns Promise resolving to the refreshed playlists
+ */
+export async function refreshPlaylists(
+  playlists: Playlist[], 
+  onProgress?: (current: number, total: number, playlist: Playlist | null) => void
+): Promise<Playlist[]> {
+  const refreshedPlaylists: Playlist[] = [];
+  
+  for (let i = 0; i < playlists.length; i++) {
+    const playlist = playlists[i];
+    onProgress?.(i + 1, playlists.length, playlist);
+    
+    if (playlist.hrefURL) {
+      try {
+        const refreshedPlaylist = await getPlaylistByURL(playlist.hrefURL);
+        if (refreshedPlaylist) {
+          refreshedPlaylists.push(refreshedPlaylist);
+        } else {
+          // If refresh failed, keep the original playlist
+          refreshedPlaylists.push(playlist);
+        }
+      } catch (error) {
+        console.error(`Failed to refresh playlist ${playlist.name}:`, error);
+        // Keep the original playlist if refresh failed
+        refreshedPlaylists.push(playlist);
+      }
+    } else {
+      // Keep playlists without hrefURL as-is
+      refreshedPlaylists.push(playlist);
+    }
+  }
+  
+  onProgress?.(playlists.length, playlists.length, null);
+  return refreshedPlaylists;
 }

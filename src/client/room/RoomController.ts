@@ -11,13 +11,13 @@ import type {
   ReturnToLobbyMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
-  type Playlist, type PlaylistsFile, PlaylistsFileSchema, type Song
+  type Playlist, type PlaylistsFile, type Song
 } from "../../schemas/RoomSharedSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
-import {getPlaylistByURL} from "../../Utils";
+import {getPlaylistByURL, validatePlaylistsFile} from "../../Utils";
 
 
 /**
@@ -292,31 +292,14 @@ export class RoomController {
       version: "1.0",
       playlists: this.playlists
     };
-    return JSON.stringify(data);
+    return JSON.stringify(data, null, 2);
   }
 
   /**
-   * Parses and imports playlists from a JSON string, validating the content against a schema.
-   * @param file - The raw JSON string containing the playlist data.
-   * @returns `true` if the import was successful and state was updated; `false` if parsing or validation failed.
+   * Imports playlists from a validated PlaylistsFile object.
+   * @param playlistsFile The validated PlaylistsFile object containing playlist data.
    */
-  public importPlaylistsFromFile(file: string): boolean {
-    // try to parse JSON
-    try {
-      // noinspection ES6ConvertVarToLetConst
-      var json = JSON.parse(file);
-    } catch (e) {
-      console.error("Invalid playlist JSON file:", e);
-      return false;
-    }
-
-    // check if received message is valid
-    const result = PlaylistsFileSchema.safeParse(json);
-    if (!result.success) {
-      console.error("Invalid playlist JSON file:\n%s", z.prettifyError(result.error));
-      return false;
-    }
-
+  public importPlaylistsFromFile(playlistsFile: PlaylistsFile) {
     if (this.playlists.length > 0) {
       let isConfirmed = window.confirm("Do you want to clear the old playlists first?");
       if (isConfirmed) {
@@ -325,10 +308,9 @@ export class RoomController {
       }
     }
 
-    for (let playlist of result.data.playlists) {
+    for (let playlist of playlistsFile.playlists) {
       this.addPlaylist(playlist);
     }
-    return true;
   }
 
    /**

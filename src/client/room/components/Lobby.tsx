@@ -6,6 +6,7 @@ import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useCont
 import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../server/ServerConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
+import { downloadFile, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
 
 
 /**
@@ -46,15 +47,7 @@ function DownloadPlaylists() {
 
   const handleDownload = () => {
     const content = controller.generatePlaylistsFile();
-    const blob = new Blob([content], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "SongGuessPlaylists.sgjson";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadFile(content, "SongGuessPlaylists.sgjson");
   };
 
   return (
@@ -188,26 +181,30 @@ function AddPlaylistInput() {
 function ImportPlaylists({ setError }: { setError: (error: string | null) => void }) {
   const controller = useControllerContext();
 
-  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const data = await importPlaylistFile(event);
+      if (!data) {
+        setError("Failed to read file.");
+        setTimeout(() => setError(null), 3000);
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      const success = controller.importPlaylistsFromFile(content);
-      if (!success) {
+      const playlistsFile = validatePlaylistsFile(data);
+      if (!playlistsFile) {
         setError("Failed to import playlists. Please check the file format.");
         setTimeout(() => setError(null), 3000);
+        return;
       }
-      // Reset file input
-      event.target.value = "";
-    };
-    reader.onerror = () => {
+
+      controller.importPlaylistsFromFile(playlistsFile);
+    } catch (error) {
       setError("Failed to read file.");
       setTimeout(() => setError(null), 3000);
-    };
-    reader.readAsText(file);
+    }
+    
+    // Reset file input
+    event.target.value = "";
   };
 
   return (

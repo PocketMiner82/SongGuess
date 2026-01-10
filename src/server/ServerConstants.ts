@@ -10,6 +10,7 @@ export const ROOM_CLEANUP_TIMEOUT = 10;
 
 /**
  * The number of questions to generate per game.
+ * TODO: update to 10 again
  */
 export const QUESTION_COUNT = 1;
 

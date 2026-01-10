@@ -252,7 +252,7 @@ function AnswerResults() {
         <h2 className="text-2xl font-bold mb-2">
           Player Answertimes
         </h2>
-        <ResultsPlayerList rankedPlayers={rankedPlayers} showField="answerSpeed" />
+        <ResultsPlayerList rankedPlayers={rankedPlayers} showField="points" showField2="answerSpeed" />
       </div>
   );
 }
