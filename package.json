@@ -1,6 +1,6 @@
 {
   "name": "songguess",
-  "version": "2.1.2-dev.1",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "build": "postcss ./src/client/global.css -o ./public/dist/global.css",
