@@ -1,3 +1,10 @@
+# [2.1.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.1.0-dev.1...2.1.0-dev.2) (2026-01-10)
+
+
+### Features
+
+* **room:** add version validation checking ([f5f192f](https://github.com/PocketMiner82/SongGuess/commit/f5f192fddecb990ec5ad773c4bc2fba5b43b6210))
+
 # [2.1.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.0.0...2.1.0-dev.1) (2026-01-10)
 
 
