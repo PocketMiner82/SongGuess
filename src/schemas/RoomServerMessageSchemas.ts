@@ -22,6 +22,11 @@ export const PlayerStateSchema = z.object({
   points: z.number(),
 
   /**
+   * The last question the player answered for.
+   */
+  questionNumber: z.optional(z.number()),
+
+  /**
    * The absolute time in ms where the player answered a round question.
    */
   answerTimestamp: z.optional(z.number()),

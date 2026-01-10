@@ -86,7 +86,7 @@ function PlaylistList() {
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
         {playlists.length === 0 ? (
-          <PlaylistCard index={-1} title="List is empty..." />
+          <PlaylistCard index={-1} title="No playlists added yet." />
         ) : (
           playlists.map((pl, idx) => (
             <PlaylistCard

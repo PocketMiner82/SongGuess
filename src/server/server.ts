@@ -200,6 +200,27 @@ export default class Server implements Party.Server {
       return;
     }
 
+    // inform client about played songs in this round
+    if (this.state === "results") {
+      conn.send(this.getPlayedSongsUpdateMessage());
+    }
+
+    // inform player about current question
+    if (this.state === "ingame") {
+      let q = this.questions[this.currentQuestion];
+      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
+
+      if (this.roundTicks < ROUND_SHOW_ANSWER) {
+        conn.send(q.getQuestionMessage(this.currentQuestion + 1));
+      } else {
+        conn.send(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
+      }
+
+      if (this.roundTicks >= ROUND_START_MUSIC) {
+        conn.send(this.getAudioControlMessage("play"));
+      }
+    }
+
     // send the first update to the connection (and inform all other connections about the new player)
     this.broadcastUpdateMessage();
   }
@@ -643,6 +664,7 @@ export default class Server implements Party.Server {
   private selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
     let playerState: PlayerState = conn.state as PlayerState;
 
+    playerState.questionNumber = this.currentQuestion;
     playerState.answerTimestamp = Date.now();
     playerState.answerSpeed = playerState.answerTimestamp - this.roundStartTime;
     playerState.answerIndex = msg.answerIndex;
@@ -875,6 +897,11 @@ export default class Server implements Party.Server {
 
     conn.setState(connState);
 
+    // clear cached answer when we're already at the next question
+    if (connState.questionNumber !== this.currentQuestion) {
+      this.resetPlayerAnswerData(conn);
+    }
+
     // send the current playlist to the connection
     conn.send(this.getPlaylistsUpdateMessage());
 
@@ -940,7 +967,7 @@ export default class Server implements Party.Server {
   private getPlayedSongsUpdateMessage() {
     return JSON.stringify({
       type: "update_played_songs",
-      songs: this.songs
+      songs: this.questions.map(q => q.song)
     } satisfies UpdatePlayedSongsMessage);
   }
 
@@ -1126,7 +1153,7 @@ export default class Server implements Party.Server {
                   artist: artist,
                   audioURL: e.audio.contentUrl,
                   hrefURL: e.url ?? UnknownPlaylist.hrefURL,
-                  cover: e.thumbnailUrl ?? null
+                  cover: (e.audio.thumbnailUrl || e.thumbnailUrl) ?? null
                 } satisfies Song
             :
                 undefined
