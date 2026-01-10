@@ -1,5 +1,4 @@
 import PartySocket from "partysocket";
-import {type Entities, lookup, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
 import {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
 import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
@@ -12,11 +11,7 @@ import type {
   ReturnToLobbyMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
-  albumRegex,
-  artistRegex,
-  type Playlist, type PlaylistsFile, PlaylistsFileSchema, type Song,
-  songRegex,
-  UnknownPlaylist
+  type Playlist, type PlaylistsFile, PlaylistsFileSchema, type Song
 } from "../../schemas/RoomSharedSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
