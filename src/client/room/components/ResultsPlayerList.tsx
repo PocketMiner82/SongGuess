@@ -21,23 +21,25 @@ export function ResultsPlayerList({rankedPlayers, showField, showField2}:
         {rankedPlayers.map((player, index) => (
             <div key={player.username} className="flex items-center gap-4">
               <div className={`flex items-center justify-center min-w-12 min-h-12 rounded-full 
-        bg-card-bg text-lg font-bold ${
-                  index === 0 ? "text-yellow-500" :
-                      index === 1 ? "text-gray-400" :
-                          index === 2 ? "text-orange-600" :
-                              "text-default"
+        text-lg font-bold ${
+                  index === 0 ? "text-black bg-[#d4af37]" :
+                      index === 1 ? "text-black bg-[#c0c0c0]" :
+                          index === 2 ? "text-black bg-[#cd7f32]" :
+                              "bg-card-bg"
               }`}>
                 {index + 1}
               </div>
 
-              <div className="flex-1 flex items-center gap-2">
-                <PlayerCard
-                    player={player}
-                    username={controller.username}>
-                  {getShowField(player, showField)}
-                </PlayerCard>
+              <div className="flex-1 flex items-center gap-4">
+                <div className="flex-1">
+                  <PlayerCard
+                      player={player}
+                      username={controller.username}>
+                    {getShowField(player, showField)}
+                  </PlayerCard>
+                </div>
                 { showField2 && (
-                    <div>
+                    <div className="flex items-center text-lg font-medium">
                       {getShowField(player, showField2)}
                     </div>
                 )}
