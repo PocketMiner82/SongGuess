@@ -1,5 +1,6 @@
 import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedSchemas";
+import { version } from "../../package.json";
 
 
 /**
@@ -20,6 +21,11 @@ export const PlayerStateSchema = z.object({
    * How many points player has since he joined the room.
    */
   points: z.number(),
+
+  /**
+   * The last question the player answered for.
+   */
+  questionNumber: z.optional(z.number()),
 
   /**
    * The absolute time in ms where the player answered a round question.
@@ -143,6 +149,18 @@ export const CountdownMessageSchema = z.object({
 export type CountdownMessage = z.infer<typeof CountdownMessageSchema>;
 
 
+export const UpdatePlayedSongsMessageSchema = z.object({
+  type: z.literal("update_played_songs").default("update_played_songs"),
+
+  /**
+   * The songs that were played in this round.
+   */
+  songs: z.array(SongSchema)
+});
+
+export type UpdatePlayedSongsMessage = z.infer<typeof UpdatePlayedSongsMessageSchema>;
+
+
 /**
  * Schema for messages containing updates to the current playlists.
  */
@@ -175,6 +193,11 @@ export type GameState = z.infer<typeof GameStateSchema>;
  */
 export const UpdateMessageSchema = z.object({
   type: z.literal("update").default("update"),
+
+  /**
+   * The current {@link version} of the server.
+   */
+  version: z.literal(version).default(version),
 
   /**
    * The current game state

@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { version } from "../../../package.json";
 
 /**
  * Props for the TopBar component.
@@ -34,7 +35,9 @@ export function TopBar({
   return (
     <div className={`bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
-        <div className="flex-1" />
+        <div className="flex-1">
+          v{version}
+        </div>
 
         <div
           className="flex-1 text-center cursor-pointer hover:opacity-80 transition-opacity"

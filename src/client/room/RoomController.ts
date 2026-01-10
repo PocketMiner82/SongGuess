@@ -1,5 +1,4 @@
 import PartySocket from "partysocket";
-import {type Entities, lookup, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
 import {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
 import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
@@ -12,16 +11,14 @@ import type {
   ReturnToLobbyMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
-  albumRegex,
-  artistRegex,
-  type Playlist, type PlaylistsFile, PlaylistsFileSchema, type Song,
-  songRegex,
-  UnknownPlaylist
+  type Playlist, type PlaylistsFile, type Song
 } from "../../schemas/RoomSharedSchemas";
 import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
+import {getPlaylistByURL} from "../../Utils";
+import { version } from "../../../package.json";
 
 
 /**
@@ -78,6 +75,11 @@ export class RoomController {
    * The current answer information revealed after question ends.
    */
   currentAnswer: AnswerMessage|null = null;
+
+  /**
+   * The list of songs played in the last round.
+   */
+  playedSongs: Song[] = [];
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -219,6 +221,20 @@ export class RoomController {
         }
         break;
       case "update":
+        // force hard reload when version is outdated
+        if (msg.version !== version) {
+          alert("Client outdated. Click OK to reload the page and try again.\n\n"
+              + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or delete all cookies and data from this page.");
+
+          // try reloading with refreshing cache
+          try {
+            // @ts-ignore
+            window.location.reload(true);
+          } catch {
+            window.location.reload();
+          }
+        }
+
         this.username = msg.username;
         this.setCookies("userName", msg.username);
         this.players = msg.players;
@@ -236,6 +252,9 @@ export class RoomController {
         this.currentAnswer = msg;
         this.currentQuestion = null;
         this.players = msg.playerAnswers;
+        break;
+      case "update_played_songs":
+        this.playedSongs = msg.songs;
         break;
     }
 
@@ -288,31 +307,14 @@ export class RoomController {
       version: "1.0",
       playlists: this.playlists
     };
-    return JSON.stringify(data);
+    return JSON.stringify(data, null, 2);
   }
 
   /**
-   * Parses and imports playlists from a JSON string, validating the content against a schema.
-   * @param file - The raw JSON string containing the playlist data.
-   * @returns `true` if the import was successful and state was updated; `false` if parsing or validation failed.
+   * Imports playlists from a validated PlaylistsFile object.
+   * @param playlistsFile The validated PlaylistsFile object containing playlist data.
    */
-  public importPlaylistsFromFile(file: string): boolean {
-    // try to parse JSON
-    try {
-      // noinspection ES6ConvertVarToLetConst
-      var json = JSON.parse(file);
-    } catch (e) {
-      console.error("Invalid playlist JSON file:", e);
-      return false;
-    }
-
-    // check if received message is valid
-    const result = PlaylistsFileSchema.safeParse(json);
-    if (!result.success) {
-      console.error("Invalid playlist JSON file:\n%s", z.prettifyError(result.error));
-      return false;
-    }
-
+  public importPlaylistsFromFile(playlistsFile: PlaylistsFile) {
     if (this.playlists.length > 0) {
       let isConfirmed = window.confirm("Do you want to clear the old playlists first?");
       if (isConfirmed) {
@@ -321,10 +323,9 @@ export class RoomController {
       }
     }
 
-    for (let playlist of result.data.playlists) {
+    for (let playlist of playlistsFile.playlists) {
       this.addPlaylist(playlist);
     }
-    return true;
   }
 
    /**
@@ -365,6 +366,7 @@ export class RoomController {
   /**
    * Attempts to add multiple playlists from a given list (newline-separated) of Apple Music URLs.
    * @see tryAddPlaylist
+   * @returns true, if all playlists were requested to be added without errors.
    */
   public async tryAddPlaylists(url: string): Promise<boolean> {
     let urls: string[] = url.split(";");
@@ -380,51 +382,13 @@ export class RoomController {
    * Attempts to add a playlist from the given Apple Music URL.
    * If the URL is valid and songs are found, it sends an update to the server.
    * 
-   * @param url The Apple Music URL of the artist or album.
-   * @returns A Promise resolving to true if the playlist was added, false otherwise.
+   * @param url The Apple Music URL of the artist, song or album.
+   * @returns true if the playlist was requested to be added, false otherwise.
    */
   public async tryAddPlaylist(url: string): Promise<boolean> {
-    let targetLookupUrl: string = url;
-    let type: "Artist"|"Song"|"Album" = "Song";
+    let playlist = await getPlaylistByURL(url);
 
-
-    let match;
-    if (songRegex.test(targetLookupUrl)) {
-      targetLookupUrl = targetLookupUrl.replace(songRegex, (match, song, id) => {
-        return match.replace(id, `0?i=${id}`)
-            .replace(song, "album");
-      });
-    } else if (artistRegex.test(targetLookupUrl)) {
-      type = "Artist";
-    } else if ((match = albumRegex.exec(targetLookupUrl))) {
-      // check if the track id is set, then it is also a song
-      type = match.groups?.trackId ? "Song" : "Album";
-    } else {
-      return false;
-    }
-
-    const playlist: Playlist = await this.getPlaylistInfo(url);
-    if (playlist.songs.length === 0) {
-      let results: ResultMusicTrack[] = await this.lookupURL(targetLookupUrl, {
-        entity: "song",
-        limit: 50
-      });
-
-      if (results.length === 0) return false;
-
-      // filter only music tracks and map to our internal format
-      playlist.songs = results.filter(r => r.wrapperType === "track").map(r => ({
-        name: r.trackName,
-        audioURL: r.previewUrl,
-        artist: r.artistName,
-        hrefURL: r.trackViewUrl,
-        cover: r.artworkUrl100.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
-      } satisfies Song));
-    }
-
-    // add subtitle + show song count if not playlist is not song type
-    playlist.subtitle = type + (type !== "Song"
-        ? ` | ${playlist.songs.length} song${playlist.songs.length !== 1 ? "s" : ""}` : "");
+    if (!playlist) return false;
 
     this.addPlaylist(playlist);
 
@@ -441,50 +405,6 @@ export class RoomController {
       playlist: playlist
     };
     this.socket.send(JSON.stringify(req));
-  }
-
-  /**
-   * Fetches playlist information from the server.
-   *
-   * @param url The Apple Music URL of the playlist.
-   * @returns A Promise resolving to the Playlist information.
-   */
-  private async getPlaylistInfo(url: string): Promise<Playlist> {
-    try {
-      let page = await fetch("/parties/main/playlistInfo?url=" + encodeURIComponent(url));
-      return await page.json();
-    } catch {
-      return UnknownPlaylist;
-    }
-  }
-
-  /**
-   * Safely looks up a URL using the iTunes Store API. Also handles potential caching issues.
-   * @param url The URL to look up.
-   * @param options Optional lookup options.
-   * @returns Promise resolving to an array of results.
-   */
-  private async lookupURL<M extends Media, E extends Entities[M]>(url: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
-    let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
-
-    try {
-      try {
-        results = (await lookup("url", url, options)).results;
-      } catch {
-        // this attempts to fix a weird caching problem on Apple's side, where an old access-control-allow-origin header gets cached
-        try {
-          let newOptions = { ...options, magicnumber: Date.now() };
-          // @ts-ignore
-          results = (await lookup("url", url, newOptions)).results;
-        } catch {
-          results = [];
-        }
-      }
-    } catch (e) {
-      results = [];
-    }
-
-    return results;
   }
 }
 
@@ -626,4 +546,22 @@ export function useGameState(controller: RoomController) {
   }, [controller.state]));
 
   return state;
+}
+
+/**
+ * Custom React hook to track the list of played songs in the last round.
+ * 
+ * @param controller The RoomController instance to listen to.
+ * @returns The current list of played songs.
+ */
+export function usePlayedSongs(controller: RoomController) {
+  const [playedSongs, setPlayedSongs] = useState<Song[]>([]);
+
+  useRoomControllerListener(controller, useCallback((msg) => {
+    if (!msg || msg.type === "update_played_songs") {
+      setPlayedSongs(controller.playedSongs);
+    }
+  }, [controller.playedSongs]));
+
+  return playedSongs;
 }

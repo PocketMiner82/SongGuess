@@ -9,7 +9,7 @@ import {
   type UpdateMessage,
   type UpdatePlaylistsMessage,
   type AudioControlMessage,
-  type CountdownMessage
+  type CountdownMessage, type UpdatePlayedSongsMessage
 } from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import {
@@ -42,6 +42,7 @@ import {
   ROUND_START_MUSIC,
   ROUND_START_NEXT, TIME_PER_QUESTION
 } from "./ServerConstants";
+import { version } from "../../package.json";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -200,6 +201,27 @@ export default class Server implements Party.Server {
       return;
     }
 
+    // inform client about played songs in this round
+    if (this.state === "results") {
+      conn.send(this.getPlayedSongsUpdateMessage());
+    }
+
+    // inform player about current question
+    if (this.state === "ingame") {
+      let q = this.questions[this.currentQuestion];
+      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
+
+      if (this.roundTicks < ROUND_SHOW_ANSWER) {
+        conn.send(q.getQuestionMessage(this.currentQuestion + 1));
+      } else {
+        conn.send(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
+      }
+
+      if (this.roundTicks >= ROUND_START_MUSIC) {
+        conn.send(this.getAudioControlMessage("play"));
+      }
+    }
+
     // send the first update to the connection (and inform all other connections about the new player)
     this.broadcastUpdateMessage();
   }
@@ -254,17 +276,17 @@ export default class Server implements Party.Server {
         }
 
         if (msg.type === "add_playlist" && !this.addPlaylist(msg)) {
-          conn.send(this.getPlaylistUpdateMessage());
+          conn.send(this.getPlaylistsUpdateMessage());
           this.sendConfirmationOrError(conn, msg, "Please provide a playlist with a unique name and album cover.");
           return;
         } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
-          conn.send(this.getPlaylistUpdateMessage());
+          conn.send(this.getPlaylistsUpdateMessage());
           this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
           return;
         }
 
         // send the update to all players + confirmation to the host
-        this.room.broadcast(this.getPlaylistUpdateMessage());
+        this.room.broadcast(this.getPlaylistsUpdateMessage());
         this.sendConfirmationOrError(conn, msg);
         break;
       case "start_game":
@@ -643,6 +665,7 @@ export default class Server implements Party.Server {
   private selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
     let playerState: PlayerState = conn.state as PlayerState;
 
+    playerState.questionNumber = this.currentQuestion;
     playerState.answerTimestamp = Date.now();
     playerState.answerSpeed = playerState.answerTimestamp - this.roundStartTime;
     playerState.answerIndex = msg.answerIndex;
@@ -699,7 +722,10 @@ export default class Server implements Party.Server {
     this.state = "results";
 
     // the update message always contains the points, displaying ranks is handled client-side
-    if (sendUpdate) this.broadcastUpdateMessage();
+    if (sendUpdate) {
+      this.broadcastUpdateMessage();
+      this.room.broadcast(this.getPlayedSongsUpdateMessage());
+    }
   }
 
   /**
@@ -872,8 +898,13 @@ export default class Server implements Party.Server {
 
     conn.setState(connState);
 
+    // clear cached answer when we're already at the next question
+    if (connState.questionNumber !== this.currentQuestion) {
+      this.resetPlayerAnswerData(conn);
+    }
+
     // send the current playlist to the connection
-    conn.send(this.getPlaylistUpdateMessage());
+    conn.send(this.getPlaylistsUpdateMessage());
 
     return true;
   }
@@ -908,6 +939,7 @@ export default class Server implements Party.Server {
 
     let msg: UpdateMessage = {
       type: "update",
+      version: version,
       state: this.state,
       players: this.getAllPlayerStates(),
       username: connState.username,
@@ -930,19 +962,27 @@ export default class Server implements Party.Server {
   }
 
   /**
+   * Constructs a played songs update message with the songs played in the last round.
+   *
+   * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
+   */
+  private getPlayedSongsUpdateMessage() {
+    return JSON.stringify({
+      type: "update_played_songs",
+      songs: this.questions.map(q => q.song)
+    } satisfies UpdatePlayedSongsMessage);
+  }
+
+  /**
    * Constructs a playlist update message with the current playlist array.
    *
    * @returns a JSON string of the constructed {@link UpdatePlaylistsMessage}
    */
-  private getPlaylistUpdateMessage(): string {
-    let playlists = structuredClone(this.playlists);
-
-    let update: UpdatePlaylistsMessage = {
+  private getPlaylistsUpdateMessage(): string {
+    return JSON.stringify({
       type: "update_playlists",
-      playlists: playlists
-    };
-
-    return JSON.stringify(update);
+      playlists: this.playlists
+    } satisfies UpdatePlaylistsMessage);
   }
 
   /**
@@ -1115,7 +1155,7 @@ export default class Server implements Party.Server {
                   artist: artist,
                   audioURL: e.audio.contentUrl,
                   hrefURL: e.url ?? UnknownPlaylist.hrefURL,
-                  cover: e.thumbnailUrl ?? null
+                  cover: (e.audio.thumbnailUrl || e.thumbnailUrl) ?? null
                 } satisfies Song
             :
                 undefined

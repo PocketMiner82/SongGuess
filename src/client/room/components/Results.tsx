@@ -3,10 +3,38 @@ import { Button } from "../../components/Button";
 import {
   useControllerContext,
   useGameState,
-  useIsHost, usePlayers
+  useIsHost, usePlayers, usePlayedSongs
 } from "../RoomController";
 import {ResultsPlayerList} from "./ResultsPlayerList";
+import {PlaylistCard} from "../../components/PlaylistCard";
 
+
+/**
+ * Component for displaying list of songs played during the game round.
+ * Shows all songs that were played with their title, artist, and cover art.
+ */
+function PlayedSongsList() {
+  const controller = useControllerContext();
+  const playedSongs = usePlayedSongs(controller);
+
+  return playedSongs.length > 0 && (
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4 text-center">
+          Played Songs
+        </h3>
+        <div className="space-y-2 mx-auto">
+          {playedSongs.map((song, idx) => (
+              <PlaylistCard
+                  index={idx}
+                  title={song.name}
+                  subtitle={song.artist}
+                  coverURL={song.cover}
+                  hrefURL={song.hrefURL} />
+          ))}
+        </div>
+      </div>
+  );
+}
 
 /**
  * Component for displaying game results after all questions are answered.
@@ -17,6 +45,7 @@ export function Results() {
   const state = useGameState(controller);
   const isHost = useIsHost(controller);
   let {players: rankedPlayers} = usePlayers(controller);
+
 
   if (state !== "results") return null;
 
@@ -39,15 +68,17 @@ export function Results() {
           showField="points"/>
 
       {isHost && (
-        <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8">
-          <Button onClick={() => controller.startGame()}>
-            Play Again
-          </Button>
-          <Button onClick={() => controller.returnToLobby()}>
-            Return to Lobby
-          </Button>
-        </div>
+          <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
+            <Button onClick={() => controller.startGame()}>
+              Play Again
+            </Button>
+            <Button onClick={() => controller.returnToLobby()}>
+              Return to Lobby
+            </Button>
+          </div>
       )}
+
+      <PlayedSongsList />
     </div>
   );
 }
