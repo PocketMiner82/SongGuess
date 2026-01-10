@@ -1,3 +1,10 @@
+## [2.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.1.1-dev.1...2.1.1-dev.2) (2026-01-10)
+
+
+### Bug Fixes
+
+* wrong version validation ([4985b59](https://github.com/PocketMiner82/SongGuess/commit/4985b59edba10ebb9912848df96739817d389541))
+
 ## [2.1.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.1.0...2.1.1-dev.1) (2026-01-10)
 
 
