@@ -5,8 +5,8 @@ import type {PlayerState} from "../../../schemas/RoomServerMessageSchemas";
 
 
 function getShowField(player: PlayerState, showField: keyof PlayerState) {
-  return (showField === "answerSpeed" ?
-      `${player.answerSpeed! / 1000} s` :
+  return (showField === "answerSpeed" && player.answerSpeed ?
+      `${(player.answerSpeed / 1000).toFixed(3)} s` :
       player[showField]);
 }
 
@@ -37,8 +37,8 @@ export function ResultsPlayerList({rankedPlayers, showField, showField2}:
                     {getShowField(player, showField)}
                   </PlayerCard>
                 </div>
-                { showField2 && (
-                    <div className="flex items-center text-lg font-medium">
+                { showField2 && getShowField(player, showField2) && (
+                    <div className="flex items-center text-lg font-medium min-w-16">
                       {getShowField(player, showField2)}
                     </div>
                 )}

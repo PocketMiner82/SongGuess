@@ -1,6 +1,5 @@
 import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./RoomSharedSchemas";
-import { version } from "../../package.json";
 
 
 /**
@@ -197,7 +196,7 @@ export const UpdateMessageSchema = z.object({
   /**
    * The current {@link version} of the server.
    */
-  version: z.literal(version).default(version),
+  version: z.string(),
 
   /**
    * The current game state

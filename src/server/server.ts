@@ -201,6 +201,9 @@ export default class Server implements Party.Server {
       return;
     }
 
+    // send the first update to the connection (and inform all other connections about the new player)
+    this.broadcastUpdateMessage();
+
     // inform client about played songs in this round
     if (this.state === "results") {
       conn.send(this.getPlayedSongsUpdateMessage());
@@ -209,7 +212,6 @@ export default class Server implements Party.Server {
     // inform player about current question
     if (this.state === "ingame") {
       let q = this.questions[this.currentQuestion];
-      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
 
       if (this.roundTicks < ROUND_SHOW_ANSWER) {
         conn.send(q.getQuestionMessage(this.currentQuestion + 1));
@@ -217,13 +219,15 @@ export default class Server implements Party.Server {
         conn.send(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
       }
 
-      if (this.roundTicks >= ROUND_START_MUSIC) {
-        conn.send(this.getAudioControlMessage("play"));
-      }
-    }
+      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
 
-    // send the first update to the connection (and inform all other connections about the new player)
-    this.broadcastUpdateMessage();
+
+      setTimeout(() => {
+        if (this.roundTicks >= ROUND_START_MUSIC) {
+          conn.send(this.getAudioControlMessage("play"));
+        }
+      }, 100);
+    }
   }
 
   /**
@@ -1031,7 +1035,7 @@ export default class Server implements Party.Server {
       msg = {
         type: "audio_control",
         action: action,
-        length: TIME_PER_QUESTION
+        length: ROUND_SHOW_ANSWER - this.roundTicks
       };
     }
 
