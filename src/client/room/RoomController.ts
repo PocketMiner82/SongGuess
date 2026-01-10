@@ -17,7 +17,7 @@ import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessage
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
-import {getPlaylistByURL, validatePlaylistsFile} from "../../Utils";
+import {getPlaylistByURL} from "../../Utils";
 
 
 /**
