@@ -250,7 +250,7 @@ function AnswerResults() {
   return (
       <div className="space-y-6 xl:max-w-3/4 mx-auto p-4 min-h-full mt-8">
         <h2 className="text-2xl font-bold mb-2">
-          Player Answertimes
+          Correct Answers
         </h2>
         <ResultsPlayerList rankedPlayers={rankedPlayers} showField="points" showField2="answerSpeed" />
       </div>

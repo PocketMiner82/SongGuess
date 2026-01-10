@@ -36,7 +36,7 @@ export function PlaylistCard({index, title, subtitle, coverURL, hrefURL, onDelet
               className={`text-xl font-medium wrap-break-word ${hrefURL && "hover:underline hover:cursor-pointer"}`}>
             {title}
           </a>
-          {subtitle && <div className="text-sm text-disabled-text block">{subtitle}</div>}
+          {subtitle && <div className="mt-1 text-sm text-disabled-text block">{subtitle}</div>}
         </div>
         {onDeleteClick && index >= 0 ?
             <Button

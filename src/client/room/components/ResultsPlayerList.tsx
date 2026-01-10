@@ -20,8 +20,7 @@ export function ResultsPlayerList({rankedPlayers, showField, showField2}:
       <div className="space-y-3">
         {rankedPlayers.map((player, index) => (
             <div key={player.username} className="flex items-center gap-4">
-              <div className={`flex items-center justify-center min-w-12 min-h-12 rounded-full 
-        text-lg font-bold ${
+              <div className={`flex items-center justify-center min-w-12 min-h-12 rounded-full text-lg font-bold ${
                   index === 0 ? "text-black bg-[#d4af37]" :
                       index === 1 ? "text-black bg-[#c0c0c0]" :
                           index === 2 ? "text-black bg-[#cd7f32]" :

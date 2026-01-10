@@ -20,7 +20,7 @@ function PlayedSongsList() {
   return playedSongs.length > 0 && (
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4 text-center">
-          Songs played this round
+          Played Songs
         </h3>
         <div className="space-y-2 mx-auto">
           {playedSongs.map((song, idx) => (
