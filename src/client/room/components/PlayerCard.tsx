@@ -57,7 +57,7 @@ export const PlayerCard = memo(function PlayerCard({
               }}>
                 {player.username + (player.username === username ? " (You)" : "")}
               </span>
-              {children &&
+              {children !== undefined &&
                 <span
                 className="text-lg font-medium ml-3 mr-3">
                   {children}
