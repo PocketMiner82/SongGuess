@@ -1,3 +1,10 @@
+## [2.1.3-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.1.2...2.1.3-dev.1) (2026-01-10)
+
+
+### Bug Fixes
+
+* **Ingame:** wrong styling ([d7d28a1](https://github.com/PocketMiner82/SongGuess/commit/d7d28a176e87e96107d08460bf553529c8f73667))
+
 ## [2.1.2](https://github.com/PocketMiner82/SongGuess/compare/2.1.1...2.1.2) (2026-01-10)
 
 
