@@ -236,15 +236,26 @@ function AnswerResults() {
   useRoomControllerListener(controller, useCallback(e => {
     if (e?.type === "answer") {
       setRankedPlayers(e.playerAnswers
-          // don't show time for wrong answers (remove answerSpeed)
           .map(p => {
+            // don't show time for wrong answers
             if (p.answerIndex !== e.correctIndex) {
               p.answerSpeed = undefined;
             }
             return p;
           })
-          // sort by ascending time
-          .sort((a, b) => a.answerSpeed! - b.answerSpeed!));
+          .sort((a, b) => {
+            // 1. Handle "Correctness" (Presence of answerSpeed)
+            if (a.answerSpeed !== undefined && b.answerSpeed === undefined) return -1;
+            if (a.answerSpeed === undefined && b.answerSpeed !== undefined) return 1;
+
+            // 2. Both are correct: Sort by speed (ascending)
+            if (a.answerSpeed !== undefined && b.answerSpeed !== undefined) {
+              return a.answerSpeed - b.answerSpeed;
+            }
+
+            // 3. Both are wrong: Keep original order (or return 0)
+            return 0;
+          }));
     } else if (e?.type === "question") {
       setRankedPlayers([]);
     }
