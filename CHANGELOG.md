@@ -1,3 +1,19 @@
+## [2.1.1](https://github.com/PocketMiner82/SongGuess/compare/2.1.0...2.1.1) (2026-01-10)
+
+
+### Bug Fixes
+
+* **server:** allow clients to select answers when (re)joining mid-game ([880b9b6](https://github.com/PocketMiner82/SongGuess/commit/880b9b6472a542c2fbd2f4f88675ebe4b4137600))
+* show answers of all players ([aad935c](https://github.com/PocketMiner82/SongGuess/commit/aad935c2f864d57e7041ed6057cd8a3de13b599f))
+* wrong version validation ([4985b59](https://github.com/PocketMiner82/SongGuess/commit/4985b59edba10ebb9912848df96739817d389541))
+
+## [2.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.1.1-dev.1...2.1.1-dev.2) (2026-01-10)
+
+
+### Bug Fixes
+
+* wrong version validation ([4985b59](https://github.com/PocketMiner82/SongGuess/commit/4985b59edba10ebb9912848df96739817d389541))
+
 ## [2.1.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.1.0...2.1.1-dev.1) (2026-01-10)
 
 
