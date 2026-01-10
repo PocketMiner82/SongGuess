@@ -236,8 +236,13 @@ function AnswerResults() {
   useRoomControllerListener(controller, useCallback(e => {
     if (e?.type === "answer") {
       setRankedPlayers(e.playerAnswers
-          // remove wrong answers
-          .filter(p => p.answerIndex === e.correctIndex)
+          // don't show time for wrong answers (remove answerSpeed)
+          .map(p => {
+            if (p.answerIndex !== e.correctIndex) {
+              p.answerSpeed = undefined;
+            }
+            return p;
+          })
           // sort by ascending time
           .sort((a, b) => a.answerSpeed! - b.answerSpeed!));
     } else if (e?.type === "question") {
@@ -250,7 +255,7 @@ function AnswerResults() {
   return (
       <div className="space-y-6 xl:max-w-3/4 mx-auto p-4 min-h-full mt-8">
         <h2 className="text-2xl font-bold mb-2">
-          Correct Answers
+          Player Answers
         </h2>
         <ResultsPlayerList rankedPlayers={rankedPlayers} showField="points" showField2="answerSpeed" />
       </div>
