@@ -88,22 +88,34 @@ const ProgressBar = memo(function ProgressBar({
   duration: number; 
   isPlaying: boolean; 
 }) {
-  const [progress, setProgress] = useState(100);
+  const [progress, setProgress] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (isPlaying && duration > 0) {
-      // Reset to full when starting
-      setProgress(100);
+    if (isPlaying && duration) {
+      let reversed = false;
+      if (duration < 0) {
+        reversed = true;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        duration = -duration;
+      }
+
+      // Reset when starting
+      setProgress(reversed ? 0 : 100);
       
       // Update progress every 100ms for smooth animation
       const intervalTime = 100;
-      const decrement = (100 / duration) * (intervalTime / 1000);
+      const change = (100 / duration) * (intervalTime / 1000);
       
       intervalRef.current = setInterval(() => {
         setProgress(prev => {
-          const newProgress = prev - decrement;
-          return newProgress <= 0 ? 0 : newProgress;
+          if (reversed) {
+            const newProgress = prev + change;
+            return newProgress >= 100 ? 100 : newProgress;
+          } else {
+            const newProgress = prev - change;
+            return newProgress <= 0 ? 0 : newProgress;
+          }
         });
       }, intervalTime);
     } else {
@@ -142,7 +154,7 @@ function QuestionDisplay() {
   const [currentAnswer, setCurrentAnswer] = useState<AnswerMessage | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [canAnswer, setCanAnswer] = useState(false);
-  const [audioLength, setAudioLength] = useState<number>(1);
+  const [audioLength, setAudioLength] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useRoomControllerListener(controller, useCallback(msg => {
@@ -154,13 +166,14 @@ function QuestionDisplay() {
       setSelectedAnswer(null);
       setIsPlaying(false);
     } else if (msg?.type === "audio_control") {
+      setAudioLength(msg.action === "load" ? -msg.length : msg.length);
+
       if (msg.action === "play") {
         // allow answering when music starts
         setCanAnswer(true);
         setIsPlaying(true);
-        setAudioLength(msg.length);
       } else {
-        setIsPlaying(false);
+        setIsPlaying(msg.action === "load");
       }
     } else if (msg?.type === "answer") {
       // answering no longer allowed when server publishes correct answer
@@ -205,7 +218,7 @@ function QuestionDisplay() {
       </div>
 
       {/* Progress bar */}
-      {audioLength > 0 && (
+      {audioLength !== 0 && (
         <div className="mx-auto w-3/4">
           <ProgressBar duration={audioLength} isPlaying={isPlaying} />
         </div>
