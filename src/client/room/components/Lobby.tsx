@@ -5,6 +5,7 @@ import { ErrorLabel } from "../../components/ErrorLabel";
 import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext, useGameState } from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../server/ServerConstants";
+import {PlaylistCard} from "../../components/PlaylistCard";
 
 
 /**
@@ -33,50 +34,6 @@ function PlayerList() {
         ))}
       </ul>
     </div>
-  );
-}
-
-/**
- * Displays a single playlist entry with cover art, title and subtitle.
- * Shows a delete button for hosts.
- *
- * @param index The playlist's position in the list
- * @param title The primary display name
- * @param subtitle Optional secondary text
- * @param coverURL URL for the cover image or null
- * @param hrefURL URL to open in new tab when clicking the title.
- */
-function PlaylistListEntry({index, title, subtitle, coverURL, hrefURL}: {index: number, title: string, subtitle?: string, coverURL?: string|null, hrefURL?: string}) {
-  const controller = useControllerContext();
-  const isHost = useIsHost(controller);
-
-  return (
-    <li key={index} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
-      {coverURL ? (
-        <img src={coverURL} alt="Album Cover" className="w-25 h-25 lg:w-30 lg:h-30 2xl:w-40 2xl:h-40 rounded-xl object-cover" />
-      ) : (
-        <div className="min-w-25 min-h-25 lg:min-w-30 lg:min-h-30 2xl:min-w-40 2xl:min-h-40 rounded-xl bg-disabled-bg flex items-center justify-center">
-          <span className="text-disabled-text text-4xl">?</span>
-        </div>
-      )}
-      <div className="w-full">
-        <a
-            target="_blank"
-            rel="noopener noreferrer" href={hrefURL}
-            className={`text-xl font-medium wrap-break-word ${hrefURL && "hover:underline hover:cursor-pointer"}`}>
-          {title}
-        </a>
-        {subtitle && <div className="text-sm text-disabled-text block">{subtitle}</div>}
-      </div>
-      {isHost && index >= 0 ?
-        <Button
-          onClick={() => controller.removePlaylist(index)}
-          className="items-center flex justify-center"
-        >
-          <span className="material-symbols-outlined">delete</span>
-        </Button>
-      : null}
-    </li>
   );
 }
 
@@ -117,6 +74,7 @@ function DownloadPlaylists() {
  */
 function PlaylistList() {
   const controller = useControllerContext();
+  const isHost = useIsHost(controller);
   const playlists = usePlaylists(controller);
   const songCount = controller.getSongs().length;
 
@@ -128,10 +86,17 @@ function PlaylistList() {
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
         {playlists.length === 0 ? (
-          <PlaylistListEntry index={-1} title="No playlists added" />
+          <PlaylistCard index={-1} title="List is empty..." />
         ) : (
           playlists.map((pl, idx) => (
-            <PlaylistListEntry key={idx} index={idx} title={pl.name} subtitle={pl.subtitle} coverURL={pl.cover} hrefURL={pl.hrefURL} />
+            <PlaylistCard
+                key={idx}
+                index={idx}
+                title={pl.name}
+                subtitle={pl.subtitle}
+                coverURL={pl.cover}
+                hrefURL={pl.hrefURL}
+                onDeleteClick={isHost ? () => controller.removePlaylist(idx) : undefined}/>
           ))
         )}
       </ul>

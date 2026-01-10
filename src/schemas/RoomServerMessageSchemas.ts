@@ -143,6 +143,18 @@ export const CountdownMessageSchema = z.object({
 export type CountdownMessage = z.infer<typeof CountdownMessageSchema>;
 
 
+export const UpdatePlayedSongsMessageSchema = z.object({
+  type: z.literal("update_played_songs").default("update_played_songs"),
+
+  /**
+   * The songs that were played in this round.
+   */
+  songs: z.array(SongSchema)
+});
+
+export type UpdatePlayedSongsMessage = z.infer<typeof UpdatePlayedSongsMessageSchema>;
+
+
 /**
  * Schema for messages containing updates to the current playlists.
  */

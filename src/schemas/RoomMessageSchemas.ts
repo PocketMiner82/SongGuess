@@ -3,7 +3,15 @@ import {
   ChangeUsernameMessageSchema, AddPlaylistMessageSchema, RemovePlaylistMessageSchema, StartGameMessageSchema,
   SelectAnswerMessageSchema, ReturnToLobbyMessageSchema
 } from "./RoomClientMessageSchemas";
-import { UpdateMessageSchema, UpdatePlaylistsMessageSchema, CountdownMessageSchema, AudioControlMessageSchema, AnswerMessageSchema, QuestionMessageSchema } from "./RoomServerMessageSchemas";
+import {
+  UpdateMessageSchema,
+  UpdatePlaylistsMessageSchema,
+  CountdownMessageSchema,
+  AudioControlMessageSchema,
+  AnswerMessageSchema,
+  QuestionMessageSchema,
+  UpdatePlayedSongsMessageSchema
+} from "./RoomServerMessageSchemas";
 
 
 const _ClientMessageSchema = z.discriminatedUnion("type", [
@@ -21,7 +29,8 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
   CountdownMessageSchema,
   AudioControlMessageSchema,
   QuestionMessageSchema,
-  AnswerMessageSchema
+  AnswerMessageSchema,
+  UpdatePlayedSongsMessageSchema
 ]);
 
 

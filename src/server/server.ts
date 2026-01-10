@@ -9,7 +9,7 @@ import {
   type UpdateMessage,
   type UpdatePlaylistsMessage,
   type AudioControlMessage,
-  type CountdownMessage
+  type CountdownMessage, type UpdatePlayedSongsMessage
 } from "../schemas/RoomServerMessageSchemas";
 import { setInterval, setTimeout, clearInterval } from "node:timers";
 import {
@@ -254,17 +254,17 @@ export default class Server implements Party.Server {
         }
 
         if (msg.type === "add_playlist" && !this.addPlaylist(msg)) {
-          conn.send(this.getPlaylistUpdateMessage());
+          conn.send(this.getPlaylistsUpdateMessage());
           this.sendConfirmationOrError(conn, msg, "Please provide a playlist with a unique name and album cover.");
           return;
         } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
-          conn.send(this.getPlaylistUpdateMessage());
+          conn.send(this.getPlaylistsUpdateMessage());
           this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
           return;
         }
 
         // send the update to all players + confirmation to the host
-        this.room.broadcast(this.getPlaylistUpdateMessage());
+        this.room.broadcast(this.getPlaylistsUpdateMessage());
         this.sendConfirmationOrError(conn, msg);
         break;
       case "start_game":
@@ -699,7 +699,10 @@ export default class Server implements Party.Server {
     this.state = "results";
 
     // the update message always contains the points, displaying ranks is handled client-side
-    if (sendUpdate) this.broadcastUpdateMessage();
+    if (sendUpdate) {
+      this.broadcastUpdateMessage();
+      this.room.broadcast(this.getPlayedSongsUpdateMessage());
+    }
   }
 
   /**
@@ -873,7 +876,7 @@ export default class Server implements Party.Server {
     conn.setState(connState);
 
     // send the current playlist to the connection
-    conn.send(this.getPlaylistUpdateMessage());
+    conn.send(this.getPlaylistsUpdateMessage());
 
     return true;
   }
@@ -930,19 +933,27 @@ export default class Server implements Party.Server {
   }
 
   /**
+   * Constructs a played songs update message with the songs played in the last round.
+   *
+   * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
+   */
+  private getPlayedSongsUpdateMessage() {
+    return JSON.stringify({
+      type: "update_played_songs",
+      songs: this.songs
+    } satisfies UpdatePlayedSongsMessage);
+  }
+
+  /**
    * Constructs a playlist update message with the current playlist array.
    *
    * @returns a JSON string of the constructed {@link UpdatePlaylistsMessage}
    */
-  private getPlaylistUpdateMessage(): string {
-    let playlists = structuredClone(this.playlists);
-
-    let update: UpdatePlaylistsMessage = {
+  private getPlaylistsUpdateMessage(): string {
+    return JSON.stringify({
       type: "update_playlists",
-      playlists: playlists
-    };
-
-    return JSON.stringify(update);
+      playlists: this.playlists
+    } satisfies UpdatePlaylistsMessage);
   }
 
   /**
