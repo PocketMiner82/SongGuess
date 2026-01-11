@@ -36,7 +36,7 @@ import {
   COLORS,
   POINTS_PER_QUESTION,
   QUESTION_COUNT,
-  ROOM_CLEANUP_TIMEOUT,
+  ROOM_CLEANUP_TIMEOUT, ROUND_PAUSE_MUSIC,
   ROUND_SHOW_ANSWER,
   ROUND_START,
   ROUND_START_MUSIC,
@@ -599,6 +599,11 @@ export default class Server implements Party.Server {
           for (let conn of this.room.getConnections()) {
             this.resetPlayerAnswerData(conn);
           }
+          break;
+
+        // pause music to allow fade out
+        case ROUND_PAUSE_MUSIC:
+          this.room.broadcast(this.getAudioControlMessage("pause"));
           break;
       }
     }

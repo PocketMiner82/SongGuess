@@ -33,10 +33,12 @@ export const ROUND_START_MUSIC = 5;
  */
 export const ROUND_SHOW_ANSWER = ROUND_START_MUSIC + TIME_PER_QUESTION;
 
+export const ROUND_PAUSE_MUSIC = ROUND_SHOW_ANSWER + 5;
+
 /**
  * The tick count when the next round starts.
  */
-export const ROUND_START_NEXT = ROUND_SHOW_ANSWER + 5;
+export const ROUND_START_NEXT = ROUND_PAUSE_MUSIC + 2;
 
 /**
  * How many points a player can get per question.

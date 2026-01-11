@@ -217,12 +217,9 @@ function QuestionDisplay() {
         </p>
       </div>
 
-      {/* Progress bar */}
-      {audioLength !== 0 && (
-        <div className="mx-auto w-3/4">
-          <ProgressBar duration={audioLength} isPlaying={isPlaying} />
-        </div>
-      )}
+      <div className="mx-auto w-3/4">
+        <ProgressBar duration={audioLength} isPlaying={isPlaying} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => (
