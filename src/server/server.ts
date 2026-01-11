@@ -36,7 +36,7 @@ import {
   COLORS,
   POINTS_PER_QUESTION,
   QUESTION_COUNT,
-  ROOM_CLEANUP_TIMEOUT,
+  ROOM_CLEANUP_TIMEOUT, ROUND_PAUSE_MUSIC,
   ROUND_SHOW_ANSWER,
   ROUND_START,
   ROUND_START_MUSIC,
@@ -219,14 +219,13 @@ export default class Server implements Party.Server {
         conn.send(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
       }
 
-      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
-
-
       setTimeout(() => {
+        conn.send(this.getAudioControlMessage("load", q.song.audioURL));
+
         if (this.roundTicks >= ROUND_START_MUSIC) {
           conn.send(this.getAudioControlMessage("play"));
         }
-      }, 100);
+      }, 50);
     }
   }
 
@@ -601,6 +600,11 @@ export default class Server implements Party.Server {
             this.resetPlayerAnswerData(conn);
           }
           break;
+
+        // pause music to allow fade out
+        case ROUND_PAUSE_MUSIC:
+          this.room.broadcast(this.getAudioControlMessage("pause"));
+          break;
       }
     }
 
@@ -613,7 +617,7 @@ export default class Server implements Party.Server {
       this.broadcastUpdateMessage();
 
       this.addRandomQuestions();
-      gameLoop();
+      setTimeout(gameLoop, 50);
       this.gameLoopInterval = setInterval(gameLoop, 1000);
     });
   }
@@ -1029,13 +1033,14 @@ export default class Server implements Party.Server {
       msg = {
         type: "audio_control",
         action: "load",
+        length: Math.max(0, ROUND_START_MUSIC - this.roundTicks),
         audioURL: audioURL!
       };
     } else {
       msg = {
         type: "audio_control",
         action: action,
-        length: ROUND_SHOW_ANSWER - this.roundTicks
+        length: Math.max(0, ROUND_SHOW_ANSWER - this.roundTicks)
       };
     }
 

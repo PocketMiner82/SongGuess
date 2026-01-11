@@ -38,7 +38,7 @@ export function ResultsPlayerList({rankedPlayers, showField, showField2}:
                   </PlayerCard>
                 </div>
                 { showField2 && getShowField(player, showField2) && (
-                    <div className="flex items-center text-lg font-medium min-w-16">
+                    <div className="flex text-lg justify-end font-medium min-w-20">
                       {getShowField(player, showField2)}
                     </div>
                 )}

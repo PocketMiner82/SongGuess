@@ -108,6 +108,11 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
     action: z.literal("load"),
 
     /**
+     * The length in seconds of the max time for this question.
+     */
+    length: z.number().nonnegative(),
+
+    /**
      * URL to load music from.
      * @see {@link SongSchema.shape.audioURL}
      */
