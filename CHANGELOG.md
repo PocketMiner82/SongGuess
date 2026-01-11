@@ -1,3 +1,17 @@
+# [2.2.0](https://github.com/PocketMiner82/SongGuess/compare/2.1.2...2.2.0) (2026-01-11)
+
+
+### Bug Fixes
+
+* **Ingame:** wrong styling ([d7d28a1](https://github.com/PocketMiner82/SongGuess/commit/d7d28a176e87e96107d08460bf553529c8f73667))
+* **Ingame:** wrong styling of answers ([eca604c](https://github.com/PocketMiner82/SongGuess/commit/eca604ceaebceac01511c397a782c0fa0380d0c5))
+
+
+### Features
+
+* **Audio:** add fade in and out ([72eee84](https://github.com/PocketMiner82/SongGuess/commit/72eee84b251d87b76f6c50019d28d416055dadf1))
+* **Ingame:** show "loading" progress bar on question start ([ca013af](https://github.com/PocketMiner82/SongGuess/commit/ca013af4e4f9bd702c4792e9f5b76503653ec17b))
+
 # [2.2.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.1.3-dev.2...2.2.0-dev.1) (2026-01-11)
 
 
