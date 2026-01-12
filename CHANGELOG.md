@@ -1,3 +1,10 @@
+# [2.3.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.4...2.3.0-dev.5) (2026-01-12)
+
+
+### Features
+
+* **server:** allow even more username characters ([536345f](https://github.com/PocketMiner82/SongGuess/commit/536345fe6e2fac316a9b361faa1d24cc48967cad))
+
 # [2.3.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.3...2.3.0-dev.4) (2026-01-12)
 
 
