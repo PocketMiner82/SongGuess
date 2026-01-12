@@ -104,7 +104,7 @@ export default class Server implements Party.Server {
    * Whether to perform advanced song filtering.
    * @see {@link ConfigRoomMessage.advancedSongFiltering}
    */
-  advancedSongFiltering: boolean = false;
+  advancedSongFiltering: boolean = true;
 
   /**
    * All songs of the currently selected playlist(s)
@@ -866,7 +866,7 @@ export default class Server implements Party.Server {
     this.hostTransferTimeout = null;
     this.cachedStates = new Map();
     this.playlists = [];
-    this.advancedSongFiltering = false;
+    this.advancedSongFiltering = true;
     this.songs = [];
     this.countdownInterval = null;
     this.countdown = 0;

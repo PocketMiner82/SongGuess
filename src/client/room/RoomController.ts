@@ -90,7 +90,7 @@ export class RoomController {
    * Whether to perform advanced song filtering.
    * @see {@link ConfigRoomMessage.advancedSongFiltering}
    */
-  advancedSongFiltering: boolean = false;
+  advancedSongFiltering: boolean = true;
 
 
   /**
