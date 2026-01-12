@@ -1,3 +1,10 @@
+# [2.3.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.3...2.3.0-dev.4) (2026-01-12)
+
+
+### Bug Fixes
+
+* **server:** don't show lobby when restarting game from results ([cbf6fda](https://github.com/PocketMiner82/SongGuess/commit/cbf6fda7b4375caaf715577c2c9ec81ab252e9b1))
+
 # [2.3.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.2...2.3.0-dev.3) (2026-01-12)
 
 
