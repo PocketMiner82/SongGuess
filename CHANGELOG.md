@@ -1,3 +1,10 @@
+# [2.3.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.1...2.3.0-dev.2) (2026-01-12)
+
+
+### Features
+
+* allow more username characters + show if username is invalid ([017e182](https://github.com/PocketMiner82/SongGuess/commit/017e182978c60cb894e499c99a37e0b69a972305))
+
 # [2.3.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.2.0...2.3.0-dev.1) (2026-01-12)
 
 
