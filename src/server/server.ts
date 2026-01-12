@@ -323,11 +323,9 @@ export default class Server implements Party.Server {
           return;
         }
 
-        this.resetGame();
-
         // make sure setting distractions worked
         try {
-          this.addRandomQuestions();
+          this.regenerateRandomQuestions();
         } catch (e) {
           if (this.hostConnection && e instanceof DistractionError) {
             this.sendConfirmationOrError(this.hostConnection, msg, e.message);
@@ -617,9 +615,10 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Starts a countdown, then starts the game loop.
-   * Must call before starting
+   * Starts a countdown, then starts the game loop. Also resets the game before starting.
+   * You must set/regenerate questions before calling this.
    * @see {@link resetGame}
+   * @see {@link regenerateRandomQuestions}
    * @see {@link endGame}
    */
   private startGame() {
@@ -677,6 +676,7 @@ export default class Server implements Party.Server {
     this.broadcastUpdateMessage();
 
     this.startCountdown(3, () => {
+      this.resetGame();
       this.state = "ingame";
       this.broadcastUpdateMessage();
 
@@ -695,7 +695,6 @@ export default class Server implements Party.Server {
     this.stopCountdown();
 
     this.roundTicks = 0;
-    this.questions = [];
     this.currentQuestion = 0;
     this.state = "lobby";
 
@@ -706,10 +705,12 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Add random song guessing questions to the room.
+   * Clears and then adds random song guessing questions to the room.
    * Creates {@link QUESTION_COUNT} random questions for the current game session.
    */
-  private addRandomQuestions() {
+  private regenerateRandomQuestions() {
+    this.questions = [];
+
     // add QUESTION_COUNT random questions
     for (let i = 0; i < QUESTION_COUNT; i++) {
       if (this.remainingSongs.length === 0) {
