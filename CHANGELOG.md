@@ -1,3 +1,10 @@
+# [2.3.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.2.0...2.3.0-dev.1) (2026-01-12)
+
+
+### Features
+
+* add (advanced) serverside song filtering ([7906ffb](https://github.com/PocketMiner82/SongGuess/commit/7906ffb1bd52fd1d3ae1dc65bb6c3104f3ca45bc))
+
 # [2.2.0](https://github.com/PocketMiner82/SongGuess/compare/2.1.2...2.2.0) (2026-01-11)
 
 
