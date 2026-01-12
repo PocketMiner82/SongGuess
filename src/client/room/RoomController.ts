@@ -251,6 +251,8 @@ export class RoomController {
           } catch {
             window.location.reload();
           }
+
+          return;
         }
 
         this.username = msg.username;
