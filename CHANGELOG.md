@@ -1,3 +1,10 @@
+# [2.3.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.2...2.3.0-dev.3) (2026-01-12)
+
+
+### Bug Fixes
+
+* don't reset username after new version ([98c1699](https://github.com/PocketMiner82/SongGuess/commit/98c1699346cea49e879b072327107b4a5d38db9c))
+
 # [2.3.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.1...2.3.0-dev.2) (2026-01-12)
 
 
