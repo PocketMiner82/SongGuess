@@ -1,3 +1,10 @@
+# [2.3.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.5...2.3.0-dev.6) (2026-01-12)
+
+
+### Bug Fixes
+
+* make advancedSongFiltering default to true ([ce74e89](https://github.com/PocketMiner82/SongGuess/commit/ce74e89e4268d2f829fc8ad969cb242d4d3f5cf9))
+
 # [2.3.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.4...2.3.0-dev.5) (2026-01-12)
 
 
