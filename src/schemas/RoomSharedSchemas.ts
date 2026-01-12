@@ -4,7 +4,7 @@ import z from "zod";
 /**
  * Regex of the allowed username characters + length restriction
  */
-export const UsernameRegex = /^[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/()=?*'#+|,.;:_~@€-]{1,16}$/;
+export const UsernameRegex = /^[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<>_-]{1,16}$/;
 
 /**
  * The zod schema for the username.
