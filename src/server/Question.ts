@@ -22,6 +22,7 @@ export default class Question {
    * Adds 3 random distraction songs to the question and shuffles all options.
    *
    * @param possibleDistractions Array of songs to use as distraction options. Will be copied, so no items are removed.
+   * @throws Error if distraction generation fails.
    */
   public generateDistractions(possibleDistractions: Song[]) {
     const distractions = possibleDistractions.filter(s =>
@@ -29,7 +30,17 @@ export default class Question {
 
     for (let i = 0; i < 3; i++) {
       let randomIndex = Math.floor(Math.random() * distractions.length);
-      this.questions.push(distractions.splice(randomIndex, 1)[0]);
+      let distraction = distractions.splice(randomIndex, 1)[0];
+
+      if (!distraction) {
+        throw new DistractionError();
+      } else if (distraction.name === this.song.name) {
+        // try again
+        i--;
+        continue;
+      }
+
+      this.questions.push(distraction);
     }
     this.questions = shuffle(this.questions);
   }
@@ -88,5 +99,16 @@ export default class Question {
    */
   public getAnswerIndex() {
     return this.questions.indexOf(this.song);
+  }
+}
+
+
+/**
+ * An exception informing the user about distraction generation errors.
+ */
+export class DistractionError extends Error {
+  constructor() {
+    super("Cannot find enough distractions with different name.\n" +
+        "Please add more songs with unique names to the playlist!");
   }
 }

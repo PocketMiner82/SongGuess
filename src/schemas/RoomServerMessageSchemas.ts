@@ -174,7 +174,13 @@ export const UpdatePlaylistsMessageSchema = z.object({
   /**
    * Currently selected playlist(s)
    */
-  playlists: z.array(PlaylistSchema)
+  playlists: z.array(PlaylistSchema),
+
+  /**
+   * The count of filtered songs.
+   * @see {@link filterSongs}
+   */
+  filteredSongsCount: z.number().nonnegative()
 });
 
 export type UpdatePlaylistsMessage = z.infer<typeof UpdatePlaylistsMessageSchema>;

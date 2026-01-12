@@ -2,9 +2,14 @@ import z from "zod";
 
 
 /**
- * Allowed characters + length restriction of usernames
+ * Regex of the allowed username characters + length restriction
  */
-export const UsernameSchema = z.stringFormat("user", /^[a-zA-ZäöüÄÖÜßẞ0-9_]{1,16}$/);
+export const UsernameRegex = /^[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<>_-]{1,16}$/;
+
+/**
+ * The zod schema for the username.
+ */
+export const UsernameSchema = z.stringFormat("user", UsernameRegex);
 
 /**
  * Regular expression to validate that a URL starts with the apple music domain.

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, {useState, useCallback, useMemo, type ReactNode} from "react";
 import {albumRegex, artistRegex, songRegex} from "../../../schemas/RoomSharedSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
@@ -43,7 +43,7 @@ function PlayerList() {
  */
 function DownloadPlaylists() {
   const controller = useControllerContext();
-  const playlists = usePlaylists(controller);
+  const {playlists} = usePlaylists(controller);
 
   const handleDownload = () => {
     const content = controller.generatePlaylistsFile();
@@ -65,16 +65,15 @@ function DownloadPlaylists() {
  * Lists all added playlists in a vertical stack. Shows a placeholder
  * message when no playlists are available.
  */
-function PlaylistList() {
+function PlaylistsList() {
   const controller = useControllerContext();
   const isHost = useIsHost(controller);
-  const playlists = usePlaylists(controller);
-  const songCount = controller.getSongs().length;
+  const {playlists, filteredSongsCount} = usePlaylists(controller);
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-xl font-bold">Playlists ({`${songCount} song${songCount !== 1 && "s"} total`})</h3>
+        <h3 className="text-xl font-bold">Playlists - {`${filteredSongsCount} song${filteredSongsCount !== 1 && "s"}`} (filtered)</h3>
         <DownloadPlaylists />
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
@@ -232,7 +231,7 @@ function ImportPlaylists({ setError }: { setError: (error: string | null) => voi
  */
 function ClearPlaylists() {
   const controller = useControllerContext();
-  const playlists = usePlaylists(controller);
+  const {playlists} = usePlaylists(controller);
 
   const handleClearPlaylists = () => {
     const isConfirmed = window.confirm("Are you sure you want to clear all playlists?");
@@ -259,7 +258,7 @@ function ClearPlaylists() {
  */
 function StartGame() {
   const controller = useControllerContext();
-  const playlists = usePlaylists(controller);
+  const {playlists} = usePlaylists(controller);
 
   return (
     <Button
@@ -300,27 +299,71 @@ function CopyLink() {
   );
 }
 
+/**
+ * Toggle switch component for advanced song filtering setting.
+ * Features left-aligned label and right-aligned toggle switch.
+ */
+function SettingsToggle({ value, onToggle, children }: { value: boolean; onToggle: (value: boolean) => void; children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span>
+        {children}
+      </span>
+      <button
+        onClick={() => onToggle(!value)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          value ? 'bg-secondary' : 'bg-gray-300'
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            value ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
 function Settings() {
   const controller = useControllerContext();
   const [error, setError] = useState<string | null>(null);
+  const [advancedSongFiltering, setAdvancedSongFiltering] = useState(controller.advancedSongFiltering);
 
   useRoomControllerListener(controller, useCallback(msg => {
-    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "start_game") {
-      setError(msg.error ?? null);
+    if (msg && msg.type === "confirmation") {
+      if (msg.sourceMessage.type === "start_game") {
+        setError(msg.error ?? null);
+      } else if (msg.sourceMessage.type === "config_room") {
+        setAdvancedSongFiltering(controller.advancedSongFiltering);
+      }
     }
-  }, []));
+  }, [controller.advancedSongFiltering]));
 
   return (
     <div>
       <h3 className="text-xl font-bold mb-3">Settings</h3>
       <div className="grid gap-4">
         <AddPlaylistInput />
+
         <div className="grid grid-cols-2 gap-4">
           <ClearPlaylists />
           <ImportPlaylists setError={setError} />
+        </div>
+
+        <div className="border-t border-disabled-bg my-2"></div>
+
+        <SettingsToggle value={advancedSongFiltering} onToggle={v => controller.updateAdvancedSongFiltering(v)}>
+          Perform advanced song filtering
+        </SettingsToggle>
+
+        <div className="border-t border-disabled-bg my-2"></div>
+
+        <div className="grid grid-cols-2 gap-4">
           <CopyLink />
           <StartGame />
         </div>
+
         <ErrorLabel error={error} />
       </div>
     </div>
@@ -349,7 +392,7 @@ export function Lobby() {
         </div>
 
         <div className="lg:order-first min-h-0">
-          <PlaylistList />
+          <PlaylistsList />
         </div>
       </div>
     </div>
