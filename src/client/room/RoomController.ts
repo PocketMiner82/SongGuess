@@ -86,6 +86,12 @@ export class RoomController {
    */
   filteredSongsCount: number = 0;
 
+  /**
+   * Whether to perform advanced song filtering.
+   * @see {@link ConfigRoomMessage.advancedSongFiltering}
+   */
+  advancedSongFiltering: boolean = false;
+
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -224,6 +230,12 @@ export class RoomController {
       case "confirmation":
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
+        }
+
+        if (msg.sourceMessage.type === "config_room") {
+          if (msg.sourceMessage.advancedSongFiltering !== undefined) {
+            this.advancedSongFiltering = msg.sourceMessage.advancedSongFiltering;
+          }
         }
         break;
       case "update":

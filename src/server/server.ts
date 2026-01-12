@@ -293,6 +293,9 @@ export default class Server implements Party.Server {
           return;
         }
 
+        // always re-filter songs after playlist update
+        this.filterSongs();
+
         // send the update to all players + confirmation to the host
         this.room.broadcast(this.getPlaylistsUpdateMessage());
         this.sendConfirmationOrError(conn, msg);
@@ -415,7 +418,10 @@ export default class Server implements Party.Server {
   private performChecks(conn: Party.Connection|null, msg: SourceMessage,
         ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count" | "answer")[]): boolean {
     let possibleErrorFunc = conn
-        ? (error: string)=>this.sendConfirmationOrError(conn, msg, error)
+        ? (error: string)=> {
+          conn.send(this.getUpdateMessage(conn));
+          this.sendConfirmationOrError(conn, msg, error);
+        }
         : () => {};
     let successful: boolean = true;
     let connState: PlayerState = conn?.state as PlayerState;
@@ -499,10 +505,6 @@ export default class Server implements Party.Server {
     }
 
     this.playlists.push(msg.playlist);
-
-    // always re-filter songs after playlist update
-    this.filterSongs();
-
     this.log(`The playlist "${msg.playlist.name}" has been added.`);
     return true;
   }
@@ -542,11 +544,11 @@ export default class Server implements Party.Server {
    * @returns true if the playlist was removed successfully, false if the index was out of bounds.
    */
   private removePlaylist(msg: RemovePlaylistMessage): boolean {
-    if (msg.index && msg.index >= this.playlists.length) {
+    if (msg.index !== null && msg.index >= this.playlists.length) {
       return false;
     }
 
-    if (msg.index) {
+    if (msg.index !== null) {
       let playlistName = this.playlists[msg.index].name;
       this.playlists.splice(msg.index, 1);
       this.log(`The playlist "${playlistName}" has been removed.`);
@@ -994,12 +996,11 @@ export default class Server implements Party.Server {
   }
 
   /**
-   * Sends a confirmation or error message to the player, along with an update message.
+   * Sends a confirmation or error message to the player.
    *
    * @param conn The connection of the player that should receive the messages
    * @param source The source/type of the confirmation message
    * @param error An optional error message to include in the confirmation
-   * @see {@link getUpdateMessage}
    */
   private sendConfirmationOrError(conn: Party.Connection, source: SourceMessage, error?: string) {
     let resp: ConfirmationMessage = {
@@ -1008,7 +1009,6 @@ export default class Server implements Party.Server {
       error: error
     }
 
-    conn.send(this.getUpdateMessage(conn));
     conn.send(JSON.stringify(resp));
   }
 

@@ -1,5 +1,5 @@
 import z from "zod";
-import {PlaylistSchema, SongSchema, UsernameSchema} from "./RoomSharedSchemas";
+import {PlaylistSchema, UsernameSchema} from "./RoomSharedSchemas";
 
 
 /**
