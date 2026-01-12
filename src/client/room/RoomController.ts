@@ -8,7 +8,7 @@ import type {
   RemovePlaylistMessage,
   StartGameMessage,
   SelectAnswerMessage,
-  ReturnToLobbyMessage
+  ReturnToLobbyMessage, ConfigRoomMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
   type Playlist, type PlaylistsFile, type Song
@@ -80,6 +80,12 @@ export class RoomController {
    * The list of songs played in the last round.
    */
   playedSongs: Song[] = [];
+
+  /**
+   * The amount of filtered songs
+   */
+  filteredSongsCount: number = 0;
+
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -243,6 +249,7 @@ export class RoomController {
         break;
       case "update_playlists":
         this.playlists = msg.playlists;
+        this.filteredSongsCount = msg.filteredSongsCount;
         break;
       case "question":
         this.currentQuestion = msg;
@@ -280,23 +287,20 @@ export class RoomController {
    */
   public startGame() {
     let msg: StartGameMessage = {
-      type: "start_game",
-      songs: this.getSongs()
+      type: "start_game"
     };
     this.socket.send(JSON.stringify(msg));
   }
 
   /**
-   * Updates the songs array by collecting all songs from the current playlists.
-   * Also updates the subtitle of each playlist to show the song count.
+   * Asks the server to update the advanced filtering config value.
+   * @param val the new value to set
    */
-  public getSongs(): Song[] {
-    let songs: Song[] = [];
-    for (let playlist of this.playlists) {
-      songs.push(...playlist.songs);
-    }
-
-    return songs;
+  public updateAdvancedSongFiltering(val: boolean) {
+    this.socket.send(JSON.stringify({
+      type: "config_room",
+      advancedSongFiltering: val
+    } satisfies ConfigRoomMessage));
   }
 
   /**
@@ -497,21 +501,23 @@ export function usePlayers(controller: RoomController) {
 }
 
 /**
- * Custom React hook to manage and provide the list of playlists in a room.
- * 
+ * Custom React hook to provide the list of playlists and amount of filtered songs in a room.
+ *
  * @param controller The RoomController instance to listen to.
- * @returns The current list of playlists.
+ * @returns An object containing the current list of playlists and amount of filtered songs.
  */
 export function usePlaylists(controller: RoomController) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [filteredSongsCount, setFilteredSongsCount] = useState(0);
 
   useRoomControllerListener(controller, useCallback((msg) => {
     if (!msg || msg.type === "update_playlists") {
       setPlaylists(controller.playlists);
+      setFilteredSongsCount(controller.filteredSongsCount);
     }
-  }, [controller.playlists]));
+  }, [controller]));
 
-  return playlists;
+  return {playlists, filteredSongsCount};
 }
 
 /**

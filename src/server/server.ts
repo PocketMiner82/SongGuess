@@ -26,10 +26,10 @@ import {
   UnknownPlaylist,
   songRegex
 } from "../schemas/RoomSharedSchemas";
-import Question from "./Question";
+import Question, {DistractionError} from "./Question";
 import type {
   AddPlaylistMessage,
-  ChangeUsernameMessage,
+  ChangeUsernameMessage, ConfigRoomMessage,
   RemovePlaylistMessage, SelectAnswerMessage
 } from "../schemas/RoomClientMessageSchemas";
 import {
@@ -99,6 +99,12 @@ export default class Server implements Party.Server {
    * Currently selected playlist(s)
    */
   playlists: Playlist[] = [];
+
+  /**
+   * Whether to perform advanced song filtering.
+   * @see {@link ConfigRoomMessage.advancedSongFiltering}
+   */
+  advancedSongFiltering: boolean = false;
 
   /**
    * All songs of the currently selected playlist(s)
@@ -184,11 +190,10 @@ export default class Server implements Party.Server {
     }
 
     if (this.hostConnection === undefined) {
-      this.hostConnection = conn;
-      this.hostID = conn.id;
+      this.transferHost(conn, false);
     } else if (this.hostConnection === null && this.hostID === conn.id) {
       // host joined again within timeout
-      this.hostConnection = conn;
+      this.transferHost(conn, false);
 
       if (this.hostTransferTimeout) {
         clearTimeout(this.hostTransferTimeout);
@@ -292,15 +297,41 @@ export default class Server implements Party.Server {
         this.room.broadcast(this.getPlaylistsUpdateMessage());
         this.sendConfirmationOrError(conn, msg);
         break;
+      case "config_room":
+        if (!this.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
+          return;
+        }
+
+        // update filtered songs if config for that changed
+        if (msg.advancedSongFiltering !== undefined) {
+          this.advancedSongFiltering = msg.advancedSongFiltering;
+          this.filterSongs();
+
+          this.sendConfirmationOrError(conn, msg);
+          this.room.broadcast(this.getPlaylistsUpdateMessage());
+        }
+        break;
       case "start_game":
         if (!this.performChecks(conn, msg, "host", "not_ingame", "not_contdown")) {
           return;
         }
 
-        // update songs before checking for min count
-        this.songs = msg.songs;
-
         if (!this.performChecks(conn, msg, "min_song_count")) {
+          return;
+        }
+
+        this.resetGame();
+
+        // make sure setting distractions worked
+        try {
+          this.addRandomQuestions();
+        } catch (e) {
+          if (this.hostConnection && e instanceof DistractionError) {
+            this.sendConfirmationOrError(this.hostConnection, msg, e.message);
+          } else if (this.hostConnection) {
+            this.sendConfirmationOrError(this.hostConnection, msg, "Unknown error while starting game.");
+            this.log(e, "error");
+          }
           return;
         }
 
@@ -468,8 +499,40 @@ export default class Server implements Party.Server {
     }
 
     this.playlists.push(msg.playlist);
+
+    // always re-filter songs after playlist update
+    this.filterSongs();
+
     this.log(`The playlist "${msg.playlist.name}" has been added.`);
     return true;
+  }
+
+  /**
+   * Updates the songs array by collecting all songs from the current playlists.
+   */
+  public filterSongs(): Song[] {
+    this.songs = [];
+    for (let playlist of this.playlists) {
+      this.songs.push(...playlist.songs);
+    }
+
+    this.songs = [
+      ...new Map(this.songs.map(s => {
+            // filter for unique name and artist
+            let normalizedName = s.name.toLowerCase();
+            let normalizedArtist = s.artist.toLowerCase();
+
+            if (this.advancedSongFiltering) {
+              // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
+              normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
+            }
+
+            return [`${normalizedName}|${normalizedArtist}`, s]
+          }
+      )).values()
+    ];
+
+    return this.songs;
   }
 
   /**
@@ -553,7 +616,7 @@ export default class Server implements Party.Server {
 
   /**
    * Starts a countdown, then starts the game loop.
-   * Will reset the game state before starting
+   * Must call before starting
    * @see {@link resetGame}
    * @see {@link endGame}
    */
@@ -612,11 +675,9 @@ export default class Server implements Party.Server {
     this.broadcastUpdateMessage();
 
     this.startCountdown(3, () => {
-      this.resetGame();
       this.state = "ingame";
       this.broadcastUpdateMessage();
 
-      this.addRandomQuestions();
       setTimeout(gameLoop, 50);
       this.gameLoopInterval = setInterval(gameLoop, 1000);
     });
@@ -747,17 +808,31 @@ export default class Server implements Party.Server {
         let next = this.room.getConnections()[Symbol.iterator]().next();
         if (!next.done) {
           this.log(`Host left, transferring host to ${next.value.id}`);
-          this.hostConnection = next.value;
-          this.hostConnection.send(this.getUpdateMessage(this.hostConnection));
-          this.hostID = this.hostConnection.id;
+          this.transferHost(next.value);
         } else {
-          this.hostConnection = undefined;
-          this.hostID = undefined;
+          this.transferHost(undefined);
         }
       }
 
       this.hostTransferTimeout = null;
     }, 3000);
+  }
+
+  /**
+   * Transfers the host to another connection
+   * @param newHost the new host connection.
+   * @param sendUpdate whether to broadcast an update (that also informs the new host that it got host).
+   */
+  private transferHost(newHost: Party.Connection|undefined, sendUpdate: boolean = true) {
+    this.hostConnection = newHost;
+    this.hostID = newHost?.id;
+
+    if (newHost) {
+      this.sendConfirmationOrError(newHost, this.getConfigMessage());
+      if (sendUpdate) {
+        this.broadcastUpdateMessage();
+      }
+    }
   }
 
   /**
@@ -788,6 +863,7 @@ export default class Server implements Party.Server {
     this.hostTransferTimeout = null;
     this.cachedStates = new Map();
     this.playlists = [];
+    this.advancedSongFiltering = false;
     this.songs = [];
     this.countdownInterval = null;
     this.countdown = 0;
@@ -806,7 +882,7 @@ export default class Server implements Party.Server {
    * @param text the text to log
    * @param level the log level to use
    */
-  private log(text: string, level: "debug"|"warn"|"error"|"info" = "info") {
+  private log(text: any, level: "debug"|"warn"|"error"|"info" = "info") {
     let logFunction: (...data: any) => void;
     switch(level) {
       case "debug":
@@ -989,12 +1065,25 @@ export default class Server implements Party.Server {
   private getPlaylistsUpdateMessage(): string {
     return JSON.stringify({
       type: "update_playlists",
-      playlists: this.playlists
+      playlists: this.playlists,
+      filteredSongsCount: this.songs.length
     } satisfies UpdatePlaylistsMessage);
   }
 
   /**
-   * Returns a JSON string representing a countdown message.
+   * Constructs a configuration update message.
+   *
+   * @returns a {@link ConfigRoomMessage}
+   */
+  private getConfigMessage(): ConfigRoomMessage {
+    return {
+      type: "config_room",
+      advancedSongFiltering: this.advancedSongFiltering
+    };
+  }
+
+  /**
+   * Constructs a JSON string representing a countdown message.
    * The countdown message is sent to connected clients when the countdown is updated.
    *
    * @returns a JSON string representing the countdown message.

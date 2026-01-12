@@ -31,15 +31,23 @@ export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
  * Schema for messages requesting to start a new game.
  */
 export const StartGameMessageSchema = z.object({
-  type: z.literal("start_game").default("start_game"),
-
-  /**
-   * The (filtered) list of songs to play in this round.
-   */
-  songs: z.array(SongSchema)
+  type: z.literal("start_game").default("start_game")
 });
 
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
+
+
+export const ConfigRoomMessageSchema = z.object({
+  type: z.literal("config_room").default("config_room"),
+
+  /**
+   * Whether to perform advanced filtering tactics when generating the songs array.
+   * Currently just ignores parens when filtering for identical song names.
+   */
+  advancedSongFiltering: z.optional(z.boolean())
+});
+
+export type ConfigRoomMessage = z.infer<typeof ConfigRoomMessageSchema>;
 
 
 /**

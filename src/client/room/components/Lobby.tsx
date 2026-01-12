@@ -43,7 +43,7 @@ function PlayerList() {
  */
 function DownloadPlaylists() {
   const controller = useControllerContext();
-  const playlists = usePlaylists(controller);
+  const {playlists} = usePlaylists(controller);
 
   const handleDownload = () => {
     const content = controller.generatePlaylistsFile();
@@ -68,13 +68,12 @@ function DownloadPlaylists() {
 function PlaylistList() {
   const controller = useControllerContext();
   const isHost = useIsHost(controller);
-  const playlists = usePlaylists(controller);
-  const songCount = controller.getSongs().length;
+  const {playlists, filteredSongsCount} = usePlaylists(controller);
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-xl font-bold">Playlists ({`${songCount} song${songCount !== 1 && "s"} total`})</h3>
+        <h3 className="text-xl font-bold">Playlists - {`${filteredSongsCount} song${filteredSongsCount !== 1 && "s"}`} (filtered)</h3>
         <DownloadPlaylists />
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
@@ -232,7 +231,7 @@ function ImportPlaylists({ setError }: { setError: (error: string | null) => voi
  */
 function ClearPlaylists() {
   const controller = useControllerContext();
-  const playlists = usePlaylists(controller);
+  const {playlists} = usePlaylists(controller);
 
   const handleClearPlaylists = () => {
     const isConfirmed = window.confirm("Are you sure you want to clear all playlists?");
@@ -259,7 +258,7 @@ function ClearPlaylists() {
  */
 function StartGame() {
   const controller = useControllerContext();
-  const playlists = usePlaylists(controller);
+  const {playlists} = usePlaylists(controller);
 
   return (
     <Button
@@ -303,10 +302,17 @@ function CopyLink() {
 function Settings() {
   const controller = useControllerContext();
   const [error, setError] = useState<string | null>(null);
+  const [advancedSongFiltering, setAdvancedSongFiltering] = useState(false);
 
   useRoomControllerListener(controller, useCallback(msg => {
-    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "start_game") {
-      setError(msg.error ?? null);
+    if (msg && msg.type === "confirmation") {
+      if (msg.sourceMessage.type === "start_game") {
+        setError(msg.error ?? null);
+      } else if (msg.sourceMessage.type === "config_room") {
+        if (msg.sourceMessage.advancedSongFiltering !== undefined) {
+          setAdvancedSongFiltering(msg.sourceMessage.advancedSongFiltering);
+        }
+      }
     }
   }, []));
 
@@ -314,13 +320,20 @@ function Settings() {
     <div>
       <h3 className="text-xl font-bold mb-3">Settings</h3>
       <div className="grid gap-4">
-        <AddPlaylistInput />
         <div className="grid grid-cols-2 gap-4">
           <ClearPlaylists />
           <ImportPlaylists setError={setError} />
+        </div>
+
+        <AddPlaylistInput />
+
+        <SettingsToggle value={advancedSongFiltering} onToggle={v => controller.updateAdvancedSongFiltering(v)} />
+
+        <div className="grid grid-cols-2 gap-4">
           <CopyLink />
           <StartGame />
         </div>
+
         <ErrorLabel error={error} />
       </div>
     </div>
