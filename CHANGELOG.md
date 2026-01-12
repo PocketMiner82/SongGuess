@@ -1,3 +1,19 @@
+# [2.3.0](https://github.com/PocketMiner82/SongGuess/compare/2.2.0...2.3.0) (2026-01-12)
+
+
+### Bug Fixes
+
+* don't reset username after new version ([98c1699](https://github.com/PocketMiner82/SongGuess/commit/98c1699346cea49e879b072327107b4a5d38db9c))
+* make advancedSongFiltering default to true ([ce74e89](https://github.com/PocketMiner82/SongGuess/commit/ce74e89e4268d2f829fc8ad969cb242d4d3f5cf9))
+* **server:** don't show lobby when restarting game from results ([cbf6fda](https://github.com/PocketMiner82/SongGuess/commit/cbf6fda7b4375caaf715577c2c9ec81ab252e9b1))
+
+
+### Features
+
+* add (advanced) serverside song filtering ([7906ffb](https://github.com/PocketMiner82/SongGuess/commit/7906ffb1bd52fd1d3ae1dc65bb6c3104f3ca45bc))
+* allow more username characters + show if username is invalid ([017e182](https://github.com/PocketMiner82/SongGuess/commit/017e182978c60cb894e499c99a37e0b69a972305))
+* **server:** allow even more username characters ([536345f](https://github.com/PocketMiner82/SongGuess/commit/536345fe6e2fac316a9b361faa1d24cc48967cad))
+
 # [2.3.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.3.0-dev.5...2.3.0-dev.6) (2026-01-12)
 
 
