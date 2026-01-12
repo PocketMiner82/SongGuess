@@ -2,6 +2,7 @@ import {memo, type ReactNode, useState} from "react";
 import type {PlayerState} from "../../../schemas/RoomServerMessageSchemas";
 import {useControllerContext} from "../RoomController";
 import {PlayerAvatar} from "./PlayerAvatar";
+import {UsernameRegex} from "../../../schemas/RoomSharedSchemas";
 
 /**
  * Interactive list entry for a single player. Allows the current user
@@ -44,7 +45,8 @@ export const PlayerCard = memo(function PlayerCard({
             onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
             autoFocus
             maxLength={16}
-            className="text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none focus:border-secondary"/>
+            className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none 
+              ${UsernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}/>
           ) : (
             <>
               <span
