@@ -380,7 +380,7 @@ export class RoomController {
 
     switch (msg.type) {
       case "pong":
-        this.currentPingMs = performance.now() - this.pingStart;
+        this.currentPingMs = Math.round(performance.now() - this.pingStart);
         this.pongSeq = msg.seq;
         break;
       case "confirmation":
