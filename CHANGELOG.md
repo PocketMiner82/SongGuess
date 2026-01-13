@@ -1,3 +1,10 @@
+# [2.4.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.3.1-dev.1...2.4.0-dev.1) (2026-01-13)
+
+
+### Features
+
+* add ping + kick inactive players after 15 seconds + room config is now sent to all clients ([dc716e0](https://github.com/PocketMiner82/SongGuess/commit/dc716e04f14e0b99d1429905a649a13dc3ce8462))
+
 ## [2.3.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.3.0...2.3.1-dev.1) (2026-01-13)
 
 
