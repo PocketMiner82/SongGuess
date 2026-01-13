@@ -1,3 +1,10 @@
+# [2.4.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.4.0-dev.1...2.4.0-dev.2) (2026-01-13)
+
+
+### Bug Fixes
+
+* round ping for browsers like chrome ([270e0e0](https://github.com/PocketMiner82/SongGuess/commit/270e0e07f0d7fe03f0d2b167d503bfd935bdc18f))
+
 # [2.4.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.3.1-dev.1...2.4.0-dev.1) (2026-01-13)
 
 
