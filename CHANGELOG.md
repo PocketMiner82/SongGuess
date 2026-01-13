@@ -1,3 +1,10 @@
+## [2.3.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.3.0...2.3.1-dev.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* refactor roomcontroller listener management fixing several caching issues on page reload or bad connections + update styling of ingame results list ([e425001](https://github.com/PocketMiner82/SongGuess/commit/e425001ee5d4e3d138e758d2ff82f23141a07152))
+
 # [2.3.0](https://github.com/PocketMiner82/SongGuess/compare/2.2.0...2.3.0) (2026-01-12)
 
 
