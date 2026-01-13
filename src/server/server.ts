@@ -11,12 +11,12 @@ import {
   type AudioControlMessage,
   type CountdownMessage, type UpdatePlayedSongsMessage
 } from "../schemas/RoomServerMessageSchemas";
-import { setInterval, setTimeout, clearInterval } from "node:timers";
+import {setInterval, setTimeout, clearInterval, clearTimeout} from "node:timers";
 import {
   ClientMessageSchema,
   type ClientMessage,
   type ConfirmationMessage,
-  type SourceMessage, OtherMessageSchema
+  type SourceMessage, OtherMessageSchema, type PongMessage, type RoomConfigMessage
 } from "../schemas/RoomMessageSchemas";
 import {
   type Playlist,
@@ -29,7 +29,7 @@ import {
 import Question, {DistractionError} from "./Question";
 import type {
   AddPlaylistMessage,
-  ChangeUsernameMessage, ConfigRoomMessage,
+  ChangeUsernameMessage,
   RemovePlaylistMessage, SelectAnswerMessage
 } from "../schemas/RoomClientMessageSchemas";
 import {
@@ -62,6 +62,11 @@ export default class Server implements Party.Server {
    * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
   cleanupTimeout: NodeJS.Timeout|null = null;
+
+  /**
+   * Map containing timeouts to kick inactive players. Key is connection id.
+   */
+  kickPlayerTimeouts: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
 
   /**
    * This is the websocket connection of the host.
@@ -102,7 +107,7 @@ export default class Server implements Party.Server {
 
   /**
    * Whether to perform advanced song filtering.
-   * @see {@link ConfigRoomMessage.advancedSongFiltering}
+   * @see {@link RoomConfigMessage.advancedSongFiltering}
    */
   advancedSongFiltering: boolean = true;
 
@@ -221,7 +226,7 @@ export default class Server implements Party.Server {
       if (this.roundTicks < ROUND_SHOW_ANSWER) {
         conn.send(q.getQuestionMessage(this.currentQuestion + 1));
       } else {
-        conn.send(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
+        conn.send(q.getAnswerMessage(this.currentQuestion + 1));
       }
 
       setTimeout(() => {
@@ -246,13 +251,15 @@ export default class Server implements Party.Server {
       return;
     }
 
-    this.log(`${conn.id} sent: ${message}`, "debug");
+    // when room is valid: always refresh inactive timeout
+    this.refreshKickPlayerTimeout(conn);
 
     // try to parse JSON
     try {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
+      this.log(`${conn.id} sent: ${message}`, "debug");
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
@@ -260,6 +267,7 @@ export default class Server implements Party.Server {
     // check if received message is valid
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
+      this.log(`${conn.id} sent: ${message}`, "debug");
       this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
@@ -267,8 +275,22 @@ export default class Server implements Party.Server {
 
     let msg = result.data;
 
+    // don't log ping/pong
+    if (msg.type !== "ping" && msg.type !== "pong")
+      this.log(`${conn.id} sent: ${message}`, "debug");
+
     // handle each message type
     switch(msg.type) {
+      case "ping":
+        // always directly answer pings
+        conn.send(JSON.stringify({
+          type: "pong",
+          seq: msg.seq
+        } satisfies PongMessage));
+        break;
+      case "pong":
+        // currently ignored
+        break;
       case "confirmation":
         if (msg.error) {
           this.log(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`, "warn");
@@ -300,7 +322,7 @@ export default class Server implements Party.Server {
         this.room.broadcast(this.getPlaylistsUpdateMessage());
         this.sendConfirmationOrError(conn, msg);
         break;
-      case "config_room":
+      case "room_config":
         if (!this.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
           return;
         }
@@ -310,7 +332,7 @@ export default class Server implements Party.Server {
           this.advancedSongFiltering = msg.advancedSongFiltering;
           this.filterSongs();
 
-          this.sendConfirmationOrError(conn, msg);
+          this.room.broadcast(this.getConfigMessage());
           this.room.broadcast(this.getPlaylistsUpdateMessage());
         }
         break;
@@ -346,14 +368,21 @@ export default class Server implements Party.Server {
 
         this.selectAnswer(conn, msg);
         break;
-      case "return_to_lobby":
+      case "return_to":
         if (!this.performChecks(conn, msg, "host", "not_lobby")) {
           return;
         }
 
-        this.resetGame();
-        // returning to lobby will force to include all songs again
-        this.remainingSongs = [];
+        switch (msg.where) {
+          case "lobby":
+            this.resetGame();
+            // returning to lobby will force to include all songs again
+            this.remainingSongs = [];
+            break;
+          case "results":
+            this.endGame();
+            break;
+        }
 
         this.broadcastUpdateMessage();
         break;
@@ -376,6 +405,14 @@ export default class Server implements Party.Server {
     }
 
     this.log(`${conn.id} left.`);
+
+    // always remove inactive player timeouts
+    let playerTimeout = this.kickPlayerTimeouts.get(conn.id);
+    if (playerTimeout) {
+      clearTimeout(playerTimeout);
+      this.kickPlayerTimeouts.delete(conn.id);
+    }
+
 
     // cache state of connection
     this.cachedStates.set(conn.id, conn.state as PlayerState);
@@ -630,6 +667,9 @@ export default class Server implements Party.Server {
       if (this.roundTicks >= ROUND_START_NEXT) {
         this.roundTicks = 0;
         this.currentQuestion++;
+        for (let conn of this.room.getConnections()) {
+          this.resetPlayerAnswerData(conn);
+        }
       }
 
       if (this.currentQuestion >= this.questions.length) {
@@ -658,11 +698,10 @@ export default class Server implements Party.Server {
         case ROUND_SHOW_ANSWER:
           this.calculatePoints();
 
-          // this also shows which player voted for which question
-          this.room.broadcast(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
-          for (let conn of this.room.getConnections()) {
-            this.resetPlayerAnswerData(conn);
-          }
+          // shows which player voted for which question
+          this.broadcastUpdateMessage();
+
+          this.room.broadcast(q.getAnswerMessage(this.currentQuestion + 1));
           break;
 
         // pause music to allow fade out
@@ -831,7 +870,7 @@ export default class Server implements Party.Server {
     this.hostID = newHost?.id;
 
     if (newHost) {
-      this.sendConfirmationOrError(newHost, this.getConfigMessage());
+      newHost.send(this.getConfigMessage());
       if (sendUpdate) {
         this.broadcastUpdateMessage();
       }
@@ -921,7 +960,7 @@ export default class Server implements Party.Server {
    *
    * @returns An array of valid PlayerState objects from all connected players.
    */
-  private getAllPlayerStates(): PlayerState[] {
+  private getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
     for (let conn of this.room.getConnections()) {
       states.push(conn.state as PlayerState);
@@ -953,7 +992,7 @@ export default class Server implements Party.Server {
    * @returns A string array of unused colors or an empty array if all colors are used.
    */
   private getUnusedColors(): string[] {
-    let usedColors = this.getAllPlayerStates().map(item => item.color);
+    let usedColors = this.getPlayerStates().map(item => item.color);
 
     return COLORS.filter(item => usedColors.indexOf(item) < 0);
   }
@@ -993,7 +1032,27 @@ export default class Server implements Party.Server {
     // send the current playlist to the connection
     conn.send(this.getPlaylistsUpdateMessage());
 
+    // kicks player if inactive
+    this.refreshKickPlayerTimeout(conn);
+
     return true;
+  }
+
+  /**
+   * Resets the inactivity timer for a specific player connection.
+   * If the timer expires before being refreshed again, the connection is closed.
+   *
+   * @param conn - The player connection to monitor for inactivity.
+   */
+  private refreshKickPlayerTimeout(conn: Party.Connection) {
+    let playerTimeout = this.kickPlayerTimeouts.get(conn.id);
+    if (playerTimeout) {
+      clearTimeout(playerTimeout);
+    }
+
+    this.kickPlayerTimeouts.set(conn.id, setTimeout(() => {
+      conn.close(4001, "Didn't receive updates within 15 seconds.");
+    }, 15000));
   }
 
   /**
@@ -1026,7 +1085,7 @@ export default class Server implements Party.Server {
       type: "update",
       version: version,
       state: this.state,
-      players: this.getAllPlayerStates(),
+      players: this.getPlayerStates(),
       username: connState.username,
       color: connState.color,
       isHost: conn === this.hostConnection
@@ -1074,13 +1133,13 @@ export default class Server implements Party.Server {
   /**
    * Constructs a configuration update message.
    *
-   * @returns a {@link ConfigRoomMessage}
+   * @returns a JSON string of the constructed {@link RoomConfigMessage}
    */
-  private getConfigMessage(): ConfigRoomMessage {
-    return {
-      type: "config_room",
+  private getConfigMessage(): string {
+    return JSON.stringify({
+      type: "room_config",
       advancedSongFiltering: this.advancedSongFiltering
-    };
+    } satisfies RoomConfigMessage);
   }
 
   /**

@@ -1,5 +1,5 @@
 import PartySocket from "partysocket";
-import {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
+import React, {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
 import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
 import type {
@@ -8,12 +8,17 @@ import type {
   RemovePlaylistMessage,
   StartGameMessage,
   SelectAnswerMessage,
-  ReturnToLobbyMessage, ConfigRoomMessage
+  ReturnToMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
   type Playlist, type PlaylistsFile, type Song
 } from "../../schemas/RoomSharedSchemas";
-import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
+import {
+  type PingMessage,
+  type RoomConfigMessage,
+  type ServerMessage,
+  ServerMessageSchema
+} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
@@ -28,6 +33,101 @@ declare const PARTYKIT_HOST: string;
 
 
 /**
+ * A callback function that receives the RoomController instance when its state changes and returns a boolean
+ * to indicate whether the update should trigger a component update, therefore also making new controller accissible.
+ */
+type ListenerCallback = (msg: ServerMessage | null) => boolean;
+
+
+/**
+ * Custom React hook that provides a {@link RoomController} instance for managing
+ * the connection and state of a room.
+ *
+ * @param roomID The ID of the room to connect to.
+ * @param getCookies What cookies are currently set.
+ * @param setCookies A function to allow updating cookies.
+ * @returns An object containing a `getController` method to access the `RoomController` instance.
+ */
+export function useRoomController(roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
+  // hold the class instance so it persists across renders
+  const controllerRef = useRef<RoomController | null>(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // initialize the controller
+    controllerRef.current = new RoomController(roomID, getCookies, setCookies);
+    setIsReady(true);
+
+    return () => {
+      controllerRef.current?.destroy();
+    };
+    // only update on roomID change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomID]);
+
+  return {
+    getController: (): RoomController => controllerRef.current!,
+    isReady
+  };
+}
+
+
+/**
+ * React context for providing the RoomController instance to child components.
+ */
+export const RoomContext = createContext<RoomController | null>(null);
+
+/**
+ * Custom React hook to access the RoomController from the React context.
+ *
+ * @returns The RoomController instance.
+ * @throws Error if used outside a RoomProvider.
+ */
+export function useControllerContext() {
+  const controller = useContext(RoomContext);
+  if (!controller) throw new Error("useRoom must be used within RoomProvider");
+  return controller;
+}
+
+
+/**
+ * Custom React hook to subscribe to state changes in a {@link RoomController}.
+ * @param controller The RoomController instance to listen to.
+ * @param cb The {@link ListenerCallback} function.
+ */
+export function useRoomControllerListener(controller: RoomController, cb: ListenerCallback) {
+  const [updateVal, updateComponent] = React.useState(false);
+  const forceUpdateComponent = React.useCallback(() => updateComponent(!updateVal), [updateVal]);
+
+  useEffect(() => {
+    if (cb(null)) {
+      forceUpdateComponent();
+    }
+
+    return controller.registerOnStateChangeListener(msg => {
+      let update = cb(msg);
+      if (update) {
+        forceUpdateComponent();
+      }
+      return update;
+    });
+  }, [controller, cb, forceUpdateComponent]);
+}
+
+
+/**
+ * A wrapper around {@link useRoomControllerListener} that forces a React update when the specified message is received.
+ * @param controller The RoomController instance to listen to.
+ * @param msgType The {@link ServerMessage["type"]} to listen for.
+ */
+export function useRoomControllerMessageTypeListener(controller: RoomController, msgType: ServerMessage["type"]|null) {
+  useRoomControllerListener(controller, useCallback(msg => {
+    return (msg?.type ?? null) === msgType;
+  }, [msgType]));
+}
+
+
+/**
  * Manages the connection and state of a room.
  */
 export class RoomController {
@@ -39,7 +139,7 @@ export class RoomController {
   /**
    * Listeners that are called whenever the state of the room changes.
    */
-  private stateChangeEventListeners: ((msg: ServerMessage|null) => void)[] = [];
+  private stateChangeEventListeners: ListenerCallback[] = [];
 
   /**
    * The current list of players in the room.
@@ -88,9 +188,34 @@ export class RoomController {
 
   /**
    * Whether to perform advanced song filtering.
-   * @see {@link ConfigRoomMessage.advancedSongFiltering}
+   * @see {@link RoomConfigMessage.advancedSongFiltering}
    */
   advancedSongFiltering: boolean = true;
+
+  /**
+   * The interval of the ping function.
+   */
+  pingInterval?: number;
+
+  /**
+   * The current ping sequence number.
+   */
+  pingSeq: number = 0;
+
+  /**
+   * The last received sequence number by the server.
+   */
+  pongSeq: number = 0;
+
+  /**
+   * The performance.now() timestamp when the last ping was sent.
+   */
+  pingStart: number = 0;
+
+  /**
+   * The current ping in milliseconds.
+   */
+  currentPingMs: number = -1;
 
 
   /**
@@ -126,6 +251,11 @@ export class RoomController {
    */
   public destroy() {
     this.socket.close();
+
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+      this.pingInterval = undefined;
+    }
   }
 
   /**
@@ -138,19 +268,19 @@ export class RoomController {
   /**
    * Registers a listener that will be called whenever the state of the room changes.
    * 
-   * @param listener A callback function that receives the sent {@link ServerMessage} as an argument.
+   * @param listener The {@link ListenerCallback} function.
    * @returns A function to unregister the listener.
    */
-  public registerOnStateChangeListener(listener: (msg: ServerMessage|null) => void) {
+  public registerOnStateChangeListener(listener: ListenerCallback) {
     this.stateChangeEventListeners.push(listener);
     return () => this.unregisterOnStateChangeListener(listener);
   }
 
   /**
    * Unregisters a previously registered state change listener.
-   * @param listener The listener to unregister.
+   * @param listener The {@link ListenerCallback} function.
    */
-  public unregisterOnStateChangeListener(listener: (msg: ServerMessage) => void) {
+  public unregisterOnStateChangeListener(listener: ListenerCallback) {
     this.stateChangeEventListeners = this.stateChangeEventListeners.filter(l => l !== listener);
   }
 
@@ -175,6 +305,9 @@ export class RoomController {
     if (this.getCookies().userName) {
       this.updateUsername(this.getCookies().userName!);
     }
+
+    // send a ping every second
+    this.pingInterval = window.setInterval(() => this.sendPing(), 1000);
   }
 
   /**
@@ -201,18 +334,32 @@ export class RoomController {
   }
 
   /**
+   * Sends a ping with the current sequence number to the server and tracks the start timestamp.
+   */
+  private sendPing() {
+    // wait until server answers first ping
+    if (this.pingSeq !== this.pongSeq)
+      return;
+
+    this.pingStart = performance.now();
+    this.socket.send(JSON.stringify({
+      type: "ping",
+      seq: ++this.pingSeq
+    } satisfies PingMessage));
+  }
+
+  /**
    * Handles incoming messages from the server.
    * 
    * @param ev The MessageEvent containing the server message.
    */
   private onMessage(ev: MessageEvent) {
-    console.debug("Server sent:", ev.data);
-
     // try to parse JSON
     try {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(ev.data);
     } catch (e) {
+      console.debug("Server sent:", ev.data);
       console.error("Server sent invalid JSON:", e);
       return;
     }
@@ -220,22 +367,25 @@ export class RoomController {
     // check if received message is valid
     const result = ServerMessageSchema.safeParse(json);
     if (!result.success) {
+      console.debug("Server sent:", ev.data);
       console.error("Server sent invalid data:\n%s", z.prettifyError(result.error));
       return;
     }
 
     let msg: ServerMessage = result.data;
 
+    // don't log ping/pong
+    if (msg.type !== "ping" && msg.type !== "pong")
+      console.debug("Server sent:", ev.data);
+
     switch (msg.type) {
+      case "pong":
+        this.currentPingMs = Math.round(performance.now() - this.pingStart);
+        this.pongSeq = msg.seq;
+        break;
       case "confirmation":
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
-        }
-
-        if (msg.sourceMessage.type === "config_room") {
-          if (msg.sourceMessage.advancedSongFiltering !== undefined) {
-            this.advancedSongFiltering = msg.sourceMessage.advancedSongFiltering;
-          }
         }
         break;
       case "update":
@@ -261,6 +411,11 @@ export class RoomController {
         this.isHost = msg.isHost;
         this.state = msg.state;
         break;
+      case "room_config":
+        if (msg.advancedSongFiltering !== undefined) {
+          this.advancedSongFiltering = msg.advancedSongFiltering;
+        }
+        break;
       case "update_playlists":
         this.playlists = msg.playlists;
         this.filteredSongsCount = msg.filteredSongsCount;
@@ -272,7 +427,6 @@ export class RoomController {
       case "answer":
         this.currentAnswer = msg;
         this.currentQuestion = null;
-        this.players = msg.playerAnswers;
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;
@@ -312,9 +466,9 @@ export class RoomController {
    */
   public updateAdvancedSongFiltering(val: boolean) {
     this.socket.send(JSON.stringify({
-      type: "config_room",
+      type: "room_config",
       advancedSongFiltering: val
-    } satisfies ConfigRoomMessage));
+    } satisfies RoomConfigMessage));
   }
 
   /**
@@ -351,21 +505,21 @@ export class RoomController {
     * @param answerIndex The index of the selected answer (0-3).
     */
   public selectAnswer(answerIndex: number) {
-    let msg: SelectAnswerMessage = {
+    this.socket.send(JSON.stringify({
       type: "select_answer",
       answerIndex
-    };
-    this.socket.send(JSON.stringify(msg));
+    } satisfies SelectAnswerMessage));
   }
 
   /**
-    * Requests the server to return to the lobby.
-    */
-  public returnToLobby() {
-    let msg: ReturnToLobbyMessage = {
-      type: "return_to_lobby"
-    };
-    this.socket.send(JSON.stringify(msg));
+   * Requests the server to return to the lobby.
+   * @param where {@link ReturnToMessage["where"]}
+   */
+  public returnTo(where: ReturnToMessage["where"]) {
+    this.socket.send(JSON.stringify({
+      type: "return_to",
+      where: where
+    } satisfies ReturnToMessage));
   }
 
   /**
@@ -424,164 +578,4 @@ export class RoomController {
     };
     this.socket.send(JSON.stringify(req));
   }
-}
-
-
-/**
- * Custom React hook that provides a {@link RoomController} instance for managing
- * the connection and state of a room.
- *
- * @param roomID The ID of the room to connect to.
- * @param getCookies What cookies are currently set.
- * @param setCookies A function to allow updating cookies.
- * @returns An object containing a `getController` method to access the `RoomController` instance.
- */
-export function useRoomController(roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
-  // hold the class instance so it persists across renders
-  const controllerRef = useRef<RoomController | null>(null);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    // initialize the controller
-    controllerRef.current = new RoomController(roomID, getCookies, setCookies);
-    setIsReady(true);
-
-    return () => {
-      controllerRef.current?.destroy();
-    };
-  // only update on roomID change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomID]);
-
-  return {
-    getController: (): RoomController => controllerRef.current!,
-    isReady
-  };
-}
-
-/**
- * React context for providing the RoomController instance to child components.
- */
-export const RoomContext = createContext<RoomController | null>(null);
-
-/**
- * Custom React hook to access the RoomController from the React context.
- * 
- * @returns The RoomController instance.
- * @throws Error if used outside a RoomProvider.
- */
-export function useControllerContext() {
-  const controller = useContext(RoomContext);
-  if (!controller) throw new Error("useRoom must be used within RoomProvider");
-  return controller;
-}
-
-
-/**
- * Custom React hook to subscribe to state changes in a {@link RoomController}.
- * @param controller The RoomController instance to listen to.
- * @param cb A callback function that receives the RoomController instance when its state changes.
- */
-export function useRoomControllerListener(controller: RoomController, cb: (msg: ServerMessage|null) => void) {
-  useEffect(() => {
-    cb(null);
-    return controller.registerOnStateChangeListener(cb);
-  }, [controller, cb]);
-}
-
-/**
- * Custom React hook to manage and provide the list of players and the username
- * of the current user in a room.
- * 
- * @param controller The RoomController instance to listen to.
- * @returns An object containing the list of players and the current user's username.
- */
-export function usePlayers(controller: RoomController) {
-  const [players, setPlayers] = useState<PlayerState[]>([]);
-  const [username, setUsername] = useState("");
-
-  const listener = useCallback((msg: ServerMessage|null) => {
-    if (!msg || msg.type === "update") {
-      setPlayers(controller.players);
-      setUsername(controller.username);
-    } else if (msg.type === "answer") {
-      setPlayers(msg.playerAnswers);
-    }
-  }, [controller.players, controller.username]);
-
-  useRoomControllerListener(controller, listener);
-
-  return { players, username };
-}
-
-/**
- * Custom React hook to provide the list of playlists and amount of filtered songs in a room.
- *
- * @param controller The RoomController instance to listen to.
- * @returns An object containing the current list of playlists and amount of filtered songs.
- */
-export function usePlaylists(controller: RoomController) {
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [filteredSongsCount, setFilteredSongsCount] = useState(0);
-
-  useRoomControllerListener(controller, useCallback((msg) => {
-    if (!msg || msg.type === "update_playlists") {
-      setPlaylists(controller.playlists);
-      setFilteredSongsCount(controller.filteredSongsCount);
-    }
-  }, [controller]));
-
-  return {playlists, filteredSongsCount};
-}
-
-/**
- * Custom React hook to track whether the current user is the host.
- * 
- * @param controller The RoomController instance to listen to.
- * @returns A boolean indicating whether the current user is the host.
- */
-export function useIsHost(controller: RoomController) {
-  const [isHost, setIsHost] = useState(false);
-
-  useRoomControllerListener(controller, useCallback((msg) => {
-    if (!msg || msg.type === "update") setIsHost(controller.isHost);
-  }, [controller.isHost]));
-
-  return isHost;
-}
-
-/**
- * Custom React hook to track the current game state.
- * 
- * @param controller The RoomController instance to listen to.
- * @returns The current GameState.
- */
-export function useGameState(controller: RoomController) {
-  const [state, setState] = useState<GameState>("lobby");
-
-  useRoomControllerListener(controller, useCallback((msg) => {
-    if (!msg || msg.type === "update") {
-      setState(controller.state);
-    }
-  }, [controller.state]));
-
-  return state;
-}
-
-/**
- * Custom React hook to track the list of played songs in the last round.
- * 
- * @param controller The RoomController instance to listen to.
- * @returns The current list of played songs.
- */
-export function usePlayedSongs(controller: RoomController) {
-  const [playedSongs, setPlayedSongs] = useState<Song[]>([]);
-
-  useRoomControllerListener(controller, useCallback((msg) => {
-    if (!msg || msg.type === "update_played_songs") {
-      setPlayedSongs(controller.playedSongs);
-    }
-  }, [controller.playedSongs]));
-
-  return playedSongs;
 }

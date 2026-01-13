@@ -5,11 +5,16 @@ import {PlaylistSchema, UsernameSchema} from "./RoomSharedSchemas";
 /**
  * Schema for messages requesting to return to the lobby from the game.
  */
-export const ReturnToLobbyMessageSchema = z.object({
-  type: z.literal("return_to_lobby").default("return_to_lobby")
+export const ReturnToMessageSchema = z.object({
+  type: z.literal("return_to").default("return_to"),
+
+  /**
+   * Where to send the player to.
+   */
+  where: z.literal(["lobby", "results"])
 });
 
-export type ReturnToLobbyMessage = z.infer<typeof ReturnToLobbyMessageSchema>;
+export type ReturnToMessage = z.infer<typeof ReturnToMessageSchema>;
 
 
 /**
@@ -35,19 +40,6 @@ export const StartGameMessageSchema = z.object({
 });
 
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
-
-
-export const ConfigRoomMessageSchema = z.object({
-  type: z.literal("config_room").default("config_room"),
-
-  /**
-   * Whether to perform advanced filtering tactics when generating the songs array.
-   * Currently just ignores parens when filtering for identical song names.
-   */
-  advancedSongFiltering: z.optional(z.boolean())
-});
-
-export type ConfigRoomMessage = z.infer<typeof ConfigRoomMessageSchema>;
 
 
 /**

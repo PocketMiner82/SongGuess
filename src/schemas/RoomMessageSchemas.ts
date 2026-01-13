@@ -1,7 +1,7 @@
 import z from "zod";
 import {
   ChangeUsernameMessageSchema, AddPlaylistMessageSchema, RemovePlaylistMessageSchema, StartGameMessageSchema,
-  SelectAnswerMessageSchema, ReturnToLobbyMessageSchema, ConfigRoomMessageSchema
+  SelectAnswerMessageSchema, ReturnToMessageSchema
 } from "./RoomClientMessageSchemas";
 import {
   UpdateMessageSchema,
@@ -14,19 +14,33 @@ import {
 } from "./RoomServerMessageSchemas";
 
 
+export const RoomConfigMessageSchema = z.object({
+  type: z.literal("room_config").default("room_config"),
+
+  /**
+   * Whether to perform advanced filtering tactics when generating the songs array.
+   * Currently just ignores parens when filtering for identical song names.
+   */
+  advancedSongFiltering: z.optional(z.boolean())
+});
+
+export type RoomConfigMessage = z.infer<typeof RoomConfigMessageSchema>;
+
+
 const _ClientMessageSchema = z.discriminatedUnion("type", [
   ChangeUsernameMessageSchema,
   AddPlaylistMessageSchema,
   RemovePlaylistMessageSchema,
-  ConfigRoomMessageSchema,
+  RoomConfigMessageSchema,
   StartGameMessageSchema,
   SelectAnswerMessageSchema,
-  ReturnToLobbyMessageSchema
+  ReturnToMessageSchema
 ]);
 
 const _ServerMessageSchema = z.discriminatedUnion("type", [
   UpdateMessageSchema,
   UpdatePlaylistsMessageSchema,
+  RoomConfigMessageSchema,
   CountdownMessageSchema,
   AudioControlMessageSchema,
   QuestionMessageSchema,
@@ -47,7 +61,7 @@ export const OtherMessageSchema = z.object({
  * Schema for messages that can be either server messages, client messages, or other messages.
  * Used as a discriminated union to handle different message types.
  */
-export const SourceMessageSchema = z.discriminatedUnion("type", [
+export const SourceMessageSchema = z.union([
   _ServerMessageSchema,
   _ClientMessageSchema,
   OtherMessageSchema
@@ -75,11 +89,37 @@ export const ConfirmationMessageSchema = z.object({
 
 export type ConfirmationMessage = z.infer<typeof ConfirmationMessageSchema>;
 
+export const PingMessageSchema = z.object({
+  type: z.literal("ping").default("ping"),
+
+  /**
+   * The sequence number the pong should respond with
+   */
+  seq: z.number()
+});
+
+export type PingMessage = z.infer<typeof PingMessageSchema>;
+
+
+export const PongMessageSchema = z.object({
+  type: z.literal("pong").default("pong"),
+
+  /**
+   * The sequence number asked for in the ping packet.
+   */
+  seq: z.number()
+});
+
+export type PongMessage = z.infer<typeof PongMessageSchema>;
+
+
 /**
  * A message sent from the server.
  */
 export const ServerMessageSchema = z.discriminatedUnion("type", [
   ConfirmationMessageSchema,
+  PingMessageSchema,
+  PongMessageSchema,
   _ServerMessageSchema
 ]);
 
@@ -91,6 +131,8 @@ export type ServerMessage = z.infer<typeof ServerMessageSchema>;
  */
 export const ClientMessageSchema = z.discriminatedUnion("type", [
   ConfirmationMessageSchema,
+  PingMessageSchema,
+  PongMessageSchema,
   _ClientMessageSchema
 ]);
 

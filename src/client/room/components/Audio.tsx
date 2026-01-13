@@ -16,17 +16,9 @@ export function Audio() {
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   if (cookies.audioVolume === undefined) setCookie('audioVolume', 0.2);
 
-  useEffect(() => {
-    if (audioRef.current && cookies.audioVolume !== undefined) {
-      audioRef.current.volume = cookies.audioVolume;
-      audioRef.current.muted = cookies.audioMuted === true;
-      setTargetVolume(cookies.audioVolume);
-    }
-  }, [cookies.audioMuted, cookies.audioVolume]);
-
   const fadeOut = useCallback((duration: number = 1000) => {
     if (!audioRef.current) return;
-    
+
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
@@ -53,7 +45,7 @@ export function Audio() {
 
   const fadeIn = useCallback((duration: number = 1000) => {
     if (!audioRef.current) return;
-    
+
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
     }
@@ -81,24 +73,13 @@ export function Audio() {
 
   useRoomControllerListener(controller, useCallback((msg: ServerMessage|null) => {
     if (!msg || msg.type !== "audio_control" || !audioRef.current) {
-      return;
+      return false;
     }
 
     const audio = audioRef.current;
 
     // perform requested action
     switch (msg.action) {
-      case "pause":
-        fadeOut();
-        setTimeout(() => audio.pause(), 1000);
-        return;
-      case "play":
-        if (audio.paused) {
-          audio.volume = 0;
-          audio.play().catch(() => {/* ignore play promise errors */});
-          fadeIn();
-        }
-        return;
       case "load":
         const currentAudioURL = msg.audioURL;
         // avoid resetting src if it is already correct
@@ -106,8 +87,30 @@ export function Audio() {
 
         audio.load();
         break;
+      case "play":
+        if (audio.paused) {
+          audio.volume = 0;
+          audio.play().catch(e => {
+            console.error("Failed to start playback:", e);
+          });
+          fadeIn();
+        }
+        break;
+      case "pause":
+        fadeOut();
+        setTimeout(() => audio.pause(), 1000);
+        break;
     }
+    return false;
   }, [fadeIn, fadeOut]));
+
+  useEffect(() => {
+    if (audioRef.current && cookies.audioVolume !== undefined) {
+      audioRef.current.volume = cookies.audioVolume;
+      audioRef.current.muted = cookies.audioMuted === true;
+      setTargetVolume(cookies.audioVolume);
+    }
+  }, [cookies.audioMuted, cookies.audioVolume]);
 
   const getVolumeIcon = () => {
     if (cookies.audioMuted) return 'volume_off';
