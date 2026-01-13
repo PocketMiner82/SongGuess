@@ -53,6 +53,8 @@ function Countdown() {
 function Room() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "pong");
+
 
   // if port is set, this is probably a dev environment: prevent accidental reloads
   if (!window.location.port) window.onbeforeunload = () => true;
@@ -77,7 +79,19 @@ function Room() {
           <Countdown />
         </main>
         <BottomBar>
-          <Audio />
+          <div className="flex-1 flex justify-start">
+            <Audio />
+          </div>
+          {controller.currentPingMs >= 0 && (
+              <div className="flex-1 flex justify-end">
+                <span>Ping:</span>
+                <span className={`ml-1 min-w-12 text-right ${
+                    controller.currentPingMs > 100 ? "text-yellow-500" :
+                    controller.currentPingMs > 250 ? "text-error" :
+                    "text-success"
+                }`}>{controller.currentPingMs} ms</span>
+              </div>
+          )}
         </BottomBar>
       </div>
   );

@@ -42,19 +42,6 @@ export const StartGameMessageSchema = z.object({
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
 
 
-export const ConfigRoomMessageSchema = z.object({
-  type: z.literal("config_room").default("config_room"),
-
-  /**
-   * Whether to perform advanced filtering tactics when generating the songs array.
-   * Currently just ignores parens when filtering for identical song names.
-   */
-  advancedSongFiltering: z.optional(z.boolean())
-});
-
-export type ConfigRoomMessage = z.infer<typeof ConfigRoomMessageSchema>;
-
-
 /**
  * Schema for messages requesting to add a new playlist to the game.
  */

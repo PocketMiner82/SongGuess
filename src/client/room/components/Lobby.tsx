@@ -69,11 +69,14 @@ function PlaylistsList() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "update_playlists");
+  useRoomControllerMessageTypeListener(controller, "room_config");
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-xl font-bold">Playlists - {`${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 && "s"}`} (filtered)</h3>
+        <h3 className="text-xl font-bold">Playlists - {
+          `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.advancedSongFiltering ? " (filtered)" : ""}`
+        }</h3>
         <DownloadPlaylists />
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
@@ -329,18 +332,16 @@ function SettingsToggle({ value, onToggle, children }: { value: boolean; onToggl
 function Settings() {
   const controller = useControllerContext();
   const [error, setError] = useState<string | null>(null);
-  const [advancedSongFiltering, setAdvancedSongFiltering] = useState(controller.advancedSongFiltering);
+  useRoomControllerMessageTypeListener(controller, "room_config");
 
   useRoomControllerListener(controller, useCallback(msg => {
     if (msg && msg.type === "confirmation") {
       if (msg.sourceMessage.type === "start_game") {
         setError(msg.error ?? null);
-      } else if (msg.sourceMessage.type === "config_room") {
-        setAdvancedSongFiltering(controller.advancedSongFiltering);
       }
     }
     return false;
-  }, [controller.advancedSongFiltering]));
+  }, []));
 
   return (
     <div>
@@ -355,7 +356,7 @@ function Settings() {
 
         <div className="border-t border-disabled-bg my-2"></div>
 
-        <SettingsToggle value={advancedSongFiltering} onToggle={v => controller.updateAdvancedSongFiltering(v)}>
+        <SettingsToggle value={controller.advancedSongFiltering} onToggle={v => controller.updateAdvancedSongFiltering(v)}>
           Perform advanced song filtering
         </SettingsToggle>
 

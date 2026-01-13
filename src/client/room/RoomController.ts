@@ -8,12 +8,17 @@ import type {
   RemovePlaylistMessage,
   StartGameMessage,
   SelectAnswerMessage,
-  ReturnToMessage, ConfigRoomMessage
+  ReturnToMessage
 } from "../../schemas/RoomClientMessageSchemas";
 import {
   type Playlist, type PlaylistsFile, type Song
 } from "../../schemas/RoomSharedSchemas";
-import {type ServerMessage, ServerMessageSchema} from "../../schemas/RoomMessageSchemas";
+import {
+  type PingMessage,
+  type RoomConfigMessage,
+  type ServerMessage,
+  ServerMessageSchema
+} from "../../schemas/RoomMessageSchemas";
 import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
@@ -183,9 +188,34 @@ export class RoomController {
 
   /**
    * Whether to perform advanced song filtering.
-   * @see {@link ConfigRoomMessage.advancedSongFiltering}
+   * @see {@link RoomConfigMessage.advancedSongFiltering}
    */
   advancedSongFiltering: boolean = true;
+
+  /**
+   * The interval of the ping function.
+   */
+  pingInterval?: number;
+
+  /**
+   * The current ping sequence number.
+   */
+  pingSeq: number = 0;
+
+  /**
+   * The last received sequence number by the server.
+   */
+  pongSeq: number = 0;
+
+  /**
+   * The performance.now() timestamp when the last ping was sent.
+   */
+  pingStart: number = 0;
+
+  /**
+   * The current ping in milliseconds.
+   */
+  currentPingMs: number = -1;
 
 
   /**
@@ -221,6 +251,11 @@ export class RoomController {
    */
   public destroy() {
     this.socket.close();
+
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+      this.pingInterval = undefined;
+    }
   }
 
   /**
@@ -270,6 +305,9 @@ export class RoomController {
     if (this.getCookies().userName) {
       this.updateUsername(this.getCookies().userName!);
     }
+
+    // send a ping every second
+    this.pingInterval = window.setInterval(() => this.sendPing(), 1000);
   }
 
   /**
@@ -296,18 +334,32 @@ export class RoomController {
   }
 
   /**
+   * Sends a ping with the current sequence number to the server and tracks the start timestamp.
+   */
+  private sendPing() {
+    // wait until server answers first ping
+    if (this.pingSeq !== this.pongSeq)
+      return;
+
+    this.pingStart = performance.now();
+    this.socket.send(JSON.stringify({
+      type: "ping",
+      seq: ++this.pingSeq
+    } satisfies PingMessage));
+  }
+
+  /**
    * Handles incoming messages from the server.
    * 
    * @param ev The MessageEvent containing the server message.
    */
   private onMessage(ev: MessageEvent) {
-    console.debug("Server sent:", ev.data);
-
     // try to parse JSON
     try {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(ev.data);
     } catch (e) {
+      console.debug("Server sent:", ev.data);
       console.error("Server sent invalid JSON:", e);
       return;
     }
@@ -315,22 +367,25 @@ export class RoomController {
     // check if received message is valid
     const result = ServerMessageSchema.safeParse(json);
     if (!result.success) {
+      console.debug("Server sent:", ev.data);
       console.error("Server sent invalid data:\n%s", z.prettifyError(result.error));
       return;
     }
 
     let msg: ServerMessage = result.data;
 
+    // don't log ping/pong
+    if (msg.type !== "ping" && msg.type !== "pong")
+      console.debug("Server sent:", ev.data);
+
     switch (msg.type) {
+      case "pong":
+        this.currentPingMs = performance.now() - this.pingStart;
+        this.pongSeq = msg.seq;
+        break;
       case "confirmation":
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
-        }
-
-        if (msg.sourceMessage.type === "config_room") {
-          if (msg.sourceMessage.advancedSongFiltering !== undefined) {
-            this.advancedSongFiltering = msg.sourceMessage.advancedSongFiltering;
-          }
         }
         break;
       case "update":
@@ -355,6 +410,11 @@ export class RoomController {
         this.players = msg.players;
         this.isHost = msg.isHost;
         this.state = msg.state;
+        break;
+      case "room_config":
+        if (msg.advancedSongFiltering !== undefined) {
+          this.advancedSongFiltering = msg.advancedSongFiltering;
+        }
         break;
       case "update_playlists":
         this.playlists = msg.playlists;
@@ -406,9 +466,9 @@ export class RoomController {
    */
   public updateAdvancedSongFiltering(val: boolean) {
     this.socket.send(JSON.stringify({
-      type: "config_room",
+      type: "room_config",
       advancedSongFiltering: val
-    } satisfies ConfigRoomMessage));
+    } satisfies RoomConfigMessage));
   }
 
   /**
