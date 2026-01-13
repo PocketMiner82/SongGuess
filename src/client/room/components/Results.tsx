@@ -1,10 +1,6 @@
 import React from "react";
 import { Button } from "../../components/Button";
-import {
-  useControllerContext,
-  useGameState,
-  useIsHost, usePlayers, usePlayedSongs
-} from "../RoomController";
+import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {ResultsPlayerList} from "./ResultsPlayerList";
 import {PlaylistCard} from "../../components/PlaylistCard";
 
@@ -15,15 +11,15 @@ import {PlaylistCard} from "../../components/PlaylistCard";
  */
 function PlayedSongsList() {
   const controller = useControllerContext();
-  const playedSongs = usePlayedSongs(controller);
+  useRoomControllerMessageTypeListener(controller, "update_played_songs");
 
-  return playedSongs.length > 0 && (
+  return controller.playedSongs.length > 0 && (
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4 text-center">
           Played Songs
         </h3>
         <div className="space-y-2 mx-auto">
-          {playedSongs.map((song, idx) => (
+          {controller.playedSongs.map((song, idx) => (
               <PlaylistCard
                   index={idx}
                   title={song.name}
@@ -42,15 +38,12 @@ function PlayedSongsList() {
  */
 export function Results() {
   const controller = useControllerContext();
-  const state = useGameState(controller);
-  const isHost = useIsHost(controller);
-  let {players: rankedPlayers} = usePlayers(controller);
+  useRoomControllerMessageTypeListener(controller, "update");
 
-
-  if (state !== "results") return null;
+  if (controller.state !== "results") return null;
 
   // sort by descending score
-  rankedPlayers = rankedPlayers.sort((a, b) => b.points - a.points);
+  let rankedPlayers = controller.players.sort((a, b) => b.points - a.points);
 
   return (
     <div className="space-y-6 lg:max-w-3/4 2xl:max-w-1/2 mx-auto p-4 min-h-full">
@@ -67,12 +60,12 @@ export function Results() {
           rankedPlayers={rankedPlayers}
           showField="points"/>
 
-      {isHost && (
+      {controller.isHost && (
           <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
             <Button onClick={() => controller.startGame()}>
               Play Again
             </Button>
-            <Button onClick={() => controller.returnToLobby()}>
+            <Button onClick={() => controller.returnTo("lobby")}>
               Return to Lobby
             </Button>
           </div>

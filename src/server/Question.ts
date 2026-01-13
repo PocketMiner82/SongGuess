@@ -1,6 +1,6 @@
 import type { Song } from "../schemas/RoomSharedSchemas";
 import { shuffle } from "../Utils";
-import type {AnswerMessage, PlayerState, QuestionMessage} from "../schemas/RoomServerMessageSchemas";
+import type {AnswerMessage, QuestionMessage} from "../schemas/RoomServerMessageSchemas";
 
 export default class Question {
   /**
@@ -80,16 +80,14 @@ export default class Question {
    * Creates an answer message for sending to clients.
    *
    * @param n The question number.
-   * @param playerAnswers An array containing the answers of all players.
    * @returns A JSON string containing the answer message.
    */
-  public getAnswerMessage(n: number, playerAnswers: PlayerState[]): string {
+  public getAnswerMessage(n: number): string {
     let answerMsg: AnswerMessage = {
       type: "answer",
       number: n,
       answerOptions: this.getSongNames(),
-      correctIndex: this.getAnswerIndex(),
-      playerAnswers: playerAnswers
+      correctIndex: this.getAnswerIndex()
     }
     return JSON.stringify(answerMsg);
   }

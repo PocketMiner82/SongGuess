@@ -84,12 +84,7 @@ export const AnswerMessageSchema = z.object({
   /**
    * The index of the correct answer.
    */
-  correctIndex: z.int().min(0).max(3),
-
-  /**
-   * Information about which player selected which answer
-   */
-  playerAnswers: z.array(PlayerStateSchema)
+  correctIndex: z.int().min(0).max(3)
 });
 
 export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;

@@ -1,8 +1,8 @@
 import React, { useState, useCallback, memo, useEffect, useRef } from "react";
-import type { QuestionMessage, AnswerMessage, PlayerState } from "../../../schemas/RoomServerMessageSchemas";
+import type { PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
 import { PlayerAvatar } from "./PlayerAvatar";
-import {useControllerContext, useRoomControllerListener, useGameState} from "../RoomController";
+import {useControllerContext, useRoomControllerListener, useRoomControllerMessageTypeListener} from "../RoomController";
 import {ResultsPlayerList} from "./ResultsPlayerList";
 
 /**
@@ -150,17 +150,12 @@ const ProgressBar = memo(function ProgressBar({
  */
 function QuestionDisplay() {
   const controller = useControllerContext();
-  const [currentQuestion, setCurrentQuestion] = useState<QuestionMessage | null>(null);
-  const [currentAnswer, setCurrentAnswer] = useState<AnswerMessage | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [canAnswer, setCanAnswer] = useState(false);
   const [audioLength, setAudioLength] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useRoomControllerListener(controller, useCallback(msg => {
-    setCurrentQuestion(controller.currentQuestion);
-    setCurrentAnswer(controller.currentAnswer);
-
     if (msg?.type === "question") {
       // reset selection
       setSelectedAnswer(null);
@@ -170,7 +165,7 @@ function QuestionDisplay() {
 
       if (msg.action === "play") {
         // allow answering when music starts
-        setCanAnswer(true);
+        setCanAnswer(controller.currentAnswer === null);
         setIsPlaying(true);
       } else {
         setIsPlaying(msg.action === "load");
@@ -180,7 +175,8 @@ function QuestionDisplay() {
       setCanAnswer(false);
       setIsPlaying(false);
     }
-  }, [controller.currentAnswer, controller.currentQuestion]));
+    return false;
+  }, [controller.currentAnswer]));
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -192,7 +188,7 @@ function QuestionDisplay() {
     controller.selectAnswer(answerIndex);
   }, [canAnswer, controller]);
 
-  if (!currentQuestion && !currentAnswer) {
+  if (!controller.currentQuestion && !controller.currentAnswer) {
     return (
         <>
           <div className="material-symbols-outlined animate-spin text-gray-500 mb-8">progress_activity</div>
@@ -201,9 +197,9 @@ function QuestionDisplay() {
     );
   }
 
-  const answerOptions = currentAnswer?.answerOptions || currentQuestion?.answerOptions;
-  const correctIndex = currentAnswer?.correctIndex;
-  const questionNumber = currentQuestion?.number || currentAnswer?.number;
+  const answerOptions = controller.currentAnswer?.answerOptions || controller.currentQuestion?.answerOptions;
+  const correctIndex = controller.currentAnswer?.correctIndex;
+  const questionNumber = controller.currentQuestion?.number || controller.currentAnswer?.number;
   const isDisabled = !canAnswer;
 
   return (
@@ -231,7 +227,7 @@ function QuestionDisplay() {
             isCorrect={correctIndex !== undefined ? correctIndex === index : null}
             isDisabled={isDisabled}
             onSelect={handleAnswerSelect}
-            playerAnswers={currentAnswer?.playerAnswers || null}
+            playerAnswers={controller.players}
           />
         ))}
       </div>
@@ -241,35 +237,33 @@ function QuestionDisplay() {
 
 function AnswerResults() {
   const controller = useControllerContext();
-  const [rankedPlayers, setRankedPlayers] = useState<PlayerState[]>([]);
+  useRoomControllerMessageTypeListener(controller, "answer");
+  useRoomControllerMessageTypeListener(controller, "question");
+  let rankedPlayers: PlayerState[] = [];
 
-  useRoomControllerListener(controller, useCallback(e => {
-    if (e?.type === "answer") {
-      setRankedPlayers(e.playerAnswers
-          .map(p => {
-            // don't show time for wrong answers
-            if (p.answerIndex !== e.correctIndex) {
-              p.answerSpeed = undefined;
-            }
-            return p;
-          })
-          .sort((a, b) => {
-            // 1. Handle "Correctness" (Presence of answerSpeed)
-            if (a.answerSpeed !== undefined && b.answerSpeed === undefined) return -1;
-            if (a.answerSpeed === undefined && b.answerSpeed !== undefined) return 1;
+  if (controller.currentAnswer) {
+    rankedPlayers = controller.players
+        .map(p => {
+          // don't show time for wrong answers
+          if (p.answerIndex !== controller.currentAnswer!.correctIndex) {
+            p.answerSpeed = undefined;
+          }
+          return p;
+        })
+        .sort((a, b) => {
+          // 1. Handle "Correctness" (Presence of answerSpeed)
+          if (a.answerSpeed !== undefined && b.answerSpeed === undefined) return -1;
+          if (a.answerSpeed === undefined && b.answerSpeed !== undefined) return 1;
 
-            // 2. Both are correct: Sort by speed (ascending)
-            if (a.answerSpeed !== undefined && b.answerSpeed !== undefined) {
-              return a.answerSpeed - b.answerSpeed;
-            }
+          // 2. Both are correct: Sort by speed (ascending)
+          if (a.answerSpeed !== undefined && b.answerSpeed !== undefined) {
+            return a.answerSpeed - b.answerSpeed;
+          }
 
-            // 3. Both are wrong: Keep original order (or return 0)
-            return 0;
-          }));
-    } else if (e?.type === "question") {
-      setRankedPlayers([]);
-    }
-  }, []));
+          // 3. Both are wrong: Keep original order (or return 0)
+          return 0;
+        });
+  }
 
   if (rankedPlayers.length === 0) return null;
 
@@ -278,7 +272,7 @@ function AnswerResults() {
         <h2 className="text-2xl font-bold mb-2">
           Player Answers
         </h2>
-        <ResultsPlayerList rankedPlayers={rankedPlayers} showField="points" showField2="answerSpeed" />
+        <ResultsPlayerList rankedPlayers={rankedPlayers} showField="points" showField2="answerSpeed" showRankingNumbers={false} />
       </div>
   );
 }
@@ -289,9 +283,9 @@ function AnswerResults() {
  */
 export function Ingame() {
   const controller = useControllerContext();
-  const state = useGameState(controller);
+  useRoomControllerMessageTypeListener(controller, "update");
 
-  if (state !== "ingame") return null;
+  if (controller.state !== "ingame") return null;
 
   return (
     <div className="lg:max-w-3/4 mx-auto h-full flex items-center justify-center p-4">

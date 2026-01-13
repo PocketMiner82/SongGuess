@@ -221,7 +221,7 @@ export default class Server implements Party.Server {
       if (this.roundTicks < ROUND_SHOW_ANSWER) {
         conn.send(q.getQuestionMessage(this.currentQuestion + 1));
       } else {
-        conn.send(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
+        conn.send(q.getAnswerMessage(this.currentQuestion + 1));
       }
 
       setTimeout(() => {
@@ -346,14 +346,21 @@ export default class Server implements Party.Server {
 
         this.selectAnswer(conn, msg);
         break;
-      case "return_to_lobby":
+      case "return_to":
         if (!this.performChecks(conn, msg, "host", "not_lobby")) {
           return;
         }
 
-        this.resetGame();
-        // returning to lobby will force to include all songs again
-        this.remainingSongs = [];
+        switch (msg.where) {
+          case "lobby":
+            this.resetGame();
+            // returning to lobby will force to include all songs again
+            this.remainingSongs = [];
+            break;
+          case "results":
+            this.endGame();
+            break;
+        }
 
         this.broadcastUpdateMessage();
         break;
@@ -630,6 +637,9 @@ export default class Server implements Party.Server {
       if (this.roundTicks >= ROUND_START_NEXT) {
         this.roundTicks = 0;
         this.currentQuestion++;
+        for (let conn of this.room.getConnections()) {
+          this.resetPlayerAnswerData(conn);
+        }
       }
 
       if (this.currentQuestion >= this.questions.length) {
@@ -658,11 +668,10 @@ export default class Server implements Party.Server {
         case ROUND_SHOW_ANSWER:
           this.calculatePoints();
 
-          // this also shows which player voted for which question
-          this.room.broadcast(q.getAnswerMessage(this.currentQuestion + 1, this.getAllPlayerStates()));
-          for (let conn of this.room.getConnections()) {
-            this.resetPlayerAnswerData(conn);
-          }
+          // shows which player voted for which question
+          this.broadcastUpdateMessage();
+
+          this.room.broadcast(q.getAnswerMessage(this.currentQuestion + 1));
           break;
 
         // pause music to allow fade out
@@ -921,7 +930,7 @@ export default class Server implements Party.Server {
    *
    * @returns An array of valid PlayerState objects from all connected players.
    */
-  private getAllPlayerStates(): PlayerState[] {
+  private getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
     for (let conn of this.room.getConnections()) {
       states.push(conn.state as PlayerState);
@@ -953,7 +962,7 @@ export default class Server implements Party.Server {
    * @returns A string array of unused colors or an empty array if all colors are used.
    */
   private getUnusedColors(): string[] {
-    let usedColors = this.getAllPlayerStates().map(item => item.color);
+    let usedColors = this.getPlayerStates().map(item => item.color);
 
     return COLORS.filter(item => usedColors.indexOf(item) < 0);
   }
@@ -1026,7 +1035,7 @@ export default class Server implements Party.Server {
       type: "update",
       version: version,
       state: this.state,
-      players: this.getAllPlayerStates(),
+      players: this.getPlayerStates(),
       username: connState.username,
       color: connState.color,
       isHost: conn === this.hostConnection

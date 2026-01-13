@@ -2,7 +2,7 @@ import React, {useState, useCallback, useMemo, type ReactNode} from "react";
 import {albumRegex, artistRegex, songRegex} from "../../../schemas/RoomSharedSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
-import { useIsHost, useRoomControllerListener, usePlayers, usePlaylists, useControllerContext, useGameState } from "../RoomController";
+import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../server/ServerConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
@@ -15,12 +15,12 @@ import { downloadFile, importPlaylistFile, validatePlaylistsFile } from "../../.
  */
 function PlayerList() {
   const controller = useControllerContext();
-  const { players, username } = usePlayers(controller);
+  useRoomControllerMessageTypeListener(controller, "update");
   
   const slots = useMemo(() => {
-    const emptySlots = Math.max(0, COLORS.length - players.length);
-    return [...players, ...Array(emptySlots).fill(null)];
-  }, [players]);
+    const emptySlots = Math.max(0, COLORS.length - controller.players.length);
+    return [...controller.players, ...Array(emptySlots).fill(null)];
+  }, [controller.players]);
 
   return (
     <div className="mb-12">
@@ -30,7 +30,7 @@ function PlayerList() {
           <PlayerCard
             key={player?.username || `empty-${idx}`}
             player={player}
-            username={username}
+            username={controller.username}
           />
         ))}
       </ul>
@@ -43,7 +43,7 @@ function PlayerList() {
  */
 function DownloadPlaylists() {
   const controller = useControllerContext();
-  const {playlists} = usePlaylists(controller);
+  useRoomControllerMessageTypeListener(controller, "update_playlists");
 
   const handleDownload = () => {
     const content = controller.generatePlaylistsFile();
@@ -53,7 +53,7 @@ function DownloadPlaylists() {
   return (
     <Button
       onClick={handleDownload}
-      disabled={playlists.length === 0}
+      disabled={controller.playlists.length === 0}
       className="items-center flex justify-center"
     >
       <span className="material-symbols-outlined">download</span>
@@ -67,20 +67,20 @@ function DownloadPlaylists() {
  */
 function PlaylistsList() {
   const controller = useControllerContext();
-  const isHost = useIsHost(controller);
-  const {playlists, filteredSongsCount} = usePlaylists(controller);
+  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "update_playlists");
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-xl font-bold">Playlists - {`${filteredSongsCount} song${filteredSongsCount !== 1 && "s"}`} (filtered)</h3>
+        <h3 className="text-xl font-bold">Playlists - {`${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 && "s"}`} (filtered)</h3>
         <DownloadPlaylists />
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
-        {playlists.length === 0 ? (
+        {controller.playlists.length === 0 ? (
           <PlaylistCard index={-1} title="No playlists added yet." />
         ) : (
-          playlists.map((pl, idx) => (
+            controller.playlists.map((pl, idx) => (
             <PlaylistCard
                 key={idx}
                 index={idx}
@@ -88,7 +88,7 @@ function PlaylistsList() {
                 subtitle={pl.subtitle}
                 coverURL={pl.cover}
                 hrefURL={pl.hrefURL}
-                onDeleteClick={isHost ? () => controller.removePlaylist(idx) : undefined}/>
+                onDeleteClick={controller.isHost ? () => controller.removePlaylist(idx) : undefined}/>
           ))
         )}
       </ul>
@@ -109,6 +109,7 @@ function AddPlaylistInput() {
     if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
       setSearchStatus(msg.error ? "error" : "success");
     }
+    return false;
   }, []));
 
   const isValidURL = artistRegex.test(playlistURL) || albumRegex.test(playlistURL) || songRegex.test(playlistURL);
@@ -231,7 +232,7 @@ function ImportPlaylists({ setError }: { setError: (error: string | null) => voi
  */
 function ClearPlaylists() {
   const controller = useControllerContext();
-  const {playlists} = usePlaylists(controller);
+  useRoomControllerMessageTypeListener(controller, "update_playlists");
 
   const handleClearPlaylists = () => {
     const isConfirmed = window.confirm("Are you sure you want to clear all playlists?");
@@ -243,7 +244,7 @@ function ClearPlaylists() {
   return (
     <Button
       onClick={handleClearPlaylists}
-      disabled={playlists.length === 0}
+      disabled={controller.playlists.length === 0}
       className="items-center flex justify-center"
     >
       <span className="material-symbols-outlined mr-2">delete</span>
@@ -258,11 +259,11 @@ function ClearPlaylists() {
  */
 function StartGame() {
   const controller = useControllerContext();
-  const {playlists} = usePlaylists(controller);
+  useRoomControllerMessageTypeListener(controller, "update_playlists");
 
   return (
     <Button
-      disabled={playlists.length === 0}
+      disabled={controller.playlists.length === 0}
       onClick={() => controller.startGame()}
     >
       Start Game
@@ -338,6 +339,7 @@ function Settings() {
         setAdvancedSongFiltering(controller.advancedSongFiltering);
       }
     }
+    return false;
   }, [controller.advancedSongFiltering]));
 
   return (
@@ -376,19 +378,19 @@ function Settings() {
  */
 export function Lobby() {
   const controller = useControllerContext();
-  const isHost = useIsHost(controller);
-  const state = useGameState(controller);
+  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "update_playlists");
 
-  if (state !== "lobby") return null;
+  if (controller.state !== "lobby") return null;
 
   return (
     <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
       <div className="mb-12 shrink-0">
         <PlayerList />
       </div>
-      <div className={`grid gap-4 grid-cols-1 flex-1 ${isHost ? "lg:grid-cols-2" : ""}`}>
+      <div className={`grid gap-4 grid-cols-1 flex-1 ${controller.isHost ? "lg:grid-cols-2" : ""}`}>
         <div className="lg:order-last">
-          {isHost && <Settings />}
+          {controller.isHost && <Settings />}
         </div>
 
         <div className="lg:order-first min-h-0">

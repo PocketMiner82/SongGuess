@@ -1,6 +1,9 @@
 import { createRoot } from "react-dom/client";
 import { useState, useCallback } from "react";
-import { RoomContext, useControllerContext, useRoomController, useRoomControllerListener, useIsHost, useGameState } from "./RoomController";
+import {
+  RoomContext, useControllerContext, useRoomController, useRoomControllerListener,
+  useRoomControllerMessageTypeListener
+} from "./RoomController";
 import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
 import { Lobby } from "./components/Lobby";
 import {Ingame} from "./components/Ingame";
@@ -33,12 +36,12 @@ function Countdown() {
   const [countdown, setCountdown] = useState(0);
   const visible = countdown > 0;
 
-  const listener = useCallback((msg: ServerMessage|null) => {
-    if (!msg || msg.type !== "countdown") return;
-    setCountdown(msg.countdown);
-  }, []);
-
-  useRoomControllerListener(useControllerContext(), listener);
+  useRoomControllerListener(useControllerContext(), useCallback((msg: ServerMessage|null) => {
+    if (msg && msg.type === "countdown") {
+      setCountdown(msg.countdown);
+    }
+    return false;
+  }, []));
 
   return visible ? (
     <div className="fixed inset-0 flex items-center justify-center bg-black/85">
@@ -49,8 +52,7 @@ function Countdown() {
 
 function Room() {
   const controller = useControllerContext();
-  const isHost = useIsHost(controller);
-  const gameState = useGameState(controller);
+  useRoomControllerMessageTypeListener(controller, "update");
 
   // if port is set, this is probably a dev environment: prevent accidental reloads
   if (!window.location.port) window.onbeforeunload = () => true;
@@ -62,9 +64,9 @@ function Room() {
         </CookieConsent>
 
         <TopBar>
-          {isHost && gameState === "ingame" && (
-              <Button onClick={() => controller.returnToLobby()}>
-                Lobby
+          {controller.isHost && controller.state === "ingame" && (
+              <Button onClick={() => controller.returnTo("results")}>
+                Abort
               </Button>
           )}
         </TopBar>

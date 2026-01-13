@@ -1,7 +1,7 @@
 import z from "zod";
 import {
   ChangeUsernameMessageSchema, AddPlaylistMessageSchema, RemovePlaylistMessageSchema, StartGameMessageSchema,
-  SelectAnswerMessageSchema, ReturnToLobbyMessageSchema, ConfigRoomMessageSchema
+  SelectAnswerMessageSchema, ReturnToMessageSchema, ConfigRoomMessageSchema
 } from "./RoomClientMessageSchemas";
 import {
   UpdateMessageSchema,
@@ -21,7 +21,7 @@ const _ClientMessageSchema = z.discriminatedUnion("type", [
   ConfigRoomMessageSchema,
   StartGameMessageSchema,
   SelectAnswerMessageSchema,
-  ReturnToLobbyMessageSchema
+  ReturnToMessageSchema
 ]);
 
 const _ServerMessageSchema = z.discriminatedUnion("type", [
