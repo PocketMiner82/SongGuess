@@ -1,3 +1,16 @@
+# [2.4.0](https://github.com/PocketMiner82/SongGuess/compare/2.3.0...2.4.0) (2026-01-13)
+
+
+### Bug Fixes
+
+* refactor roomcontroller listener management fixing several caching issues on page reload or bad connections + update styling of ingame results list ([e425001](https://github.com/PocketMiner82/SongGuess/commit/e425001ee5d4e3d138e758d2ff82f23141a07152))
+* round ping for browsers like chrome ([270e0e0](https://github.com/PocketMiner82/SongGuess/commit/270e0e07f0d7fe03f0d2b167d503bfd935bdc18f))
+
+
+### Features
+
+* add ping + kick inactive players after 15 seconds + room config is now sent to all clients ([dc716e0](https://github.com/PocketMiner82/SongGuess/commit/dc716e04f14e0b99d1429905a649a13dc3ce8462))
+
 # [2.4.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.4.0-dev.1...2.4.0-dev.2) (2026-01-13)
 
 
