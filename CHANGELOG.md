@@ -1,3 +1,10 @@
+# [2.5.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.1...2.5.0-dev.2) (2026-01-14)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** add delay to avoid rate limiting after 20 requests ([e33cafd](https://github.com/PocketMiner82/SongGuess/commit/e33cafd17e8a207f903cc89b08b7b732b1d6718e))
+
 # [2.5.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.4.0...2.5.0-dev.1) (2026-01-14)
 
 
