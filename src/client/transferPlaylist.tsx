@@ -1,5 +1,5 @@
 import {createRoot} from "react-dom/client";
-import {useState} from "react";
+import React, {useState} from "react";
 import {CookieConsent} from "react-cookie-consent";
 import {TopBar} from "./components/TopBar";
 import {Button} from "./components/Button";
@@ -31,6 +31,7 @@ function ImportCSV() {
 
     setStatus("loading");
     setProgress("Reading CSV file...");
+    setError(null);
 
     try {
       // Read and parse CSV file
@@ -82,6 +83,7 @@ function ImportCSV() {
       // Create playlists and search for songs
       const playlists: Playlist[] = [];
       let processedCount = 0;
+      let requestCount = 0;
       const notFoundSongs: string[] = [];
 
       for (const [playlistName, tracks] of playlistMap) {
@@ -94,6 +96,26 @@ function ImportCSV() {
 
         for (const track of tracks) {
           processedCount++;
+
+          // pause for one minute to avoid rate limits
+          if (requestCount >= 20) {
+            await new Promise<void>(r => {
+              let sleep = 61;
+
+              const update = () => {
+                if (--sleep > 0) {
+                  setProgress(`Waiting for ${sleep} second(s) to avoid rate limiting.`);
+                  setTimeout(update, 1000);
+                  return;
+                }
+                r();
+              };
+
+              update();
+            });
+            requestCount = 0;
+          }
+
           setProgress(`Searching ${processedCount}/${records.length}: ${track["Track name"]} in album ${track["Album"]} by ${track["Artist name"]}`);
 
           try {
@@ -104,6 +126,7 @@ function ImportCSV() {
 
             do {
               tryAgain = false;
+              requestCount++;
               const results = await safeSearch(searchTerm, {
                 country: "de",
                 media: "music",
