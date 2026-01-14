@@ -218,7 +218,11 @@ function ImportCSV() {
       <input
         type="file"
         accept=".csv"
-        onChange={handleImport}
+        onChange={async e => {
+          window.onbeforeunload = () => true;
+          await handleImport(e);
+          window.onbeforeunload = () => undefined;
+        }}
         className="hidden"
         id="csv-import"
       />
