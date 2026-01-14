@@ -1,3 +1,10 @@
+# [2.5.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.2...2.5.0-dev.3) (2026-01-14)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** show already processed tracks on wait ([b1971c7](https://github.com/PocketMiner82/SongGuess/commit/b1971c78feea804c9d87acb4735ae11405e33a2b))
+
 # [2.5.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.1...2.5.0-dev.2) (2026-01-14)
 
 
