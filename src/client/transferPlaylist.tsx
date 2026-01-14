@@ -5,19 +5,16 @@ import {TopBar} from "./components/TopBar";
 import {Button} from "./components/Button";
 import {ErrorLabel} from "./components/ErrorLabel";
 import {downloadFile} from "../Utils";
-import {searchURL} from "../Utils";
-import * as csv from "csv";
+import {safeSearch} from "../Utils";
+import Papa from "papaparse";
 import type { ResultMusicTrack } from "itunes-store-api";
 import type {Playlist, PlaylistsFile, Song} from "../schemas/RoomSharedSchemas";
 
 interface CSVRow {
   "Track name": string;
   "Artist name": string;
-  "Album": string;
   "Playlist name": string;
-  "Type": string;
-  "ISRC": string;
-  "Spotify - id": string;
+  "Album": string;
 }
 
 /**
@@ -39,13 +36,19 @@ function ImportCSV() {
       // Read and parse CSV file
       const text = await file.text();
       const records: CSVRow[] = await new Promise((resolve, reject) => {
-        csv.parse(text, {
-          columns: true,
-          skip_empty_lines: true,
-          trim: true
-        }, (err, records) => {
-          if (err) reject(err);
-          else resolve(records as CSVRow[]);
+        Papa.parse(text, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: (header) => header.trim(),
+          transform: (value) => value.trim(),
+          complete: (results) => {
+            if (results.errors.length > 0) {
+              reject(new Error(results.errors.map(e => e.message).join(', ')));
+            } else {
+              resolve(results.data as CSVRow[]);
+            }
+          },
+          error: (error: Error) => reject(error)
         });
       });
 
@@ -57,11 +60,16 @@ function ImportCSV() {
 
       setProgress(`Processing ${records.length} tracks...`);
 
-      // Group tracks by playlist name
+      // Validate required fields and group tracks by playlist name
       const playlistMap = new Map<string, CSVRow[]>();
       records.forEach(record => {
+        const trackName = record["Track name"];
+        const artistName = record["Artist name"];
         const playlistName = record["Playlist name"];
-        if (!playlistName) return;
+        const albumName = record["Album"];
+        
+        // Skip rows that don't have required fields
+        if (!trackName || !artistName || !playlistName || !albumName) return;
         
         if (!playlistMap.has(playlistName)) {
           playlistMap.set(playlistName, []);
@@ -85,15 +93,17 @@ function ImportCSV() {
 
         for (const track of tracks) {
           processedCount++;
-          setProgress(`Searching ${processedCount}/${records.length}: ${track["Track name"]} by ${track["Artist name"]}`);
+          setProgress(`Searching ${processedCount}/${records.length}: ${track["Track name"]} in album ${track["Album"]} by ${track["Artist name"]}`);
 
           try {
             // Search for song using iTunes Search API
-            const searchTerm = `${track["Track name"]} ${track["Artist name"]}`;
-            const results = await searchURL(searchTerm, {
+            const searchTerm = `${track["Track name"]} ${track["Album"]}`;
+            const results = await safeSearch(searchTerm, {
+              country: "de",
               media: "music",
               entity: "song",
-              limit: 10
+              attribute: "songTerm",
+              limit: 25
             });
 
             // Find first musicTrack (not musicVideo)

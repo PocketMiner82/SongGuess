@@ -8,7 +8,16 @@ import {
   UnknownPlaylist,
   PlaylistsFileSchema
 } from "./schemas/RoomSharedSchemas";
-import {type Entities, lookup, search, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
+import {
+  type Entities,
+  lookup,
+  type Media,
+  type Options,
+  type ResultMusicTrack,
+  type Results,
+  type PlainObject,
+  type Response
+} from "itunes-store-api";
 import z from "zod";
 
 /**
@@ -128,9 +137,9 @@ async function lookupURL<M extends Media, E extends Entities[M]>(url: string, op
         results = [];
       }
     }
-} catch (e) {
-  results = [];
-}
+  } catch (e) {
+    results = [];
+  }
 
 return results;
 }
@@ -141,30 +150,78 @@ return results;
  * @param options Optional search options.
  * @returns Promise resolving to an array of results.
  */
-export async function searchURL<M extends Media, E extends Entities[M]>(term: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
+export async function safeSearch<M extends Media, E extends Entities[M]>(term: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
   let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
 
-try {
   try {
-    results = (await search(term, options)).results;
-  } catch {
-    // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
     try {
-      let newOptions = { ...options, magicnumber: Date.now() };
-      // @ts-ignore
-      results = (await search(term, newOptions)).results;
+      results = (await search(term, options)).results;
     } catch {
-      results = [];
+      // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
+      try {
+        let newOptions = { ...options, magicnumber: Date.now() };
+        // @ts-ignore
+        results = (await search(term, newOptions)).results;
+      } catch {
+        results = [];
+      }
     }
+  } catch (e) {
+    results = [];
   }
-} catch (e) {
-  results = [];
+
+  return results;
 }
 
-return results;
+const defaultOptions: Partial<Options> = {
+  country: "de"
 }
 
+async function search<M extends Media, E extends Entities[M]>(
+    search: string,
+    options: Partial<Options<M, E>> = {}
+): Promise<Response<M, E>> {
+  const resolvedOptions = { ...defaultOptions, ...options }
 
+  return await query<Response<M, E>>("search", {
+    ...resolvedOptions,
+    explicit: resolvedOptions.explicit ? "Yes" : "No",
+    term: search
+  })
+}
+
+const API = "https://itunes.apple.com"
+
+/**
+ * Query an endpoint from the iTunes Store API.
+ *
+ * @param endpoint - The API endpoint to query.
+ * @param parameters - An object of URL parameters.
+ */
+async function query<T = PlainObject>(
+    endpoint: string,
+    parameters: Record<string, boolean | number | string>
+): Promise<T> {
+  // Map through entries and manually encode keys and values
+  const queryString = Object.entries(parameters)
+      .map(([key, value]) => {
+        return `${encodeURIComponent(key).replace(/%20/g, "+")}=${encodeURIComponent(value).replace(/%20/g, "+")}`;
+      })
+      .join('&');
+
+  try {
+    const response = await fetch(`${API}/${endpoint}?${queryString}`);
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      // noinspection ExceptionCaughtLocallyJS
+      throw new Error(response.statusText);
+    }
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
 
 /**
  * Downloads content as a file with the specified filename.
