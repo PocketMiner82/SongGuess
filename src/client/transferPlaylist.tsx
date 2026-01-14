@@ -95,16 +95,17 @@ function ImportCSV() {
         };
 
         for (const track of tracks) {
-          processedCount++;
-
           // pause for one minute to avoid rate limits
           if (requestCount >= 20) {
+            const pCount = processedCount;
+            const recLen = records.length;
+
             await new Promise<void>(r => {
               let sleep = 61;
 
               const update = () => {
                 if (--sleep > 0) {
-                  setProgress(`Waiting for ${sleep} second(s) to avoid rate limiting.`);
+                  setProgress(`Processed ${pCount}/${recLen}. Waiting for ${sleep} second(s) to avoid rate limiting.`);
                   setTimeout(update, 1000);
                   return;
                 }
@@ -116,6 +117,7 @@ function ImportCSV() {
             requestCount = 0;
           }
 
+          processedCount++;
           setProgress(`Searching ${processedCount}/${records.length}: ${track["Track name"]} in album ${track["Album"]} by ${track["Artist name"]}`);
 
           try {
