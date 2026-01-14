@@ -1,3 +1,11 @@
+# [2.5.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.4.0...2.5.0-dev.1) (2026-01-14)
+
+
+### Features
+
+* add templated html file build based on partykit.json ([86788cf](https://github.com/PocketMiner82/SongGuess/commit/86788cf6216503e8d1de10b1785f3f120fbd5471))
+* **transferPlaylist:** add page to allow transferring playlist from other service to SongGuess ([b5793d6](https://github.com/PocketMiner82/SongGuess/commit/b5793d6876be04cfc618c10b9d5112dd247e0609))
+
 # [2.4.0](https://github.com/PocketMiner82/SongGuess/compare/2.3.0...2.4.0) (2026-01-13)
 
 
