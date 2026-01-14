@@ -130,7 +130,12 @@ function App() {
       <TopBar />
       <div className="flex items-center justify-center flex-1 p-4">
         <div className="m-auto justify-items-center text-center max-w-full">
-          <ErrorLabel error={error} />
+          <Button
+              onClick={() => window.location.href = "/transferPlaylist"}
+              className="py-2 px-4 mb-4"
+          >
+            Transfer Playlist
+          </Button>
 
           <div className="mb-8">
             <Button
@@ -156,6 +161,8 @@ function App() {
               </div>
             )}
           </div>
+
+          <ErrorLabel error={error} />
 
           <Button
             onClick={buttonClick}

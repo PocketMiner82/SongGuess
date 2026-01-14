@@ -3,18 +3,18 @@ import { useState, useCallback } from "react";
 import {
   RoomContext, useControllerContext, useRoomController, useRoomControllerListener,
   useRoomControllerMessageTypeListener
-} from "./RoomController";
-import type { ServerMessage } from "../../schemas/RoomMessageSchemas";
-import { Lobby } from "./components/Lobby";
-import {Ingame} from "./components/Ingame";
-import {Results} from "./components/Results";
-import { BottomBar } from "./components/BottomBar";
-import { TopBar } from "../components/TopBar";
-import { Button } from "../components/Button";
-import { Audio } from "./components/Audio";
+} from "./room/RoomController";
+import type { ServerMessage } from "../schemas/RoomMessageSchemas";
+import { Lobby } from "./room/components/Lobby";
+import {Ingame} from "./room/components/Ingame";
+import {Results} from "./room/components/Results";
+import { BottomBar } from "./room/components/BottomBar";
+import { TopBar } from "./components/TopBar";
+import { Button } from "./components/Button";
+import { Audio } from "./room/components/Audio";
 import {CookieConsent} from "react-cookie-consent";
 import {CookiesProvider, useCookies} from "react-cookie";
-import type CookieProps from "../../types/CookieProps";
+import type CookieProps from "../types/CookieProps";
 
 
 /**
@@ -54,7 +54,6 @@ function Room() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "pong");
-
 
   // if port is set, this is probably a dev environment: prevent accidental reloads
   if (!window.location.port) window.onbeforeunload = () => true;

@@ -1262,8 +1262,10 @@ export default class Server implements Party.Server {
     let url: URL = new URL(req.url);
 
     // if room url is requested without HTML extension, add it
-    if (url.pathname === "/room") {
-      return lobby.assets.fetch("/room.html" + url.search);
+    if (!url.pathname.endsWith(".html")) {
+      let resp = await lobby.assets.fetch(`${url.pathname}.html${url.search}`);
+      if (resp)
+        return resp;
     }
 
     // redirect to main page, if on another one

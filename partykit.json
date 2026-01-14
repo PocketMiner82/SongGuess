@@ -9,7 +9,8 @@
     "build": {
       "entry": [
         "src/client/index.tsx",
-        "src/client/room/room.tsx"
+        "src/client/room.tsx",
+        "src/client/transferPlaylist.tsx"
       ]
     }
   },
