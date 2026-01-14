@@ -1,3 +1,10 @@
+# [2.5.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.3...2.5.0-dev.4) (2026-01-14)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** add are you sure? close dialog when importing ([61473ea](https://github.com/PocketMiner82/SongGuess/commit/61473ea72395b777f907423a1db475dbf5bf14b9))
+
 # [2.5.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.2...2.5.0-dev.3) (2026-01-14)
 
 
