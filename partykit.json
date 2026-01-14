@@ -3,7 +3,7 @@
   "name": "songguess",
   "main": "src/server/server.ts",
   "compatibilityDate": "2025-11-22",
-  "compatibilityFlags": ["global_fetch_private_origin"],
+  "compatibilityFlags": ["global_fetch_private_origin", "nodejs_compat"],
   "serve": {
     "path": "public",
     "build": {

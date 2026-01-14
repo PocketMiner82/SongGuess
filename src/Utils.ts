@@ -8,7 +8,7 @@ import {
   UnknownPlaylist,
   PlaylistsFileSchema
 } from "./schemas/RoomSharedSchemas";
-import {type Entities, lookup, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
+import {type Entities, lookup, search, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
 import z from "zod";
 
 /**
@@ -115,15 +115,44 @@ async function fetchPlaylistInfo(url: string): Promise<Playlist> {
 async function lookupURL<M extends Media, E extends Entities[M]>(url: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
   let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
 
+  try {
+    try {
+      results = (await lookup("url", url, options)).results;
+    } catch {
+      // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
+      try {
+        let newOptions = { ...options, magicnumber: Date.now() };
+        // @ts-ignore
+        results = (await lookup("url", url, newOptions)).results;
+      } catch {
+        results = [];
+      }
+    }
+} catch (e) {
+  results = [];
+}
+
+return results;
+}
+
+/**
+ * Safely searches using the iTunes Store API. Also handles potential caching issues.
+ * @param term The search term.
+ * @param options Optional search options.
+ * @returns Promise resolving to an array of results.
+ */
+export async function searchURL<M extends Media, E extends Entities[M]>(term: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
+  let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
+
 try {
   try {
-    results = (await lookup("url", url, options)).results;
+    results = (await search(term, options)).results;
   } catch {
     // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
     try {
       let newOptions = { ...options, magicnumber: Date.now() };
       // @ts-ignore
-      results = (await lookup("url", url, newOptions)).results;
+      results = (await search(term, newOptions)).results;
     } catch {
       results = [];
     }
@@ -134,6 +163,8 @@ try {
 
 return results;
 }
+
+
 
 /**
  * Downloads content as a file with the specified filename.
