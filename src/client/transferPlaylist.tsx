@@ -82,6 +82,7 @@ function ImportCSV() {
       // Create playlists and search for songs
       const playlists: Playlist[] = [];
       let processedCount = 0;
+      const notFoundSongs: string[] = [];
 
       for (const [playlistName, tracks] of playlistMap) {
         const playlist: Playlist = {
@@ -97,34 +98,47 @@ function ImportCSV() {
 
           try {
             // Search for song using iTunes Search API
-            const searchTerm = `${track["Track name"]} ${track["Album"]}`;
-            const results = await safeSearch(searchTerm, {
-              country: "de",
-              media: "music",
-              entity: "song",
-              attribute: "songTerm",
-              limit: 25
-            });
+            let searchTerm = `${track["Track name"]} ${track["Album"]}`;
+            const searchTermArtist = `${track["Track name"]} ${track["Artist name"]}`;
+            let tryAgain = false;
 
-            // Find first musicTrack (not musicVideo)
-            const musicTrack = results.find((result): result is ResultMusicTrack => 
-              result.kind === "song" && result.wrapperType === "track"
-            );
+            do {
+              tryAgain = false;
+              const results = await safeSearch(searchTerm, {
+                country: "de",
+                media: "music",
+                entity: "song",
+                attribute: "songTerm",
+                limit: 10
+              });
 
-            if (musicTrack) {
-              const song: Song = {
-                name: musicTrack.trackName,
-                audioURL: musicTrack.previewUrl,
-                artist: musicTrack.artistName,
-                hrefURL: musicTrack.trackViewUrl,
-                cover: musicTrack.artworkUrl100.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
-              };
-              playlist.songs.push(song);
-            } else {
-              console.warn(`No music track found for: ${track["Track name"]} by ${track["Artist name"]}`);
-            }
+              // Find first musicTrack (not musicVideo)
+              const musicTrack = results.find((result): result is ResultMusicTrack =>
+                  result.kind === "song" && result.wrapperType === "track"
+              );
+
+              if (musicTrack) {
+                const song: Song = {
+                  name: musicTrack.trackName,
+                  audioURL: musicTrack.previewUrl,
+                  artist: musicTrack.artistName,
+                  hrefURL: musicTrack.trackViewUrl,
+                  cover: musicTrack.artworkUrl100.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
+                };
+                playlist.songs.push(song);
+              } else if (searchTerm !== searchTermArtist) {
+                tryAgain = true;
+                searchTerm = searchTermArtist;
+              } else {
+                const notFoundSong = `${track["Track name"]} by ${track["Artist name"]}`;
+                notFoundSongs.push(notFoundSong);
+                console.warn(`No music track found for: ${notFoundSong}`);
+              }
+            } while (tryAgain);
           } catch (error) {
-            console.error(`Error searching for ${track["Track name"]}:`, error);
+            const notFoundSong = `${track["Track name"]} by ${track["Artist name"]}`;
+            notFoundSongs.push(notFoundSong);
+            console.error(`Error searching for ${notFoundSong}:`, error);
           }
         }
 
@@ -154,14 +168,15 @@ function ImportCSV() {
       downloadFile(content, filename);
 
       setStatus("success");
-      setProgress(`Successfully imported ${playlists.length} playlist(s) with ${playlists.reduce((sum, p) => sum + p.songs.length, 0)} songs!`);
-
-      // Reset status after 3 seconds
-      setTimeout(() => {
-        setStatus("idle");
-        setProgress("");
-      }, 3000);
-
+      const totalSongs = playlists.reduce((sum, p) => sum + p.songs.length, 0);
+      let successMessage = `Successfully imported ${playlists.length} playlist(s) with ${totalSongs} song${totalSongs !== 1 ? "s" : ""}!`;
+      
+      if (notFoundSongs.length > 0) {
+        const notFoundList = notFoundSongs.join("\n• ");
+        setError(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
+      }
+      
+      setProgress(successMessage);
     } catch (error) {
       console.error("Error importing CSV:", error);
       setError("Failed to import CSV file. Please check the file format and try again.");
@@ -175,8 +190,6 @@ function ImportCSV() {
 
   return (
     <div>
-      <ErrorLabel error={error} />
-      
       <input
         type="file"
         accept=".csv"
@@ -192,6 +205,8 @@ function ImportCSV() {
         <span className="material-symbols-outlined mr-2">upload</span>
         Import CSV
       </Button>
+
+      <ErrorLabel error={error} />
 
       {status !== "idle" && (
         <div className={`text-sm mt-2 items-center justify-center ${

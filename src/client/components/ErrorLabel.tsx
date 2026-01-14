@@ -21,7 +21,7 @@ export function ErrorLabel({ error }: ErrorLabelProps) {
       role="alert"
     >
       <span className="material-icons mr-1">error</span>
-      <div>
+      <div className="whitespace-pre-line">
         <span className="font-medium">{error}</span>
       </div>
     </div>
