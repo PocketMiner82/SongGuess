@@ -15,6 +15,7 @@ interface CSVRow {
   "Artist name": string;
   "Playlist name": string;
   "Album": string;
+  "ISRC": string;
 }
 
 /**
@@ -130,7 +131,8 @@ function ImportCSV() {
               tryAgain = false;
               requestCount++;
               const results = await safeSearch(searchTerm, {
-                country: "de",
+                // @ts-ignore
+                country: track["ISRC"].slice(0,2).toLowerCase(),
                 media: "music",
                 entity: "song",
                 attribute: "songTerm",
