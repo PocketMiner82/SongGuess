@@ -1,3 +1,23 @@
+# [2.5.0](https://github.com/PocketMiner82/SongGuess/compare/2.4.0...2.5.0) (2026-01-15)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** add are you sure? close dialog when importing ([61473ea](https://github.com/PocketMiner82/SongGuess/commit/61473ea72395b777f907423a1db475dbf5bf14b9))
+* **transferPlaylist:** add delay to avoid rate limiting after 20 requests ([e33cafd](https://github.com/PocketMiner82/SongGuess/commit/e33cafd17e8a207f903cc89b08b7b732b1d6718e))
+* **transferPlaylist:** add ISRC based country tag to make matching better ([30354d3](https://github.com/PocketMiner82/SongGuess/commit/30354d33186507278d3f306da6ac3b9fd43f9e96))
+* **transferPlaylist:** proxy song link API ([7a6d1b4](https://github.com/PocketMiner82/SongGuess/commit/7a6d1b411464576736cbb1edfd61dcd76625f6b7))
+* **transferPlaylist:** show already processed tracks on wait ([b1971c7](https://github.com/PocketMiner82/SongGuess/commit/b1971c78feea804c9d87acb4735ae11405e33a2b))
+* **transferPlaylist:** test with custom header ([dc4ca7c](https://github.com/PocketMiner82/SongGuess/commit/dc4ca7cc40d1fad65452c0bdfd956667703ff2c8))
+* **transferPlaylist:** use apple music api instead of songlink ([36704fe](https://github.com/PocketMiner82/SongGuess/commit/36704feb22d9f6ee32b83003baa2a55d82167138))
+
+
+### Features
+
+* add templated html file build based on partykit.json ([86788cf](https://github.com/PocketMiner82/SongGuess/commit/86788cf6216503e8d1de10b1785f3f120fbd5471))
+* **transferPlaylist:** add ISRC based lookup using song.link API ([7d36f0a](https://github.com/PocketMiner82/SongGuess/commit/7d36f0aaf06fe76fe5e510957bf43e174c68e356))
+* **transferPlaylist:** add page to allow transferring playlist from other service to SongGuess ([b5793d6](https://github.com/PocketMiner82/SongGuess/commit/b5793d6876be04cfc618c10b9d5112dd247e0609))
+
 # [2.5.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.7...2.5.0-dev.8) (2026-01-15)
 
 
