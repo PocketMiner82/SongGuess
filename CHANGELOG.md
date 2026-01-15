@@ -1,3 +1,10 @@
+# [2.5.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.7...2.5.0-dev.8) (2026-01-15)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** use apple music api instead of songlink ([36704fe](https://github.com/PocketMiner82/SongGuess/commit/36704feb22d9f6ee32b83003baa2a55d82167138))
+
 # [2.5.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.6...2.5.0-dev.7) (2026-01-15)
 
 

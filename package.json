@@ -1,6 +1,6 @@
 {
   "name": "songguess",
-  "version": "2.5.0-dev.7",
+  "version": "2.5.0-dev.8",
   "type": "module",
   "private": true,
   "scripts": {
