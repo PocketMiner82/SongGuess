@@ -8,8 +8,18 @@ import {
   UnknownPlaylist,
   PlaylistsFileSchema
 } from "./schemas/RoomSharedSchemas";
-import {type Entities, lookup, type Media, type Options, type ResultMusicTrack, type Results} from "itunes-store-api";
+import {
+  type Entities,
+  lookup,
+  type Media,
+  type Options,
+  type ResultMusicTrack,
+  type Results,
+  type PlainObject,
+  type Response, type Lookup
+} from "itunes-store-api";
 import z from "zod";
+import React from "react";
 
 /**
  * Shuffles an array in place using the Fisher-Yates algorithm.
@@ -67,7 +77,7 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
 
   // server did not add tracks, we need to ask apple ourselves
   if (playlist.songs.length === 0) {
-    let results: ResultMusicTrack[] = await lookupURL(targetLookupUrl, {
+    let results: ResultMusicTrack[] = await safeLookup("url", targetLookupUrl, {
       entity: "song",
       limit: 50
     });
@@ -80,7 +90,7 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
       audioURL: r.previewUrl,
       artist: r.artistName,
       hrefURL: r.trackViewUrl,
-      cover: r.artworkUrl100.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
+      cover: largerCover(r.artworkUrl100)
     } satisfies Song));
   }
 
@@ -89,6 +99,14 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
       ? ` | ${playlist.songs.length} song${playlist.songs.length !== 1 ? "s" : ""}` : "");
 
   return playlist;
+}
+
+/**
+ * Replaces the cover of a {@link Song} with a larger version.
+ * @param url The url100 to search and replace the 100x100 dimensions in
+ */
+export function largerCover(url: string) {
+  return url.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
 }
 
 /**
@@ -107,32 +125,163 @@ async function fetchPlaylistInfo(url: string): Promise<Playlist> {
 }
 
 /**
- * Safely looks up a URL using the iTunes Store API. Also handles potential caching issues.
- * @param url The URL to look up.
- * @param options Optional lookup options.
- * @returns Promise resolving to an array of results.
+ * Returns the first {@link Song} from a given results list returned by the iTunes Search API.
+ * @param results the list of {@link ResultMusicTrack} to find and convert the first song
+ * @returns a song with replaced bigger cover
  */
-async function lookupURL<M extends Media, E extends Entities[M]>(url: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
-  let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
+export function getFirstSong(results: ResultMusicTrack[]): Song|null {
+  // Find first musicTrack (not musicVideo)
+  const track = results.find((result): result is ResultMusicTrack =>
+      result.kind === "song" && result.wrapperType === "track"
+  );
 
-try {
-  try {
-    results = (await lookup("url", url, options)).results;
-  } catch {
-    // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
-    try {
-      let newOptions = { ...options, magicnumber: Date.now() };
-      // @ts-ignore
-      results = (await lookup("url", url, newOptions)).results;
-    } catch {
-      results = [];
-    }
-  }
-} catch (e) {
-  results = [];
+  if (!track) return null;
+
+  return {
+    name: track.trackName,
+    audioURL: track.previewUrl,
+    artist: track.artistName,
+    hrefURL: track.trackViewUrl,
+    cover: largerCover(track.artworkUrl100)
+  };
 }
 
-return results;
+/**
+ * Fetches Apple Music API to convert an isrc to an iTunes ID.
+ * @param isrc The ISRC to lookup.
+ * @returns the iTunes ID or null if not found.
+ */
+export async function fetchSongByISRC(isrc: string): Promise<number|null> {
+  try {
+    let page = await fetch("/parties/main/songByISRC?isrc=" + encodeURIComponent(isrc));
+    let json: {id: number|null} = await page.json();
+    return json.id;
+  } catch (e) {
+    console.error("Error fetching from api.song.link:", e);
+    return null;
+  }
+}
+
+/**
+ * Safely looks up an entry using the iTunes Store API. Also handles potential caching issues.
+ * @see {@link lookup}
+ * @returns Promise resolving to an array of results.
+ */
+export async function safeLookup<M extends Media, E extends Entities[M]>(
+    type: Lookup,
+    value: number,
+    options?: Partial<Options<M, E>>
+): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]>
+export async function safeLookup<M extends Media, E extends Entities[M]>(
+    type: "url",
+    value: string,
+    options?: Partial<Options<M, E>>
+): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]>
+export async function safeLookup<M extends Media, E extends Entities[M]>(
+    type: Lookup | "url",
+    value: number | string,
+    options: Partial<Options<M, E>> = {}
+): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
+  let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
+
+  try {
+    try {
+      // @ts-ignore
+      results = (await lookup(type, value, options)).results;
+    } catch {
+      // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
+      try {
+        let newOptions = { ...options, magicnumber: Date.now() };
+        // @ts-ignore
+        results = (await lookup(type, value, newOptions)).results;
+      } catch {
+        results = [];
+      }
+    }
+  } catch (e) {
+    results = [];
+  }
+
+  return results;
+}
+
+/**
+ * Safely searches using the iTunes Store API. Also handles potential caching issues.
+ * @param term The search term.
+ * @param options Optional search options.
+ * @returns Promise resolving to an array of results.
+ */
+export async function safeSearch<M extends Media, E extends Entities[M]>(term: string, options: Partial<Options<M, E>> = {}): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
+  let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
+
+  try {
+    try {
+      results = (await search(term, options)).results;
+    } catch {
+      // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
+      try {
+        let newOptions = { ...options, magicnumber: Date.now() };
+        // @ts-ignore
+        results = (await search(term, newOptions)).results;
+      } catch {
+        results = [];
+      }
+    }
+  } catch (e) {
+    results = [];
+  }
+
+  return results;
+}
+
+const defaultOptions: Partial<Options> = {
+  country: "de"
+}
+
+async function search<M extends Media, E extends Entities[M]>(
+    search: string,
+    options: Partial<Options<M, E>> = {}
+): Promise<Response<M, E>> {
+  const resolvedOptions = { ...defaultOptions, ...options }
+
+  return await query<Response<M, E>>("search", {
+    ...resolvedOptions,
+    explicit: resolvedOptions.explicit ? "Yes" : "No",
+    term: search
+  })
+}
+
+const API = "https://itunes.apple.com"
+
+/**
+ * Query an endpoint from the iTunes Store API.
+ *
+ * @param endpoint - The API endpoint to query.
+ * @param parameters - An object of URL parameters.
+ */
+async function query<T = PlainObject>(
+    endpoint: string,
+    parameters: Record<string, boolean | number | string>
+): Promise<T> {
+  // Map through entries and manually encode keys and values
+  const queryString = Object.entries(parameters)
+      .map(([key, value]) => {
+        return `${encodeURIComponent(key).replace(/%20/g, "+")}=${encodeURIComponent(value).replace(/%20/g, "+")}`;
+      })
+      .join('&');
+
+  try {
+    const response = await fetch(`${API}/${endpoint}?${queryString}`);
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      // noinspection ExceptionCaughtLocallyJS
+      throw new Error(response.statusText);
+    }
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }
 
 /**

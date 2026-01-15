@@ -1,0 +1,2 @@
+# Ignore all html files as they are generated on each build
+*.html

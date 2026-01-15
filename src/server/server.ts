@@ -43,6 +43,14 @@ import {
   ROUND_START_NEXT, TIME_PER_QUESTION
 } from "./ServerConstants";
 import { version } from "../../package.json";
+import {
+  AppleMusicConfig,
+  AuthType,
+  getAuthenticatedAxios,
+  Region,
+  SongsEndpointTypes
+} from "@syncfm/applemusic-api";
+import type {AxiosInstance} from "axios";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -1200,6 +1208,7 @@ export default class Server implements Party.Server {
   // ROOM HTTP EVENTS
   //
 
+  axiosClient: AxiosInstance|null = null;
   /**
    * Handles HTTP requests to the room endpoint.
    *
@@ -1217,10 +1226,24 @@ export default class Server implements Party.Server {
       // fetch playlist info
       let playlistURL = url.searchParams.get("url");
       if (!playlistURL) {
-        return new Response("Missing url parameter.", { status: 400 });
+        return new Response("Missing url parameter.", {status: 400});
       }
 
       return Response.json(await Server.getPlaylistInfo(playlistURL));
+    } else if(url.pathname.endsWith("/songByISRC")) {
+      let isrc = url.searchParams.get("isrc");
+      if (!isrc) {
+        return new Response("Missing isrc parameter.", {status: 400});
+      }
+
+      if (!this.axiosClient) {
+        this.axiosClient = await getAuthenticatedAxios(new AppleMusicConfig({
+          region: Region.US,
+          authType: AuthType.Scraped
+        }));
+      }
+
+      return Server.songByISRCProxy(this.axiosClient, isrc);
     // respond with JSON containing the current online count and if the room is valid
     } else if (req.method === "GET") {
       let json: RoomInfoResponse = {
@@ -1262,8 +1285,10 @@ export default class Server implements Party.Server {
     let url: URL = new URL(req.url);
 
     // if room url is requested without HTML extension, add it
-    if (url.pathname === "/room") {
-      return lobby.assets.fetch("/room.html" + url.search);
+    if (!url.pathname.endsWith(".html")) {
+      let resp = await lobby.assets.fetch(`${url.pathname}.html${url.search}`);
+      if (resp)
+        return resp;
     }
 
     // redirect to main page, if on another one
@@ -1273,6 +1298,31 @@ export default class Server implements Party.Server {
   //
   // STATIC FUNCTIONS
   //
+
+  /**
+   * Simple proxy to fetch data from Apple Music API.
+   * @param client the axios client from the apple music api library
+   * @param isrc the ISRC to look for.
+   * @returns json with id key set to the iTunes ID or null if not found.
+   */
+  private static async songByISRCProxy(client: AxiosInstance, isrc: string): Promise<Response> {
+    try {
+      let resp = await client.get("https://amp-api-edge.music.apple.com/v1/catalog/us/songs?filter[isrc]=" + encodeURIComponent(isrc));
+
+      if (resp.data) {
+        let data = resp.data as SongsEndpointTypes.SongsResponse;
+
+        if (data.data) {
+          for (let s of data.data) {
+            if (s.id) {
+              return Response.json({id: parseInt(s.id)});
+            }
+          }
+        }
+      }
+    } catch { }
+    return Response.json({id: null});
+  }
 
   /**
    * Fetches playlist information from an Apple Music URL.
