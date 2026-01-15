@@ -1,3 +1,15 @@
+# [2.5.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.4...2.5.0-dev.5) (2026-01-15)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** add ISRC based country tag to make matching better ([30354d3](https://github.com/PocketMiner82/SongGuess/commit/30354d33186507278d3f306da6ac3b9fd43f9e96))
+
+
+### Features
+
+* **transferPlaylist:** add ISRC based lookup using song.link API ([7d36f0a](https://github.com/PocketMiner82/SongGuess/commit/7d36f0aaf06fe76fe5e510957bf43e174c68e356))
+
 # [2.5.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.3...2.5.0-dev.4) (2026-01-14)
 
 
