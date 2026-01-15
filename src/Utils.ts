@@ -153,7 +153,7 @@ export function getFirstSong(results: ResultMusicTrack[]): Song|null {
  */
 export async function fetchSongLink(isrc: string): Promise<number|null> {
   try {
-    let page = await fetch("https://api.song.link/v1-alpha.1/links?type=song&platform=isrc&id=" + encodeURIComponent(isrc));
+    let page = await fetch("/parties/main/songLinkProxy?isrc=" + encodeURIComponent(isrc));
     let json = await page.json();
 
     let uid:string|undefined = json.linksByPlatform?.itunes?.entityUniqueId;

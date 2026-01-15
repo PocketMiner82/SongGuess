@@ -1217,10 +1217,17 @@ export default class Server implements Party.Server {
       // fetch playlist info
       let playlistURL = url.searchParams.get("url");
       if (!playlistURL) {
-        return new Response("Missing url parameter.", { status: 400 });
+        return new Response("Missing url parameter.", {status: 400});
       }
 
       return Response.json(await Server.getPlaylistInfo(playlistURL));
+    } else if(url.pathname.endsWith("/songLinkProxy")) {
+      let isrc = url.searchParams.get("isrc");
+      if (!isrc) {
+        return new Response("Missing isrc parameter.", {status: 400});
+      }
+
+      return Server.songLinkProxy(isrc);
     // respond with JSON containing the current online count and if the room is valid
     } else if (req.method === "GET") {
       let json: RoomInfoResponse = {
@@ -1275,6 +1282,14 @@ export default class Server implements Party.Server {
   //
   // STATIC FUNCTIONS
   //
+
+  /**
+   * Simple proxy to fetch data from song link.
+   * @param isrc the ISRC to look for.
+   */
+  private static async songLinkProxy(isrc: string): Promise<Response> {
+    return fetch("https://api.song.link/v1-alpha.1/links?type=song&platform=isrc&id=" + encodeURIComponent(isrc));
+  }
 
   /**
    * Fetches playlist information from an Apple Music URL.
