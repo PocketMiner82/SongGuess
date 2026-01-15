@@ -1,3 +1,10 @@
+# [2.5.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.6...2.5.0-dev.7) (2026-01-15)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** test with custom header ([dc4ca7c](https://github.com/PocketMiner82/SongGuess/commit/dc4ca7cc40d1fad65452c0bdfd956667703ff2c8))
+
 # [2.5.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.5...2.5.0-dev.6) (2026-01-15)
 
 
