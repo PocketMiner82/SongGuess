@@ -4,10 +4,14 @@ import {CookieConsent} from "react-cookie-consent";
 import {TopBar} from "./components/TopBar";
 import {Button} from "./components/Button";
 import {ErrorLabel} from "./components/ErrorLabel";
-import {downloadFile} from "../Utils";
-import {safeSearch} from "../Utils";
+import {
+  getFirstSong,
+  downloadFile,
+  fetchSongLink,
+  safeLookup,
+  safeSearch
+} from "../Utils";
 import Papa from "papaparse";
-import type { ResultMusicTrack } from "itunes-store-api";
 import type {Playlist, PlaylistsFile, Song} from "../schemas/RoomSharedSchemas";
 
 interface CSVRow {
@@ -19,6 +23,66 @@ interface CSVRow {
 }
 
 /**
+ * Finds a song by its ISRC (International Standard Recording Code).
+ * @param isrc - The ISRC to search for
+ * @returns Promise<Song | null> - The found song or null if not found
+ */
+async function findByISRC(isrc: string): Promise<Song | null> {
+  try {
+    const iTunesID = await fetchSongLink(isrc);
+
+    if (iTunesID !== null) {
+      let results = await safeLookup("id", iTunesID, {
+        entity: "song",
+        limit: 5
+      });
+
+      const song = getFirstSong(results);
+
+      if (song) {
+        return song;
+      } else {
+        console.info(`iTunes didn't return any valid results for ID ${iTunesID}, retrying with search...`);
+      }
+    } else {
+      console.info(`Could not find iTunes ID for ISRC ${isrc}, retrying with search...`);
+    }
+  } catch (error) {
+    console.info(`Failed searching for ISRC ${isrc}:`, error);
+    console.info("Retrying with search...");
+  }
+  return null;
+}
+
+/**
+ * Finds a song by searching with a term (typically artist + song name).
+ * @param term - The search term to use for finding the song
+ * @returns Promise<Song | null> - The found song or null if not found
+ */
+async function findBySearch(term: string): Promise<Song | null> {
+  try {
+      const results = await safeSearch(term, {
+        country: "de",
+        media: "music",
+        entity: "song",
+        attribute: "songTerm",
+        limit: 10
+      });
+
+      const song = getFirstSong(results);
+
+      if (song) {
+        return song;
+      } else {
+        console.warn(`No music track found for ${term}`);
+      }
+  } catch (error) {
+    console.warn(`Failed searching for ${term}:`, error);
+  }
+  return null;
+}
+
+/**
  * Button component that imports playlists from a CSV file.
  */
 function ImportCSV() { 
@@ -26,6 +90,10 @@ function ImportCSV() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [progress, setProgress] = useState<string>("");
 
+  /**
+   * Handles the CSV file import process.
+   * @param event - The file input change event
+   */
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -119,54 +187,23 @@ function ImportCSV() {
           }
 
           processedCount++;
-          setProgress(`Searching ${processedCount}/${records.length}: ${track["Track name"]} in album ${track["Album"]} by ${track["Artist name"]}`);
+          setProgress(`Searching ${processedCount}/${records.length}: ${track["Track name"]} by ${track["Artist name"]}`);
+          requestCount++;
 
-          try {
-            // Search for song using iTunes Search API
-            let searchTerm = `${track["Track name"]} ${track["Album"]}`;
-            const searchTermArtist = `${track["Track name"]} ${track["Artist name"]}`;
-            let tryAgain = false;
+          // try finding song by isrc and then falling back to song title based search
+          let song = await findByISRC(track["ISRC"]);
+          if (!song) {
+            song = await findBySearch(`${track["Track name"]} ${track["Artist name"]}`);
+          }
 
-            do {
-              tryAgain = false;
-              requestCount++;
-              const results = await safeSearch(searchTerm, {
-                // @ts-ignore
-                country: track["ISRC"].slice(0,2).toLowerCase(),
-                media: "music",
-                entity: "song",
-                attribute: "songTerm",
-                limit: 10
-              });
-
-              // Find first musicTrack (not musicVideo)
-              const musicTrack = results.find((result): result is ResultMusicTrack =>
-                  result.kind === "song" && result.wrapperType === "track"
-              );
-
-              if (musicTrack) {
-                const song: Song = {
-                  name: musicTrack.trackName,
-                  audioURL: musicTrack.previewUrl,
-                  artist: musicTrack.artistName,
-                  hrefURL: musicTrack.trackViewUrl,
-                  cover: musicTrack.artworkUrl100.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
-                };
-                playlist.songs.push(song);
-              } else if (searchTerm !== searchTermArtist) {
-                tryAgain = true;
-                searchTerm = searchTermArtist;
-              } else {
-                const notFoundSong = `${track["Track name"]} by ${track["Artist name"]}`;
-                notFoundSongs.push(notFoundSong);
-                console.warn(`No music track found for: ${notFoundSong}`);
-              }
-            } while (tryAgain);
-          } catch (error) {
+          // none of the methods found the song
+          if (!song) {
             const notFoundSong = `${track["Track name"]} by ${track["Artist name"]}`;
             notFoundSongs.push(notFoundSong);
-            console.error(`Error searching for ${notFoundSong}:`, error);
+            continue;
           }
+
+          playlist.songs.push(song);
         }
 
         if (playlist.songs.length > 0) {
@@ -191,7 +228,7 @@ function ImportCSV() {
 
       // Download the file
       const content = JSON.stringify(playlistsFile, null, 2);
-      const filename = `SongGuessPlaylists_Imported_${new Date().toISOString().slice(0, 10)}.sgjson`;
+      const filename = `SongGuessPlaylists_Imported_${new Date().toISOString()}.sgjson`;
       downloadFile(content, filename);
 
       setStatus("success");
@@ -252,6 +289,10 @@ function ImportCSV() {
   );
 }
 
+/**
+ * Main application component for transferring playlists to SongGuess.
+ * Renders the UI with instructions and CSV import functionality.
+ */
 function App() {
 
   return (
@@ -340,11 +381,19 @@ function App() {
               </div>
 
               <div className="bg-card-bg rounded-lg p-4">
-                <h3 className="font-semibold mb-2">Important Notes:</h3>
+                <h3 className="font-semibold mb-2">Notes:</h3>
                 <ul className="text-sm text-disabled-text space-y-1">
                   <li>• The CSV file should contain information about song title and artist</li>
                   <li>• Make sure the CSV is properly formatted with the correct headers</li>
                   <li>• Large playlists may take some time to process especially due to rate limiting of the iTunes Search API</li>
+                  <li className="mt-4 text-center"><div>Powered by <a
+                      href="https://song.link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                  >
+                    SongLink
+                  </a></div></li>
                 </ul>
               </div>
             </div>
