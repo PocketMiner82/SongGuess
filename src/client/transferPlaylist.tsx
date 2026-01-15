@@ -7,7 +7,7 @@ import {ErrorLabel} from "./components/ErrorLabel";
 import {
   getFirstSong,
   downloadFile,
-  fetchSongLink,
+  fetchSongByISRC,
   safeLookup,
   safeSearch
 } from "../Utils";
@@ -29,7 +29,7 @@ interface CSVRow {
  */
 async function findByISRC(isrc: string): Promise<Song | null> {
   try {
-    const iTunesID = await fetchSongLink(isrc);
+    const iTunesID = await fetchSongByISRC(isrc);
 
     if (iTunesID !== null) {
       let results = await safeLookup("id", iTunesID, {
@@ -386,14 +386,6 @@ function App() {
                   <li>• The CSV file should contain information about song title and artist</li>
                   <li>• Make sure the CSV is properly formatted with the correct headers</li>
                   <li>• Large playlists may take some time to process especially due to rate limiting of the iTunes Search API</li>
-                  <li className="mt-4 text-center"><div>Powered by <a
-                      href="https://song.link"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                  >
-                    SongLink
-                  </a></div></li>
                 </ul>
               </div>
             </div>

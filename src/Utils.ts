@@ -147,28 +147,15 @@ export function getFirstSong(results: ResultMusicTrack[]): Song|null {
 }
 
 /**
- * Fetches api.song.link to convert an isrc to an iTunes ID.
+ * Fetches Apple Music API to convert an isrc to an iTunes ID.
  * @param isrc The ISRC to lookup.
  * @returns the iTunes ID or null if not found.
  */
-export async function fetchSongLink(isrc: string): Promise<number|null> {
+export async function fetchSongByISRC(isrc: string): Promise<number|null> {
   try {
-    let page = await fetch("/parties/main/songLinkProxy?isrc=" + encodeURIComponent(isrc), {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Referer': 'https://www.google.com/'
-      }
-    });
-    let json = await page.json();
-
-    let uid:string|undefined = json.linksByPlatform?.itunes?.entityUniqueId;
-    let iTunesID = uid?.split("::")[1];
-
-    return iTunesID ? parseFloat(iTunesID) : null;
+    let page = await fetch("/parties/main/songByISRC?isrc=" + encodeURIComponent(isrc));
+    let json: {id: number|null} = await page.json();
+    return json.id;
   } catch (e) {
     console.error("Error fetching from api.song.link:", e);
     return null;
