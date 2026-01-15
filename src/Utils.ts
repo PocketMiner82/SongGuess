@@ -153,7 +153,16 @@ export function getFirstSong(results: ResultMusicTrack[]): Song|null {
  */
 export async function fetchSongLink(isrc: string): Promise<number|null> {
   try {
-    let page = await fetch("/parties/main/songLinkProxy?isrc=" + encodeURIComponent(isrc));
+    let page = await fetch("/parties/main/songLinkProxy?isrc=" + encodeURIComponent(isrc), {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Referer': 'https://www.google.com/'
+      }
+    });
     let json = await page.json();
 
     let uid:string|undefined = json.linksByPlatform?.itunes?.entityUniqueId;
