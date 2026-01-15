@@ -1,3 +1,10 @@
+# [2.5.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.5...2.5.0-dev.6) (2026-01-15)
+
+
+### Bug Fixes
+
+* **transferPlaylist:** proxy song link API ([7a6d1b4](https://github.com/PocketMiner82/SongGuess/commit/7a6d1b411464576736cbb1edfd61dcd76625f6b7))
+
 # [2.5.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.5.0-dev.4...2.5.0-dev.5) (2026-01-15)
 
 
