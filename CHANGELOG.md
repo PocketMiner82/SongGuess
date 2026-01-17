@@ -1,3 +1,10 @@
+# [2.6.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.5.0...2.6.0-dev.1) (2026-01-17)
+
+
+### Features
+
+* **transferPlaylists:** use Date.now() based sleep when avoiding rate limits ([0055843](https://github.com/PocketMiner82/SongGuess/commit/0055843ddf7861c9d26cc0727510f4dd2bd7e0ca))
+
 # [2.5.0](https://github.com/PocketMiner82/SongGuess/compare/2.4.0...2.5.0) (2026-01-15)
 
 
