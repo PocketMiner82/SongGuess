@@ -43,12 +43,6 @@ function App() {
    * Prompts user to select a file, refreshes all playlists, and allows download.
    */
   const handleRefreshPlaylists = async () => {
-    const isConfirmed = window.confirm(
-      "This will refresh all playlists in the selected file.\nThis could take some time and make a lot of API calls.\n\nDo you want to continue?"
-    );
-
-    if (!isConfirmed) return;
-
     // Create file input for selecting sgjson file
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -75,6 +69,13 @@ function App() {
           setRefreshStatus("error");
           return;
         }
+
+        const isConfirmed = window.confirm(
+            "This will refresh all playlists in the selected file.\n" +
+            "This could take some time and make a lot of API calls." +
+            "\n\nDo you want to continue?"
+        );
+        if (!isConfirmed) return;
 
         setRefreshProgress(`Refreshing ${playlistsFile.playlists.length} playlist(s)...`);
 

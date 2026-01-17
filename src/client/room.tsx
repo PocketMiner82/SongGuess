@@ -55,9 +55,6 @@ function Room() {
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "pong");
 
-  // if port is set, this is probably a dev environment: prevent accidental reloads
-  if (!window.location.port) window.onbeforeunload = () => true;
-
   return (
       <div className="flex flex-col h-screen">
         <CookieConsent location="bottom" buttonText="I understand" overlay >
@@ -66,7 +63,14 @@ function Room() {
 
         <TopBar>
           {controller.isHost && controller.state === "ingame" && (
-              <Button onClick={() => controller.returnTo("results")}>
+              <Button onClick={() => {
+                const isConfirmed = window.confirm(
+                    "Do you really want to abort and send all players to the results screen?"
+                );
+                if (!isConfirmed) return;
+
+                controller.returnTo("results")
+              }}>
                 Abort
               </Button>
           )}
@@ -108,9 +112,6 @@ function App() {
   if (!isReady) return <Loading />;
 
   const controller = getController();
-
-  // if port is set, this is probably a dev environment: prevent accidental reloads
-  if (!window.location.port) window.onbeforeunload = () => true;
 
   return (
       <RoomContext.Provider value={controller}>

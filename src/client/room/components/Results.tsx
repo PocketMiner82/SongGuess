@@ -63,7 +63,14 @@ export function Results() {
 
       {controller.isHost && (
           <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
-            <Button onClick={() => controller.returnTo("lobby")}>
+            <Button onClick={() => {
+              const isConfirmed = window.confirm(
+                  "Do you really want to send all players to the lobby?"
+              );
+              if (!isConfirmed) return;
+
+              controller.returnTo("lobby");
+            }}>
               Return to Lobby
             </Button>
             <Button onClick={() => controller.startGame()}>
