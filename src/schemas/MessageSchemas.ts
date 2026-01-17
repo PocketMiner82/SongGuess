@@ -2,7 +2,7 @@ import z from "zod";
 import {
   ChangeUsernameMessageSchema, AddPlaylistMessageSchema, RemovePlaylistMessageSchema, StartGameMessageSchema,
   SelectAnswerMessageSchema, ReturnToMessageSchema
-} from "./RoomClientMessageSchemas";
+} from "./ClientMessageSchemas";
 import {
   UpdateMessageSchema,
   UpdatePlaylistsMessageSchema,
@@ -11,7 +11,7 @@ import {
   AnswerMessageSchema,
   QuestionMessageSchema,
   UpdatePlayedSongsMessageSchema
-} from "./RoomServerMessageSchemas";
+} from "./ServerMessageSchemas";
 
 
 export const RoomConfigMessageSchema = z.object({
@@ -23,8 +23,6 @@ export const RoomConfigMessageSchema = z.object({
    */
   advancedSongFiltering: z.optional(z.boolean())
 });
-
-export type RoomConfigMessage = z.infer<typeof RoomConfigMessageSchema>;
 
 
 const _ClientMessageSchema = z.discriminatedUnion("type", [
@@ -67,8 +65,6 @@ export const SourceMessageSchema = z.union([
   OtherMessageSchema
 ]);
 
-export type SourceMessage = z.infer<typeof SourceMessageSchema>;
-
 
 /**
  * Schema for confirmation messages sent in response to client actions.
@@ -87,8 +83,6 @@ export const ConfirmationMessageSchema = z.object({
   error: z.optional(z.string())
 });
 
-export type ConfirmationMessage = z.infer<typeof ConfirmationMessageSchema>;
-
 export const PingMessageSchema = z.object({
   type: z.literal("ping").default("ping"),
 
@@ -97,8 +91,6 @@ export const PingMessageSchema = z.object({
    */
   seq: z.number()
 });
-
-export type PingMessage = z.infer<typeof PingMessageSchema>;
 
 
 export const PongMessageSchema = z.object({
@@ -109,8 +101,6 @@ export const PongMessageSchema = z.object({
    */
   seq: z.number()
 });
-
-export type PongMessage = z.infer<typeof PongMessageSchema>;
 
 
 /**
@@ -123,8 +113,6 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
   _ServerMessageSchema
 ]);
 
-export type ServerMessage = z.infer<typeof ServerMessageSchema>;
-
 
 /**
  * A message sent from a client.
@@ -135,5 +123,3 @@ export const ClientMessageSchema = z.discriminatedUnion("type", [
   PongMessageSchema,
   _ClientMessageSchema
 ]);
-
-export type ClientMessage = z.infer<typeof ClientMessageSchema>;

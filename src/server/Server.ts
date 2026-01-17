@@ -1,37 +1,9 @@
 import type * as Party from "partykit/server";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import z from "zod";
-import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
-import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import {
-  type GameState,
-  type PlayerState,
-  type UpdateMessage,
-  type UpdatePlaylistsMessage,
-  type AudioControlMessage,
-  type CountdownMessage, type UpdatePlayedSongsMessage
-} from "../schemas/RoomServerMessageSchemas";
 import {setInterval, setTimeout, clearInterval, clearTimeout} from "node:timers";
-import {
-  ClientMessageSchema,
-  type ClientMessage,
-  type ConfirmationMessage,
-  type SourceMessage, OtherMessageSchema, type PongMessage, type RoomConfigMessage
-} from "../schemas/RoomMessageSchemas";
-import {
-  type Playlist,
-  type Song,
-  artistRegex,
-  albumRegex,
-  UnknownPlaylist,
-  songRegex
-} from "../schemas/RoomSharedSchemas";
+import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import Question, {DistractionError} from "./Question";
-import type {
-  AddPlaylistMessage,
-  ChangeUsernameMessage,
-  RemovePlaylistMessage, SelectAnswerMessage
-} from "../schemas/RoomClientMessageSchemas";
 import {
   COLORS,
   POINTS_PER_QUESTION,
@@ -43,14 +15,17 @@ import {
   ROUND_START_NEXT, TIME_PER_QUESTION
 } from "./ServerConstants";
 import { version } from "../../package.json";
-import {
-  AppleMusicConfig,
-  AuthType,
-  getAuthenticatedAxios,
-  Region,
-  SongsEndpointTypes
-} from "@syncfm/applemusic-api";
-import type {AxiosInstance} from "axios";
+import type {RoomGetResponse} from "../types/APIResponseTypes";
+import type {
+  AddPlaylistMessage, AudioControlMessage, ChangeUsernameMessage,
+  ClientMessage, ConfirmationMessage,
+  CountdownMessage,
+  GameState,
+  PlayerState,
+  Playlist,
+  PongMessage, RemovePlaylistMessage, RoomConfigMessage, SelectAnswerMessage,
+  Song, SourceMessage, UpdateMessage, UpdatePlayedSongsMessage, UpdatePlaylistsMessage
+} from "../types/MessageTypes";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -176,7 +151,7 @@ export default class Server implements Party.Server {
    *
    * @param room The room to serve
    */
-  constructor(readonly room: Party.Room) {}
+  constructor(readonly room: Party.Room) { }
 
   //
   // ROOM WS EVENTS
@@ -1208,7 +1183,6 @@ export default class Server implements Party.Server {
   // ROOM HTTP EVENTS
   //
 
-  axiosClient: AxiosInstance|null = null;
   /**
    * Handles HTTP requests to the room endpoint.
    *
@@ -1216,37 +1190,9 @@ export default class Server implements Party.Server {
    * @returns A Promise resolving to the HTTP response.
    */
   async onRequest(req: Party.Request): Promise<Response> {
-    let url: URL = new URL(req.url);
-
-    // handle room creation
-    if (url.pathname.endsWith("/createRoom")) {
-      return await Server.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
-    // handle playlist info request
-    } else if (url.pathname.endsWith("/playlistInfo")) {
-      // fetch playlist info
-      let playlistURL = url.searchParams.get("url");
-      if (!playlistURL) {
-        return new Response("Missing url parameter.", {status: 400});
-      }
-
-      return Response.json(await Server.getPlaylistInfo(playlistURL));
-    } else if(url.pathname.endsWith("/songByISRC")) {
-      let isrc = url.searchParams.get("isrc");
-      if (!isrc) {
-        return new Response("Missing isrc parameter.", {status: 400});
-      }
-
-      if (!this.axiosClient) {
-        this.axiosClient = await getAuthenticatedAxios(new AppleMusicConfig({
-          region: Region.US,
-          authType: AuthType.Scraped
-        }));
-      }
-
-      return Server.songByISRCProxy(this.axiosClient, isrc);
     // respond with JSON containing the current online count and if the room is valid
-    } else if (req.method === "GET") {
-      let json: RoomInfoResponse = {
+    if (req.method === "GET") {
+      let json: RoomGetResponse = {
         onlineCount: this.getOnlineCount(),
         isValidRoom: this.isValidRoom
       };
@@ -1266,7 +1212,7 @@ export default class Server implements Party.Server {
       return new Response("Token invalid/missing.", { status: 401 });
     }
 
-    return new Response("Bad request", { status: 400 });
+    return new Response("Bad request. Only GET and POST is supported.", { status: 400 });
   }
 
   //
@@ -1293,159 +1239,6 @@ export default class Server implements Party.Server {
 
     // redirect to main page, if on another one
     return Response.redirect(url.origin);
-  }
-
-  //
-  // STATIC FUNCTIONS
-  //
-
-  /**
-   * Simple proxy to fetch data from Apple Music API.
-   * @param client the axios client from the apple music api library
-   * @param isrc the ISRC to look for.
-   * @returns json with id key set to the iTunes ID or null if not found.
-   */
-  private static async songByISRCProxy(client: AxiosInstance, isrc: string): Promise<Response> {
-    try {
-      let resp = await client.get("https://amp-api-edge.music.apple.com/v1/catalog/us/songs?filter[isrc]=" + encodeURIComponent(isrc));
-
-      if (resp.data) {
-        let data = resp.data as SongsEndpointTypes.SongsResponse;
-
-        if (data.data) {
-          for (let s of data.data) {
-            if (s.id) {
-              return Response.json({id: parseInt(s.id)});
-            }
-          }
-        }
-      }
-    } catch { }
-    return Response.json({id: null});
-  }
-
-  /**
-   * Fetches playlist information from an Apple Music URL.
-   *
-   * @param url The Apple Music URL of the playlist.
-   * @returns A Promise resolving to the Playlist information.
-   */
-  private static async getPlaylistInfo(url: string): Promise<Playlist> {
-    if (!artistRegex.test(url) && !albumRegex.test(url) && !songRegex.test(url)) {
-      return UnknownPlaylist;
-    }
-
-    let page = await fetch(url);
-    let text = await page.text();
-
-    // get content of schema.org tag <script id=schema:music-[...] type="application/ld+json">
-    let regex = /<script\s+id="?schema:(Music[^"]*|song)"?\s+type="?application\/ld\+json"?\s*>(?<json>[\s\S]*?)<\/script>/i;
-    let match = regex.exec(text);
-    if (!match || !match.groups) {
-      return UnknownPlaylist;
-    }
-    let json = match.groups["json"];
-
-    try {
-      let data = JSON.parse(json);
-      let name: string = data.name ?? url;
-      let cover: string|null = data.image ?? null;
-      let songs: Song[] = [];
-
-      // album always provides tracks
-      if (data["@type"] === "MusicAlbum" && data.tracks) {
-        let artist: string = data?.byArtist?.[0]?.name ?? "Unknown Artist";
-
-        songs = data.tracks.map((e: any) => (
-            e?.audio?.contentUrl ?
-                {
-                  name: e.audio.name ?? "Unknown Song",
-                  artist: artist,
-                  audioURL: e.audio.contentUrl,
-                  hrefURL: e.url ?? UnknownPlaylist.hrefURL,
-                  cover: (e.audio.thumbnailUrl || e.thumbnailUrl) ?? null
-                } satisfies Song
-            :
-                undefined
-        )).filter((e: any) => e);
-      }
-
-      return {
-        name: name,
-        hrefURL: url,
-        cover: cover,
-        songs: songs
-      };
-    } catch {
-      return UnknownPlaylist;
-    }
-  }
-
-  /**
-   * Generates a unique 6-character room ID that does not currently exist on the server.
-   *
-   * It attempts to generate a random ID and checks for its existence up to 100 times.
-   * The possible characters for the ID are alphanumeric (A-Z, a-z, 0-9).
-   *
-   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
-   * @returns A Promise that resolves with the unique 6-character room ID, or `null` if a unique ID couldn't be found after 100 attempts.
-   */
-  private static async generateRoomID(origin: string): Promise<string | null> {
-    let text: string = "";
-    let possible: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let attempt = 0; attempt < 100; attempt++) {
-      for (let i: number = 0; i < 6; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-      }
-
-      let roomInfo = await fetchGetRoom(`${origin}/parties/main/${text}`);
-
-      // room already exists
-      if (roomInfo && roomInfo.isValidRoom) {
-        continue;
-      }
-
-      return text;
-    }
-
-    return null;
-  }
-
-  /**
-   * Creates a new room on the server by generating a unique ID and then returning the room data.
-   *
-   * It first calls `generateRoomID` to get an available room ID. If an ID is successfully
-   * generated, it sends a request to create the room with the provided token.
-   *
-   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
-   * @param token The initial authentication token to associate with the new room.
-   * @returns A Promise that resolves with a standard `Response` object.
-   * - Status 201 (Created) with the room ID as the body on success.
-   * - Status 409 (Conflict) on failure.
-   * - Status 500 (Internal Server Error) on room validation failure.
-   */
-  private static async createNewRoom(origin: string, token: string): Promise<Response> {
-    let roomID = await Server.generateRoomID(origin);
-    let errorMessage = "";
-    let statusCode = 201;
-
-    if (roomID) {
-      if(!await fetchPostRoom(`${origin}/parties/main/${roomID}`, token)) {
-        errorMessage = "Can't validate room.";
-        statusCode = 500;
-      }
-    } else {
-      errorMessage = "Can't find a free room id.";
-      statusCode = 409;
-    }
-
-    let json: PostCreateRoomResponse = {
-      roomID: roomID as string,
-      error: errorMessage
-    };
-
-    return Response.json(json, {status: statusCode});
   }
 }
 

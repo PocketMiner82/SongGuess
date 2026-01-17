@@ -1,4 +1,4 @@
-import { type RoomInfoResponse, RoomInfoResponseSchema, type PostCreateRoomResponse, PostCreateRoomResponseSchema } from "./schemas/RoomHTTPSchemas";
+import type {CreateRoomResponse, RoomGetResponse} from "./types/APIResponseTypes";
 
 /**
  * Fetches room information from the specified URL.
@@ -6,7 +6,7 @@ import { type RoomInfoResponse, RoomInfoResponseSchema, type PostCreateRoomRespo
  * @param url The URL to fetch room information from.
  * @returns A Promise resolving to the room information, or null if the request fails or validation fails.
  */
-export async function fetchGetRoom(url: URL|string): Promise<RoomInfoResponse|null> {
+export async function fetchGetRoom(url: URL|string): Promise<RoomGetResponse|null> {
   try {
     const resp = await fetch(url, {signal: AbortSignal.timeout(5000)});
     if (resp.status !== 200) {
@@ -14,16 +14,7 @@ export async function fetchGetRoom(url: URL|string): Promise<RoomInfoResponse|nu
       return null;
     }
 
-    const data = await resp.json();
-    
-    // make sure correct response was returned
-    const result = RoomInfoResponseSchema.safeParse(data);
-    if (result.success) {
-      return result.data;
-    } else {
-      console.error(`Error validating API response while getting ${url}:`, result.error);
-      return null;
-    }
+    return await resp.json();
   } catch (error) {
     console.error(`Exception occurred while getting ${url}:`, error);
     return null;
@@ -64,23 +55,14 @@ export async function fetchPostRoom(urlParam: URL|string, token: string): Promis
  * @param url The URL of the room creation endpoint.
  * @returns A Promise resolving to the created room information, or null if the request fails or validation fails.
  */
-export async function fetchPostCreateRoom(url: URL|string): Promise<PostCreateRoomResponse|null> {
+export async function fetchPostCreateRoom(url: URL|string): Promise<CreateRoomResponse|null> {
   try {
     const resp = await fetch(url, {method: "POST", signal: AbortSignal.timeout(5000)});
     if (resp.status !== 201) {
       console.error(`Posting ${url} returned ${resp.status}!`);
     }
 
-    const data = await resp.json();
-    
-    // make sure correct response was returned
-    const result = PostCreateRoomResponseSchema.safeParse(data);
-    if (result.success) {
-      return result.data;
-    } else {
-      console.error(`Error validating API response while posting ${url}:`, result.error);
-      return null;
-    }
+    return await resp.json();
   } catch (error) {
     console.error(`Exception occurred while posting ${url}:`, error);
     return null;

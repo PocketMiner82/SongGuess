@@ -42,8 +42,6 @@ export const PlayerStateSchema = z.object({
   answerIndex: z.optional(z.int().min(0).max(3))
 });
 
-export type PlayerState = z.infer<typeof PlayerStateSchema>;
-
 
 /**
  * Schema for messages containing a song guessing question.
@@ -61,8 +59,6 @@ export const QuestionMessageSchema = z.object({
    */
   answerOptions: z.array(z.string()).length(4)
 });
-
-export type QuestionMessage = z.infer<typeof QuestionMessageSchema>;
 
 
 /**
@@ -86,8 +82,6 @@ export const AnswerMessageSchema = z.object({
    */
   correctIndex: z.int().min(0).max(3)
 });
-
-export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
 
 
 /**
@@ -130,8 +124,6 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
 
 ]);
 
-export type AudioControlMessage = z.infer<typeof AudioControlMessageSchema>;
-
 
 /**
  * Schema for messages containing the current countdown value.
@@ -145,8 +137,6 @@ export const CountdownMessageSchema = z.object({
   countdown: z.int().min(0)
 });
 
-export type CountdownMessage = z.infer<typeof CountdownMessageSchema>;
-
 
 export const UpdatePlayedSongsMessageSchema = z.object({
   type: z.literal("update_played_songs").default("update_played_songs"),
@@ -156,8 +146,6 @@ export const UpdatePlayedSongsMessageSchema = z.object({
    */
   songs: z.array(SongSchema)
 });
-
-export type UpdatePlayedSongsMessage = z.infer<typeof UpdatePlayedSongsMessageSchema>;
 
 
 /**
@@ -178,19 +166,15 @@ export const UpdatePlaylistsMessageSchema = z.object({
   filteredSongsCount: z.number().nonnegative()
 });
 
-export type UpdatePlaylistsMessage = z.infer<typeof UpdatePlaylistsMessageSchema>;
-
 
 /**
  * All possible states of the game
  */
-const GameStateSchema = z.literal([
+export const GameStateSchema = z.literal([
   "lobby",
   "ingame",
   "results"
 ]);
-
-export type GameState = z.infer<typeof GameStateSchema>;
 
 
 /**
@@ -229,5 +213,3 @@ export const UpdateMessageSchema = z.object({
    */
   isHost: z.boolean()
 });
-
-export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;

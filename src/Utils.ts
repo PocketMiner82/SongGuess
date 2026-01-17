@@ -1,25 +1,19 @@
-import {
-  albumRegex,
-  artistRegex,
-  type Playlist,
-  type PlaylistsFile,
-  type Song,
-  songRegex,
-  UnknownPlaylist,
-  PlaylistsFileSchema
-} from "./schemas/RoomSharedSchemas";
+import {PlaylistsFileSchema} from "./schemas/RoomSharedSchemas";
 import {
   type Entities,
   lookup,
+  type Lookup,
   type Media,
   type Options,
-  type ResultMusicTrack,
-  type Results,
   type PlainObject,
-  type Response, type Lookup
+  type Response,
+  type ResultMusicTrack,
+  type Results
 } from "itunes-store-api";
 import z from "zod";
 import React from "react";
+import {DefaultPlaylist, type Playlist, type PlaylistsFile, type Song} from "./types/MessageTypes";
+import {albumRegex, artistRegex, songRegex} from "./schemas/ValidationRegexes";
 
 /**
  * Shuffles an array in place using the Fisher-Yates algorithm.
@@ -90,7 +84,7 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
       audioURL: r.previewUrl,
       artist: r.artistName,
       hrefURL: r.trackViewUrl,
-      cover: largerCover(r.artworkUrl100)
+      cover: fixedCoverSize(r.artworkUrl100)
     } satisfies Song));
   }
 
@@ -103,10 +97,13 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
 
 /**
  * Replaces the cover of a {@link Song} with a larger version.
- * @param url The url100 to search and replace the 100x100 dimensions in
+ * @param url The url to search and replace the dimensions in
+ * @returns the replaced url or null if the provided param is not a string
  */
-export function largerCover(url: string) {
-  return url.replace(/100x100(bb.[a-z]+)$/, "486x486$1")
+export function fixedCoverSize(url: string|undefined|null): string|null {
+  return !url
+      ? null
+      : url.replace(/\/[^/]+x[^/]+bb\.([a-z]+)$/, "/486x486bb.$1");
 }
 
 /**
@@ -117,10 +114,10 @@ export function largerCover(url: string) {
  */
 async function fetchPlaylistInfo(url: string): Promise<Playlist> {
   try {
-    let page = await fetch("/parties/main/playlistInfo?url=" + encodeURIComponent(url));
+    let page = await fetch("/parties/api/playlistInfo?url=" + encodeURIComponent(url));
     return await page.json();
   } catch {
-    return UnknownPlaylist;
+    return DefaultPlaylist;
   }
 }
 
@@ -142,7 +139,7 @@ export function getFirstSong(results: ResultMusicTrack[]): Song|null {
     audioURL: track.previewUrl,
     artist: track.artistName,
     hrefURL: track.trackViewUrl,
-    cover: largerCover(track.artworkUrl100)
+    cover: fixedCoverSize(track.artworkUrl100)
   };
 }
 
@@ -151,11 +148,10 @@ export function getFirstSong(results: ResultMusicTrack[]): Song|null {
  * @param isrc The ISRC to lookup.
  * @returns the iTunes ID or null if not found.
  */
-export async function fetchSongByISRC(isrc: string): Promise<number|null> {
+export async function fetchSongByISRC(isrc: string): Promise<Song|null> {
   try {
-    let page = await fetch("/parties/main/songByISRC?isrc=" + encodeURIComponent(isrc));
-    let json: {id: number|null} = await page.json();
-    return json.id;
+    let page = await fetch("/parties/api/songByISRC?isrc=" + encodeURIComponent(isrc));
+    return await page.json();
   } catch (e) {
     console.error("Error fetching from api.song.link:", e);
     return null;

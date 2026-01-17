@@ -1,5 +1,5 @@
 import chroma from "chroma-js";
-import type { PlayerState } from "../../../schemas/RoomServerMessageSchemas";
+import type {PlayerState} from "../../../types/MessageTypes";
 
 
 /**

@@ -1,38 +1,11 @@
 import z from "zod";
-
-
-/**
- * Regex of the allowed username characters + length restriction
- */
-export const UsernameRegex = /^[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<>_-]{1,16}$/;
+import {appleMusicCoverRegex, appleMusicPreviewRegex, appleMusicRegex, usernameRegex} from "./ValidationRegexes";
 
 /**
  * The zod schema for the username.
  */
-export const UsernameSchema = z.stringFormat("user", UsernameRegex);
+export const UsernameSchema = z.stringFormat("user", usernameRegex);
 
-/**
- * Regular expression to validate that a URL starts with the apple music domain.
- */
-export const appleMusicRegex = /^https?:\/\/music\.apple\.com\/[^/]+\//;
-
-/**
- * Regular expression to validate cover/image urls.
- */
-export const appleMusicCoverRegex = /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/;
-
-/**
- * Regular expression to validate Apple Music artist URLs.
- */
-export const artistRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/artist\/[^/]+\/(?<id>\d+);?)+$/
-/**
- * Regular expression to validate Apple Music album URLs.
- */
-export const albumRegex =  /^(https?:\/\/music\.apple\.com\/[^/]+\/album\/[^/]+\/(?<id>\d+)(?:\?.*i=(?<trackId>\d+))?;?)+$/
-/**
- * Regular expression to validate Apple Music song URLs.
- */
-export const songRegex =   /^(https?:\/\/music\.apple\.com\/[^/]+\/(?<song>song)\/[^/]+\/(?<id>\d+);?)+$/
 
 export const SongSchema = z.object({
   /**
@@ -59,10 +32,8 @@ export const SongSchema = z.object({
    * A URL to the audio file of the song.
    * Currently only audio previews from Apple Music are allowed.
    */
-  audioURL: z.url({pattern: /^https:\/\/audio-ssl\.itunes\.apple\.com\/itunes-assets\/AudioPreview.*\.m4a$/})
+  audioURL: z.url({pattern: appleMusicPreviewRegex})
 });
-
-export type Song = z.infer<typeof SongSchema>;
 
 export const PlaylistSchema = z.object({
   /**
@@ -91,8 +62,6 @@ export const PlaylistSchema = z.object({
   songs: z.array(SongSchema)
 });
 
-export type Playlist = z.infer<typeof PlaylistSchema>;
-
 
 export const PlaylistsFileSchema = z.object({
   /**
@@ -105,16 +74,3 @@ export const PlaylistsFileSchema = z.object({
    */
   playlists: z.array(PlaylistSchema)
 });
-
-export type PlaylistsFile = z.infer<typeof PlaylistsFileSchema>;
-
-
-/**
- * Default playlist object used when playlist information cannot be retrieved or is invalid.
- */
-export const UnknownPlaylist: Playlist = {
-  name: "Unknown",
-  hrefURL: "https://music.apple.com/us/",
-  cover: null,
-  songs: []
-};

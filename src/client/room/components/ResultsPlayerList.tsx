@@ -1,7 +1,7 @@
 import React from "react";
 import {PlayerCard} from "./PlayerCard";
 import {useControllerContext} from "../RoomController";
-import type {PlayerState} from "../../../schemas/RoomServerMessageSchemas";
+import type {PlayerState} from "../../../types/MessageTypes";
 
 
 function getShowField(player: PlayerState, showField: keyof PlayerState) {

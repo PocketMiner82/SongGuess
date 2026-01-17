@@ -2,28 +2,20 @@ import PartySocket from "partysocket";
 import React, {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
 import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
-import type {
-  ChangeUsernameMessage,
-  AddPlaylistMessage,
-  RemovePlaylistMessage,
-  StartGameMessage,
-  SelectAnswerMessage,
-  ReturnToMessage
-} from "../../schemas/RoomClientMessageSchemas";
-import {
-  type Playlist, type PlaylistsFile, type Song
-} from "../../schemas/RoomSharedSchemas";
-import {
-  type PingMessage,
-  type RoomConfigMessage,
-  type ServerMessage,
-  ServerMessageSchema
-} from "../../schemas/RoomMessageSchemas";
-import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
+import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
 import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
+import type {
+  AddPlaylistMessage,
+  AnswerMessage, ChangeUsernameMessage,
+  GameState, PingMessage,
+  PlayerState,
+  Playlist, PlaylistsFile,
+  QuestionMessage, RemovePlaylistMessage, ReturnToMessage, RoomConfigMessage, SelectAnswerMessage,
+  ServerMessage, Song, StartGameMessage
+} from "../../types/MessageTypes";
 
 
 /**

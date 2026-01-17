@@ -4,7 +4,6 @@ import {
   RoomContext, useControllerContext, useRoomController, useRoomControllerListener,
   useRoomControllerMessageTypeListener
 } from "./room/RoomController";
-import type { ServerMessage } from "../schemas/RoomMessageSchemas";
 import { Lobby } from "./room/components/Lobby";
 import {Ingame} from "./room/components/Ingame";
 import {Results} from "./room/components/Results";
@@ -15,6 +14,7 @@ import { Audio } from "./room/components/Audio";
 import {CookieConsent} from "react-cookie-consent";
 import {CookiesProvider, useCookies} from "react-cookie";
 import type CookieProps from "../types/CookieProps";
+import type {ServerMessage} from "../types/MessageTypes";
 
 
 /**

@@ -14,8 +14,6 @@ export const ReturnToMessageSchema = z.object({
   where: z.literal(["lobby", "results"])
 });
 
-export type ReturnToMessage = z.infer<typeof ReturnToMessageSchema>;
-
 
 /**
  * Schema for messages containing the player's selected answer during a question.
@@ -29,8 +27,6 @@ export const SelectAnswerMessageSchema = z.object({
   answerIndex: z.int().min(0).max(3)
 })
 
-export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
-
 
 /**
  * Schema for messages requesting to start a new game.
@@ -38,8 +34,6 @@ export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
 export const StartGameMessageSchema = z.object({
   type: z.literal("start_game").default("start_game")
 });
-
-export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
 
 
 /**
@@ -54,8 +48,6 @@ export const AddPlaylistMessageSchema = z.object({
   playlist: PlaylistSchema
 });
 
-export type AddPlaylistMessage = z.infer<typeof AddPlaylistMessageSchema>;
-
 
 /**
  * Schema for messages requesting to remove a playlist from the game.
@@ -69,8 +61,6 @@ export const RemovePlaylistMessageSchema = z.object({
   index: z.nullable(z.int().nonnegative())
 });
 
-export type RemovePlaylistMessage = z.infer<typeof RemovePlaylistMessageSchema>;
-
 
 /**
  * Schema for messages requesting to change a player's username.
@@ -83,5 +73,3 @@ export const ChangeUsernameMessageSchema = z.object({
    */
   username: UsernameSchema
 });
-
-export type ChangeUsernameMessage = z.infer<typeof ChangeUsernameMessageSchema>;

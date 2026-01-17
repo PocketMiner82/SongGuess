@@ -1,9 +1,9 @@
 import React, { useState, useCallback, memo, useEffect, useRef } from "react";
-import type { PlayerState } from "../../../schemas/RoomServerMessageSchemas";
 import { Button } from "../../components/Button";
 import { PlayerAvatar } from "./PlayerAvatar";
 import {useControllerContext, useRoomControllerListener, useRoomControllerMessageTypeListener} from "../RoomController";
 import {ResultsPlayerList} from "./ResultsPlayerList";
+import type {PlayerState} from "../../../types/MessageTypes";
 
 /**
  * Individual answer option button that handles selection and styling.

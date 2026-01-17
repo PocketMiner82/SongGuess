@@ -6,7 +6,7 @@ import { ErrorLabel } from "./components/ErrorLabel";
 import { TopBar } from "./components/TopBar";
 import {CookieConsent} from "react-cookie-consent";
 import { downloadFile, importPlaylistFile, refreshPlaylists, validatePlaylistsFile } from "../Utils";
-import type { PlaylistsFile } from "../schemas/RoomSharedSchemas";
+import type {PlaylistsFile} from "../types/MessageTypes";
 
 
 /**
@@ -23,7 +23,7 @@ function App() {
    * Creates a new room via API and redirects to the room page.
    */
   const buttonClick = async () => {
-    const resp = await fetchPostCreateRoom("/parties/main/createRoom");
+    const resp = await fetchPostCreateRoom("/parties/api/createRoom");
 
     if (!resp) {
       setError("Unknown server error");

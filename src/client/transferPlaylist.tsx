@@ -8,11 +8,10 @@ import {
   getFirstSong,
   downloadFile,
   fetchSongByISRC,
-  safeLookup,
   safeSearch
 } from "../Utils";
 import Papa from "papaparse";
-import type {Playlist, PlaylistsFile, Song} from "../schemas/RoomSharedSchemas";
+import type {Playlist, PlaylistsFile, Song} from "../types/MessageTypes";
 
 interface CSVRow {
   "Track name": string;
@@ -29,21 +28,10 @@ interface CSVRow {
  */
 async function findByISRC(isrc: string): Promise<Song | null> {
   try {
-    const iTunesID = await fetchSongByISRC(isrc);
+    const song = await fetchSongByISRC(isrc);
 
-    if (iTunesID !== null) {
-      let results = await safeLookup("id", iTunesID, {
-        entity: "song",
-        limit: 5
-      });
-
-      const song = getFirstSong(results);
-
-      if (song) {
-        return song;
-      } else {
-        console.info(`iTunes didn't return any valid results for ID ${iTunesID}, retrying with search...`);
-      }
+    if (song !== null) {
+      return song;
     } else {
       console.info(`Could not find iTunes ID for ISRC ${isrc}, retrying with search...`);
     }
