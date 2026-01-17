@@ -150,33 +150,39 @@ const ProgressBar = memo(function ProgressBar({
  */
 function QuestionDisplay() {
   const controller = useControllerContext();
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(controller.players.find(p =>
+      p.username === controller.username)!.answerIndex ?? null);
   const [canAnswer, setCanAnswer] = useState(false);
-  const [audioLength, setAudioLength] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  useRoomControllerMessageTypeListener(controller, "audio_control");
 
   useRoomControllerListener(controller, useCallback(msg => {
     if (msg?.type === "question") {
       // reset selection
       setSelectedAnswer(null);
       setIsPlaying(false);
-    } else if (msg?.type === "audio_control") {
-      setAudioLength(msg.action === "load" ? -msg.length : msg.length);
-
-      if (msg.action === "play") {
-        // allow answering when music starts
-        setCanAnswer(controller.currentAnswer === null);
-        setIsPlaying(true);
-      } else {
-        setIsPlaying(msg.action === "load");
-      }
     } else if (msg?.type === "answer") {
       // answering no longer allowed when server publishes correct answer
       setCanAnswer(false);
       setIsPlaying(false);
     }
     return false;
-  }, [controller.currentAnswer]));
+  }, []));
+
+  useEffect(() => {
+    if (controller.currentAudioState === "play") {
+      // allow answering when music starts
+      setCanAnswer(controller.currentAnswer === null);
+      setIsPlaying(controller.currentAnswer === null);
+    } else if (controller.currentAudioState === "load") {
+      setIsPlaying(true);
+      setCanAnswer(false);
+    } else {
+      // pause or null state
+      setIsPlaying(false);
+      setCanAnswer(false);
+    }
+  }, [controller.currentAudioState, controller.currentAnswer]);
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -214,7 +220,10 @@ function QuestionDisplay() {
       </div>
 
       <div className="mx-auto w-3/4">
-        <ProgressBar duration={audioLength} isPlaying={isPlaying} />
+        <ProgressBar duration={controller.currentAudioState === "load"
+            ? -controller.currentAudioLength
+            : controller.currentAudioLength
+        } isPlaying={isPlaying} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

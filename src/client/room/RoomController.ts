@@ -9,7 +9,7 @@ import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
 import type {
   AddPlaylistsMessage,
-  AnswerMessage, ChangeUsernameMessage,
+  AnswerMessage, AudioControlMessage, ChangeUsernameMessage,
   GameState, PingMessage,
   PlayerState,
   Playlist, PlaylistsFile,
@@ -208,6 +208,16 @@ export class RoomController {
    * The current ping in milliseconds.
    */
   currentPingMs: number = -1;
+
+  /**
+   * The current state of the audio playback
+   */
+  currentAudioState: AudioControlMessage["action"]|null = null;
+
+  /**
+   * The length of the current audio.
+   */
+  currentAudioLength: number = 0;
 
 
   /**
@@ -422,6 +432,10 @@ export class RoomController {
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;
+        break;
+      case "audio_control":
+        this.currentAudioState = msg.action;
+        this.currentAudioLength = msg.length
         break;
     }
 

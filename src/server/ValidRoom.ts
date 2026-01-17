@@ -171,19 +171,17 @@ export class ValidRoom implements Party.Server {
     if (this.state === "ingame") {
       let q = this.questions[this.currentQuestion];
 
+      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
+
       if (this.roundTicks < ROUND_SHOW_ANSWER) {
         conn.send(q.getQuestionMessage(this.currentQuestion + 1));
       } else {
         conn.send(q.getAnswerMessage(this.currentQuestion + 1));
       }
 
-      setTimeout(() => {
-        conn.send(this.getAudioControlMessage("load", q.song.audioURL));
-
-        if (this.roundTicks >= ROUND_START_MUSIC) {
-          conn.send(this.getAudioControlMessage("play"));
-        }
-      }, 50);
+      if (this.roundTicks >= ROUND_START_MUSIC) {
+        conn.send(this.getAudioControlMessage("play"));
+      }
     }
   }
 
@@ -432,7 +430,7 @@ export class ValidRoom implements Party.Server {
 
         case "answer":
           if (this.roundTicks > ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
-            possibleErrorFunc("Can only accept answering during questioning phase.");
+            possibleErrorFunc("Can only accept answers during questioning phase.");
             successful = false;
           } else if (conn && connState.answerIndex !== undefined) {
             possibleErrorFunc("You already selected an answer.");
@@ -468,7 +466,6 @@ export class ValidRoom implements Party.Server {
           playlists.map(p => p.name).join("; ")
       } has/have been added.`);
     }
-
 
     return msg.playlists.length - playlists.length;
   }
@@ -648,7 +645,7 @@ export class ValidRoom implements Party.Server {
       this.state = "ingame";
       this.broadcastUpdateMessage();
 
-      setTimeout(gameLoop, 50);
+      gameLoop();
       this.gameLoopInterval = setInterval(gameLoop, 1000);
     });
   }

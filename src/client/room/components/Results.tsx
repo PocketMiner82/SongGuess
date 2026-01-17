@@ -21,6 +21,7 @@ function PlayedSongsList() {
         <div className="space-y-2 mx-auto">
           {controller.playedSongs.map((song, idx) => (
               <PlaylistCard
+                  key={idx}
                   index={idx}
                   title={song.name}
                   subtitle={song.artist}

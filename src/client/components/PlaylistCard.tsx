@@ -21,7 +21,7 @@ export function PlaylistCard({index, title, subtitle, coverURL, hrefURL, onDelet
   onDeleteClick?: Function
 }) {
   return (
-      <li key={index} className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
+      <li className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
         {coverURL ? (
             <img src={coverURL} alt="Album Cover" className="w-25 h-25 lg:w-30 lg:h-30 2xl:w-40 2xl:h-40 rounded-xl object-cover" />
         ) : (
