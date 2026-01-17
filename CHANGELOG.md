@@ -1,3 +1,10 @@
+# [2.6.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.4...2.6.0-dev.5) (2026-01-17)
+
+
+### Bug Fixes
+
+* **room:** remove onbeforeunload + add confirmation for lobby and abort button ([6cb291d](https://github.com/PocketMiner82/SongGuess/commit/6cb291d98b073f52825e19dfe799ebe575a1868c))
+
 # [2.6.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.3...2.6.0-dev.4) (2026-01-17)
 
 
