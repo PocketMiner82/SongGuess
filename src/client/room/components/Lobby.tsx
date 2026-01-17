@@ -75,7 +75,7 @@ function PlaylistsList() {
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-xl font-bold">Playlists - {
-          `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.advancedSongFiltering ? " (filtered)" : ""}`
+          `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.config.advancedSongFiltering ? " (filtered)" : ""}`
         }</h3>
         <DownloadPlaylists />
       </div>
@@ -356,8 +356,18 @@ function Settings() {
 
         <div className="border-t border-disabled-bg my-2"></div>
 
-        <SettingsToggle value={controller.advancedSongFiltering} onToggle={v => controller.updateAdvancedSongFiltering(v)}>
+        <SettingsToggle value={controller.config.advancedSongFiltering} onToggle={v => {
+          controller.config.advancedSongFiltering = v;
+          controller.sendConfig();
+        }}>
           Perform advanced song filtering
+        </SettingsToggle>
+
+        <SettingsToggle value={controller.config.endWhenAnswered} onToggle={v => {
+          controller.config.endWhenAnswered = v;
+          controller.sendConfig();
+        }}>
+          End round when all players answered
         </SettingsToggle>
 
         <div className="border-t border-disabled-bg my-2"></div>

@@ -24,7 +24,7 @@ import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas
 import z from "zod";
 import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
 import { version } from "../../package.json";
-import Config from "./Config";
+import ServerConfig from "./ServerConfig";
 import type {IMessageListener} from "./IMessageListener";
 
 
@@ -35,7 +35,7 @@ export class ValidRoom implements Party.Server {
   /**
    * The configuration of this room.
    */
-  readonly config: Config;
+  readonly config: ServerConfig;
 
   /**
    * Contains all listeners that want to receive client messages.
@@ -138,7 +138,7 @@ export class ValidRoom implements Party.Server {
   remainingSongs: Song[] = [];
 
   constructor(readonly server: Server) {
-    this.config = new Config(this);
+    this.config = new ServerConfig(this);
   }
 
   onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
@@ -698,7 +698,7 @@ export class ValidRoom implements Party.Server {
     }
 
     // show answers if everyone voted
-    if (everyoneVoted) {
+    if (everyoneVoted && this.config.endWhenAnswered) {
       this.roundTicks = ROUND_SHOW_ANSWER;
     }
   }

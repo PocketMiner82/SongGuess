@@ -74,3 +74,39 @@ export const PlaylistsFileSchema = z.object({
    */
   playlists: z.array(PlaylistSchema)
 });
+
+
+export const RoomConfigMessageSchema = z.object({
+  type: z.literal("room_config").default("room_config"),
+
+  /**
+   * Whether to perform advanced filtering tactics when generating the songs array.
+   * Currently just ignores parens when filtering for identical song names.
+   */
+  advancedSongFiltering: z.optional(z.boolean()),
+
+  /**
+   * Whether to directly end the round after all players answered.
+   */
+  endWhenAnswered: z.optional(z.boolean())
+});
+
+
+export const PingMessageSchema = z.object({
+  type: z.literal("ping").default("ping"),
+
+  /**
+   * The sequence number the pong should respond with
+   */
+  seq: z.number()
+});
+
+
+export const PongMessageSchema = z.object({
+  type: z.literal("pong").default("pong"),
+
+  /**
+   * The sequence number asked for in the ping packet.
+   */
+  seq: z.number()
+});

@@ -13,9 +13,10 @@ import type {
   GameState, PingMessage,
   PlayerState,
   Playlist, PlaylistsFile,
-  QuestionMessage, RemovePlaylistMessage, ReturnToMessage, RoomConfigMessage, SelectAnswerMessage,
+  QuestionMessage, RemovePlaylistMessage, ReturnToMessage, SelectAnswerMessage,
   ServerMessage, Song, StartGameMessage
 } from "../../types/MessageTypes";
+import {BaseConfig} from "../../BaseConfig";
 
 
 /**
@@ -179,10 +180,9 @@ export class RoomController {
   filteredSongsCount: number = 0;
 
   /**
-   * Whether to perform advanced song filtering.
-   * @see {@link RoomConfigMessage.advancedSongFiltering}
+   * The config of this room
    */
-  advancedSongFiltering: boolean = true;
+  config: BaseConfig = new BaseConfig();
 
   /**
    * The interval of the ping function.
@@ -414,9 +414,7 @@ export class RoomController {
         this.state = msg.state;
         break;
       case "room_config":
-        if (msg.advancedSongFiltering !== undefined) {
-          this.advancedSongFiltering = msg.advancedSongFiltering;
-        }
+        this.config = new BaseConfig(msg);
         break;
       case "update_playlists":
         this.playlists = msg.playlists;
@@ -467,14 +465,10 @@ export class RoomController {
   }
 
   /**
-   * Asks the server to update the advanced filtering config value.
-   * @param val the new value to set
+   * Asks the server to update config.
    */
-  public updateAdvancedSongFiltering(val: boolean) {
-    this.socket.send(JSON.stringify({
-      type: "room_config",
-      advancedSongFiltering: val
-    } satisfies RoomConfigMessage));
+  public sendConfig() {
+    this.socket.send(this.config.getConfigMessage());
   }
 
   /**
