@@ -1,3 +1,10 @@
+# [2.6.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.2...2.6.0-dev.3) (2026-01-17)
+
+
+### Features
+
+* **ValidRoom:** allow adding multiple playlists at once ([29ef82a](https://github.com/PocketMiner82/SongGuess/commit/29ef82a1357b72ec1d563e9bf7854243afbd6943))
+
 # [2.6.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.1...2.6.0-dev.2) (2026-01-17)
 
 
