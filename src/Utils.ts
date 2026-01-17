@@ -1,4 +1,4 @@
-import {PlaylistsFileSchema} from "./schemas/RoomSharedSchemas";
+import {PlaylistsFileSchema} from "./schemas/SharedSchemas";
 import {
   type Entities,
   lookup,

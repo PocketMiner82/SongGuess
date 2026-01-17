@@ -11,7 +11,7 @@ import {
   type RoomConfigMessageSchema, ServerMessageSchema,
   SourceMessageSchema
 } from "../schemas/MessageSchemas";
-import {PlaylistSchema, PlaylistsFileSchema, type SongSchema} from "../schemas/RoomSharedSchemas";
+import {PlaylistSchema, PlaylistsFileSchema, type SongSchema} from "../schemas/SharedSchemas";
 import {
   AnswerMessageSchema,
   AudioControlMessageSchema, CountdownMessageSchema, GameStateSchema,

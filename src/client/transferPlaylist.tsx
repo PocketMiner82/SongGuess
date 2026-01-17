@@ -158,11 +158,14 @@ function ImportCSV() {
             const recLen = records.length;
 
             await new Promise<void>(r => {
-              let sleep = 61;
+              let sleepEnd = Date.now() + 60000;
 
               const update = () => {
-                if (--sleep > 0) {
-                  setProgress(`Processed ${pCount}/${recLen}. Waiting for ${sleep} second(s) to avoid rate limiting.`);
+                let curTime = Date.now();
+                if (sleepEnd > curTime) {
+                  setProgress(`Processed ${pCount}/${recLen}. Waiting for ${
+                    Math.round((sleepEnd - curTime) / 1000)
+                  } second(s) to avoid rate limiting.`);
                   setTimeout(update, 1000);
                   return;
                 }
