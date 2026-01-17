@@ -1,3 +1,10 @@
+# [2.6.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.5...2.6.0-dev.6) (2026-01-17)
+
+
+### Features
+
+* **config:** add option to end round when all players answered ([e593bfe](https://github.com/PocketMiner82/SongGuess/commit/e593bfe48073298cf9591016dda97b742f74f020))
+
 # [2.6.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.4...2.6.0-dev.5) (2026-01-17)
 
 
