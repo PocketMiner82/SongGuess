@@ -1,3 +1,10 @@
+# [2.6.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.1...2.6.0-dev.2) (2026-01-17)
+
+
+### Bug Fixes
+
+* **Results:** swap control buttons ([8589cac](https://github.com/PocketMiner82/SongGuess/commit/8589cac6ef2feb8336028488a562de9437278177))
+
 # [2.6.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.5.0...2.6.0-dev.1) (2026-01-17)
 
 
