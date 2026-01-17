@@ -1,3 +1,10 @@
+# [2.6.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.3...2.6.0-dev.4) (2026-01-17)
+
+
+### Bug Fixes
+
+* allow selecting answers when reloading while game is in questioning phase ([35d9bbe](https://github.com/PocketMiner82/SongGuess/commit/35d9bbe0e18cdc4e73bd3e96ea39aad079280c07))
+
 # [2.6.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.2...2.6.0-dev.3) (2026-01-17)
 
 
