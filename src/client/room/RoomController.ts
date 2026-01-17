@@ -8,7 +8,7 @@ import {v4 as uuidv4} from "uuid";
 import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
 import type {
-  AddPlaylistMessage,
+  AddPlaylistsMessage,
   AnswerMessage, ChangeUsernameMessage,
   GameState, PingMessage,
   PlayerState,
@@ -487,9 +487,7 @@ export class RoomController {
       }
     }
 
-    for (let playlist of playlistsFile.playlists) {
-      this.addPlaylist(playlist);
-    }
+    this.addPlaylists(...playlistsFile.playlists);
   }
 
    /**
@@ -554,19 +552,19 @@ export class RoomController {
 
     if (!playlist) return false;
 
-    this.addPlaylist(playlist);
+    this.addPlaylists(playlist);
 
     return true;
   }
 
   /**
    * Requests the server to add a playlist
-   * @param playlist the playlist to add
+   * @param playlists the playlists to add
    */
-  public addPlaylist(playlist: Playlist) {
-    const req: AddPlaylistMessage = {
-      type: "add_playlist",
-      playlist: playlist
+  public addPlaylists(...playlists: Playlist[]) {
+    const req: AddPlaylistsMessage = {
+      type: "add_playlists",
+      playlists: playlists
     };
     this.socket.send(JSON.stringify(req));
   }

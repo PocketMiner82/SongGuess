@@ -1,5 +1,5 @@
 import {
-  AddPlaylistMessageSchema, ChangeUsernameMessageSchema, RemovePlaylistMessageSchema, ReturnToMessageSchema,
+  AddPlaylistsMessageSchema, ChangeUsernameMessageSchema, RemovePlaylistMessageSchema, ReturnToMessageSchema,
   SelectAnswerMessageSchema,
   StartGameMessageSchema
 } from "../schemas/ClientMessageSchemas";
@@ -21,7 +21,7 @@ import {
 
 export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
-export type AddPlaylistMessage = z.infer<typeof AddPlaylistMessageSchema>;
+export type AddPlaylistsMessage = z.infer<typeof AddPlaylistsMessageSchema>;
 export type RemovePlaylistMessage = z.infer<typeof RemovePlaylistMessageSchema>;
 export type ChangeUsernameMessage = z.infer<typeof ChangeUsernameMessageSchema>;
 export type RoomConfigMessage = z.infer<typeof RoomConfigMessageSchema>;

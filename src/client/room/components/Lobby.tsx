@@ -109,7 +109,7 @@ function AddPlaylistInput() {
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   useRoomControllerListener(controller, useCallback(msg => {
-    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
+    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlists") {
       setSearchStatus(msg.error ? "error" : "success");
     }
     return false;

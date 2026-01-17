@@ -1,7 +1,7 @@
 import type Server from "./Server";
 import type * as Party from "partykit/server";
 import type {
-  AddPlaylistMessage, AudioControlMessage, ChangeUsernameMessage,
+  AddPlaylistsMessage, AudioControlMessage, ChangeUsernameMessage,
   ClientMessage, ConfirmationMessage,
   CountdownMessage,
   GameState,
@@ -240,20 +240,25 @@ export class ValidRoom implements Party.Server {
       case "change_username":
         this.changeUsername(conn, msg);
         break;
-      case "add_playlist":
+      case "add_playlists":
       case "remove_playlist":
         if (!this.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
           return;
         }
 
-        if (msg.type === "add_playlist" && !this.addPlaylist(msg)) {
-          conn.send(this.getPlaylistsUpdateMessage());
-          this.sendConfirmationOrError(conn, msg, "Please provide a playlist with a unique name and album cover.");
-          return;
+        if (msg.type === "add_playlists") {
+          let omitted = this.addPlaylists(msg);
+          if (omitted > 0) {
+            this.sendConfirmationOrError(conn, msg, `${omitted}/${msg.playlists.length} playlist(s) were ommited because they don't have songs or they don't have a unique name and album cover.`);
+          } else {
+            this.sendConfirmationOrError(conn, msg);
+          }
         } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
-          conn.send(this.getPlaylistsUpdateMessage());
           this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
+          conn.send(this.getPlaylistsUpdateMessage());
           return;
+        } else {
+          this.sendConfirmationOrError(conn, msg);
         }
 
         // always re-filter songs after playlist update
@@ -261,7 +266,6 @@ export class ValidRoom implements Party.Server {
 
         // send the update to all players + confirmation to the host
         this.getPartyRoom().broadcast(this.getPlaylistsUpdateMessage());
-        this.sendConfirmationOrError(conn, msg);
         break;
       case "start_game":
         if (!this.performChecks(conn, msg, "host", "not_ingame", "not_contdown")) {
@@ -450,18 +454,23 @@ export class ValidRoom implements Party.Server {
    * Adds a playlist to the current game session.
    *
    * @param msg The message containing the playlist to add.
-   * @returns true if the playlist was added successfully, false if validation failed.
+   * @returns the amount of playlists omitted.
    */
-  private addPlaylist(msg: AddPlaylistMessage): boolean {
-    if (!msg.playlist.songs || this.playlists.some(p =>
-        p.name === msg.playlist.name && p.cover === msg.playlist.cover
-    )) {
-      return false;
+  private addPlaylists(msg: AddPlaylistsMessage): number {
+    const playlists = msg.playlists.filter(playlist =>
+        playlist.songs && this.playlists.every(p =>
+          p.name !== playlist.name && p.cover !== playlist.cover
+    ));
+
+    if (playlists.length > 0) {
+      this.playlists.push(...playlists);
+      this.server.log(`The playlist(s) ${
+          playlists.map(p => p.name).join("; ")
+      } has/have been added.`);
     }
 
-    this.playlists.push(msg.playlist);
-    this.server.log(`The playlist "${msg.playlist.name}" has been added.`);
-    return true;
+
+    return msg.playlists.length - playlists.length;
   }
 
   /**

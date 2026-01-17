@@ -39,13 +39,13 @@ export const StartGameMessageSchema = z.object({
 /**
  * Schema for messages requesting to add a new playlist to the game.
  */
-export const AddPlaylistMessageSchema = z.object({
-  type: z.literal("add_playlist").default("add_playlist"),
+export const AddPlaylistsMessageSchema = z.object({
+  type: z.literal("add_playlists").default("add_playlists"),
 
   /**
    * The new playlist to add.
    */
-  playlist: PlaylistSchema
+  playlists: z.array(PlaylistSchema)
 });
 
 
