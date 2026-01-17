@@ -9,7 +9,7 @@ export default class Config implements IMessageListener {
    * Whether to perform advanced song filtering.
    * @see {@link RoomConfigMessage.advancedSongFiltering}
    */
-  advancedSongFiltering: boolean = true;
+  public advancedSongFiltering: boolean = true;
 
   constructor(private readonly room: ValidRoom) {
     room.registerMessageListener(this);
