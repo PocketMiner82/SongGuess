@@ -1,3 +1,19 @@
+# [2.6.0](https://github.com/PocketMiner82/SongGuess/compare/2.5.0...2.6.0) (2026-01-18)
+
+
+### Bug Fixes
+
+* allow selecting answers when reloading while game is in questioning phase ([35d9bbe](https://github.com/PocketMiner82/SongGuess/commit/35d9bbe0e18cdc4e73bd3e96ea39aad079280c07))
+* **Results:** swap control buttons ([8589cac](https://github.com/PocketMiner82/SongGuess/commit/8589cac6ef2feb8336028488a562de9437278177))
+* **room:** remove onbeforeunload + add confirmation for lobby and abort button ([6cb291d](https://github.com/PocketMiner82/SongGuess/commit/6cb291d98b073f52825e19dfe799ebe575a1868c))
+
+
+### Features
+
+* **config:** add option to end round when all players answered ([e593bfe](https://github.com/PocketMiner82/SongGuess/commit/e593bfe48073298cf9591016dda97b742f74f020))
+* **transferPlaylists:** use Date.now() based sleep when avoiding rate limits ([0055843](https://github.com/PocketMiner82/SongGuess/commit/0055843ddf7861c9d26cc0727510f4dd2bd7e0ca))
+* **ValidRoom:** allow adding multiple playlists at once ([29ef82a](https://github.com/PocketMiner82/SongGuess/commit/29ef82a1357b72ec1d563e9bf7854243afbd6943))
+
 # [2.6.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.6.0-dev.5...2.6.0-dev.6) (2026-01-17)
 
 
