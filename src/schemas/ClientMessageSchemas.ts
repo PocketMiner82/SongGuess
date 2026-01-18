@@ -1,5 +1,5 @@
 import z from "zod";
-import {PlaylistSchema, UsernameSchema} from "./RoomSharedSchemas";
+import {PlaylistSchema, UsernameSchema} from "./SharedSchemas";
 
 
 /**
@@ -14,8 +14,6 @@ export const ReturnToMessageSchema = z.object({
   where: z.literal(["lobby", "results"])
 });
 
-export type ReturnToMessage = z.infer<typeof ReturnToMessageSchema>;
-
 
 /**
  * Schema for messages containing the player's selected answer during a question.
@@ -29,8 +27,6 @@ export const SelectAnswerMessageSchema = z.object({
   answerIndex: z.int().min(0).max(3)
 })
 
-export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
-
 
 /**
  * Schema for messages requesting to start a new game.
@@ -39,22 +35,18 @@ export const StartGameMessageSchema = z.object({
   type: z.literal("start_game").default("start_game")
 });
 
-export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
-
 
 /**
  * Schema for messages requesting to add a new playlist to the game.
  */
-export const AddPlaylistMessageSchema = z.object({
-  type: z.literal("add_playlist").default("add_playlist"),
+export const AddPlaylistsMessageSchema = z.object({
+  type: z.literal("add_playlists").default("add_playlists"),
 
   /**
    * The new playlist to add.
    */
-  playlist: PlaylistSchema
+  playlists: z.array(PlaylistSchema)
 });
-
-export type AddPlaylistMessage = z.infer<typeof AddPlaylistMessageSchema>;
 
 
 /**
@@ -69,8 +61,6 @@ export const RemovePlaylistMessageSchema = z.object({
   index: z.nullable(z.int().nonnegative())
 });
 
-export type RemovePlaylistMessage = z.infer<typeof RemovePlaylistMessageSchema>;
-
 
 /**
  * Schema for messages requesting to change a player's username.
@@ -83,5 +73,3 @@ export const ChangeUsernameMessageSchema = z.object({
    */
   username: UsernameSchema
 });
-
-export type ChangeUsernameMessage = z.infer<typeof ChangeUsernameMessageSchema>;

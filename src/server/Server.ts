@@ -1,0 +1,214 @@
+import type * as Party from "partykit/server";
+import {clearTimeout} from "node:timers";
+import {
+  ROOM_CLEANUP_TIMEOUT
+} from "./ServerConstants";
+import type {RoomGetResponse} from "../types/APIResponseTypes";
+import {ValidRoom} from "./ValidRoom";
+
+
+// noinspection JSUnusedGlobalSymbols
+export default class Server implements Party.Server {
+  /**
+   * Log messages are prefixed with this string.
+   */
+  readonly LOG_PREFIX: string = `[Room ${this.partyRoom.id}]`;
+
+
+  /**
+   * Only set, if this room was created by a request to /createRoom
+   */
+  validRoom?: ValidRoom;
+
+  /**
+   * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
+   */
+  cleanupTimeout: NodeJS.Timeout|null = null;
+
+
+  /**
+   * Creates a new room server.
+   *
+   * @param partyRoom The room to serve
+   */
+  constructor(readonly partyRoom: Party.Room) { }
+
+  /**
+   * Logs a message with the {@link LOG_PREFIX}
+   *
+   * @param text the text to log
+   * @param level the log level to use
+   */
+  public log(text: any, level: "debug"|"warn"|"error"|"info" = "info") {
+    let logFunction: (...data: any) => void;
+    switch(level) {
+      case "debug":
+        logFunction = console.debug;
+        break;
+      case "warn":
+        logFunction = console.error;
+        break;
+      case "error":
+        logFunction = console.error;
+        break;
+      case "info":
+      default:
+        logFunction = console.info;
+        break;
+    }
+
+    logFunction(`${this.LOG_PREFIX} ${text}`);
+  }
+
+  /**
+   * Calculates the current number of active WebSocket connections in the room.
+   *
+   * @returns The count of connected clients.
+   */
+  public getOnlineCount(): number {
+    return Array.from(this.partyRoom.getConnections()).length;
+  }
+
+  /**
+   * Invalidates the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
+   * Uses milliseconds for the setTimeout function (ROOM_CLEANUP_TIMEOUT * 1000).
+   */
+  private delayedCleanup() {
+    this.cleanupTimeout = setTimeout(() => {
+      if (this.getOnlineCount() === 0) {
+        this.validRoom = undefined;
+        this.log("Room closed due to timeout.");
+      }
+      this.cleanupTimeout = null;
+    }, ROOM_CLEANUP_TIMEOUT * 1000);
+  }
+
+  //
+  // ROOM WS EVENTS
+  //
+
+  /**
+   * Handles a new WebSocket connection to the room.
+   *
+   * @param conn The new connection.
+   * @param ctx The connection context.
+   */
+  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    if (this.cleanupTimeout) {
+      clearTimeout(this.cleanupTimeout);
+      this.cleanupTimeout = null;
+    }
+
+    this.log(`${conn.id} connected.`);
+
+    // kick player if room is not created yet
+    if (!this.validRoom) {
+      conn.close(4000, "Room ID not found");
+      return;
+    }
+
+    this.validRoom.onConnect(conn, ctx);
+  }
+
+  /**
+   * Handles incoming messages from a WebSocket connection.
+   *
+   * @param message The message content as a string.
+   * @param conn The connection that sent the message.
+   */
+  onMessage(message: string, conn: Party.Connection) {
+    // ignore all messages if room is not valid
+    if (!this.validRoom) {
+      return;
+    }
+
+    this.validRoom.onMessage(message, conn);
+  }
+
+  /**
+   * Handles a WebSocket connection closing.
+   *
+   * @param conn The connection that closed.
+   */
+  onClose(conn: Party.Connection) {
+    // ignore disconnects if room is not valid
+    if (!this.validRoom) {
+      return;
+    }
+
+    this.log(`${conn.id} left.`);
+
+    this.validRoom.onClose(conn);
+
+    if (this.getOnlineCount() === 0) {
+      this.delayedCleanup();
+
+      this.log(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
+    }
+  }
+
+  //
+  // ROOM HTTP EVENTS
+  //
+
+  /**
+   * Handles HTTP requests to the room endpoint.
+   *
+   * @param req The HTTP request to handle.
+   * @returns A Promise resolving to the HTTP response.
+   */
+  async onRequest(req: Party.Request): Promise<Response> {
+    // respond with JSON containing the current online count and if the room is valid
+    if (req.method === "GET") {
+      let json: RoomGetResponse = {
+        onlineCount: this.getOnlineCount(),
+        isValidRoom: this.validRoom !== undefined
+      };
+
+      return Response.json(json);
+    // used to initially validate and activate the room, requires a secret token shared between this method and the static createRoom method
+    } else if (req.method === "POST") {
+      let url = new URL(req.url);
+      if (url.searchParams.has("token") && url.searchParams.get("token") === this.partyRoom.env.VALIDATE_ROOM_TOKEN) {
+        this.validRoom = new ValidRoom(this);
+        this.delayedCleanup();
+
+        this.log("Room created.");
+        return new Response("ok", { status: 200 });
+      }
+
+      return new Response("Token invalid/missing.", { status: 401 });
+    }
+
+    return new Response("Bad request. Only GET and POST is supported.", { status: 400 });
+  }
+
+  //
+  // GLOBAL HTTP EVENTS
+  //
+
+  /**
+   * Handles global HTTP requests to the PartyKit worker.
+   *
+   * @param req The fetch request.
+   * @param lobby The fetch lobby for asset serving.
+   * @param _ctx The execution context (unused).
+   * @returns A Promise resolving to the fetch response.
+   */
+  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, _ctx: Party.ExecutionContext) {
+    let url: URL = new URL(req.url);
+
+    // if room url is requested without HTML extension, add it
+    if (!url.pathname.endsWith(".html")) {
+      let resp = await lobby.assets.fetch(`${url.pathname}.html${url.search}`);
+      if (resp)
+        return resp;
+    }
+
+    // redirect to main page, if on another one
+    return Response.redirect(url.origin);
+  }
+}
+
+// noinspection BadExpressionStatementJS
+Server satisfies Party.Worker;

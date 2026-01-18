@@ -1,75 +1,48 @@
+import type Server from "./Server";
 import type * as Party from "partykit/server";
-import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
-import z from "zod";
-import { fetchGetRoom, fetchPostRoom } from "../RoomHTTPHelper";
-import type { RoomInfoResponse, PostCreateRoomResponse } from "../schemas/RoomHTTPSchemas";
-import {
-  type GameState,
-  type PlayerState,
-  type UpdateMessage,
-  type UpdatePlaylistsMessage,
-  type AudioControlMessage,
-  type CountdownMessage, type UpdatePlayedSongsMessage
-} from "../schemas/RoomServerMessageSchemas";
-import {setInterval, setTimeout, clearInterval, clearTimeout} from "node:timers";
-import {
-  ClientMessageSchema,
-  type ClientMessage,
-  type ConfirmationMessage,
-  type SourceMessage, OtherMessageSchema, type PongMessage, type RoomConfigMessage
-} from "../schemas/RoomMessageSchemas";
-import {
-  type Playlist,
-  type Song,
-  artistRegex,
-  albumRegex,
-  UnknownPlaylist,
-  songRegex
-} from "../schemas/RoomSharedSchemas";
-import Question, {DistractionError} from "./Question";
 import type {
-  AddPlaylistMessage,
-  ChangeUsernameMessage,
-  RemovePlaylistMessage, SelectAnswerMessage
-} from "../schemas/RoomClientMessageSchemas";
+  AddPlaylistsMessage, AudioControlMessage, ChangeUsernameMessage,
+  ClientMessage, ConfirmationMessage,
+  CountdownMessage,
+  GameState,
+  PlayerState,
+  Playlist,
+  PongMessage, RemovePlaylistMessage, SelectAnswerMessage,
+  Song, SourceMessage, UpdateMessage, UpdatePlayedSongsMessage, UpdatePlaylistsMessage
+} from "../types/MessageTypes";
+import Question, {DistractionError} from "./Question";
 import {
   COLORS,
   POINTS_PER_QUESTION,
   QUESTION_COUNT,
-  ROOM_CLEANUP_TIMEOUT, ROUND_PAUSE_MUSIC,
-  ROUND_SHOW_ANSWER,
-  ROUND_START,
+  ROUND_PAUSE_MUSIC,
+  ROUND_SHOW_ANSWER, ROUND_START,
   ROUND_START_MUSIC,
   ROUND_START_NEXT, TIME_PER_QUESTION
 } from "./ServerConstants";
+import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
+import z from "zod";
+import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
 import { version } from "../../package.json";
-import {
-  AppleMusicConfig,
-  AuthType,
-  getAuthenticatedAxios,
-  Region,
-  SongsEndpointTypes
-} from "@syncfm/applemusic-api";
-import type {AxiosInstance} from "axios";
+import ServerConfig from "./ServerConfig";
+import type {IMessageListener} from "./IMessageListener";
 
 
-// noinspection JSUnusedGlobalSymbols
-export default class Server implements Party.Server {
+/**
+ * A validated SongGuess room.
+ */
+export class ValidRoom implements Party.Server {
   /**
-   * Log messages are prefixed with this string.
+   * The configuration of this room.
    */
-  readonly LOG_PREFIX: string = `[Room ${this.room.id}]`;
-
+  readonly config: ServerConfig;
 
   /**
-   * True, if this room was created by a request to /createRoom
+   * Contains all listeners that want to receive client messages.
+   * @see registerMessageListener
+   * @private
    */
-  isValidRoom: boolean = false;
-
-  /**
-   * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
-   */
-  cleanupTimeout: NodeJS.Timeout|null = null;
+  private messageListeners: IMessageListener[] = [];
 
   /**
    * Map containing timeouts to kick inactive players. Key is connection id.
@@ -112,12 +85,6 @@ export default class Server implements Party.Server {
    * Currently selected playlist(s)
    */
   playlists: Playlist[] = [];
-
-  /**
-   * Whether to perform advanced song filtering.
-   * @see {@link RoomConfigMessage.advancedSongFiltering}
-   */
-  advancedSongFiltering: boolean = true;
 
   /**
    * All songs of the currently selected playlist(s)
@@ -170,38 +137,11 @@ export default class Server implements Party.Server {
    */
   remainingSongs: Song[] = [];
 
+  constructor(readonly server: Server) {
+    this.config = new ServerConfig(this);
+  }
 
-  /**
-   * Creates a new room server.
-   *
-   * @param room The room to serve
-   */
-  constructor(readonly room: Party.Room) {}
-
-  //
-  // ROOM WS EVENTS
-  //
-
-  /**
-   * Handles a new WebSocket connection to the room.
-   *
-   * @param conn The new connection.
-   * @param _ctx The connection context (unused).
-   */
   onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
-    if (this.cleanupTimeout) {
-      clearTimeout(this.cleanupTimeout);
-      this.cleanupTimeout = null;
-    }
-
-    this.log(`${conn.id} connected.`);
-
-    // kick player if room is not created yet
-    if (!this.isValidRoom) {
-      conn.close(4000, "Room ID not found");
-      return;
-    }
-
     if (this.hostConnection === undefined) {
       this.transferHost(conn, false);
     } else if (this.hostConnection === null && this.hostID === conn.id) {
@@ -231,35 +171,22 @@ export default class Server implements Party.Server {
     if (this.state === "ingame") {
       let q = this.questions[this.currentQuestion];
 
+      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
+
       if (this.roundTicks < ROUND_SHOW_ANSWER) {
         conn.send(q.getQuestionMessage(this.currentQuestion + 1));
       } else {
         conn.send(q.getAnswerMessage(this.currentQuestion + 1));
       }
 
-      setTimeout(() => {
-        conn.send(this.getAudioControlMessage("load", q.song.audioURL));
-
-        if (this.roundTicks >= ROUND_START_MUSIC) {
-          conn.send(this.getAudioControlMessage("play"));
-        }
-      }, 50);
+      if (this.roundTicks >= ROUND_START_MUSIC) {
+        conn.send(this.getAudioControlMessage("play"));
+      }
     }
   }
 
-  /**
-   * Handles incoming messages from a WebSocket connection.
-   *
-   * @param message The message content as a string.
-   * @param conn The connection that sent the message.
-   */
   onMessage(message: string, conn: Party.Connection) {
-    // ignore all messages if room is not valid
-    if (!this.isValidRoom) {
-      return;
-    }
-
-    // when room is valid: always refresh inactive timeout
+    // always refresh inactive timeout
     this.refreshKickPlayerTimeout(conn);
 
     // try to parse JSON
@@ -267,7 +194,7 @@ export default class Server implements Party.Server {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
-      this.log(`${conn.id} sent: ${message}`, "debug");
+      this.server.log(`${conn.id} sent: ${message}`, "debug");
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
@@ -275,8 +202,8 @@ export default class Server implements Party.Server {
     // check if received message is valid
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
-      this.log(`${conn.id} sent: ${message}`, "debug");
-      this.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
+      this.server.log(`${conn.id} sent: ${message}`, "debug");
+      this.server.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
@@ -285,7 +212,11 @@ export default class Server implements Party.Server {
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
-      this.log(`${conn.id} sent: ${message}`, "debug");
+      this.server.log(`${conn.id} sent: ${message}`, "debug");
+
+    if (this.messageListeners.some(l => l.onMessage(conn, msg))) {
+      return;
+    }
 
     // handle each message type
     switch(msg.type) {
@@ -301,48 +232,38 @@ export default class Server implements Party.Server {
         break;
       case "confirmation":
         if (msg.error) {
-          this.log(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`, "warn");
+          this.server.log(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`, "warn");
         }
         break;
       case "change_username":
         this.changeUsername(conn, msg);
         break;
-      case "add_playlist":
+      case "add_playlists":
       case "remove_playlist":
         if (!this.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
           return;
         }
 
-        if (msg.type === "add_playlist" && !this.addPlaylist(msg)) {
-          conn.send(this.getPlaylistsUpdateMessage());
-          this.sendConfirmationOrError(conn, msg, "Please provide a playlist with a unique name and album cover.");
-          return;
+        if (msg.type === "add_playlists") {
+          let omitted = this.addPlaylists(msg);
+          if (omitted > 0) {
+            this.sendConfirmationOrError(conn, msg, `${omitted}/${msg.playlists.length} playlist(s) were ommited because they don't have songs or they don't have a unique name and album cover.`);
+          } else {
+            this.sendConfirmationOrError(conn, msg);
+          }
         } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
-          conn.send(this.getPlaylistsUpdateMessage());
           this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
+          conn.send(this.getPlaylistsUpdateMessage());
           return;
+        } else {
+          this.sendConfirmationOrError(conn, msg);
         }
 
         // always re-filter songs after playlist update
         this.filterSongs();
 
         // send the update to all players + confirmation to the host
-        this.room.broadcast(this.getPlaylistsUpdateMessage());
-        this.sendConfirmationOrError(conn, msg);
-        break;
-      case "room_config":
-        if (!this.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
-          return;
-        }
-
-        // update filtered songs if config for that changed
-        if (msg.advancedSongFiltering !== undefined) {
-          this.advancedSongFiltering = msg.advancedSongFiltering;
-          this.filterSongs();
-
-          this.room.broadcast(this.getConfigMessage());
-          this.room.broadcast(this.getPlaylistsUpdateMessage());
-        }
+        this.getPartyRoom().broadcast(this.getPlaylistsUpdateMessage());
         break;
       case "start_game":
         if (!this.performChecks(conn, msg, "host", "not_ingame", "not_contdown")) {
@@ -361,7 +282,7 @@ export default class Server implements Party.Server {
             this.sendConfirmationOrError(this.hostConnection, msg, e.message);
           } else if (this.hostConnection) {
             this.sendConfirmationOrError(this.hostConnection, msg, "Unknown error while starting game.");
-            this.log(e, "error");
+            this.server.log(e, "error");
           }
           return;
         }
@@ -396,31 +317,18 @@ export default class Server implements Party.Server {
         break;
       default:
         // in case a message is defined but not yet implemented
-        this.sendConfirmationOrError(conn, msg, `Not implemented: ${(msg as ClientMessage).type}`);
+        this.sendConfirmationOrError(conn, msg as any, `Not implemented: ${(msg as ClientMessage).type}`);
         break;
     }
   }
 
-  /**
-   * Handles a WebSocket connection closing.
-   *
-   * @param conn The connection that closed.
-   */
   onClose(conn: Party.Connection) {
-    // ignore disconnects if room is not valid
-    if (!this.isValidRoom) {
-      return;
-    }
-
-    this.log(`${conn.id} left.`);
-
     // always remove inactive player timeouts
     let playerTimeout = this.kickPlayerTimeouts.get(conn.id);
     if (playerTimeout) {
       clearTimeout(playerTimeout);
       this.kickPlayerTimeouts.delete(conn.id);
     }
-
 
     // cache state of connection
     this.cachedStates.set(conn.id, conn.state as PlayerState);
@@ -430,20 +338,26 @@ export default class Server implements Party.Server {
       this.delayedHostTransfer();
     }
 
-    // no more players left
-    if (this.getOnlineCount() === 0) {
-      this.delayedCleanup();
-
-      this.log(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
-    } else {
-      // inform all clients about changes, including possible host transfer
-      this.broadcastUpdateMessage();
-    }
+    // inform all clients about changes, including possible host transfer
+    this.broadcastUpdateMessage();
   }
 
-  //
-  // NORMAL FUNCTIONS
-  //
+  /**
+   * Returns the instance of the current {@link Party.Room}
+   */
+  public getPartyRoom(): Party.Room {
+    return this.server.partyRoom;
+  }
+
+  /**
+   * Registers a new listener that recieves client messages.
+   * @param listener the object that wants to listen for client messages.
+   */
+  public registerMessageListener(listener: IMessageListener) {
+    if (this.messageListeners.indexOf(listener) < 0) {
+      this.messageListeners.push(listener);
+    }
+  }
 
   /**
    * Performs one or more of the specified checks.
@@ -458,8 +372,8 @@ export default class Server implements Party.Server {
    *               - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
-  private performChecks(conn: Party.Connection|null, msg: SourceMessage,
-        ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count" | "answer")[]): boolean {
+  public performChecks(conn: Party.Connection|null, msg: SourceMessage,
+                       ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count" | "answer")[]): boolean {
     let possibleErrorFunc = conn
         ? (error: string)=> {
           conn.send(this.getUpdateMessage(conn));
@@ -516,7 +430,7 @@ export default class Server implements Party.Server {
 
         case "answer":
           if (this.roundTicks > ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
-            possibleErrorFunc("Can only accept answering during questioning phase.");
+            possibleErrorFunc("Can only accept answers during questioning phase.");
             successful = false;
           } else if (conn && connState.answerIndex !== undefined) {
             possibleErrorFunc("You already selected an answer.");
@@ -538,18 +452,22 @@ export default class Server implements Party.Server {
    * Adds a playlist to the current game session.
    *
    * @param msg The message containing the playlist to add.
-   * @returns true if the playlist was added successfully, false if validation failed.
+   * @returns the amount of playlists omitted.
    */
-  private addPlaylist(msg: AddPlaylistMessage): boolean {
-    if (!msg.playlist.songs || this.playlists.some(p =>
-        p.name === msg.playlist.name && p.cover === msg.playlist.cover
-    )) {
-      return false;
+  private addPlaylists(msg: AddPlaylistsMessage): number {
+    const playlists = msg.playlists.filter(playlist =>
+        playlist.songs && this.playlists.every(p =>
+          p.name !== playlist.name && p.cover !== playlist.cover
+    ));
+
+    if (playlists.length > 0) {
+      this.playlists.push(...playlists);
+      this.server.log(`The playlist(s) ${
+          playlists.map(p => p.name).join("; ")
+      } has/have been added.`);
     }
 
-    this.playlists.push(msg.playlist);
-    this.log(`The playlist "${msg.playlist.name}" has been added.`);
-    return true;
+    return msg.playlists.length - playlists.length;
   }
 
   /**
@@ -567,7 +485,7 @@ export default class Server implements Party.Server {
             let normalizedName = s.name.toLowerCase();
             let normalizedArtist = s.artist.toLowerCase();
 
-            if (this.advancedSongFiltering) {
+            if (this.config.advancedSongFiltering) {
               // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
               normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
             }
@@ -594,10 +512,10 @@ export default class Server implements Party.Server {
     if (msg.index !== null) {
       let playlistName = this.playlists[msg.index].name;
       this.playlists.splice(msg.index, 1);
-      this.log(`The playlist "${playlistName}" has been removed.`);
+      this.server.log(`The playlist "${playlistName}" has been removed.`);
     } else {
       this.playlists = [];
-      this.log(`All playlists have been removed.`);
+      this.server.log(`All playlists have been removed.`);
     }
     return true;
   }
@@ -610,7 +528,7 @@ export default class Server implements Party.Server {
    */
   private changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
     // username is already validated, just check if it's used by another player
-    for (let connection of this.room.getConnections()) {
+    for (let connection of this.getPartyRoom().getConnections()) {
       let state = connection.state as PlayerState;
       if (connection !== conn && state.username === msg.username) {
         conn.send(this.getUpdateMessage(conn));
@@ -643,7 +561,7 @@ export default class Server implements Party.Server {
    */
   private startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
-      this.room.broadcast(this.getCountdownMessage());
+      this.getPartyRoom().broadcast(this.getCountdownMessage());
 
       if (this.countdown === 0) {
         this.stopCountdown();
@@ -675,7 +593,7 @@ export default class Server implements Party.Server {
       if (this.roundTicks >= ROUND_START_NEXT) {
         this.roundTicks = 0;
         this.currentQuestion++;
-        for (let conn of this.room.getConnections()) {
+        for (let conn of this.getPartyRoom().getConnections()) {
           this.resetPlayerAnswerData(conn);
         }
       }
@@ -687,34 +605,34 @@ export default class Server implements Party.Server {
 
       let q = this.questions[this.currentQuestion];
       switch (this.roundTicks++) {
-        // send question directly at start
+          // send question directly at start
         case ROUND_START:
-          this.room.broadcast(q.getQuestionMessage(this.currentQuestion + 1));
+          this.getPartyRoom().broadcast(q.getQuestionMessage(this.currentQuestion + 1));
           this.broadcastUpdateMessage();
 
           // load audio of song to guess
-          this.room.broadcast(this.getAudioControlMessage("load", q.song.audioURL));
+          this.getPartyRoom().broadcast(this.getAudioControlMessage("load", q.song.audioURL));
           break;
 
-        // start playback of song to guess
+          // start playback of song to guess
         case ROUND_START_MUSIC:
           this.roundStartTime = Date.now();
-          this.room.broadcast(this.getAudioControlMessage("play"));
+          this.getPartyRoom().broadcast(this.getAudioControlMessage("play"));
           break;
 
-        // show results of current round
+          // show results of current round
         case ROUND_SHOW_ANSWER:
           this.calculatePoints();
 
           // shows which player voted for which question
           this.broadcastUpdateMessage();
 
-          this.room.broadcast(q.getAnswerMessage(this.currentQuestion + 1));
+          this.getPartyRoom().broadcast(q.getAnswerMessage(this.currentQuestion + 1));
           break;
 
-        // pause music to allow fade out
+          // pause music to allow fade out
         case ROUND_PAUSE_MUSIC:
-          this.room.broadcast(this.getAudioControlMessage("pause"));
+          this.getPartyRoom().broadcast(this.getAudioControlMessage("pause"));
           break;
       }
     }
@@ -727,28 +645,9 @@ export default class Server implements Party.Server {
       this.state = "ingame";
       this.broadcastUpdateMessage();
 
-      setTimeout(gameLoop, 50);
+      gameLoop();
       this.gameLoopInterval = setInterval(gameLoop, 1000);
     });
-  }
-
-  /**
-   * Resets the game to the lobby state.
-   *
-   * @see {@link endGame}
-   */
-  private resetGame() {
-    this.endGame(false);
-    this.stopCountdown();
-
-    this.roundTicks = 0;
-    this.currentQuestion = 0;
-    this.state = "lobby";
-
-    // reset points of all players
-    for (let conn of this.room.getConnections()) {
-      this.resetPlayerAnswerData(conn, true);
-    }
   }
 
   /**
@@ -790,7 +689,7 @@ export default class Server implements Party.Server {
     playerState.answerIndex = msg.answerIndex;
 
     let everyoneVoted = true;
-    for (let conn of this.room.getConnections()) {
+    for (let conn of this.getPartyRoom().getConnections()) {
       let connState = conn.state as PlayerState;
       if (connState.answerIndex === undefined) {
         everyoneVoted = false;
@@ -799,7 +698,7 @@ export default class Server implements Party.Server {
     }
 
     // show answers if everyone voted
-    if (everyoneVoted) {
+    if (everyoneVoted && this.config.endWhenAnswered) {
       this.roundTicks = ROUND_SHOW_ANSWER;
     }
   }
@@ -808,7 +707,7 @@ export default class Server implements Party.Server {
    * Calculates the points for this round for all players that selected the correct answer.
    */
   private calculatePoints() {
-    for (let conn of this.room.getConnections()) {
+    for (let conn of this.getPartyRoom().getConnections()) {
       let connState = conn.state as PlayerState;
 
       if (connState.answerTimestamp && connState.answerIndex === this.questions[this.currentQuestion].getAnswerIndex()) {
@@ -836,14 +735,14 @@ export default class Server implements Party.Server {
     clearInterval(this.gameLoopInterval);
     this.gameLoopInterval = null;
 
-    this.room.broadcast(this.getAudioControlMessage("pause"));
+    this.getPartyRoom().broadcast(this.getAudioControlMessage("pause"));
 
     this.state = "results";
 
     // the update message always contains the points, displaying ranks is handled client-side
     if (sendUpdate) {
       this.broadcastUpdateMessage();
-      this.room.broadcast(this.getPlayedSongsUpdateMessage());
+      this.getPartyRoom().broadcast(this.getPlayedSongsUpdateMessage());
     }
   }
 
@@ -855,9 +754,9 @@ export default class Server implements Party.Server {
 
     this.hostTransferTimeout = setTimeout(() => {
       if (this.hostConnection === null) {
-        let next = this.room.getConnections()[Symbol.iterator]().next();
+        let next = this.getPartyRoom().getConnections()[Symbol.iterator]().next();
         if (!next.done) {
-          this.log(`Host left, transferring host to ${next.value.id}`);
+          this.server.log(`Host left, transferring host to ${next.value.id}`);
           this.transferHost(next.value);
         } else {
           this.transferHost(undefined);
@@ -878,88 +777,11 @@ export default class Server implements Party.Server {
     this.hostID = newHost?.id;
 
     if (newHost) {
-      newHost.send(this.getConfigMessage());
+      newHost.send(this.config.getConfigMessage());
       if (sendUpdate) {
         this.broadcastUpdateMessage();
       }
     }
-  }
-
-  /**
-   * Invalidates the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
-   * Uses milliseconds for the setTimeout function (ROOM_CLEANUP_TIMEOUT * 1000).
-   */
-  private delayedCleanup() {
-    this.cleanupTimeout = setTimeout(() => {
-      if (this.getOnlineCount() === 0) {
-        this.resetRoom();
-        this.log("Room closed due to timeout.");
-      }
-      this.cleanupTimeout = null;
-    }, ROOM_CLEANUP_TIMEOUT * 1000);
-  }
-
-  /**
-   * Resets the room to its initial state.
-   * @private
-   */
-  private resetRoom() {
-    this.resetGame();
-
-    this.isValidRoom = false;
-    this.cleanupTimeout = null;
-    this.hostConnection = undefined;
-    this.hostID = undefined;
-    this.hostTransferTimeout = null;
-    this.cachedStates = new Map();
-    this.playlists = [];
-    this.advancedSongFiltering = true;
-    this.songs = [];
-    this.countdownInterval = null;
-    this.countdown = 0;
-    this.state = "lobby";
-    this.roundStartTime = -1;
-    this.gameLoopInterval = null;
-    this.roundTicks = 0;
-    this.questions = [];
-    this.currentQuestion = 0;
-    this.remainingSongs = [];
-  }
-
-  /**
-   * Logs a message with the {@link LOG_PREFIX}
-   *
-   * @param text the text to log
-   * @param level the log level to use
-   */
-  private log(text: any, level: "debug"|"warn"|"error"|"info" = "info") {
-    let logFunction: (...data: any) => void;
-    switch(level) {
-      case "debug":
-        logFunction = console.debug;
-        break;
-      case "warn":
-        logFunction = console.error;
-        break;
-      case "error":
-        logFunction = console.error;
-        break;
-      case "info":
-      default:
-        logFunction = console.info;
-        break;
-    }
-
-    logFunction(`${this.LOG_PREFIX} ${text}`);
-  }
-
-  /**
-   * Calculates the current number of active WebSocket connections in the room.
-   *
-   * @returns The count of connected clients.
-   */
-  private getOnlineCount(): number {
-    return Array.from(this.room.getConnections()).length;
   }
 
   /**
@@ -970,7 +792,7 @@ export default class Server implements Party.Server {
    */
   private getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
-    for (let conn of this.room.getConnections()) {
+    for (let conn of this.getPartyRoom().getConnections()) {
       states.push(conn.state as PlayerState);
     }
 
@@ -1108,7 +930,7 @@ export default class Server implements Party.Server {
    * @see {@link getUpdateMessage}
    */
   private broadcastUpdateMessage() {
-    for (const conn of this.room.getConnections()) {
+    for (const conn of this.getPartyRoom().getConnections()) {
       conn.send(this.getUpdateMessage(conn));
     }
   }
@@ -1130,24 +952,12 @@ export default class Server implements Party.Server {
    *
    * @returns a JSON string of the constructed {@link UpdatePlaylistsMessage}
    */
-  private getPlaylistsUpdateMessage(): string {
+  public getPlaylistsUpdateMessage(): string {
     return JSON.stringify({
       type: "update_playlists",
       playlists: this.playlists,
       filteredSongsCount: this.songs.length
     } satisfies UpdatePlaylistsMessage);
-  }
-
-  /**
-   * Constructs a configuration update message.
-   *
-   * @returns a JSON string of the constructed {@link RoomConfigMessage}
-   */
-  private getConfigMessage(): string {
-    return JSON.stringify({
-      type: "room_config",
-      advancedSongFiltering: this.advancedSongFiltering
-    } satisfies RoomConfigMessage);
   }
 
   /**
@@ -1204,250 +1014,22 @@ export default class Server implements Party.Server {
     return JSON.stringify(msg);
   }
 
-  //
-  // ROOM HTTP EVENTS
-  //
-
-  axiosClient: AxiosInstance|null = null;
   /**
-   * Handles HTTP requests to the room endpoint.
+   * Resets the game to the lobby state.
    *
-   * @param req The HTTP request to handle.
-   * @returns A Promise resolving to the HTTP response.
+   * @see {@link endGame}
    */
-  async onRequest(req: Party.Request): Promise<Response> {
-    let url: URL = new URL(req.url);
+  private resetGame() {
+    this.endGame(false);
+    this.stopCountdown();
 
-    // handle room creation
-    if (url.pathname.endsWith("/createRoom")) {
-      return await Server.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
-    // handle playlist info request
-    } else if (url.pathname.endsWith("/playlistInfo")) {
-      // fetch playlist info
-      let playlistURL = url.searchParams.get("url");
-      if (!playlistURL) {
-        return new Response("Missing url parameter.", {status: 400});
-      }
+    this.roundTicks = 0;
+    this.currentQuestion = 0;
+    this.state = "lobby";
 
-      return Response.json(await Server.getPlaylistInfo(playlistURL));
-    } else if(url.pathname.endsWith("/songByISRC")) {
-      let isrc = url.searchParams.get("isrc");
-      if (!isrc) {
-        return new Response("Missing isrc parameter.", {status: 400});
-      }
-
-      if (!this.axiosClient) {
-        this.axiosClient = await getAuthenticatedAxios(new AppleMusicConfig({
-          region: Region.US,
-          authType: AuthType.Scraped
-        }));
-      }
-
-      return Server.songByISRCProxy(this.axiosClient, isrc);
-    // respond with JSON containing the current online count and if the room is valid
-    } else if (req.method === "GET") {
-      let json: RoomInfoResponse = {
-        onlineCount: this.getOnlineCount(),
-        isValidRoom: this.isValidRoom
-      };
-
-      return Response.json(json);
-    // used to initially validate and activate the room, requires a secret token shared between this method and the static createRoom method
-    } else if (req.method === "POST") {
-      let url = new URL(req.url);
-      if (url.searchParams.has("token") && url.searchParams.get("token") === this.room.env.VALIDATE_ROOM_TOKEN) {
-        this.isValidRoom = true;
-        this.delayedCleanup();
-
-        this.log("Room created.");
-        return new Response("ok", { status: 200 });
-      }
-
-      return new Response("Token invalid/missing.", { status: 401 });
+    // reset points of all players
+    for (let conn of this.getPartyRoom().getConnections()) {
+      this.resetPlayerAnswerData(conn, true);
     }
-
-    return new Response("Bad request", { status: 400 });
-  }
-
-  //
-  // STATIC GLOBAL FETCH EVENTS
-  //
-
-  /**
-   * Handles global fetch events for the PartyKit worker.
-   *
-   * @param req The fetch request.
-   * @param lobby The fetch lobby for asset serving.
-   * @param _ctx The execution context (unused).
-   * @returns A Promise resolving to the fetch response.
-   */
-  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, _ctx: Party.ExecutionContext) {
-    let url: URL = new URL(req.url);
-
-    // if room url is requested without HTML extension, add it
-    if (!url.pathname.endsWith(".html")) {
-      let resp = await lobby.assets.fetch(`${url.pathname}.html${url.search}`);
-      if (resp)
-        return resp;
-    }
-
-    // redirect to main page, if on another one
-    return Response.redirect(url.origin);
-  }
-
-  //
-  // STATIC FUNCTIONS
-  //
-
-  /**
-   * Simple proxy to fetch data from Apple Music API.
-   * @param client the axios client from the apple music api library
-   * @param isrc the ISRC to look for.
-   * @returns json with id key set to the iTunes ID or null if not found.
-   */
-  private static async songByISRCProxy(client: AxiosInstance, isrc: string): Promise<Response> {
-    try {
-      let resp = await client.get("https://amp-api-edge.music.apple.com/v1/catalog/us/songs?filter[isrc]=" + encodeURIComponent(isrc));
-
-      if (resp.data) {
-        let data = resp.data as SongsEndpointTypes.SongsResponse;
-
-        if (data.data) {
-          for (let s of data.data) {
-            if (s.id) {
-              return Response.json({id: parseInt(s.id)});
-            }
-          }
-        }
-      }
-    } catch { }
-    return Response.json({id: null});
-  }
-
-  /**
-   * Fetches playlist information from an Apple Music URL.
-   *
-   * @param url The Apple Music URL of the playlist.
-   * @returns A Promise resolving to the Playlist information.
-   */
-  private static async getPlaylistInfo(url: string): Promise<Playlist> {
-    if (!artistRegex.test(url) && !albumRegex.test(url) && !songRegex.test(url)) {
-      return UnknownPlaylist;
-    }
-
-    let page = await fetch(url);
-    let text = await page.text();
-
-    // get content of schema.org tag <script id=schema:music-[...] type="application/ld+json">
-    let regex = /<script\s+id="?schema:(Music[^"]*|song)"?\s+type="?application\/ld\+json"?\s*>(?<json>[\s\S]*?)<\/script>/i;
-    let match = regex.exec(text);
-    if (!match || !match.groups) {
-      return UnknownPlaylist;
-    }
-    let json = match.groups["json"];
-
-    try {
-      let data = JSON.parse(json);
-      let name: string = data.name ?? url;
-      let cover: string|null = data.image ?? null;
-      let songs: Song[] = [];
-
-      // album always provides tracks
-      if (data["@type"] === "MusicAlbum" && data.tracks) {
-        let artist: string = data?.byArtist?.[0]?.name ?? "Unknown Artist";
-
-        songs = data.tracks.map((e: any) => (
-            e?.audio?.contentUrl ?
-                {
-                  name: e.audio.name ?? "Unknown Song",
-                  artist: artist,
-                  audioURL: e.audio.contentUrl,
-                  hrefURL: e.url ?? UnknownPlaylist.hrefURL,
-                  cover: (e.audio.thumbnailUrl || e.thumbnailUrl) ?? null
-                } satisfies Song
-            :
-                undefined
-        )).filter((e: any) => e);
-      }
-
-      return {
-        name: name,
-        hrefURL: url,
-        cover: cover,
-        songs: songs
-      };
-    } catch {
-      return UnknownPlaylist;
-    }
-  }
-
-  /**
-   * Generates a unique 6-character room ID that does not currently exist on the server.
-   *
-   * It attempts to generate a random ID and checks for its existence up to 100 times.
-   * The possible characters for the ID are alphanumeric (A-Z, a-z, 0-9).
-   *
-   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
-   * @returns A Promise that resolves with the unique 6-character room ID, or `null` if a unique ID couldn't be found after 100 attempts.
-   */
-  private static async generateRoomID(origin: string): Promise<string | null> {
-    let text: string = "";
-    let possible: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let attempt = 0; attempt < 100; attempt++) {
-      for (let i: number = 0; i < 6; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-      }
-
-      let roomInfo = await fetchGetRoom(`${origin}/parties/main/${text}`);
-
-      // room already exists
-      if (roomInfo && roomInfo.isValidRoom) {
-        continue;
-      }
-
-      return text;
-    }
-
-    return null;
-  }
-
-  /**
-   * Creates a new room on the server by generating a unique ID and then returning the room data.
-   *
-   * It first calls `generateRoomID` to get an available room ID. If an ID is successfully
-   * generated, it sends a request to create the room with the provided token.
-   *
-   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
-   * @param token The initial authentication token to associate with the new room.
-   * @returns A Promise that resolves with a standard `Response` object.
-   * - Status 201 (Created) with the room ID as the body on success.
-   * - Status 409 (Conflict) on failure.
-   * - Status 500 (Internal Server Error) on room validation failure.
-   */
-  private static async createNewRoom(origin: string, token: string): Promise<Response> {
-    let roomID = await Server.generateRoomID(origin);
-    let errorMessage = "";
-    let statusCode = 201;
-
-    if (roomID) {
-      if(!await fetchPostRoom(`${origin}/parties/main/${roomID}`, token)) {
-        errorMessage = "Can't validate room.";
-        statusCode = 500;
-      }
-    } else {
-      errorMessage = "Can't find a free room id.";
-      statusCode = 409;
-    }
-
-    let json: PostCreateRoomResponse = {
-      roomID: roomID as string,
-      error: errorMessage
-    };
-
-    return Response.json(json, {status: statusCode});
   }
 }
-
-// noinspection BadExpressionStatementJS
-Server satisfies Party.Worker;

@@ -1,5 +1,4 @@
 import React, {useState, useCallback, useMemo, type ReactNode} from "react";
-import {albumRegex, artistRegex, songRegex} from "../../../schemas/RoomSharedSchemas";
 import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
 import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
@@ -7,6 +6,7 @@ import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../server/ServerConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
 import { downloadFile, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
+import {albumRegex, artistRegex, songRegex} from "../../../schemas/ValidationRegexes";
 
 
 /**
@@ -75,7 +75,7 @@ function PlaylistsList() {
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-xl font-bold">Playlists - {
-          `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.advancedSongFiltering ? " (filtered)" : ""}`
+          `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.config.advancedSongFiltering ? " (filtered)" : ""}`
         }</h3>
         <DownloadPlaylists />
       </div>
@@ -109,7 +109,7 @@ function AddPlaylistInput() {
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   useRoomControllerListener(controller, useCallback(msg => {
-    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlist") {
+    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlists") {
       setSearchStatus(msg.error ? "error" : "success");
     }
     return false;
@@ -356,8 +356,18 @@ function Settings() {
 
         <div className="border-t border-disabled-bg my-2"></div>
 
-        <SettingsToggle value={controller.advancedSongFiltering} onToggle={v => controller.updateAdvancedSongFiltering(v)}>
+        <SettingsToggle value={controller.config.advancedSongFiltering} onToggle={v => {
+          controller.config.advancedSongFiltering = v;
+          controller.sendConfig();
+        }}>
           Perform advanced song filtering
+        </SettingsToggle>
+
+        <SettingsToggle value={controller.config.endWhenAnswered} onToggle={v => {
+          controller.config.endWhenAnswered = v;
+          controller.sendConfig();
+        }}>
+          End round when all players answered
         </SettingsToggle>
 
         <div className="border-t border-disabled-bg my-2"></div>

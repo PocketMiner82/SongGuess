@@ -1,7 +1,10 @@
 {
   "$schema": "https://www.partykit.io/schema.json",
   "name": "songguess",
-  "main": "src/server/server.ts",
+  "main": "src/server/Server.ts",
+  "parties": {
+    "api": "src/server/API.ts"
+  },
   "compatibilityDate": "2025-11-22",
   "compatibilityFlags": ["global_fetch_private_origin"],
   "serve": {
@@ -17,8 +20,7 @@
   "build": {
     "command": "npm run build",
     "watch": [
-      "src",
-      "public/*.html"
+      "src"
     ]
   }
 }

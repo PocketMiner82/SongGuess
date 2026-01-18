@@ -6,7 +6,7 @@ import { ErrorLabel } from "./components/ErrorLabel";
 import { TopBar } from "./components/TopBar";
 import {CookieConsent} from "react-cookie-consent";
 import { downloadFile, importPlaylistFile, refreshPlaylists, validatePlaylistsFile } from "../Utils";
-import type { PlaylistsFile } from "../schemas/RoomSharedSchemas";
+import type {PlaylistsFile} from "../types/MessageTypes";
 
 
 /**
@@ -23,7 +23,7 @@ function App() {
    * Creates a new room via API and redirects to the room page.
    */
   const buttonClick = async () => {
-    const resp = await fetchPostCreateRoom("/parties/main/createRoom");
+    const resp = await fetchPostCreateRoom("/parties/api/createRoom");
 
     if (!resp) {
       setError("Unknown server error");
@@ -43,12 +43,6 @@ function App() {
    * Prompts user to select a file, refreshes all playlists, and allows download.
    */
   const handleRefreshPlaylists = async () => {
-    const isConfirmed = window.confirm(
-      "This will refresh all playlists in the selected file.\nThis could take some time and make a lot of API calls.\n\nDo you want to continue?"
-    );
-
-    if (!isConfirmed) return;
-
     // Create file input for selecting sgjson file
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -75,6 +69,13 @@ function App() {
           setRefreshStatus("error");
           return;
         }
+
+        const isConfirmed = window.confirm(
+            "This will refresh all playlists in the selected file.\n" +
+            "This could take some time and make a lot of API calls." +
+            "\n\nDo you want to continue?"
+        );
+        if (!isConfirmed) return;
 
         setRefreshProgress(`Refreshing ${playlistsFile.playlists.length} playlist(s)...`);
 

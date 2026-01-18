@@ -21,6 +21,7 @@ function PlayedSongsList() {
         <div className="space-y-2 mx-auto">
           {controller.playedSongs.map((song, idx) => (
               <PlaylistCard
+                  key={idx}
                   index={idx}
                   title={song.name}
                   subtitle={song.artist}
@@ -62,11 +63,18 @@ export function Results() {
 
       {controller.isHost && (
           <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
+            <Button onClick={() => {
+              const isConfirmed = window.confirm(
+                  "Do you really want to send all players to the lobby?"
+              );
+              if (!isConfirmed) return;
+
+              controller.returnTo("lobby");
+            }}>
+              Return to Lobby
+            </Button>
             <Button onClick={() => controller.startGame()}>
               Play Again
-            </Button>
-            <Button onClick={() => controller.returnTo("lobby")}>
-              Return to Lobby
             </Button>
           </div>
       )}

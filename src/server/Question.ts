@@ -1,6 +1,5 @@
-import type { Song } from "../schemas/RoomSharedSchemas";
 import { shuffle } from "../Utils";
-import type {AnswerMessage, QuestionMessage} from "../schemas/RoomServerMessageSchemas";
+import type {AnswerMessage, QuestionMessage, Song} from "../types/MessageTypes";
 
 export default class Question {
   /**

@@ -28,10 +28,6 @@ export function TopBar({
   children,
   className = ''
 }: TopBarProps) {
-  const handleTitleClick = () => {
-    window.location.href = '/';
-  };
-
   return (
     <div className={`bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
@@ -39,12 +35,12 @@ export function TopBar({
           v{version}
         </div>
 
-        <div
-          className="flex-1 text-center cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={handleTitleClick}
+        <a
+          href="/"
+          className="flex-1 text-center cursor-pointer"
         >
           <span className="text-2xl font-bold text-default">SongGuess</span>
-        </div>
+        </a>
 
         <div className="flex-1 flex justify-end">
           {children}

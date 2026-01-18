@@ -2,28 +2,21 @@ import PartySocket from "partysocket";
 import React, {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
 import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
-import type {
-  ChangeUsernameMessage,
-  AddPlaylistMessage,
-  RemovePlaylistMessage,
-  StartGameMessage,
-  SelectAnswerMessage,
-  ReturnToMessage
-} from "../../schemas/RoomClientMessageSchemas";
-import {
-  type Playlist, type PlaylistsFile, type Song
-} from "../../schemas/RoomSharedSchemas";
-import {
-  type PingMessage,
-  type RoomConfigMessage,
-  type ServerMessage,
-  ServerMessageSchema
-} from "../../schemas/RoomMessageSchemas";
-import type {AnswerMessage, GameState, PlayerState, QuestionMessage} from "../../schemas/RoomServerMessageSchemas";
+import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
 import {v4 as uuidv4} from "uuid";
 import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
+import type {
+  AddPlaylistsMessage,
+  AnswerMessage, AudioControlMessage, ChangeUsernameMessage,
+  GameState, PingMessage,
+  PlayerState,
+  Playlist, PlaylistsFile,
+  QuestionMessage, RemovePlaylistMessage, ReturnToMessage, SelectAnswerMessage,
+  ServerMessage, Song, StartGameMessage
+} from "../../types/MessageTypes";
+import {BaseConfig} from "../../BaseConfig";
 
 
 /**
@@ -187,10 +180,9 @@ export class RoomController {
   filteredSongsCount: number = 0;
 
   /**
-   * Whether to perform advanced song filtering.
-   * @see {@link RoomConfigMessage.advancedSongFiltering}
+   * The config of this room
    */
-  advancedSongFiltering: boolean = true;
+  config: BaseConfig = new BaseConfig();
 
   /**
    * The interval of the ping function.
@@ -216,6 +208,16 @@ export class RoomController {
    * The current ping in milliseconds.
    */
   currentPingMs: number = -1;
+
+  /**
+   * The current state of the audio playback
+   */
+  currentAudioState: AudioControlMessage["action"]|null = null;
+
+  /**
+   * The length of the current audio.
+   */
+  currentAudioLength: number = 0;
 
 
   /**
@@ -412,9 +414,7 @@ export class RoomController {
         this.state = msg.state;
         break;
       case "room_config":
-        if (msg.advancedSongFiltering !== undefined) {
-          this.advancedSongFiltering = msg.advancedSongFiltering;
-        }
+        this.config = new BaseConfig(msg);
         break;
       case "update_playlists":
         this.playlists = msg.playlists;
@@ -430,6 +430,10 @@ export class RoomController {
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;
+        break;
+      case "audio_control":
+        this.currentAudioState = msg.action;
+        this.currentAudioLength = msg.length
         break;
     }
 
@@ -461,14 +465,10 @@ export class RoomController {
   }
 
   /**
-   * Asks the server to update the advanced filtering config value.
-   * @param val the new value to set
+   * Asks the server to update config.
    */
-  public updateAdvancedSongFiltering(val: boolean) {
-    this.socket.send(JSON.stringify({
-      type: "room_config",
-      advancedSongFiltering: val
-    } satisfies RoomConfigMessage));
+  public sendConfig() {
+    this.socket.send(this.config.getConfigMessage());
   }
 
   /**
@@ -495,9 +495,7 @@ export class RoomController {
       }
     }
 
-    for (let playlist of playlistsFile.playlists) {
-      this.addPlaylist(playlist);
-    }
+    this.addPlaylists(...playlistsFile.playlists);
   }
 
    /**
@@ -562,19 +560,19 @@ export class RoomController {
 
     if (!playlist) return false;
 
-    this.addPlaylist(playlist);
+    this.addPlaylists(playlist);
 
     return true;
   }
 
   /**
    * Requests the server to add a playlist
-   * @param playlist the playlist to add
+   * @param playlists the playlists to add
    */
-  public addPlaylist(playlist: Playlist) {
-    const req: AddPlaylistMessage = {
-      type: "add_playlist",
-      playlist: playlist
+  public addPlaylists(...playlists: Playlist[]) {
+    const req: AddPlaylistsMessage = {
+      type: "add_playlists",
+      playlists: playlists
     };
     this.socket.send(JSON.stringify(req));
   }

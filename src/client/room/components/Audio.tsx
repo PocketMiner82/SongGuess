@@ -1,8 +1,8 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { useControllerContext, useRoomControllerListener } from '../RoomController';
-import type { ServerMessage } from '../../../schemas/RoomMessageSchemas';
 import {useCookies} from "react-cookie";
 import type CookieProps from "../../../types/CookieProps";
+import type {ServerMessage} from "../../../types/MessageTypes";
 
 /**
  * Audio component that handles audio playback and controls.
