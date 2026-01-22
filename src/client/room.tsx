@@ -89,8 +89,8 @@ function Room() {
               <div className="flex-1 flex justify-end">
                 <span>Ping:</span>
                 <span className={`ml-1 min-w-12 text-right ${
-                    controller.currentPingMs > 100 ? "text-yellow-500" :
                     controller.currentPingMs > 250 ? "text-error" :
+                    controller.currentPingMs > 100 ? "text-yellow-500" :
                     "text-success"
                 }`}>{controller.currentPingMs} ms</span>
               </div>
