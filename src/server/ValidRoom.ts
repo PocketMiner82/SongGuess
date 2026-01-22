@@ -2,15 +2,15 @@ import type Server from "./Server";
 import type * as Party from "partykit/server";
 import type {
   AddPlaylistsMessage, AudioControlMessage, ChangeUsernameMessage,
-  ClientMessage, ConfirmationMessage,
+  ConfirmationMessage,
   CountdownMessage,
   GameState,
   PlayerState,
   Playlist,
-  PongMessage, RemovePlaylistMessage, SelectAnswerMessage,
+  RemovePlaylistMessage, SelectAnswerMessage,
   Song, SourceMessage, UpdateMessage, UpdatePlayedSongsMessage, UpdatePlaylistsMessage
 } from "../types/MessageTypes";
-import Question, {DistractionError} from "./Question";
+import Question from "./Question";
 import {
   COLORS,
   POINTS_PER_QUESTION,
@@ -19,13 +19,13 @@ import {
   ROUND_SHOW_ANSWER, ROUND_START,
   ROUND_START_MUSIC,
   ROUND_START_NEXT, TIME_PER_QUESTION
-} from "./ServerConstants";
+} from "./config/ServerConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import z from "zod";
 import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
 import { version } from "../../package.json";
-import ServerConfig from "./ServerConfig";
-import type {IMessageListener} from "./IMessageListener";
+import ServerConfig from "./config/ServerConfig";
+import Listener from "./listener/Listener";
 
 
 /**
@@ -33,16 +33,14 @@ import type {IMessageListener} from "./IMessageListener";
  */
 export class ValidRoom implements Party.Server {
   /**
+   * The listener, handling incoming messages.
+   */
+  readonly listener: Listener;
+
+  /**
    * The configuration of this room.
    */
   readonly config: ServerConfig;
-
-  /**
-   * Contains all listeners that want to receive client messages.
-   * @see registerMessageListener
-   * @private
-   */
-  private messageListeners: IMessageListener[] = [];
 
   /**
    * Map containing timeouts to kick inactive players. Key is connection id.
@@ -137,7 +135,9 @@ export class ValidRoom implements Party.Server {
    */
   remainingSongs: Song[] = [];
 
+
   constructor(readonly server: Server) {
+    this.listener = new Listener(this);
     this.config = new ServerConfig(this);
   }
 
@@ -214,112 +214,7 @@ export class ValidRoom implements Party.Server {
     if (msg.type !== "ping" && msg.type !== "pong")
       this.server.log(`${conn.id} sent: ${message}`, "debug");
 
-    if (this.messageListeners.some(l => l.onMessage(conn, msg))) {
-      return;
-    }
-
-    // handle each message type
-    switch(msg.type) {
-      case "ping":
-        // always directly answer pings
-        conn.send(JSON.stringify({
-          type: "pong",
-          seq: msg.seq
-        } satisfies PongMessage));
-        break;
-      case "pong":
-        // currently ignored
-        break;
-      case "confirmation":
-        if (msg.error) {
-          this.server.log(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`, "warn");
-        }
-        break;
-      case "change_username":
-        this.changeUsername(conn, msg);
-        break;
-      case "add_playlists":
-      case "remove_playlist":
-        if (!this.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
-          return;
-        }
-
-        if (msg.type === "add_playlists") {
-          let omitted = this.addPlaylists(msg);
-          if (omitted > 0) {
-            this.sendConfirmationOrError(conn, msg, `${omitted}/${msg.playlists.length} playlist(s) were ommited because they don't have songs or they don't have a unique name and album cover.`);
-          } else {
-            this.sendConfirmationOrError(conn, msg);
-          }
-        } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
-          this.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
-          conn.send(this.getPlaylistsUpdateMessage());
-          return;
-        } else {
-          this.sendConfirmationOrError(conn, msg);
-        }
-
-        // always re-filter songs after playlist update
-        this.filterSongs();
-
-        // send the update to all players + confirmation to the host
-        this.getPartyRoom().broadcast(this.getPlaylistsUpdateMessage());
-        break;
-      case "start_game":
-        if (!this.performChecks(conn, msg, "host", "not_ingame", "not_contdown")) {
-          return;
-        }
-
-        if (!this.performChecks(conn, msg, "min_song_count")) {
-          return;
-        }
-
-        // make sure setting distractions worked
-        try {
-          this.regenerateRandomQuestions();
-        } catch (e) {
-          if (this.hostConnection && e instanceof DistractionError) {
-            this.sendConfirmationOrError(this.hostConnection, msg, e.message);
-          } else if (this.hostConnection) {
-            this.sendConfirmationOrError(this.hostConnection, msg, "Unknown error while starting game.");
-            this.server.log(e, "error");
-          }
-          return;
-        }
-
-        this.sendConfirmationOrError(conn, msg);
-        this.startGame();
-        break;
-      case "select_answer":
-        if (!this.performChecks(conn, msg, "answer")) {
-          return;
-        }
-
-        this.selectAnswer(conn, msg);
-        break;
-      case "return_to":
-        if (!this.performChecks(conn, msg, "host", "not_lobby")) {
-          return;
-        }
-
-        switch (msg.where) {
-          case "lobby":
-            this.resetGame();
-            // returning to lobby will force to include all songs again
-            this.remainingSongs = [];
-            break;
-          case "results":
-            this.endGame();
-            break;
-        }
-
-        this.broadcastUpdateMessage();
-        break;
-      default:
-        // in case a message is defined but not yet implemented
-        this.sendConfirmationOrError(conn, msg as any, `Not implemented: ${(msg as ClientMessage).type}`);
-        break;
-    }
+    this.listener.handleMessage(conn, msg);
   }
 
   onClose(conn: Party.Connection) {
@@ -347,16 +242,6 @@ export class ValidRoom implements Party.Server {
    */
   public getPartyRoom(): Party.Room {
     return this.server.partyRoom;
-  }
-
-  /**
-   * Registers a new listener that recieves client messages.
-   * @param listener the object that wants to listen for client messages.
-   */
-  public registerMessageListener(listener: IMessageListener) {
-    if (this.messageListeners.indexOf(listener) < 0) {
-      this.messageListeners.push(listener);
-    }
   }
 
   /**
@@ -454,10 +339,10 @@ export class ValidRoom implements Party.Server {
    * @param msg The message containing the playlist to add.
    * @returns the amount of playlists omitted.
    */
-  private addPlaylists(msg: AddPlaylistsMessage): number {
+  public addPlaylists(msg: AddPlaylistsMessage): number {
     const playlists = msg.playlists.filter(playlist =>
         playlist.songs && this.playlists.every(p =>
-          p.name !== playlist.name && p.cover !== playlist.cover
+          p.name !== playlist.name || p.cover !== playlist.cover
     ));
 
     if (playlists.length > 0) {
@@ -504,7 +389,7 @@ export class ValidRoom implements Party.Server {
    * @param msg The message containing the index of the playlist to remove.
    * @returns true if the playlist was removed successfully, false if the index was out of bounds.
    */
-  private removePlaylist(msg: RemovePlaylistMessage): boolean {
+  public removePlaylist(msg: RemovePlaylistMessage): boolean {
     if (msg.index !== null && msg.index >= this.playlists.length) {
       return false;
     }
@@ -526,7 +411,7 @@ export class ValidRoom implements Party.Server {
    * @param conn The connection of the player requesting the change.
    * @param msg The message with the username change request.
    */
-  private changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
+  public changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
     // username is already validated, just check if it's used by another player
     for (let connection of this.getPartyRoom().getConnections()) {
       let state = connection.state as PlayerState;
@@ -546,7 +431,7 @@ export class ValidRoom implements Party.Server {
   /**
    * Stops a countdown if running.
    */
-  private stopCountdown() {
+  public stopCountdown() {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval!);
       this.countdownInterval = null;
@@ -559,7 +444,7 @@ export class ValidRoom implements Party.Server {
    * @param from The number to count down from.
    * @param callback A function to call as soon as the countdown finishes.
    */
-  private startCountdown(from: number, callback: () => void) {
+  public startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
       this.getPartyRoom().broadcast(this.getCountdownMessage());
 
@@ -584,7 +469,7 @@ export class ValidRoom implements Party.Server {
    * @see {@link regenerateRandomQuestions}
    * @see {@link endGame}
    */
-  private startGame() {
+  public startGame() {
     /**
      * The main game loop. Assumes that game is reset before called.
      * @see {@link resetGame}
@@ -654,7 +539,7 @@ export class ValidRoom implements Party.Server {
    * Clears and then adds random song guessing questions to the room.
    * Creates {@link QUESTION_COUNT} random questions for the current game session.
    */
-  private regenerateRandomQuestions() {
+  public regenerateRandomQuestions() {
     this.questions = [];
 
     // add QUESTION_COUNT random questions
@@ -680,7 +565,7 @@ export class ValidRoom implements Party.Server {
    * @param conn the player that selected an answer.
    * @param msg the {@link SelectAnswerMessage} containing the selected index.
    */
-  private selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
+  public selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
     let playerState: PlayerState = conn.state as PlayerState;
 
     playerState.questionNumber = this.currentQuestion;
@@ -706,7 +591,7 @@ export class ValidRoom implements Party.Server {
   /**
    * Calculates the points for this round for all players that selected the correct answer.
    */
-  private calculatePoints() {
+  public calculatePoints() {
     for (let conn of this.getPartyRoom().getConnections()) {
       let connState = conn.state as PlayerState;
 
@@ -729,7 +614,7 @@ export class ValidRoom implements Party.Server {
    *
    * @param sendUpdate whether to send an update that the game ended to the players.
    */
-  private endGame(sendUpdate: boolean = true) {
+  public endGame(sendUpdate: boolean = true) {
     if (!this.gameLoopInterval) return;
 
     clearInterval(this.gameLoopInterval);
@@ -749,7 +634,7 @@ export class ValidRoom implements Party.Server {
   /**
    * Transfers host to another client after 3 seconds if the client does not join again.
    */
-  private delayedHostTransfer() {
+  public delayedHostTransfer() {
     this.hostConnection = null;
 
     this.hostTransferTimeout = setTimeout(() => {
@@ -772,7 +657,7 @@ export class ValidRoom implements Party.Server {
    * @param newHost the new host connection.
    * @param sendUpdate whether to broadcast an update (that also informs the new host that it got host).
    */
-  private transferHost(newHost: Party.Connection|undefined, sendUpdate: boolean = true) {
+  public transferHost(newHost: Party.Connection|undefined, sendUpdate: boolean = true) {
     this.hostConnection = newHost;
     this.hostID = newHost?.id;
 
@@ -790,7 +675,7 @@ export class ValidRoom implements Party.Server {
    *
    * @returns An array of valid PlayerState objects from all connected players.
    */
-  private getPlayerStates(): PlayerState[] {
+  public getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
     for (let conn of this.getPartyRoom().getConnections()) {
       states.push(conn.state as PlayerState);
@@ -803,9 +688,9 @@ export class ValidRoom implements Party.Server {
    * Removes current answer data from a connection.
    * @param connection the connection for which to clear the data.
    * @param resetPoints whether to also reset the points of a player.
-   * @private
+   * @public
    */
-  private resetPlayerAnswerData(connection: Party.Connection, resetPoints:boolean = false): void {
+  public resetPlayerAnswerData(connection: Party.Connection, resetPoints:boolean = false): void {
     const currentState = connection.state as PlayerState;
     const points = resetPoints ? 0 : currentState.points;
     const playerState: PlayerState = {
@@ -821,7 +706,7 @@ export class ValidRoom implements Party.Server {
    *
    * @returns A string array of unused colors or an empty array if all colors are used.
    */
-  private getUnusedColors(): string[] {
+  public getUnusedColors(): string[] {
     let usedColors = this.getPlayerStates().map(item => item.color);
 
     return COLORS.filter(item => usedColors.indexOf(item) < 0);
@@ -833,7 +718,7 @@ export class ValidRoom implements Party.Server {
    * @param conn The connection of the player
    * @returns whether the init was successful (room was not full)
    */
-  private initConnection(conn: Party.Connection): boolean {
+  public initConnection(conn: Party.Connection): boolean {
     let username = uniqueUsernameGenerator({
       dictionaries: [adjectives, nouns],
       style: "titleCase",
@@ -874,7 +759,7 @@ export class ValidRoom implements Party.Server {
    *
    * @param conn - The player connection to monitor for inactivity.
    */
-  private refreshKickPlayerTimeout(conn: Party.Connection) {
+  public refreshKickPlayerTimeout(conn: Party.Connection) {
     let playerTimeout = this.kickPlayerTimeouts.get(conn.id);
     if (playerTimeout) {
       clearTimeout(playerTimeout);
@@ -892,7 +777,7 @@ export class ValidRoom implements Party.Server {
    * @param source The source/type of the confirmation message
    * @param error An optional error message to include in the confirmation
    */
-  private sendConfirmationOrError(conn: Party.Connection, source: SourceMessage, error?: string) {
+  public sendConfirmationOrError(conn: Party.Connection, source: SourceMessage, error?: string) {
     let resp: ConfirmationMessage = {
       type: "confirmation",
       sourceMessage: source,
@@ -908,7 +793,7 @@ export class ValidRoom implements Party.Server {
    * @param conn the connection to send the update to
    * @returns a JSON string of the constructed {@link UpdateMessage}
    */
-  private getUpdateMessage(conn: Party.Connection): string {
+  public getUpdateMessage(conn: Party.Connection): string {
     let connState = conn.state as PlayerState;
 
     let msg: UpdateMessage = {
@@ -929,7 +814,7 @@ export class ValidRoom implements Party.Server {
    *
    * @see {@link getUpdateMessage}
    */
-  private broadcastUpdateMessage() {
+  public broadcastUpdateMessage() {
     for (const conn of this.getPartyRoom().getConnections()) {
       conn.send(this.getUpdateMessage(conn));
     }
@@ -940,7 +825,7 @@ export class ValidRoom implements Party.Server {
    *
    * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
    */
-  private getPlayedSongsUpdateMessage() {
+  public getPlayedSongsUpdateMessage() {
     return JSON.stringify({
       type: "update_played_songs",
       songs: this.questions.map(q => q.song)
@@ -967,7 +852,7 @@ export class ValidRoom implements Party.Server {
    * @returns a JSON string representing the countdown message.
    * @see {@link CountdownMessage}
    */
-  private getCountdownMessage(): string {
+  public getCountdownMessage(): string {
     let msg: CountdownMessage = {
       type: "countdown",
       countdown: this.countdown
@@ -983,7 +868,7 @@ export class ValidRoom implements Party.Server {
    * @param audioURL an {@link Song["audioURL"]} to a music file that the client should preload.
    * @returns a JSON string of the constructed {@link AudioControlMessage}
    */
-  private getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): string;
+  public getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): string;
   /**
    * Constructs an audio control message.
    *
@@ -991,8 +876,8 @@ export class ValidRoom implements Party.Server {
    * @param audioURL can only be provided for load action.
    * @returns a JSON string of the constructed {@link AudioControlMessage}
    */
-  private getAudioControlMessage(action: Exclude<AudioControlMessage["action"], "load">, audioURL?: never): string;
-  private getAudioControlMessage(action: AudioControlMessage["action"], audioURL?: Song["audioURL"]): string {
+  public getAudioControlMessage(action: Exclude<AudioControlMessage["action"], "load">, audioURL?: never): string;
+  public getAudioControlMessage(action: AudioControlMessage["action"], audioURL?: Song["audioURL"]): string {
     let msg: AudioControlMessage;
 
     if (action === "load") {
@@ -1019,7 +904,7 @@ export class ValidRoom implements Party.Server {
    *
    * @see {@link endGame}
    */
-  private resetGame() {
+  public resetGame() {
     this.endGame(false);
     this.stopCountdown();
 
