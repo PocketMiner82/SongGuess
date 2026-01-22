@@ -22,7 +22,7 @@
     "postcss-cli": "^11.0.1",
     "react": "^19.2.3",
     "react-cookie": "^8.0.1",
-    "react-cookie-consent": "^10.0.0",
+    "react-cookie-consent": "^10.0.1",
     "react-dom": "^19.2.3",
     "tailwindcss": "^4.1.18",
     "unique-username-generator": "^1.5.1",
