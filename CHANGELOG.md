@@ -1,3 +1,10 @@
+# [2.7.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.6.1-dev.2...2.7.0-dev.1) (2026-01-22)
+
+
+### Features
+
+* **Lobby:** add input to set amount of questions per round ([d57f6d2](https://github.com/PocketMiner82/SongGuess/commit/d57f6d2546c4302938a836a4fcc73b144f8820a9))
+
 ## [2.6.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.6.1-dev.1...2.6.1-dev.2) (2026-01-22)
 
 
