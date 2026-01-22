@@ -8,6 +8,8 @@ export class BaseConfig implements RoomConfigMessage {
 
   public endWhenAnswered: boolean = true;
 
+  public questionCount: number = 10;
+
 
   constructor(msg?: RoomConfigMessage) {
     if (msg) this.applyMessage(msg);

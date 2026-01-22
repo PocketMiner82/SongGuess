@@ -150,8 +150,6 @@ const ProgressBar = memo(function ProgressBar({
  */
 function QuestionDisplay() {
   const controller = useControllerContext();
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(controller.players.find(p =>
-      p.username === controller.username)!.answerIndex ?? null);
   const [canAnswer, setCanAnswer] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   useRoomControllerMessageTypeListener(controller, "audio_control");
@@ -159,12 +157,16 @@ function QuestionDisplay() {
   useRoomControllerListener(controller, useCallback(msg => {
     if (msg?.type === "question") {
       // reset selection
-      setSelectedAnswer(null);
       setIsPlaying(false);
+      return true;
     } else if (msg?.type === "answer") {
       // answering no longer allowed when server publishes correct answer
       setCanAnswer(false);
       setIsPlaying(false);
+      return true;
+    } else if (msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer") {
+      setCanAnswer(false);
+      return true;
     }
     return false;
   }, []));
@@ -172,7 +174,7 @@ function QuestionDisplay() {
   useEffect(() => {
     if (controller.currentAudioState === "play") {
       // allow answering when music starts
-      setCanAnswer(controller.currentAnswer === null);
+      setCanAnswer(controller.currentAnswer === null && controller.selectedAnswer === null);
       setIsPlaying(controller.currentAnswer === null);
     } else if (controller.currentAudioState === "load") {
       setIsPlaying(true);
@@ -182,15 +184,11 @@ function QuestionDisplay() {
       setIsPlaying(false);
       setCanAnswer(false);
     }
-  }, [controller.currentAudioState, controller.currentAnswer]);
+  }, [controller.currentAudioState, controller.currentAnswer, controller.selectedAnswer]);
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (!canAnswer) return;
-    
-    setSelectedAnswer(answerIndex);
-    setCanAnswer(false);
-    
     controller.selectAnswer(answerIndex);
   }, [canAnswer, controller]);
 
@@ -232,7 +230,7 @@ function QuestionDisplay() {
             key={index}
             option={option}
             index={index}
-            isSelected={selectedAnswer === index}
+            isSelected={controller.selectedAnswer === index}
             isCorrect={correctIndex !== undefined ? correctIndex === index : null}
             isDisabled={isDisabled}
             onSelect={handleAnswerSelect}

@@ -219,6 +219,11 @@ export class RoomController {
    */
   currentAudioLength: number = 0;
 
+  /**
+   * The currently selected answer.
+   */
+  selectedAnswer: number|null = null;
+
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -389,6 +394,10 @@ export class RoomController {
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
         }
+
+        if (msg.sourceMessage.type === "select_answer") {
+          this.selectedAnswer = msg.sourceMessage.answerIndex;
+        }
         break;
       case "update":
         // force hard reload when version is outdated
@@ -423,6 +432,7 @@ export class RoomController {
       case "question":
         this.currentQuestion = msg;
         this.currentAnswer = null;
+        this.selectedAnswer = null;
         break;
       case "answer":
         this.currentAnswer = msg;

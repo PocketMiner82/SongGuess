@@ -88,7 +88,12 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * Whether to directly end the round after all players answered.
    */
-  endWhenAnswered: z.boolean()
+  endWhenAnswered: z.boolean(),
+
+  /**
+   * The amount of questions to ask per round.
+   */
+  questionCount: z.number().nonnegative().max(30)
 });
 
 

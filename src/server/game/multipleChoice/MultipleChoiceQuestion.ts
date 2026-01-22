@@ -1,7 +1,7 @@
-import { shuffle } from "../Utils";
-import type {AnswerMessage, QuestionMessage, Song} from "../types/MessageTypes";
+import { shuffle } from "../../../Utils";
+import type {AnswerMessage, QuestionMessage, Song} from "../../../types/MessageTypes";
 
-export default class Question {
+export default class MultipleChoiceQuestion {
   /**
    * The list of songs for this question (1 correct answer + 3 distractors).
    */

@@ -1,31 +1,29 @@
 import type Server from "./Server";
 import type * as Party from "partykit/server";
 import type {
-  AddPlaylistsMessage, AudioControlMessage, ChangeUsernameMessage,
+  AddPlaylistsMessage,
+  ChangeUsernameMessage,
   ConfirmationMessage,
   CountdownMessage,
   GameState,
   PlayerState,
   Playlist,
   RemovePlaylistMessage, SelectAnswerMessage,
-  Song, SourceMessage, UpdateMessage, UpdatePlayedSongsMessage, UpdatePlaylistsMessage
+  Song,
+  SourceMessage,
+  UpdateMessage,
+  UpdatePlaylistsMessage
 } from "../types/MessageTypes";
-import Question from "./Question";
-import {
-  COLORS,
-  POINTS_PER_QUESTION,
-  QUESTION_COUNT,
-  ROUND_PAUSE_MUSIC,
-  ROUND_SHOW_ANSWER, ROUND_START,
-  ROUND_START_MUSIC,
-  ROUND_START_NEXT, TIME_PER_QUESTION
-} from "./config/ServerConfigConstants";
+import {COLORS} from "./config/ServerConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import z from "zod";
 import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
-import { version } from "../../package.json";
+import {version} from "../../package.json";
 import ServerConfig from "./config/ServerConfig";
 import Listener from "./listener/Listener";
+import type GameMode from "./game/GameMode";
+import {MulitpleChoiceGameMode} from "./game/multipleChoice/MulitpleChoiceGameMode";
+import GamePhase from "./game/GamePhase";
 
 
 /**
@@ -41,6 +39,11 @@ export class ValidRoom implements Party.Server {
    * The configuration of this room.
    */
   readonly config: ServerConfig;
+
+  /**
+   * The current game handler.
+   */
+  readonly game: GameMode;
 
   /**
    * Map containing timeouts to kick inactive players. Key is connection id.
@@ -104,41 +107,11 @@ export class ValidRoom implements Party.Server {
    */
   state: GameState = "lobby";
 
-  /**
-   * The timestamp when the current round started.
-   */
-  roundStartTime: number = -1;
-
-  /**
-   * The interval function for the main game loop.
-   */
-  gameLoopInterval: NodeJS.Timeout|null = null;
-
-  /**
-   * The current tick count within the ongoing round.
-   */
-  roundTicks: number = 0;
-
-  /**
-   * The list of questions for the current game.
-   */
-  questions: Question[] = [];
-
-  /**
-   * The index of the current question.
-   */
-  currentQuestion: number = 0;
-
-  /**
-   * A list of songs still available for use in the next round.
-   * This pool is used to avoid repeating songs within a single game session.
-   */
-  remainingSongs: Song[] = [];
-
 
   constructor(readonly server: Server) {
     this.listener = new Listener(this);
     this.config = new ServerConfig(this);
+    this.game = new MulitpleChoiceGameMode(this);
   }
 
   onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
@@ -161,28 +134,6 @@ export class ValidRoom implements Party.Server {
 
     // send the first update to the connection (and inform all other connections about the new player)
     this.broadcastUpdateMessage();
-
-    // inform client about played songs in this round
-    if (this.state === "results") {
-      conn.send(this.getPlayedSongsUpdateMessage());
-    }
-
-    // inform player about current question
-    if (this.state === "ingame") {
-      let q = this.questions[this.currentQuestion];
-
-      conn.send(this.getAudioControlMessage("load", q.song.audioURL));
-
-      if (this.roundTicks < ROUND_SHOW_ANSWER) {
-        conn.send(q.getQuestionMessage(this.currentQuestion + 1));
-      } else {
-        conn.send(q.getAnswerMessage(this.currentQuestion + 1));
-      }
-
-      if (this.roundTicks >= ROUND_START_MUSIC) {
-        conn.send(this.getAudioControlMessage("play"));
-      }
-    }
   }
 
   onMessage(message: string, conn: Party.Connection) {
@@ -215,6 +166,13 @@ export class ValidRoom implements Party.Server {
       this.server.log(`${conn.id} sent: ${message}`, "debug");
 
     this.listener.handleMessage(conn, msg);
+  }
+
+  /**
+   * Called every second by the server
+   */
+  onTick() {
+    this.listener.handleTick();
   }
 
   onClose(conn: Party.Connection) {
@@ -254,11 +212,12 @@ export class ValidRoom implements Party.Server {
    *               - "lobby": Checks whether the game is currently in lobby.
    *               - "not_lobby": Checks for the opposite.
    *               - "not_contdown": Checks whether a countdown is currently running.
+   *               - "not_ingame": Checks whether currently not ingame.
    *               - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
   public performChecks(conn: Party.Connection|null, msg: SourceMessage,
-                       ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count" | "answer")[]): boolean {
+                       ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count")[]): boolean {
     let possibleErrorFunc = conn
         ? (error: string)=> {
           conn.send(this.getUpdateMessage(conn));
@@ -266,7 +225,6 @@ export class ValidRoom implements Party.Server {
         }
         : () => {};
     let successful: boolean = true;
-    let connState: PlayerState = conn?.state as PlayerState;
 
     for (const element of checks) {
       switch (element) {
@@ -307,18 +265,8 @@ export class ValidRoom implements Party.Server {
 
         case "min_song_count":
           // todo: calculate this if implementing variable question count
-          if (this.songs.length < QUESTION_COUNT) {
-            possibleErrorFunc(`Required at least ${QUESTION_COUNT} songs. Selected: ${this.songs.length}`);
-            successful = false;
-          }
-          break;
-
-        case "answer":
-          if (this.roundTicks > ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
-            possibleErrorFunc("Can only accept answers during questioning phase.");
-            successful = false;
-          } else if (conn && connState.answerIndex !== undefined) {
-            possibleErrorFunc("You already selected an answer.");
+          if (this.songs.length < this.config.questionCount) {
+            possibleErrorFunc(`Required at least ${this.config.questionCount} songs. Selected: ${this.songs.length}`);
             successful = false;
           }
           break;
@@ -463,175 +411,6 @@ export class ValidRoom implements Party.Server {
   }
 
   /**
-   * Starts a countdown, then starts the game loop. Also resets the game before starting.
-   * You must set/regenerate questions before calling this.
-   * @see {@link resetGame}
-   * @see {@link regenerateRandomQuestions}
-   * @see {@link endGame}
-   */
-  public startGame() {
-    /**
-     * The main game loop. Assumes that game is reset before called.
-     * @see {@link resetGame}
-     */
-    const gameLoop = () => {
-      if (this.roundTicks >= ROUND_START_NEXT) {
-        this.roundTicks = 0;
-        this.currentQuestion++;
-        for (let conn of this.getPartyRoom().getConnections()) {
-          this.resetPlayerAnswerData(conn);
-        }
-      }
-
-      if (this.currentQuestion >= this.questions.length) {
-        this.endGame();
-        return;
-      }
-
-      let q = this.questions[this.currentQuestion];
-      switch (this.roundTicks++) {
-          // send question directly at start
-        case ROUND_START:
-          this.getPartyRoom().broadcast(q.getQuestionMessage(this.currentQuestion + 1));
-          this.broadcastUpdateMessage();
-
-          // load audio of song to guess
-          this.getPartyRoom().broadcast(this.getAudioControlMessage("load", q.song.audioURL));
-          break;
-
-          // start playback of song to guess
-        case ROUND_START_MUSIC:
-          this.roundStartTime = Date.now();
-          this.getPartyRoom().broadcast(this.getAudioControlMessage("play"));
-          break;
-
-          // show results of current round
-        case ROUND_SHOW_ANSWER:
-          this.calculatePoints();
-
-          // shows which player voted for which question
-          this.broadcastUpdateMessage();
-
-          this.getPartyRoom().broadcast(q.getAnswerMessage(this.currentQuestion + 1));
-          break;
-
-          // pause music to allow fade out
-        case ROUND_PAUSE_MUSIC:
-          this.getPartyRoom().broadcast(this.getAudioControlMessage("pause"));
-          break;
-      }
-    }
-
-    // inform all players about the game start
-    this.broadcastUpdateMessage();
-
-    this.startCountdown(3, () => {
-      this.resetGame();
-      this.state = "ingame";
-      this.broadcastUpdateMessage();
-
-      gameLoop();
-      this.gameLoopInterval = setInterval(gameLoop, 1000);
-    });
-  }
-
-  /**
-   * Clears and then adds random song guessing questions to the room.
-   * Creates {@link QUESTION_COUNT} random questions for the current game session.
-   */
-  public regenerateRandomQuestions() {
-    this.questions = [];
-
-    // add QUESTION_COUNT random questions
-    for (let i = 0; i < QUESTION_COUNT; i++) {
-      if (this.remainingSongs.length === 0) {
-        const usedAudioUrls = new Set(this.questions.map(q => q.song.audioURL));
-        this.remainingSongs = this.songs.filter(song => !usedAudioUrls.has(song.audioURL));
-      }
-
-      let randomIndex = Math.floor(Math.random() * this.remainingSongs.length);
-      this.questions.push(new Question(this.remainingSongs.splice(randomIndex, 1)[0]))
-    }
-
-    // add distractions to the questions
-    for (const q of this.questions) {
-      q.generateDistractions(this.songs);
-    }
-  }
-
-  /**
-   * Save timestamp and index, when user selects an answer.
-   *
-   * @param conn the player that selected an answer.
-   * @param msg the {@link SelectAnswerMessage} containing the selected index.
-   */
-  public selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
-    let playerState: PlayerState = conn.state as PlayerState;
-
-    playerState.questionNumber = this.currentQuestion;
-    playerState.answerTimestamp = Date.now();
-    playerState.answerSpeed = playerState.answerTimestamp - this.roundStartTime;
-    playerState.answerIndex = msg.answerIndex;
-
-    let everyoneVoted = true;
-    for (let conn of this.getPartyRoom().getConnections()) {
-      let connState = conn.state as PlayerState;
-      if (connState.answerIndex === undefined) {
-        everyoneVoted = false;
-        break;
-      }
-    }
-
-    // show answers if everyone voted
-    if (everyoneVoted && this.config.endWhenAnswered) {
-      this.roundTicks = ROUND_SHOW_ANSWER;
-    }
-  }
-
-  /**
-   * Calculates the points for this round for all players that selected the correct answer.
-   */
-  public calculatePoints() {
-    for (let conn of this.getPartyRoom().getConnections()) {
-      let connState = conn.state as PlayerState;
-
-      if (connState.answerTimestamp && connState.answerIndex === this.questions[this.currentQuestion].getAnswerIndex()) {
-        // half the points for correct answer
-        connState.points += POINTS_PER_QUESTION / 2;
-
-        // remaining points depend on speed of answer
-        let factor = Math.max(0, (TIME_PER_QUESTION * 1000 - (connState.answerTimestamp - this.roundStartTime)))
-            / (TIME_PER_QUESTION * 1000);
-        connState.points += (POINTS_PER_QUESTION / 2) * factor;
-
-        connState.points = Math.round(connState.points);
-      }
-    }
-  }
-
-  /**
-   * Ends the current game without resetting and transitions to the results state.
-   *
-   * @param sendUpdate whether to send an update that the game ended to the players.
-   */
-  public endGame(sendUpdate: boolean = true) {
-    if (!this.gameLoopInterval) return;
-
-    clearInterval(this.gameLoopInterval);
-    this.gameLoopInterval = null;
-
-    this.getPartyRoom().broadcast(this.getAudioControlMessage("pause"));
-
-    this.state = "results";
-
-    // the update message always contains the points, displaying ranks is handled client-side
-    if (sendUpdate) {
-      this.broadcastUpdateMessage();
-      this.getPartyRoom().broadcast(this.getPlayedSongsUpdateMessage());
-    }
-  }
-
-  /**
    * Transfers host to another client after 3 seconds if the client does not join again.
    */
   public delayedHostTransfer() {
@@ -678,27 +457,27 @@ export class ValidRoom implements Party.Server {
   public getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
     for (let conn of this.getPartyRoom().getConnections()) {
-      states.push(conn.state as PlayerState);
+      let connState = conn.state as PlayerState;
+
+      if (connState?.username && connState?.color && connState?.points !== undefined) {
+        let newConnState: PlayerState = {
+          username: connState.username,
+          color: connState.color,
+          points: connState.points
+        };
+
+        // only send full state when answer is available
+        if (this.game.gamePhase === GamePhase.ANSWER) {
+          newConnState.answerTimestamp = connState.answerTimestamp;
+          newConnState.answerIndex = connState.answerIndex;
+          newConnState.answerSpeed = connState.answerSpeed;
+        }
+
+        states.push(newConnState);
+      }
     }
 
-    return states.filter(d => d && d.username && d.color && d.points !== undefined);
-  }
-
-  /**
-   * Removes current answer data from a connection.
-   * @param connection the connection for which to clear the data.
-   * @param resetPoints whether to also reset the points of a player.
-   * @public
-   */
-  public resetPlayerAnswerData(connection: Party.Connection, resetPoints:boolean = false): void {
-    const currentState = connection.state as PlayerState;
-    const points = resetPoints ? 0 : currentState.points;
-    const playerState: PlayerState = {
-      username: currentState.username,
-      color: currentState.color,
-      points: points
-    };
-    connection.setState(playerState);
+    return states;
   }
 
   /**
@@ -740,16 +519,26 @@ export class ValidRoom implements Party.Server {
     conn.setState(connState);
 
     // clear cached answer when we're already at the next question
-    if (connState.questionNumber !== this.currentQuestion) {
-      this.resetPlayerAnswerData(conn);
+    if (connState.questionNumber !== this.game.currentQuestion) {
+      this.game.resetPlayerAnswerData(conn);
     }
 
     // send the current playlist to the connection
     conn.send(this.getPlaylistsUpdateMessage());
 
+    // inform client about current round state
+    this.game.getGameMessages(true).forEach(msg => conn.send(msg));
+
+    // send players answer if player selected one previously
+    if (connState.answerIndex !== undefined) {
+      this.sendConfirmationOrError(conn, {
+        type: "select_answer",
+        answerIndex: connState.answerIndex
+      } satisfies SelectAnswerMessage);
+    }
+
     // kicks player if inactive
     this.refreshKickPlayerTimeout(conn);
-
     return true;
   }
 
@@ -821,18 +610,6 @@ export class ValidRoom implements Party.Server {
   }
 
   /**
-   * Constructs a played songs update message with the songs played in the last round.
-   *
-   * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
-   */
-  public getPlayedSongsUpdateMessage() {
-    return JSON.stringify({
-      type: "update_played_songs",
-      songs: this.questions.map(q => q.song)
-    } satisfies UpdatePlayedSongsMessage);
-  }
-
-  /**
    * Constructs a playlist update message with the current playlist array.
    *
    * @returns a JSON string of the constructed {@link UpdatePlaylistsMessage}
@@ -859,62 +636,5 @@ export class ValidRoom implements Party.Server {
     };
 
     return JSON.stringify(msg);
-  }
-
-  /**
-   * Constructs an audio control load message.
-   *
-   * @param action must be "load" for a load message.
-   * @param audioURL an {@link Song["audioURL"]} to a music file that the client should preload.
-   * @returns a JSON string of the constructed {@link AudioControlMessage}
-   */
-  public getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): string;
-  /**
-   * Constructs an audio control message.
-   *
-   * @param action the {@link AudioControlMessage["action"]} that should be performed.
-   * @param audioURL can only be provided for load action.
-   * @returns a JSON string of the constructed {@link AudioControlMessage}
-   */
-  public getAudioControlMessage(action: Exclude<AudioControlMessage["action"], "load">, audioURL?: never): string;
-  public getAudioControlMessage(action: AudioControlMessage["action"], audioURL?: Song["audioURL"]): string {
-    let msg: AudioControlMessage;
-
-    if (action === "load") {
-      // load requires an audio URL
-      msg = {
-        type: "audio_control",
-        action: "load",
-        length: Math.max(0, ROUND_START_MUSIC - this.roundTicks),
-        audioURL: audioURL!
-      };
-    } else {
-      msg = {
-        type: "audio_control",
-        action: action,
-        length: Math.max(0, ROUND_SHOW_ANSWER - this.roundTicks)
-      };
-    }
-
-    return JSON.stringify(msg);
-  }
-
-  /**
-   * Resets the game to the lobby state.
-   *
-   * @see {@link endGame}
-   */
-  public resetGame() {
-    this.endGame(false);
-    this.stopCountdown();
-
-    this.roundTicks = 0;
-    this.currentQuestion = 0;
-    this.state = "lobby";
-
-    // reset points of all players
-    for (let conn of this.getPartyRoom().getConnections()) {
-      this.resetPlayerAnswerData(conn, true);
-    }
   }
 }
