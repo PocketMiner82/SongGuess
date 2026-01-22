@@ -1,4 +1,4 @@
-import type {ClientMessage} from "../types/MessageTypes";
+import type {ClientMessage} from "../../types/MessageTypes";
 import type * as Party from "partykit/server";
 
 

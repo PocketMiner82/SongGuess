@@ -3,7 +3,7 @@ import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
 import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
-import {COLORS} from "../../../server/ServerConstants";
+import {COLORS} from "../../../server/config/ServerConfigConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
 import { downloadFile, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
 import {albumRegex, artistRegex, songRegex} from "../../../schemas/ValidationRegexes";

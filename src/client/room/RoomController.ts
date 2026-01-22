@@ -3,7 +3,7 @@ import React, {createContext, useCallback, useContext, useEffect, useRef, useSta
 import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
-import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
+import type {CookieGetter, CookieSetter} from "../../types/CookieFunctionTypes";
 import {v4 as uuidv4} from "uuid";
 import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";

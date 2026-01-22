@@ -1,14 +1,14 @@
-import type {ClientMessage} from "../types/MessageTypes";
-import type {IMessageListener} from "./IMessageListener";
+import type {ClientMessage} from "../../types/MessageTypes";
+import type {IMessageListener} from "../listener/IMessageListener";
 import type * as Party from "partykit/server";
-import type {ValidRoom} from "./ValidRoom";
-import {BaseConfig} from "../BaseConfig";
+import type {ValidRoom} from "../ValidRoom";
+import {BaseConfig} from "../../BaseConfig";
 
 
 export default class ServerConfig extends BaseConfig implements IMessageListener{
   constructor(private readonly room: ValidRoom) {
     super();
-    room.registerMessageListener(this);
+    room.listener.registerMessageListener(this);
   }
 
   onMessage(conn: Party.Connection, msg: ClientMessage): boolean {

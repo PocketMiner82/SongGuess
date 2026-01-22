@@ -1,11 +1,11 @@
 import type * as Party from "partykit/server";
 import type {AxiosInstance} from "axios";
 import {AppleMusicConfig, AuthType, getAuthenticatedAxios, Region, SongsEndpointTypes} from "@syncfm/applemusic-api";
-import {fetchGetRoom, fetchPostRoom} from "../RoomHTTPHelper";
-import type {CreateRoomResponse} from "../types/APIResponseTypes";
-import {DefaultPlaylist, type Playlist, type Song} from "../types/MessageTypes";
-import {albumRegex, appleMusicPreviewRegex, artistRegex, songRegex} from "../schemas/ValidationRegexes";
-import {fixedCoverSize} from "../Utils";
+import {fetchGetRoom, fetchPostRoom} from "../../RoomHTTPHelper";
+import type {CreateRoomResponse} from "../../types/APIResponseTypes";
+import {DefaultPlaylist, type Playlist, type Song} from "../../types/MessageTypes";
+import {albumRegex, appleMusicPreviewRegex, artistRegex, songRegex} from "../../schemas/ValidationRegexes";
+import {fixedCoverSize} from "../../Utils";
 
 /**
  * Handles API requests to the /parties/api/{endpoint} endpoints.

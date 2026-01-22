@@ -3,7 +3,7 @@
   "name": "songguess",
   "main": "src/server/Server.ts",
   "parties": {
-    "api": "src/server/API.ts"
+    "api": "src/server/api/API.ts"
   },
   "compatibilityDate": "2025-11-22",
   "compatibilityFlags": ["global_fetch_private_origin"],
