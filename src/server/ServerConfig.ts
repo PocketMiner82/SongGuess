@@ -17,19 +17,11 @@ export default class ServerConfig extends BaseConfig implements IMessageListener
         return true;
       }
 
-      if (msg.advancedSongFiltering !== undefined) {
-        this.advancedSongFiltering = msg.advancedSongFiltering;
-        this.room.filterSongs();
+      super.applyMessage(msg);
 
-        this.room.getPartyRoom().broadcast(super.getConfigMessage());
-        this.room.getPartyRoom().broadcast(this.room.getPlaylistsUpdateMessage());
-      }
-
-      if (msg.endWhenAnswered !== undefined) {
-        this.endWhenAnswered = msg.endWhenAnswered;
-        this.room.getPartyRoom().broadcast(super.getConfigMessage());
-      }
-
+      this.room.filterSongs();
+      this.room.getPartyRoom().broadcast(super.getConfigMessage());
+      this.room.getPartyRoom().broadcast(this.room.getPlaylistsUpdateMessage());
       return true;
     }
     return false;

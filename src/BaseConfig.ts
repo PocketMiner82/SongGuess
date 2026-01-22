@@ -1,4 +1,5 @@
 import type {RoomConfigMessage} from "./types/MessageTypes";
+import {RoomConfigMessageSchema} from "./schemas/SharedSchemas";
 
 export class BaseConfig implements RoomConfigMessage {
   public type: RoomConfigMessage["type"] = "room_config";
@@ -7,11 +8,17 @@ export class BaseConfig implements RoomConfigMessage {
 
   public endWhenAnswered: boolean = true;
 
+
   constructor(msg?: RoomConfigMessage) {
-    if (msg) {
-      this.advancedSongFiltering = msg.advancedSongFiltering === true;
-      this.endWhenAnswered = msg.endWhenAnswered === true;
-    }
+    if (msg) this.applyMessage(msg);
+  }
+
+  /**
+   * Applys a {@link RoomConfigMessage} to this config instance.
+   * @param msg the message to apply.
+   */
+  public applyMessage(msg: RoomConfigMessage) {
+    Object.assign(this, msg);
   }
 
   /**
@@ -20,7 +27,7 @@ export class BaseConfig implements RoomConfigMessage {
    * @returns a JSON string of the constructed {@link RoomConfigMessage}
    */
   public getConfigMessage(): string {
-    const baseKeys: (keyof BaseConfig)[] = ['type', 'advancedSongFiltering', 'endWhenAnswered'];
+    const baseKeys: (keyof BaseConfig)[] = Object.keys(RoomConfigMessageSchema.shape) as (keyof BaseConfig)[];
     return JSON.stringify(this, baseKeys);
   }
 }
