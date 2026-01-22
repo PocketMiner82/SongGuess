@@ -1,3 +1,10 @@
+## [2.6.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.6.0...2.6.1-dev.1) (2026-01-22)
+
+
+### Bug Fixes
+
+* wrong condition for filtering out same playlists ([42951c8](https://github.com/PocketMiner82/SongGuess/commit/42951c85154d101eea1eba2ad9c923495ad1e987))
+
 # [2.6.0](https://github.com/PocketMiner82/SongGuess/compare/2.5.0...2.6.0) (2026-01-18)
 
 
