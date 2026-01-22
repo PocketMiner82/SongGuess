@@ -22,7 +22,7 @@ import {version} from "../../package.json";
 import ServerConfig from "./config/ServerConfig";
 import Listener from "./listener/Listener";
 import type GameMode from "./game/GameMode";
-import {MulitpleChoiceGameMode} from "./game/multipleChoice/MulitpleChoiceGameMode";
+import {MultipleChoiceGameMode} from "./game/multipleChoice/MultipleChoiceGameMode";
 import GamePhase from "./game/GamePhase";
 
 
@@ -111,7 +111,7 @@ export class ValidRoom implements Party.Server {
   constructor(readonly server: Server) {
     this.listener = new Listener(this);
     this.config = new ServerConfig(this);
-    this.game = new MulitpleChoiceGameMode(this);
+    this.game = new MultipleChoiceGameMode(this);
   }
 
   onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
@@ -529,12 +529,17 @@ export class ValidRoom implements Party.Server {
     // inform client about current round state
     this.game.getGameMessages(true).forEach(msg => conn.send(msg));
 
-    // send players answer if player selected one previously
+    // send client's answer if client selected one previously
     if (connState.answerIndex !== undefined) {
       this.sendConfirmationOrError(conn, {
         type: "select_answer",
         answerIndex: connState.answerIndex
       } satisfies SelectAnswerMessage);
+    }
+
+    // send played songs to client
+    if (this.state === "results" && this.game instanceof MultipleChoiceGameMode) {
+      conn.send(this.game.getPlayedSongsUpdateMessage());
     }
 
     // kicks player if inactive

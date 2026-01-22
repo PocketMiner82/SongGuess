@@ -93,7 +93,7 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * The amount of questions to ask per round.
    */
-  questionCount: z.number().nonnegative().max(30)
+  questionCount: z.number().min(1).max(30)
 });
 
 

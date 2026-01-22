@@ -12,7 +12,7 @@ import {POINTS_PER_QUESTION, TIME_PER_QUESTION} from "../../config/ServerConfigC
 import GamePhase from "../GamePhase";
 
 
-export class MulitpleChoiceGameMode extends GameMode{
+export class MultipleChoiceGameMode extends GameMode{
   /**
    * The list of questions for the current game.
    */
@@ -147,7 +147,7 @@ export class MulitpleChoiceGameMode extends GameMode{
    *
    * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
    */
-  private getPlayedSongsUpdateMessage() {
+  public getPlayedSongsUpdateMessage() {
     return JSON.stringify({
       type: "update_played_songs",
       songs: this.questions.map(q => q.song)

@@ -172,11 +172,11 @@ function QuestionDisplay() {
   }, []));
 
   useEffect(() => {
-    if (controller.currentAudioState === "play") {
+    if (controller.ingameData.currentAudioState === "play") {
       // allow answering when music starts
-      setCanAnswer(controller.currentAnswer === null && controller.selectedAnswer === null);
-      setIsPlaying(controller.currentAnswer === null);
-    } else if (controller.currentAudioState === "load") {
+      setCanAnswer(controller.ingameData.currentAnswer === null && controller.ingameData.selectedAnswer === null);
+      setIsPlaying(controller.ingameData.currentAnswer === null);
+    } else if (controller.ingameData.currentAudioState === "load") {
       setIsPlaying(true);
       setCanAnswer(false);
     } else {
@@ -184,7 +184,7 @@ function QuestionDisplay() {
       setIsPlaying(false);
       setCanAnswer(false);
     }
-  }, [controller.currentAudioState, controller.currentAnswer, controller.selectedAnswer]);
+  }, [controller.ingameData.currentAudioState, controller.ingameData.currentAnswer, controller.ingameData.selectedAnswer]);
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -192,18 +192,18 @@ function QuestionDisplay() {
     controller.selectAnswer(answerIndex);
   }, [canAnswer, controller]);
 
-  if (!controller.currentQuestion && !controller.currentAnswer) {
+  if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
     return (
         <>
           <div className="material-symbols-outlined animate-spin text-gray-500 mb-8">progress_activity</div>
-          <div className="text-2xl">Waiting for next question...</div>
+          <div className="text-2xl">Loading question...</div>
         </>
     );
   }
 
-  const answerOptions = controller.currentAnswer?.answerOptions || controller.currentQuestion?.answerOptions;
-  const correctIndex = controller.currentAnswer?.correctIndex;
-  const questionNumber = controller.currentQuestion?.number || controller.currentAnswer?.number;
+  const answerOptions = controller.ingameData.currentAnswer?.answerOptions || controller.ingameData.currentQuestion?.answerOptions;
+  const correctIndex = controller.ingameData.currentAnswer?.correctIndex;
+  const questionNumber = controller.ingameData.currentQuestion?.number || controller.ingameData.currentAnswer?.number;
   const isDisabled = !canAnswer;
 
   return (
@@ -218,9 +218,9 @@ function QuestionDisplay() {
       </div>
 
       <div className="mx-auto w-3/4">
-        <ProgressBar duration={controller.currentAudioState === "load"
-            ? -controller.currentAudioLength
-            : controller.currentAudioLength
+        <ProgressBar duration={controller.ingameData.currentAudioState === "load"
+            ? -controller.ingameData.currentAudioLength
+            : controller.ingameData.currentAudioLength
         } isPlaying={isPlaying} />
       </div>
 
@@ -230,7 +230,7 @@ function QuestionDisplay() {
             key={index}
             option={option}
             index={index}
-            isSelected={controller.selectedAnswer === index}
+            isSelected={controller.ingameData.selectedAnswer === index}
             isCorrect={correctIndex !== undefined ? correctIndex === index : null}
             isDisabled={isDisabled}
             onSelect={handleAnswerSelect}
@@ -248,11 +248,11 @@ function AnswerResults() {
   useRoomControllerMessageTypeListener(controller, "question");
   let rankedPlayers: PlayerState[] = [];
 
-  if (controller.currentAnswer) {
+  if (controller.ingameData.currentAnswer) {
     rankedPlayers = controller.players
         .map(p => {
           // don't show time for wrong answers
-          if (p.answerIndex !== controller.currentAnswer!.correctIndex) {
+          if (p.answerIndex !== controller.ingameData.currentAnswer!.correctIndex) {
             p.answerSpeed = undefined;
           }
           return p;
