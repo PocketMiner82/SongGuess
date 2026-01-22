@@ -1,3 +1,10 @@
+## [2.6.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.6.1-dev.1...2.6.1-dev.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* **room:** wrong order of ping text coloring ([3ce5dca](https://github.com/PocketMiner82/SongGuess/commit/3ce5dcacab01d62685555eb66340989cdffeb5dd))
+
 ## [2.6.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.6.0...2.6.1-dev.1) (2026-01-22)
 
 
