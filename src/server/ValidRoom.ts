@@ -1,18 +1,13 @@
 import type Server from "./Server";
 import type * as Party from "partykit/server";
 import type {
-  AddPlaylistsMessage,
-  ChangeUsernameMessage,
   ConfirmationMessage,
   CountdownMessage,
   GameState,
   PlayerState,
-  Playlist,
-  RemovePlaylistMessage, SelectAnswerMessage,
-  Song,
+  SelectAnswerMessage,
   SourceMessage,
-  UpdateMessage,
-  UpdatePlaylistsMessage
+  UpdateMessage
 } from "../types/MessageTypes";
 import {COLORS} from "./config/ServerConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
@@ -21,9 +16,10 @@ import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-genera
 import {version} from "../../package.json";
 import ServerConfig from "./config/ServerConfig";
 import Listener from "./listener/Listener";
-import type GameMode from "./game/GameMode";
-import {MultipleChoiceGameMode} from "./game/multipleChoice/MultipleChoiceGameMode";
+import type Game from "./game/Game";
+import {MultipleChoiceGame} from "./game/multipleChoice/MultipleChoiceGame";
 import GamePhase from "./game/GamePhase";
+import Lobby from "./Lobby";
 
 
 /**
@@ -43,7 +39,12 @@ export class ValidRoom implements Party.Server {
   /**
    * The current game handler.
    */
-  readonly game: GameMode;
+  readonly game: Game;
+
+  /**
+   * The lobby handler.
+   */
+  readonly lobby: Lobby;
 
   /**
    * Map containing timeouts to kick inactive players. Key is connection id.
@@ -83,16 +84,6 @@ export class ValidRoom implements Party.Server {
   cachedStates: Map<string, PlayerState> = new Map();
 
   /**
-   * Currently selected playlist(s)
-   */
-  playlists: Playlist[] = [];
-
-  /**
-   * All songs of the currently selected playlist(s)
-   */
-  songs: Song[] = [];
-
-  /**
    * The current countdown interval function
    */
   countdownInterval: NodeJS.Timeout|null = null;
@@ -111,7 +102,8 @@ export class ValidRoom implements Party.Server {
   constructor(readonly server: Server) {
     this.listener = new Listener(this);
     this.config = new ServerConfig(this);
-    this.game = new MultipleChoiceGameMode(this);
+    this.game = new MultipleChoiceGame(this);
+    this.lobby = new Lobby(this);
   }
 
   onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
@@ -127,10 +119,56 @@ export class ValidRoom implements Party.Server {
       }
     }
 
-    if (!this.initConnection(conn)) {
+    let color = this.getUnusedColors()[0];
+
+    if (!color) {
       conn.close(4002, "Room is full.");
       return;
     }
+
+    let username = uniqueUsernameGenerator({
+      dictionaries: [adjectives, nouns],
+      style: "titleCase",
+      length: 16
+    });
+
+    // load state if there is one from previous connect
+    let connState = this.cachedStates.get(conn.id) ?? {} as PlayerState;
+    connState.username = username;
+    connState.color = color;
+    connState.points = connState.points ?? 0;
+
+    conn.setState(connState);
+
+    // clear cached answer when we're already at the next question
+    if (connState.questionNumber !== this.game.currentQuestion) {
+      this.game.resetPlayerAnswerData(conn);
+    }
+
+    // send the current playlist to the connection
+    conn.send(this.lobby.getPlaylistsUpdateMessage());
+
+    // inform client about current round state
+    this.game.getGameMessages(true).forEach(msg => conn.send(msg));
+
+    // send client's answer if client selected one previously
+    if (connState.answerIndex !== undefined) {
+      this.sendConfirmationOrError(conn, {
+        type: "select_answer",
+        answerIndex: connState.answerIndex
+      } satisfies SelectAnswerMessage);
+    }
+
+    // send played songs to client
+    if (this.state === "results") {
+      conn.send(this.game.getPlayedSongsUpdateMessage());
+    }
+
+    // send current config
+    this.getPartyRoom().broadcast(this.config.getConfigMessage());
+
+    // kicks player if inactive
+    this.refreshKickPlayerTimeout(conn);
 
     // send the first update to the connection (and inform all other connections about the new player)
     this.broadcastUpdateMessage();
@@ -264,8 +302,8 @@ export class ValidRoom implements Party.Server {
           break;
 
         case "min_song_count":
-          if (this.songs.length < this.config.questionCount) {
-            possibleErrorFunc(`Required at least ${this.config.questionCount} songs. Selected: ${this.songs.length}`);
+          if (this.lobby.songs.length < this.config.questionCount) {
+            possibleErrorFunc(`Required at least ${this.config.questionCount} songs. Selected: ${this.lobby.songs.length}`);
             successful = false;
           }
           break;
@@ -278,112 +316,6 @@ export class ValidRoom implements Party.Server {
     }
 
     return successful;
-  }
-
-  /**
-   * Adds a playlist to the current game session.
-   *
-   * @param msg The message containing the playlist to add.
-   * @returns the amount of playlists omitted.
-   */
-  public addPlaylists(msg: AddPlaylistsMessage): number {
-    const playlists = msg.playlists.filter(playlist =>
-        playlist.songs && this.playlists.every(p =>
-          p.name !== playlist.name || p.cover !== playlist.cover
-    ));
-
-    if (playlists.length > 0) {
-      this.playlists.push(...playlists);
-      this.server.log(`The playlist(s) ${
-          playlists.map(p => p.name).join("; ")
-      } has/have been added.`);
-    }
-
-    return msg.playlists.length - playlists.length;
-  }
-
-  /**
-   * Updates the songs array by collecting all songs from the current playlists.
-   */
-  public filterSongs(): Song[] {
-    this.songs = [];
-    for (let playlist of this.playlists) {
-      this.songs.push(...playlist.songs);
-    }
-
-    this.songs = [
-      ...new Map(this.songs.map(s => {
-            // filter for unique name and artist
-            let normalizedName = s.name.toLowerCase();
-            let normalizedArtist = s.artist.toLowerCase();
-
-            if (this.config.advancedSongFiltering) {
-              // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
-              normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
-            }
-
-            return [`${normalizedName}|${normalizedArtist}`, s]
-          }
-      )).values()
-    ];
-
-    return this.songs;
-  }
-
-  /**
-   * Removes a playlist from the current game session by index.
-   *
-   * @param msg The message containing the index of the playlist to remove.
-   * @returns true if the playlist was removed successfully, false if the index was out of bounds.
-   */
-  public removePlaylist(msg: RemovePlaylistMessage): boolean {
-    if (msg.index !== null && msg.index >= this.playlists.length) {
-      return false;
-    }
-
-    if (msg.index !== null) {
-      let playlistName = this.playlists[msg.index].name;
-      this.playlists.splice(msg.index, 1);
-      this.server.log(`The playlist "${playlistName}" has been removed.`);
-    } else {
-      this.playlists = [];
-      this.server.log(`All playlists have been removed.`);
-    }
-    return true;
-  }
-
-  /**
-   * Changes the username for a connected player.
-   *
-   * @param conn The connection of the player requesting the change.
-   * @param msg The message with the username change request.
-   */
-  public changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
-    // username is already validated, just check if it's used by another player
-    for (let connection of this.getPartyRoom().getConnections()) {
-      let state = connection.state as PlayerState;
-      if (connection !== conn && state.username === msg.username) {
-        conn.send(this.getUpdateMessage(conn));
-        this.sendConfirmationOrError(conn, msg, "Username is already taken.");
-        return;
-      }
-    }
-    (conn.state as PlayerState).username = msg.username;
-
-    // inform all players about the username change + send confirmation to the user
-    this.sendConfirmationOrError(conn, msg);
-    this.broadcastUpdateMessage();
-  }
-
-  /**
-   * Stops a countdown if running.
-   */
-  public stopCountdown() {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval!);
-      this.countdownInterval = null;
-      this.countdown = 0;
-    }
   }
 
   /**
@@ -407,6 +339,17 @@ export class ValidRoom implements Party.Server {
     this.countdown = from;
     decrementCountdown();
     this.countdownInterval = setInterval(decrementCountdown, 1000);
+  }
+
+  /**
+   * Stops a countdown if running.
+   */
+  public stopCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval!);
+      this.countdownInterval = null;
+      this.countdown = 0;
+    }
   }
 
   /**
@@ -488,65 +431,6 @@ export class ValidRoom implements Party.Server {
   }
 
   /**
-   * Set initial random username and unused color for a player.
-   *
-   * @param conn The connection of the player
-   * @returns whether the init was successful (room was not full)
-   */
-  public initConnection(conn: Party.Connection): boolean {
-    let username = uniqueUsernameGenerator({
-      dictionaries: [adjectives, nouns],
-      style: "titleCase",
-      length: 16
-    });
-
-    let color = this.getUnusedColors()[0];
-
-    if (!color) {
-      return false;
-    }
-
-    // load state if there is one from previous connect
-    let connState = this.cachedStates.get(conn.id) ?? {} as PlayerState;
-    connState.username = username;
-    connState.color = color;
-    connState.points = connState.points ?? 0;
-
-    conn.setState(connState);
-
-    // clear cached answer when we're already at the next question
-    if (connState.questionNumber !== this.game.currentQuestion) {
-      this.game.resetPlayerAnswerData(conn);
-    }
-
-    // send the current playlist to the connection
-    conn.send(this.getPlaylistsUpdateMessage());
-
-    // inform client about current round state
-    this.game.getGameMessages(true).forEach(msg => conn.send(msg));
-
-    // send client's answer if client selected one previously
-    if (connState.answerIndex !== undefined) {
-      this.sendConfirmationOrError(conn, {
-        type: "select_answer",
-        answerIndex: connState.answerIndex
-      } satisfies SelectAnswerMessage);
-    }
-
-    // send played songs to client
-    if (this.state === "results" && this.game instanceof MultipleChoiceGameMode) {
-      conn.send(this.game.getPlayedSongsUpdateMessage());
-    }
-
-    // send current config
-    this.getPartyRoom().broadcast(this.config.getConfigMessage());
-
-    // kicks player if inactive
-    this.refreshKickPlayerTimeout(conn);
-    return true;
-  }
-
-  /**
    * Resets the inactivity timer for a specific player connection.
    * If the timer expires before being refreshed again, the connection is closed.
    *
@@ -611,19 +495,6 @@ export class ValidRoom implements Party.Server {
     for (const conn of this.getPartyRoom().getConnections()) {
       conn.send(this.getUpdateMessage(conn));
     }
-  }
-
-  /**
-   * Constructs a playlist update message with the current playlist array.
-   *
-   * @returns a JSON string of the constructed {@link UpdatePlaylistsMessage}
-   */
-  public getPlaylistsUpdateMessage(): string {
-    return JSON.stringify({
-      type: "update_playlists",
-      playlists: this.playlists,
-      filteredSongsCount: this.songs.length
-    } satisfies UpdatePlaylistsMessage);
   }
 
   /**

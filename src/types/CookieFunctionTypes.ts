@@ -1,5 +1,5 @@
 import type {Cookie, CookieSetOptions} from "universal-cookie";
-import type CookieProps from "./CookieProps";
+import type ICookieProps from "./ICookieProps";
 
 export type CookieSetter = (
     name: "userID" | "userName",
@@ -7,4 +7,4 @@ export type CookieSetter = (
     options?: CookieSetOptions
 ) => void;
 
-export type CookieGetter = () => CookieProps;
+export type CookieGetter = () => ICookieProps;

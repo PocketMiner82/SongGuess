@@ -80,7 +80,7 @@ export const AnswerMessageSchema = z.object({
   /**
    * The index of the correct answer.
    */
-  correctIndex: z.int().min(0).max(3)
+  correctAnswer: z.int().min(0).max(3)
 });
 
 
@@ -157,7 +157,7 @@ export const UpdatePlaylistsMessageSchema = z.object({
   /**
    * Currently selected playlist(s)
    */
-  playlists: z.array(PlaylistSchema),
+  playlists: z.optional(z.array(PlaylistSchema)),
 
   /**
    * The count of filtered songs.

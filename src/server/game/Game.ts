@@ -6,7 +6,7 @@ import type {
   ClientMessage,
   PlayerState,
   SelectAnswerMessage,
-  Song
+  Song, UpdatePlayedSongsMessage
 } from "../../types/MessageTypes";
 import {
   ROUND_PAUSE_MUSIC,
@@ -16,18 +16,15 @@ import {
   ROUND_START_NEXT
 } from "../config/ServerConfigConstants";
 import GamePhase from "./GamePhase";
+import Question, {InitError} from "./Question";
+import type {IEventListener} from "../listener/IEventListener";
 
 
-export default abstract class GameMode {
+export default abstract class Game implements IEventListener {
   /**
    * Whether the game currently is running
    */
   isRunning = false;
-
-  /**
-   * The index of the current question.
-   */
-  currentQuestion: number = 0;
 
   /**
    * The current tick count within the ongoing round.
@@ -50,10 +47,21 @@ export default abstract class GameMode {
    */
   remainingSongs: Song[] = [];
 
+  /**
+   * The index of the current question.
+   */
+  currentQuestion: number = 0;
+
+  /**
+   * The list of questions for the current game.
+   */
+  abstract questions: Question[];
+
 
   constructor(readonly room: ValidRoom) {
     room.listener.registerEvents(this);
   }
+
 
   /**
    * Should calculate the points for this round for all players that selected the correct answer.
@@ -61,10 +69,50 @@ export default abstract class GameMode {
   abstract calculatePoints(): void;
 
   /**
-   * Should return an array of all required {@link ServerMessage} so clients know about the current game state.
+   * Should create and return a new {@link Question} object.
+   */
+  abstract createQuestion(song: Song): Question;
+
+  /**
+   * Should return an array of all required {@link ServerMessage}s so clients know about the current game state.
    * @param sendPrevious whether to include all messages for the round. Useful when client joins.
    */
-  abstract getGameMessages(sendPrevious?: boolean): string[];
+  getGameMessages(sendPrevious?: boolean): string[] {
+    let msgs: string[] = [];
+    let q = this.questions[this.currentQuestion];
+
+    // nothing to send if game is not running
+    if (!this.isRunning) {
+      return msgs;
+    }
+
+    // directly return pause message if this is the end of the round and next round starts shortly...
+    if (this.gamePhase === GamePhase.PAUSE_MUSIC) {
+      msgs.push(this.getAudioControlMessage("pause"));
+      return msgs;
+    }
+
+    // also append all previous messages if requested
+    for (let i = sendPrevious ? 0 : this.gamePhase; i <= this.gamePhase; i++) {
+      switch (i) {
+        case GamePhase.QUESTION:
+          msgs.push(q.getQuestionMessage(this.currentQuestion + 1));
+          // load audio of song to guess
+          msgs.push(this.getAudioControlMessage("load", q.song.audioURL));
+          break;
+
+        case GamePhase.ANSWERING:
+          msgs.push(this.getAudioControlMessage("play"));
+          break;
+
+        case GamePhase.ANSWER:
+          msgs.push(q.getAnswerMessage(this.currentQuestion + 1));
+          break;
+      }
+    }
+
+    return msgs;
+  }
 
   onMessage(conn: Connection, msg: ClientMessage): boolean {
     let connState: PlayerState = conn.state as PlayerState;
@@ -84,7 +132,26 @@ export default abstract class GameMode {
         this.selectAnswer(conn, msg);
         return true;
       case "start_game":
-        return !this.room.performChecks(conn, msg, "host", "not_ingame", "not_contdown", "min_song_count");
+        if(!this.room.performChecks(conn, msg, "host", "not_ingame", "not_contdown", "min_song_count")) {
+          return true;
+        }
+
+        // make sure initialization worked
+        try {
+          this.regenerateRandomQuestions();
+        } catch (e) {
+          if (this.room.hostConnection && e instanceof InitError) {
+            this.room.sendConfirmationOrError(this.room.hostConnection, msg, e.message);
+          } else if (this.room.hostConnection) {
+            this.room.sendConfirmationOrError(this.room.hostConnection, msg, "Unknown error while starting game.");
+            this.room.server.log(e, "error");
+          }
+          return true;
+        }
+
+        this.room.sendConfirmationOrError(conn, msg);
+        this.startGame();
+        return true;
 
       case "return_to":
         if (!this.room.performChecks(conn, msg, "host", "not_lobby")) {
@@ -157,6 +224,30 @@ export default abstract class GameMode {
 
     if (sendUpdate) {
       this.getGameMessages().forEach(msg => this.room.getPartyRoom().broadcast(msg));
+    }
+  }
+
+  /**
+   * Clears and then adds random song guessing questions to the room.
+   * Creates {@link ServerConfig.questionCount} random questions for the current game session.
+   */
+  private regenerateRandomQuestions() {
+    this.questions = [];
+
+    // add QUESTION_COUNT random questions
+    for (let i = 0; i < this.room.config.questionCount; i++) {
+      if (this.remainingSongs.length === 0) {
+        const usedAudioUrls = new Set(this.questions.map(q => q.song.audioURL));
+        this.remainingSongs = this.room.lobby.songs.filter(song => !usedAudioUrls.has(song.audioURL));
+      }
+
+      let randomIndex = Math.floor(Math.random() * this.remainingSongs.length);
+      this.questions.push(this.createQuestion(this.remainingSongs.splice(randomIndex, 1)[0]))
+    }
+
+    // add distractions to the questions
+    for (const q of this.questions) {
+      q.init(this.room.lobby.songs);
     }
   }
 
@@ -281,7 +372,20 @@ export default abstract class GameMode {
     // the update message always contains the points, displaying ranks is handled client-side
     if (sendUpdate) {
       this.room.broadcastUpdateMessage();
+      this.room.getPartyRoom().broadcast(this.getPlayedSongsUpdateMessage());
     }
+  }
+
+  /**
+   * Constructs a played songs update message with the songs played in the last round.
+   *
+   * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
+   */
+  public getPlayedSongsUpdateMessage() {
+    return JSON.stringify({
+      type: "update_played_songs",
+      songs: this.questions.map(q => q.song)
+    } satisfies UpdatePlayedSongsMessage);
   }
 
   /**

@@ -1,20 +1,13 @@
 import { shuffle } from "../../../Utils";
-import type {AnswerMessage, QuestionMessage, Song} from "../../../types/MessageTypes";
+import type {Song} from "../../../types/MessageTypes";
+import Question, {InitError} from "../Question";
 
-export default class MultipleChoiceQuestion {
-  /**
-   * The list of songs for this question (1 correct answer + 3 distractors).
-   */
-  questions: Song[] = [];
+export default class MultipleChoiceQuestion extends Question {
 
-  /**
-   * Constructs a question asking which is the correct song.
-   * After all questions are added, {@link generateDistractions} MUST be called to add the distraction answers.
-   * 
-   * @param song The correct song for this question.
-   */
-  constructor(readonly song: Song) {
-    this.questions.push(song);
+  init(remainingSongs?: Song[]) {
+    if (remainingSongs) {
+      this.generateDistractions(remainingSongs);
+    }
   }
 
   /**
@@ -23,7 +16,7 @@ export default class MultipleChoiceQuestion {
    * @param possibleDistractions Array of songs to use as distraction options. Will be copied, so no items are removed.
    * @throws Error if distraction generation fails.
    */
-  public generateDistractions(possibleDistractions: Song[]) {
+  private generateDistractions(possibleDistractions: Song[]) {
     const distractions = possibleDistractions.filter(s =>
       s.audioURL !== this.song.audioURL);
 
@@ -32,7 +25,8 @@ export default class MultipleChoiceQuestion {
       let distraction = distractions.splice(randomIndex, 1)[0];
 
       if (!distraction) {
-        throw new DistractionError();
+        throw new InitError("Cannot find enough distractions with different name. " +
+            "Please add more songs with unique names to the playlist!");
       } else if (distraction.name === this.song.name) {
         // try again
         i--;
@@ -44,68 +38,7 @@ export default class MultipleChoiceQuestion {
     this.questions = shuffle(this.questions);
   }
 
-  /**
-   * Extracts song names from the questions array.
-   *
-   * @returns An array of song names for the answer options.
-   * @throws Error if generateDistractions() hasn't been called first.
-   */
-  private getSongNames() {
-    let songNames = this.questions.map(s => s.name);
-
-    if (songNames.length !== 4) {
-      throw new Error("Please call generateDistractions() first.");
-    }
-
-    return songNames;
-  }
-
-  /**
-   * Creates a question message for sending to clients.
-   *
-   * @param n The question number.
-   * @returns A JSON string containing the question message.
-   */
-  public getQuestionMessage(n: number): string {
-    let questionMsg: QuestionMessage = {
-      type: "question",
-      number: n,
-      answerOptions: this.getSongNames()
-    }
-    return JSON.stringify(questionMsg);
-  }
-
-  /**
-   * Creates an answer message for sending to clients.
-   *
-   * @param n The question number.
-   * @returns A JSON string containing the answer message.
-   */
-  public getAnswerMessage(n: number): string {
-    let answerMsg: AnswerMessage = {
-      type: "answer",
-      number: n,
-      answerOptions: this.getSongNames(),
-      correctIndex: this.getAnswerIndex()
-    }
-    return JSON.stringify(answerMsg);
-  }
-
-  /**
-   * Returns the index of the correct answer.
-   */
-  public getAnswerIndex() {
+  getCorrectAnswer() {
     return this.questions.indexOf(this.song);
-  }
-}
-
-
-/**
- * An exception informing the user about distraction generation errors.
- */
-export class DistractionError extends Error {
-  constructor() {
-    super("Cannot find enough distractions with different name.\n" +
-        "Please add more songs with unique names to the playlist!");
   }
 }

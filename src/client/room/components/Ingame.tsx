@@ -202,7 +202,7 @@ function QuestionDisplay() {
   }
 
   const answerOptions = controller.ingameData.currentAnswer?.answerOptions || controller.ingameData.currentQuestion?.answerOptions;
-  const correctIndex = controller.ingameData.currentAnswer?.correctIndex;
+  const correctIndex = controller.ingameData.currentAnswer?.correctAnswer;
   const questionNumber = controller.ingameData.currentQuestion?.number || controller.ingameData.currentAnswer?.number;
   const isDisabled = !canAnswer;
 
@@ -252,7 +252,7 @@ function AnswerResults() {
     rankedPlayers = controller.players
         .map(p => {
           // don't show time for wrong answers
-          if (p.answerIndex !== controller.ingameData.currentAnswer!.correctIndex) {
+          if (p.answerIndex !== controller.ingameData.currentAnswer!.correctAnswer) {
             p.answerSpeed = undefined;
           }
           return p;

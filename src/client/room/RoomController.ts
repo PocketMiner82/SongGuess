@@ -444,7 +444,7 @@ export class RoomController {
         this.config = new BaseConfig(msg);
         break;
       case "update_playlists":
-        this.playlists = msg.playlists;
+        this.playlists = msg.playlists ?? this.playlists;
         this.filteredSongsCount = msg.filteredSongsCount;
         break;
       case "question":
