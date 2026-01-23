@@ -264,7 +264,6 @@ export class ValidRoom implements Party.Server {
           break;
 
         case "min_song_count":
-          // todo: calculate this if implementing variable question count
           if (this.songs.length < this.config.questionCount) {
             possibleErrorFunc(`Required at least ${this.config.questionCount} songs. Selected: ${this.songs.length}`);
             successful = false;
@@ -440,11 +439,8 @@ export class ValidRoom implements Party.Server {
     this.hostConnection = newHost;
     this.hostID = newHost?.id;
 
-    if (newHost) {
-      newHost.send(this.config.getConfigMessage());
-      if (sendUpdate) {
-        this.broadcastUpdateMessage();
-      }
+    if (newHost && sendUpdate) {
+      this.broadcastUpdateMessage();
     }
   }
 
@@ -541,6 +537,9 @@ export class ValidRoom implements Party.Server {
     if (this.state === "results" && this.game instanceof MultipleChoiceGameMode) {
       conn.send(this.game.getPlayedSongsUpdateMessage());
     }
+
+    // send current config
+    this.getPartyRoom().broadcast(this.config.getConfigMessage());
 
     // kicks player if inactive
     this.refreshKickPlayerTimeout(conn);
