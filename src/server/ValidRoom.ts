@@ -207,7 +207,12 @@ export class ValidRoom implements Party.Server {
   onTick() {
     this.listener.handleTick();
 
-    if (this.hostConnection && !this.hostConnection.readyState) {
+    if (this.server.getOnlineCount() > 0) {
+      for (let conn of this.getPartyRoom().getConnections()) {
+        if (!this.hostConnection || conn?.id === this.hostID)
+          return;
+      }
+
       // host left
       this.delayedHostTransfer();
     }
@@ -225,7 +230,7 @@ export class ValidRoom implements Party.Server {
     this.cachedStates.set(conn.id, conn.state as PlayerState);
 
     // host left
-    if (this.hostConnection === conn) {
+    if (this.hostID === conn.id) {
       this.delayedHostTransfer();
     }
 
