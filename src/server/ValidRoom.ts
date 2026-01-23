@@ -102,6 +102,13 @@ export class ValidRoom implements Party.Server {
   }
 
   onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
+    let color = this.getUnusedColors()[0];
+
+    if (!color) {
+      conn.close(4002, "Room is full.");
+      return;
+    }
+
     if (this.hostConnection === undefined) {
       this.transferHost(conn, false);
     } else if (this.hostConnection === null && this.hostID === conn.id) {
@@ -112,13 +119,6 @@ export class ValidRoom implements Party.Server {
         clearTimeout(this.hostTransferTimeout);
         this.hostTransferTimeout = null;
       }
-    }
-
-    let color = this.getUnusedColors()[0];
-
-    if (!color) {
-      conn.close(4002, "Room is full.");
-      return;
     }
 
     let username = uniqueUsernameGenerator({
@@ -206,6 +206,11 @@ export class ValidRoom implements Party.Server {
    */
   onTick() {
     this.listener.handleTick();
+
+    if (this.hostConnection && !this.hostConnection.readyState) {
+      // host left
+      this.delayedHostTransfer();
+    }
   }
 
   onClose(conn: Party.Connection) {

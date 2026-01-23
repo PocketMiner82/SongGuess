@@ -110,6 +110,8 @@ export default class Lobby implements IEventListener {
             if (this.room.config.advancedSongFiltering) {
               // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
               normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
+              normalizedName = normalizedName.replace(/[^\p{L}\p{N} ]/gu, "");
+              normalizedName = normalizedName.replace(/ +/g, " ");
             }
 
             return [`${normalizedName}|${normalizedArtist}`, s]

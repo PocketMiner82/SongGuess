@@ -22,7 +22,12 @@ export default class MultipleChoiceQuestion extends Question {
     let distractions = possibleDistractions;
 
     if (this.config.distractionsPreferSameArtist) {
-      distractions = possibleDistractions.filter(s => s.artist === this.song.artist);
+      // filters for songs that share at least one artist with the current track
+      distractions = possibleDistractions.filter(s =>
+          this.song.artist.split(" & ")
+              .some(a => s.artist.split(" & ").indexOf(a) !== -1));
+
+      // add all other distractions as fallback if there are not enough distractions available by the same artist
       distractions.push(..._.difference(possibleDistractions, distractions));
     }
 
