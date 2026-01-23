@@ -1,3 +1,10 @@
+# [2.7.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.4...2.7.0-dev.5) (2026-01-23)
+
+
+### Features
+
+* **Config:** allow generating distractions by prefering songs from same artist ([4516612](https://github.com/PocketMiner82/SongGuess/commit/451661295ea5a9bb1458ec3d87b425ab9d7468d0))
+
 # [2.7.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.3...2.7.0-dev.4) (2026-01-23)
 
 
