@@ -1,3 +1,10 @@
+# [2.7.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.6...2.7.0-dev.7) (2026-01-23)
+
+
+### Bug Fixes
+
+* ignore special chars when filtering songs + filter for songs that share at least one artist with the current track when distractionsPreferSameArtist is enabled ([5ac2015](https://github.com/PocketMiner82/SongGuess/commit/5ac2015cafb8dc53d26305fcac6b587beba07a9c))
+
 # [2.7.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.5...2.7.0-dev.6) (2026-01-23)
 
 
