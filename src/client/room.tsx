@@ -13,7 +13,7 @@ import { Button } from "./components/Button";
 import { Audio } from "./room/components/Audio";
 import {CookieConsent} from "react-cookie-consent";
 import {CookiesProvider, useCookies} from "react-cookie";
-import type CookieProps from "../types/CookieProps";
+import type ICookieProps from "../types/ICookieProps";
 import type {ServerMessage} from "../types/MessageTypes";
 
 
@@ -89,8 +89,8 @@ function Room() {
               <div className="flex-1 flex justify-end">
                 <span>Ping:</span>
                 <span className={`ml-1 min-w-12 text-right ${
-                    controller.currentPingMs > 100 ? "text-yellow-500" :
                     controller.currentPingMs > 250 ? "text-error" :
+                    controller.currentPingMs > 100 ? "text-yellow-500" :
                     "text-success"
                 }`}>{controller.currentPingMs} ms</span>
               </div>
@@ -106,7 +106,7 @@ function Room() {
  */
 function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
-  const [cookies, setCookie] = useCookies<"userID"|"userName", CookieProps>(["userID", "userName"]);
+  const [cookies, setCookie] = useCookies<"userID"|"userName", ICookieProps>(["userID", "userName"]);
   const { getController, isReady } = useRoomController(roomID, () => cookies, setCookie);
 
   if (!isReady) return <Loading />;

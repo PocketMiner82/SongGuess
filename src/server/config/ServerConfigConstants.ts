@@ -9,11 +9,6 @@ export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black
 export const ROOM_CLEANUP_TIMEOUT = 10;
 
 /**
- * The number of questions to generate per game.
- */
-export const QUESTION_COUNT = 10;
-
-/**
  * The time allocated for each question in seconds.
  */
 export const TIME_PER_QUESTION = 20;

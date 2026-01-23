@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { useControllerContext, useRoomControllerListener } from '../RoomController';
 import {useCookies} from "react-cookie";
-import type CookieProps from "../../../types/CookieProps";
+import type ICookieProps from "../../../types/ICookieProps";
 import type {ServerMessage} from "../../../types/MessageTypes";
 
 /**
@@ -11,7 +11,7 @@ import type {ServerMessage} from "../../../types/MessageTypes";
 export function Audio() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const controller = useControllerContext();
-  const [cookies, setCookie] = useCookies<"audioVolume"|"audioMuted", CookieProps>(["audioVolume", "audioMuted"]);
+  const [cookies, setCookie] = useCookies<"audioVolume"|"audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
   const [targetVolume, setTargetVolume] = useState(cookies.audioVolume || 0.2);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   if (cookies.audioVolume === undefined) setCookie('audioVolume', 0.2);

@@ -1,8 +1,8 @@
 import type * as Party from "partykit/server";
-import {clearTimeout} from "node:timers";
+import {clearInterval, clearTimeout} from "node:timers";
 import {
   ROOM_CLEANUP_TIMEOUT
-} from "./ServerConstants";
+} from "./config/ServerConfigConstants";
 import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
 
@@ -24,6 +24,11 @@ export default class Server implements Party.Server {
    * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
   cleanupTimeout: NodeJS.Timeout|null = null;
+
+  /**
+   * The interval that ticks the room every second.
+   */
+  tickInterval: NodeJS.Timeout|null = null;
 
 
   /**
@@ -76,7 +81,11 @@ export default class Server implements Party.Server {
   private delayedCleanup() {
     this.cleanupTimeout = setTimeout(() => {
       if (this.getOnlineCount() === 0) {
+        clearInterval(this.tickInterval!);
+        this.tickInterval = null;
+
         this.validRoom = undefined;
+
         this.log("Room closed due to timeout.");
       }
       this.cleanupTimeout = null;
@@ -99,13 +108,19 @@ export default class Server implements Party.Server {
       this.cleanupTimeout = null;
     }
 
-    this.log(`${conn.id} connected.`);
-
     // kick player if room is not created yet
     if (!this.validRoom) {
       conn.close(4000, "Room ID not found");
+      this.log(`${conn.id} tried connecting to an invalid room.`, "debug");
       return;
     }
+
+    // start the tick interval
+    if (!this.tickInterval) {
+      this.tickInterval = setInterval(() => this.validRoom?.onTick(), 1000);
+    }
+
+    this.log(`${conn.id} connected.`);
 
     this.validRoom.onConnect(conn, ctx);
   }

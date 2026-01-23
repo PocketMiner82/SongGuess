@@ -83,12 +83,22 @@ export const RoomConfigMessageSchema = z.object({
    * Whether to perform advanced filtering tactics when generating the songs array.
    * Currently just ignores parens when filtering for identical song names.
    */
-  advancedSongFiltering: z.optional(z.boolean()),
+  advancedSongFiltering: z.boolean(),
 
   /**
    * Whether to directly end the round after all players answered.
    */
-  endWhenAnswered: z.optional(z.boolean())
+  endWhenAnswered: z.boolean(),
+
+  /**
+   * The amount of questions to ask per round.
+   */
+  questionCount: z.number().min(1).max(30),
+
+  /**
+   * Whether to prefer distractions by the same artist.
+   */
+  distractionsPreferSameArtist: z.boolean()
 });
 
 

@@ -3,7 +3,7 @@ import React, {createContext, useCallback, useContext, useEffect, useRef, useSta
 import type {CloseEvent, ErrorEvent} from "partysocket/ws";
 import z from "zod";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
-import type {CookieGetter, CookieSetter} from "../../types/CookieFunctions";
+import type {CookieGetter, CookieSetter} from "../../types/CookieFunctionTypes";
 import {v4 as uuidv4} from "uuid";
 import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
@@ -120,6 +120,34 @@ export function useRoomControllerMessageTypeListener(controller: RoomController,
 }
 
 
+class IngameData {
+  /**
+   * The current question being asked to players.
+   */
+  currentQuestion: QuestionMessage|null = null;
+
+  /**
+   * The current answer information revealed after question ends.
+   */
+  currentAnswer: AnswerMessage|null = null;
+
+  /**
+   * The currently selected answer.
+   */
+  selectedAnswer: number|null = null;
+
+  /**
+   * The current state of the audio playback
+   */
+  currentAudioState: AudioControlMessage["action"]|null = null;
+
+  /**
+   * The length of the current audio.
+   */
+  currentAudioLength: number = 0;
+}
+
+
 /**
  * Manages the connection and state of a room.
  */
@@ -160,29 +188,9 @@ export class RoomController {
   state: GameState = "lobby";
 
   /**
-   * The current question being asked to players.
-   */
-  currentQuestion: QuestionMessage|null = null;
-
-  /**
-   * The current answer information revealed after question ends.
-   */
-  currentAnswer: AnswerMessage|null = null;
-
-  /**
-   * The list of songs played in the last round.
-   */
-  playedSongs: Song[] = [];
-
-  /**
    * The amount of filtered songs
    */
   filteredSongsCount: number = 0;
-
-  /**
-   * The config of this room
-   */
-  config: BaseConfig = new BaseConfig();
 
   /**
    * The interval of the ping function.
@@ -210,14 +218,19 @@ export class RoomController {
   currentPingMs: number = -1;
 
   /**
-   * The current state of the audio playback
+   * The config of this room
    */
-  currentAudioState: AudioControlMessage["action"]|null = null;
+  config: BaseConfig = new BaseConfig();
 
   /**
-   * The length of the current audio.
+   * The currently cached ingame data
    */
-  currentAudioLength: number = 0;
+  ingameData: IngameData = new IngameData();
+
+  /**
+   * The list of songs played in the last round.
+   */
+  playedSongs: Song[] = [];
 
 
   /**
@@ -389,6 +402,10 @@ export class RoomController {
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
         }
+
+        if (msg.sourceMessage.type === "select_answer") {
+          this.ingameData.selectedAnswer = msg.sourceMessage.answerIndex;
+        }
         break;
       case "update":
         // force hard reload when version is outdated
@@ -412,28 +429,39 @@ export class RoomController {
         this.players = msg.players;
         this.isHost = msg.isHost;
         this.state = msg.state;
+
+        // reset cached ingame data
+        if (this.state !== "ingame") {
+          this.ingameData = new IngameData();
+        }
+
+        // reset cached songs
+        if (this.state !== "results") {
+          this.playedSongs = [];
+        }
         break;
       case "room_config":
         this.config = new BaseConfig(msg);
         break;
       case "update_playlists":
-        this.playlists = msg.playlists;
+        this.playlists = msg.playlists ?? this.playlists;
         this.filteredSongsCount = msg.filteredSongsCount;
         break;
       case "question":
-        this.currentQuestion = msg;
-        this.currentAnswer = null;
+        this.ingameData.currentQuestion = msg;
+        this.ingameData.currentAnswer = null;
+        this.ingameData.selectedAnswer = null;
         break;
       case "answer":
-        this.currentAnswer = msg;
-        this.currentQuestion = null;
+        this.ingameData.currentAnswer = msg;
+        this.ingameData.currentQuestion = null;
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;
         break;
       case "audio_control":
-        this.currentAudioState = msg.action;
-        this.currentAudioLength = msg.length
+        this.ingameData.currentAudioState = msg.action;
+        this.ingameData.currentAudioLength = msg.length
         break;
     }
 

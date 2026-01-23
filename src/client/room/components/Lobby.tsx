@@ -3,7 +3,7 @@ import { Button } from "../../components/Button";
 import { ErrorLabel } from "../../components/ErrorLabel";
 import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
-import {COLORS} from "../../../server/ServerConstants";
+import {COLORS} from "../../../server/config/ServerConfigConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
 import { downloadFile, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
 import {albumRegex, artistRegex, songRegex} from "../../../schemas/ValidationRegexes";
@@ -329,6 +329,54 @@ function SettingsToggle({ value, onToggle, children }: { value: boolean; onToggl
   );
 }
 
+/**
+ * Number input component for settings with validation.
+ * Features left-aligned label and right-aligned number input.
+ */
+function SettingsNumberInput({ value, onChange, min, max, children }: { 
+  value: number; 
+  onChange: (value: number) => void; 
+  min: number; 
+  max: number; 
+  children: ReactNode 
+}) {
+  const [inputValue, setInputValue] = useState(value.toString());
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    
+    const numValue = parseInt(newValue, 10);
+    if (!isNaN(numValue) && numValue >= min && numValue <= max) {
+      onChange(numValue);
+    }
+  };
+
+  const handleBlur = () => {
+    const numValue = parseInt(inputValue, 10);
+    if (isNaN(numValue) || numValue < min || numValue > max) {
+      setInputValue(value.toString());
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <span>
+        {children}
+      </span>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        value={inputValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        className="w-11 px-2 text-center border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0"
+      />
+    </div>
+  );
+}
+
 function Settings() {
   const controller = useControllerContext();
   const [error, setError] = useState<string | null>(null);
@@ -356,18 +404,43 @@ function Settings() {
 
         <div className="border-t border-disabled-bg my-2"></div>
 
-        <SettingsToggle value={controller.config.advancedSongFiltering} onToggle={v => {
-          controller.config.advancedSongFiltering = v;
-          controller.sendConfig();
-        }}>
+        <SettingsToggle value={controller.config.advancedSongFiltering}
+          onToggle={v => {
+            controller.config.advancedSongFiltering = v;
+            controller.sendConfig();
+          }}
+        >
           Perform advanced song filtering
         </SettingsToggle>
 
-        <SettingsToggle value={controller.config.endWhenAnswered} onToggle={v => {
-          controller.config.endWhenAnswered = v;
-          controller.sendConfig();
-        }}>
+        <SettingsToggle value={controller.config.endWhenAnswered}
+          onToggle={v => {
+            controller.config.endWhenAnswered = v;
+            controller.sendConfig();
+          }}
+        >
           End round when all players answered
+        </SettingsToggle>
+
+        <SettingsNumberInput 
+          value={controller.config.questionCount} 
+          onChange={v => {
+            controller.config.questionCount = v;
+            controller.sendConfig();
+          }}
+          min={1}
+          max={30}
+        >
+          Questions per round (1-30)
+        </SettingsNumberInput>
+
+        <SettingsToggle value={controller.config.distractionsPreferSameArtist}
+                        onToggle={v => {
+                          controller.config.distractionsPreferSameArtist = v;
+                          controller.sendConfig();
+                        }}
+        >
+          Distractions: Prefer songs by same artist
         </SettingsToggle>
 
         <div className="border-t border-disabled-bg my-2"></div>

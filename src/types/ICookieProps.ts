@@ -1,4 +1,4 @@
-export default interface CookieProps {
+export default interface ICookieProps {
   audioVolume?: number;
   audioMuted?: boolean;
   userID?: string;

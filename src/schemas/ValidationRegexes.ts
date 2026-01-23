@@ -1,7 +1,7 @@
 /**
  * Regex of the allowed username characters + length restriction
  */
-export const usernameRegex = /^[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<>_-]{1,16}$/;
+export const usernameRegex = /^(?! )(?!.* $)[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<>_ -]{1,16}$/;
 
 /**
  * Regular expression to validate that a URL starts with the apple music domain.
