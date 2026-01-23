@@ -3,6 +3,7 @@ import type {IEventListener} from "../listener/IEventListener";
 import type * as Party from "partykit/server";
 import type {ValidRoom} from "../ValidRoom";
 import {BaseConfig} from "../../BaseConfig";
+import _ from "lodash";
 
 
 export default class ServerConfig extends BaseConfig implements IEventListener{
@@ -17,11 +18,16 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
         return true;
       }
 
-      this.applyMessage(msg);
+      let oldSongs = this.room.lobby.songs.slice();
 
-      this.room.filterSongs();
+      this.applyMessage(msg);
+      this.room.lobby.filterSongs();
+
       this.room.getPartyRoom().broadcast(this.getConfigMessage());
-      this.room.getPartyRoom().broadcast(this.room.getPlaylistsUpdateMessage());
+
+      if (!_.isEqual(oldSongs, this.room.lobby.songs)) {
+        this.room.getPartyRoom().broadcast(this.room.lobby.getPlaylistsUpdateMessage(true));
+      }
       return true;
     }
     return false;
