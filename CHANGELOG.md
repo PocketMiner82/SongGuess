@@ -1,3 +1,10 @@
+# [2.7.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.3...2.7.0-dev.4) (2026-01-23)
+
+
+### Bug Fixes
+
+* don't send whole playlist update message when only filtered songs count changed ([470d5ce](https://github.com/PocketMiner82/SongGuess/commit/470d5cef52db3335247986bf3869dc64fa5b4959))
+
 # [2.7.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.2...2.7.0-dev.3) (2026-01-23)
 
 
