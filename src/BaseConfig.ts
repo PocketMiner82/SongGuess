@@ -10,6 +10,8 @@ export class BaseConfig implements RoomConfigMessage {
 
   public questionCount: number = 10;
 
+  public distractionsPreferSameArtist: boolean = false;
+
 
   constructor(msg?: RoomConfigMessage) {
     if (msg) this.applyMessage(msg);

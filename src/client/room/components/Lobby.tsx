@@ -434,6 +434,15 @@ function Settings() {
           Questions per round (1-30)
         </SettingsNumberInput>
 
+        <SettingsToggle value={controller.config.distractionsPreferSameArtist}
+                        onToggle={v => {
+                          controller.config.distractionsPreferSameArtist = v;
+                          controller.sendConfig();
+                        }}
+        >
+          Distractions: Prefer songs by same artist
+        </SettingsToggle>
+
         <div className="border-t border-disabled-bg my-2"></div>
 
         <div className="grid grid-cols-2 gap-4">

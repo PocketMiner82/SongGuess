@@ -1,4 +1,5 @@
 import type {AnswerMessage, QuestionMessage, Song} from "../../types/MessageTypes";
+import type ServerConfig from "../config/ServerConfig";
 
 export default abstract class Question {
   /**
@@ -11,8 +12,9 @@ export default abstract class Question {
    * After all questions are added, {@link init} MUST be called.
    *
    * @param song The correct song for this question.
+   * @param config The room's config
    */
-  constructor(readonly song: Song) {
+  constructor(readonly song: Song, readonly config: ServerConfig) {
     this.questions.push(song);
   }
 

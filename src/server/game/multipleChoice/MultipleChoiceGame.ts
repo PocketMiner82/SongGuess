@@ -17,7 +17,7 @@ export class MultipleChoiceGame extends Game{
 
 
   createQuestion(song: Song): Question {
-    return new MultipleChoiceQuestion(song);
+    return new MultipleChoiceQuestion(song, this.room.config);
   }
 
   selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {

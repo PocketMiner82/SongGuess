@@ -58,11 +58,6 @@ export class ValidRoom implements Party.Server {
    *  - undefined: No host is set.
    *  - null: Host left. If he doesn't reconnect within 3 seconds, another player will get host.
    *  - the actual {@link Party.Connection} object if the host is online.
-   *
-   * A host can:
-   *  - Select playlists
-   *  - Start the game
-   *  - End the game / Return all players to lobby
    */
   hostConnection: Party.Connection|null|undefined = undefined;
 
