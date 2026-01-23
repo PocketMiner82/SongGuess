@@ -1,3 +1,10 @@
+# [2.7.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.2...2.7.0-dev.3) (2026-01-23)
+
+
+### Bug Fixes
+
+* **ValidRoom:** send current config on client connect ([3ff41bd](https://github.com/PocketMiner82/SongGuess/commit/3ff41bd585671b2095e316171ada471e7eb6f415))
+
 # [2.7.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.1...2.7.0-dev.2) (2026-01-22)
 
 
