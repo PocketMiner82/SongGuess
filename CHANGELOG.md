@@ -1,3 +1,10 @@
+# [2.7.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.1...2.7.0-dev.2) (2026-01-22)
+
+
+### Features
+
+* **Ingame:** show configured question count ([9a2db69](https://github.com/PocketMiner82/SongGuess/commit/9a2db6990ecfe8b0ac5a6723a765e2d409618b33))
+
 # [2.7.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.6.1-dev.2...2.7.0-dev.1) (2026-01-22)
 
 
