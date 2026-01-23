@@ -1,3 +1,23 @@
+# [2.7.0](https://github.com/PocketMiner82/SongGuess/compare/2.6.0...2.7.0) (2026-01-23)
+
+
+### Bug Fixes
+
+* attempt to fix host transfer ([f163e26](https://github.com/PocketMiner82/SongGuess/commit/f163e26d647e0e26fa05a46d01c6c54ac58c76c9))
+* don't send whole playlist update message when only filtered songs count changed ([470d5ce](https://github.com/PocketMiner82/SongGuess/commit/470d5cef52db3335247986bf3869dc64fa5b4959))
+* ignore special chars when filtering songs + filter for songs that share at least one artist with the current track when distractionsPreferSameArtist is enabled ([5ac2015](https://github.com/PocketMiner82/SongGuess/commit/5ac2015cafb8dc53d26305fcac6b587beba07a9c))
+* **room:** wrong order of ping text coloring ([3ce5dca](https://github.com/PocketMiner82/SongGuess/commit/3ce5dcacab01d62685555eb66340989cdffeb5dd))
+* **ValidRoom:** send current config on client connect ([3ff41bd](https://github.com/PocketMiner82/SongGuess/commit/3ff41bd585671b2095e316171ada471e7eb6f415))
+* wrong condition for filtering out same playlists ([42951c8](https://github.com/PocketMiner82/SongGuess/commit/42951c85154d101eea1eba2ad9c923495ad1e987))
+
+
+### Features
+
+* **Config:** allow generating distractions by prefering songs from same artist ([4516612](https://github.com/PocketMiner82/SongGuess/commit/451661295ea5a9bb1458ec3d87b425ab9d7468d0))
+* **Ingame:** show configured question count ([9a2db69](https://github.com/PocketMiner82/SongGuess/commit/9a2db6990ecfe8b0ac5a6723a765e2d409618b33))
+* **Lobby:** add input to set amount of questions per round ([d57f6d2](https://github.com/PocketMiner82/SongGuess/commit/d57f6d2546c4302938a836a4fcc73b144f8820a9))
+* **ValidationRegexes:** allow spaces in username (but not at start/end) ([490edc7](https://github.com/PocketMiner82/SongGuess/commit/490edc7cd3fd6cc3c078c6168996dc5b70171e51))
+
 # [2.7.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.7...2.7.0-dev.8) (2026-01-23)
 
 
