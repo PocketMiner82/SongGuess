@@ -1,3 +1,10 @@
+# [2.7.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.5...2.7.0-dev.6) (2026-01-23)
+
+
+### Features
+
+* **ValidationRegexes:** allow spaces in username (but not at start/end) ([490edc7](https://github.com/PocketMiner82/SongGuess/commit/490edc7cd3fd6cc3c078c6168996dc5b70171e51))
+
 # [2.7.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.4...2.7.0-dev.5) (2026-01-23)
 
 
