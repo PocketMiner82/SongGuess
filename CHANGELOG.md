@@ -1,3 +1,10 @@
+# [2.7.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.7...2.7.0-dev.8) (2026-01-23)
+
+
+### Bug Fixes
+
+* attempt to fix host transfer ([f163e26](https://github.com/PocketMiner82/SongGuess/commit/f163e26d647e0e26fa05a46d01c6c54ac58c76c9))
+
 # [2.7.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.7.0-dev.6...2.7.0-dev.7) (2026-01-23)
 
 
