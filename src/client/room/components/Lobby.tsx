@@ -1,6 +1,5 @@
 import React, {useState, useCallback, useMemo, type ReactNode} from "react";
 import { Button } from "../../components/Button";
-import { ErrorLabel } from "../../components/ErrorLabel";
 import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../server/config/ServerConfigConstants";
@@ -106,11 +105,11 @@ function PlaylistsList() {
 function AddPlaylistInput() {
   const controller = useControllerContext();
   const [playlistURL, setPlaylistURL] = useState("");
-  const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [searchStatus, setSearchStatus] = useState<"idle" | "loading">("idle");
 
   useRoomControllerListener(controller, useCallback(msg => {
     if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlists") {
-      setSearchStatus(msg.error ? "error" : "success");
+      setSearchStatus("idle");
     }
     return false;
   }, []));
@@ -122,24 +121,18 @@ function AddPlaylistInput() {
       setSearchStatus("loading");
       controller.tryAddPlaylists(text).then(success => {
         if (!success) {
-          setSearchStatus("error");
+          setSearchStatus("idle");
         }
       }).catch(() => {
-        setSearchStatus("error");
+        setSearchStatus("idle");
       });
     }
   };
 
   const getStatusIcon = () => {
-    let status = searchStatus === "idle" && playlistURL && !isValidURL ? "error" : searchStatus;
-
-    switch (status) {
+    switch (searchStatus) {
       case "loading":
         return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
-      case "success":
-        return <span className="material-icons text-success">check_circle</span>;
-      case "error":
-        return <span className="material-icons text-error">error</span>;
       case "idle":
         return null;
     }
@@ -151,7 +144,11 @@ function AddPlaylistInput() {
       <div className="relative mt-6 flex gap-2">
         <input
             placeholder="Enter apple music artist or album URL"
-            className="flex-1 outline-0 focus:outline-0 border-b-2 border-gray-500 focus:border-secondary pb-1 pr-10"
+            className={`flex-1 outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
+              playlistURL && !isValidURL 
+                ? "focus:border-error" 
+                : "border-gray-500 focus:border-secondary"
+            }`}
             value={playlistURL}
             onChange={e => {
               setPlaylistURL(e.target.value);
@@ -181,29 +178,32 @@ function AddPlaylistInput() {
 /**
  * Button component that imports playlists from a JSON file.
  */
-function ImportPlaylists({ setError }: { setError: (error: string | null) => void }) {
+function ImportPlaylists() {
   const controller = useControllerContext();
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const data = await importPlaylistFile(event);
       if (!data) {
-        setError("Failed to read file.");
-        setTimeout(() => setError(null), 3000);
+        if ((window as any).showToastError) {
+          (window as any).showToastError("Failed to read file.");
+        }
         return;
       }
 
       const playlistsFile = validatePlaylistsFile(data);
       if (!playlistsFile) {
-        setError("Failed to import playlists. Please check the file format.");
-        setTimeout(() => setError(null), 3000);
+        if ((window as any).showToastError) {
+          (window as any).showToastError("Failed to import playlists. Please check the file format.");
+        }
         return;
       }
 
       controller.importPlaylistsFromFile(playlistsFile);
     } catch (error) {
-      setError("Failed to read file.");
-      setTimeout(() => setError(null), 3000);
+      if ((window as any).showToastError) {
+        (window as any).showToastError("Failed to read file.");
+      }
     }
     
     // Reset file input
@@ -288,6 +288,9 @@ function CopyLink() {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy link:', err);
+      if ((window as any).showToastError) {
+        (window as any).showToastError("Failed to copy link.");
+      }
     }
   };
 
@@ -379,17 +382,7 @@ function SettingsNumberInput({ value, onChange, min, max, children }: {
 
 function Settings() {
   const controller = useControllerContext();
-  const [error, setError] = useState<string | null>(null);
   useRoomControllerMessageTypeListener(controller, "room_config");
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (msg && msg.type === "confirmation") {
-      if (msg.sourceMessage.type === "start_game") {
-        setError(msg.error ?? null);
-      }
-    }
-    return false;
-  }, []));
 
   return (
     <div>
@@ -399,7 +392,7 @@ function Settings() {
 
         <div className="grid grid-cols-2 gap-4">
           <ClearPlaylists />
-          <ImportPlaylists setError={setError} />
+          <ImportPlaylists />
         </div>
 
         <div className="border-t border-disabled-bg my-2"></div>
@@ -449,8 +442,6 @@ function Settings() {
           <CopyLink />
           <StartGame />
         </div>
-
-        <ErrorLabel error={error} />
       </div>
     </div>
   );

@@ -6,11 +6,11 @@ export class BaseConfig implements RoomConfigMessage {
 
   public advancedSongFiltering: boolean = true;
 
-  public endWhenAnswered: boolean = true;
+  public endWhenAnswered: boolean = false;
 
   public questionCount: number = 10;
 
-  public distractionsPreferSameArtist: boolean = false;
+  public distractionsPreferSameArtist: boolean = true;
 
 
   constructor(msg?: RoomConfigMessage) {

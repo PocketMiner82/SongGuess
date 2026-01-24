@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {CookieConsent} from "react-cookie-consent";
 import {TopBar} from "./components/TopBar";
 import {Button} from "./components/Button";
-import {ErrorLabel} from "./components/ErrorLabel";
+import { ToastError } from "./components/ToastError";
 import {
   getFirstSong,
   downloadFile,
@@ -74,8 +74,7 @@ async function findBySearch(term: string): Promise<Song | null> {
  * Button component that imports playlists from a CSV file.
  */
 function ImportCSV() { 
-  const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [progress, setProgress] = useState<string>("");
 
   /**
@@ -88,7 +87,6 @@ function ImportCSV() {
 
     setStatus("loading");
     setProgress("Reading CSV file...");
-    setError(null);
 
     try {
       // Read and parse CSV file
@@ -111,8 +109,9 @@ function ImportCSV() {
       });
 
       if (!records || records.length === 0) {
-        setError("CSV file is empty or invalid.");
-        setStatus("error");
+        if ((window as any).showToastError) {
+          (window as any).showToastError("CSV file is empty or invalid.");
+        }
         return;
       }
 
@@ -204,8 +203,9 @@ function ImportCSV() {
       }
 
       if (playlists.length === 0) {
-        setError("No songs were found. Please check your CSV file format.");
-        setStatus("error");
+        if ((window as any).showToastError) {
+          (window as any).showToastError("No songs were found. Please check your CSV file format.");
+        }
         return;
       }
 
@@ -228,14 +228,17 @@ function ImportCSV() {
       
       if (notFoundSongs.length > 0) {
         const notFoundList = notFoundSongs.join("\n• ");
-        setError(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
+        if ((window as any).showToastError) {
+          (window as any).showToastError(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
+        }
       }
       
       setProgress(successMessage);
     } catch (error) {
       console.error("Error importing CSV:", error);
-      setError("Failed to import CSV file. Please check the file format and try again.");
-      setStatus("error");
+      if ((window as any).showToastError) {
+        (window as any).showToastError("Failed to import CSV file. Please check the file format and try again.");
+      }
       setProgress("");
     }
 
@@ -265,11 +268,8 @@ function ImportCSV() {
         Import CSV
       </Button>
 
-      <ErrorLabel error={error} />
-
       {status !== "idle" && (
         <div className={`text-sm mt-2 items-center justify-center ${
-          status === "error" ? "text-error" : 
           status === "success" ? "text-success" : 
           "text-gray-600"
         }`}>
@@ -293,6 +293,8 @@ function App() {
         </CookieConsent>
 
         <TopBar />
+
+        <ToastError />
 
         <main className="flex-1 overflow-auto">
           <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">

@@ -333,8 +333,10 @@ export class RoomController {
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
 
-    // if port is set, this is probably a dev environment: don't redirect
-    if (!window.location.port) window.location.href = "/";
+    // Show fatal error for disconnection
+    if ((window as any).showFatalError) {
+      (window as any).showFatalError(`Disconnected: ${ev.reason || ev.code}`);
+    }
   }
 
   /**
@@ -343,9 +345,12 @@ export class RoomController {
    * @param ev The ErrorEvent containing details about the error.
    */
   private onError(ev: ErrorEvent) {
-    console.error(`Cannot connect to ${this.socket.room}:`, ev);
-    // if port is set, this is probably a dev environment: don't redirect
-    if (!window.location.port) window.location.href = "/";
+    console.error(`Disconnected from ${this.socket.room} due to:`, ev);
+    
+    // Show fatal error for connection failure
+    if ((window as any).showFatalError) {
+      (window as any).showFatalError(`${ev.message || "WebSocket error. See console for details."}`);
+    }
   }
 
   /**
@@ -401,6 +406,9 @@ export class RoomController {
       case "confirmation":
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
+          if ((window as any).showToastError) {
+            (window as any).showToastError(msg.error);
+          }
         }
 
         if (msg.sourceMessage.type === "select_answer") {
@@ -410,6 +418,7 @@ export class RoomController {
       case "update":
         // force hard reload when version is outdated
         if (msg.version !== version) {
+          this.socket.close();
           alert("Client outdated. Click OK to reload the page and try again.\n\n"
               + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or delete all cookies and data from this page.");
 
@@ -586,7 +595,12 @@ export class RoomController {
   public async tryAddPlaylist(url: string): Promise<boolean> {
     let playlist = await getPlaylistByURL(url);
 
-    if (!playlist) return false;
+    if (!playlist) {
+      if ((window as any).showToastError) {
+        (window as any).showToastError(`Failed to get playlist: ${url}`);
+      }
+      return false;
+    }
 
     this.addPlaylists(playlist);
 
