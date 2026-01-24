@@ -1,3 +1,10 @@
+# [2.8.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.7.0...2.8.0-dev.1) (2026-01-24)
+
+
+### Features
+
+* add better, unified error components ([d87d430](https://github.com/PocketMiner82/SongGuess/commit/d87d4302cc2a1969c75a40e04fde36f5d001d1ff))
+
 # [2.7.0](https://github.com/PocketMiner82/SongGuess/compare/2.6.0...2.7.0) (2026-01-23)
 
 
