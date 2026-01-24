@@ -1,3 +1,10 @@
+# [2.8.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.8.0-dev.2...2.8.0-dev.3) (2026-01-24)
+
+
+### Bug Fixes
+
+* move ToastError after TopBar component ([309c8cd](https://github.com/PocketMiner82/SongGuess/commit/309c8cd453498a256abedf6153ed28a67daf4b24))
+
 # [2.8.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.8.0-dev.1...2.8.0-dev.2) (2026-01-24)
 
 
