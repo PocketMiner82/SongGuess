@@ -1,3 +1,10 @@
+# [2.8.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.8.0-dev.1...2.8.0-dev.2) (2026-01-24)
+
+
+### Bug Fixes
+
+* **BaseConfig:** better default values ([d775684](https://github.com/PocketMiner82/SongGuess/commit/d775684ad9d5c59691e6c7bdb1ee1da1cb73e213))
+
 # [2.8.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.7.0...2.8.0-dev.1) (2026-01-24)
 
 
