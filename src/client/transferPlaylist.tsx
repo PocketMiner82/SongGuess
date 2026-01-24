@@ -288,12 +288,13 @@ function App() {
 
   return (
       <div className="flex flex-col h-screen">
-        <ToastError />
         <CookieConsent location="bottom" buttonText="I understand" overlay >
           This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
         </CookieConsent>
 
         <TopBar />
+
+        <ToastError />
 
         <main className="flex-1 overflow-auto">
           <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
