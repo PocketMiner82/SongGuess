@@ -32,3 +32,12 @@ body {
         -moz-appearance: textfield !important;
     }
 }
+
+@keyframes progress-bar {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0;
+    }
+}

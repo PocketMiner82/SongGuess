@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { useState } from "react";
 import { fetchPostCreateRoom } from "../RoomHTTPHelper";
 import { Button } from "./components/Button";
-import { ErrorLabel } from "./components/ErrorLabel";
+import { ToastError } from "./components/ToastError";
 import { TopBar } from "./components/TopBar";
 import {CookieConsent} from "react-cookie-consent";
 import { downloadFile, importPlaylistFile, refreshPlaylists, validatePlaylistsFile } from "../Utils";
@@ -14,24 +14,27 @@ import type {PlaylistsFile} from "../types/MessageTypes";
  * Displays the SongGuess title and a button to create a new room.
  */
 function App() {
-  const [error, setError] = useState<string|null>(null);
-  const [refreshStatus, setRefreshStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [refreshStatus, setRefreshStatus] = useState<"idle" | "loading" | "success">("idle");
   const [refreshProgress, setRefreshProgress] = useState<string>("");
 
   /**
    * Handles room creation button click.
-   * Creates a new room via API and redirects to the room page.
+   * Creates a new room via API and redirects to room page.
    */
   const buttonClick = async () => {
     const resp = await fetchPostCreateRoom("/parties/api/createRoom");
 
     if (!resp) {
-      setError("Unknown server error");
+      if ((window as any).showToastError) {
+        (window as any).showToastError("Unknown server error");
+      }
       return;
     }
 
     if (resp.error !== "") {
-      setError(resp.error);
+      if ((window as any).showToastError) {
+        (window as any).showToastError(resp.error);
+      }
       return;
     }
 
@@ -58,15 +61,17 @@ function App() {
         // Import and validate the playlist file
         const data = await importPlaylistFile(event);
         if (!data) {
-          setError("Failed to read file.");
-          setRefreshStatus("error");
+          if ((window as any).showToastError) {
+            (window as any).showToastError("Failed to read file.");
+          }
           return;
         }
 
         const playlistsFile = validatePlaylistsFile(data);
         if (!playlistsFile) {
-          setError("Invalid playlist file format.");
-          setRefreshStatus("error");
+          if ((window as any).showToastError) {
+            (window as any).showToastError("Invalid playlist file format.");
+          }
           return;
         }
 
@@ -113,8 +118,9 @@ function App() {
 
       } catch (error) {
         console.error("Error refreshing playlists:", error);
-        setError("Failed to refresh playlists. Please try again.");
-        setRefreshStatus("error");
+        if ((window as any).showToastError) {
+          (window as any).showToastError("Failed to refresh playlists. Please try again.");
+        }
         setRefreshProgress("");
       }
     };
@@ -124,6 +130,7 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen">
+      <ToastError />
       <CookieConsent location="bottom" buttonText="I understand" overlay >
         This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
       </CookieConsent>
@@ -154,7 +161,6 @@ function App() {
 
             {refreshStatus !== "idle" && (
               <div className={`text-sm mt-2 items-center justify-center ${
-                refreshStatus === "error" ? "text-error" : 
                 refreshStatus === "success" ? "text-success" : 
                 "text-gray-600"
               }`}>
@@ -162,8 +168,6 @@ function App() {
               </div>
             )}
           </div>
-
-          <ErrorLabel error={error} />
 
           <Button
             onClick={buttonClick}

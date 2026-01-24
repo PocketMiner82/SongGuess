@@ -11,6 +11,8 @@ import { BottomBar } from "./room/components/BottomBar";
 import { TopBar } from "./components/TopBar";
 import { Button } from "./components/Button";
 import { Audio } from "./room/components/Audio";
+import { ToastError } from "./components/ToastError";
+import { FatalErrorPopup } from "./components/FatalErrorPopup";
 import {CookieConsent} from "react-cookie-consent";
 import {CookiesProvider, useCookies} from "react-cookie";
 import type ICookieProps from "../types/ICookieProps";
@@ -52,6 +54,7 @@ function Countdown() {
 
 function Room() {
   const controller = useControllerContext();
+  
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "pong");
 
@@ -60,6 +63,8 @@ function Room() {
         <CookieConsent location="bottom" buttonText="I understand" overlay >
           This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
         </CookieConsent>
+
+        <FatalErrorPopup/>
 
         <TopBar>
           {controller.isHost && controller.state === "ingame" && (
@@ -75,6 +80,9 @@ function Room() {
               </Button>
           )}
         </TopBar>
+
+        <ToastError />
+
         <main className="flex-1 overflow-auto">
           <Lobby />
           <Ingame />

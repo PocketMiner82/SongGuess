@@ -25,8 +25,8 @@ export const PlayerCard = memo(function PlayerCard({
   const controller = useControllerContext();
 
   const handleNameUpdate = () => {
-    if (editedName && editedName.trim() && editedName.trim() !== username) {
-      controller.updateUsername(editedName.trim());
+    if (editedName && editedName !== username && usernameRegex.test(editedName)) {
+      controller.updateUsername(editedName);
     }
     setIsEditing(false);
   };
