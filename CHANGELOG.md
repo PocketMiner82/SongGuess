@@ -1,3 +1,10 @@
+# [2.9.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.8.0...2.9.0-dev.1) (2026-01-26)
+
+
+### Features
+
+* **Config:** Allow configuring time per question ([838e064](https://github.com/PocketMiner82/SongGuess/commit/838e064a0beb49d19482bcb256a14ff732631dc4))
+
 # [2.8.0](https://github.com/PocketMiner82/SongGuess/compare/2.7.0...2.8.0) (2026-01-24)
 
 
