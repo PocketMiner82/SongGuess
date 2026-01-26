@@ -84,7 +84,7 @@ export default class Lobby implements IEventListener {
 
     if (playlists.length > 0) {
       this.playlists.push(...playlists);
-      this.room.server.log(`The playlist(s) ${
+      this.room.server.logger.info(`The playlist(s) ${
           playlists.map(p => p.name).join("; ")
       } has/have been added.`);
     }
@@ -136,10 +136,10 @@ export default class Lobby implements IEventListener {
     if (msg.index !== null) {
       let playlistName = this.playlists[msg.index].name;
       this.playlists.splice(msg.index, 1);
-      this.room.server.log(`The playlist "${playlistName}" has been removed.`);
+      this.room.server.logger.info(`The playlist "${playlistName}" has been removed.`);
     } else {
       this.playlists = [];
-      this.room.server.log(`All playlists have been removed.`);
+      this.room.server.logger.info(`All playlists have been removed.`);
     }
     return true;
   }
@@ -152,7 +152,7 @@ export default class Lobby implements IEventListener {
    */
   public changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
     // username is already validated, just check if it's used by another player
-    for (let connection of this.room.getPartyRoom().getConnections()) {
+    for (let connection of this.room.getPartyRoom().getConnections("user")) {
       let state = connection.state as PlayerState;
       if (connection !== conn && state.username === msg.username) {
         conn.send(this.room.getUpdateMessage(conn));

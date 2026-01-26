@@ -27,7 +27,7 @@ export class MultipleChoiceGame extends Game{
   }
 
   calculatePoints() {
-    for (let conn of this.room.getPartyRoom().getConnections()) {
+    for (let conn of this.room.getPartyRoom().getConnections("user")) {
       let connState = conn.state as PlayerState;
 
       if (connState.answerTimestamp && connState.answerIndex === this.questions[this.currentQuestion].getCorrectAnswer()) {

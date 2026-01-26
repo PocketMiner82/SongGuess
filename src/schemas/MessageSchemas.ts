@@ -13,6 +13,7 @@ import {
   UpdatePlayedSongsMessageSchema
 } from "./ServerMessageSchemas";
 import {PingMessageSchema, PongMessageSchema, RoomConfigMessageSchema} from "./SharedSchemas";
+import {AddLogMessageSchema} from "./ServerAdminMessageSchemas";
 
 
 const _ClientMessageSchema = z.discriminatedUnion("type", [
@@ -33,7 +34,8 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
   AudioControlMessageSchema,
   QuestionMessageSchema,
   AnswerMessageSchema,
-  UpdatePlayedSongsMessageSchema
+  UpdatePlayedSongsMessageSchema,
+  AddLogMessageSchema
 ]);
 
 

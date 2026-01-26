@@ -5,15 +5,17 @@ import {
 } from "../ConfigConstants";
 import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
+import Logger from "./logger/Logger";
+import {DefaultLoggerStorage} from "../types/LoggerStorageTypes";
+import type {UpdateLogMessages} from "../types/MessageTypes";
 
 
 // noinspection JSUnusedGlobalSymbols
 export default class Server implements Party.Server {
   /**
-   * Log messages are prefixed with this string.
+   * The main logger, logging messages to console and storage.
    */
-  readonly LOG_PREFIX: string = `[Room ${this.partyRoom.id}]`;
-
+  readonly logger: Logger;
 
   /**
    * Only set, if this room was created by a request to /createRoom
@@ -36,33 +38,8 @@ export default class Server implements Party.Server {
    *
    * @param partyRoom The room to serve
    */
-  constructor(readonly partyRoom: Party.Room) { }
-
-  /**
-   * Logs a message with the {@link LOG_PREFIX}
-   *
-   * @param text the text to log
-   * @param level the log level to use
-   */
-  public log(text: any, level: "debug"|"warn"|"error"|"info" = "info") {
-    let logFunction: (...data: any) => void;
-    switch(level) {
-      case "debug":
-        logFunction = console.debug;
-        break;
-      case "warn":
-        logFunction = console.error;
-        break;
-      case "error":
-        logFunction = console.error;
-        break;
-      case "info":
-      default:
-        logFunction = console.info;
-        break;
-    }
-
-    logFunction(`${this.LOG_PREFIX} ${text}`);
+  constructor(readonly partyRoom: Party.Room) {
+    this.logger = new Logger(this);
   }
 
   /**
@@ -71,7 +48,7 @@ export default class Server implements Party.Server {
    * @returns The count of connected clients.
    */
   public getOnlineCount(): number {
-    return Array.from(this.partyRoom.getConnections()).length;
+    return Array.from(this.partyRoom.getConnections("user")).length;
   }
 
   /**
@@ -86,7 +63,7 @@ export default class Server implements Party.Server {
 
         this.validRoom = undefined;
 
-        this.log("Room closed due to timeout.");
+        this.logger.info("Room closed due to timeout.");
       }
       this.cleanupTimeout = null;
     }, ROOM_CLEANUP_TIMEOUT * 1000);
@@ -96,6 +73,19 @@ export default class Server implements Party.Server {
   // ROOM WS EVENTS
   //
 
+  getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    let auth = ctx.request.headers.get("Authorization")?.split(" ");
+    if (auth && auth.length === 2 && auth[0] === "Basic") {
+      let userPw = Buffer.from(auth[0], "base64").toString().split(":");
+
+      if (userPw.length === 2 && userPw[0] === this.partyRoom.env.ADMIN_USER && userPw[1] === this.partyRoom.env.ADMIN_PASSWORD) {
+        return ["admin"];
+      }
+    }
+
+    return ["user"];
+  }
+
   /**
    * Handles a new WebSocket connection to the room.
    *
@@ -103,6 +93,22 @@ export default class Server implements Party.Server {
    * @param ctx The connection context.
    */
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    // admin should not be registered "normally" to the room.
+    if (this.getConnectionTags(conn, ctx).indexOf("admin") !== -1) {
+      this.logger.getLogMessages().then(async loggerStorage => {
+        if (loggerStorage) {
+          conn.send(JSON.stringify({
+            type: "update_log_messages",
+            messages: loggerStorage
+          } satisfies UpdateLogMessages));
+        }
+
+        this.logger.info(`Admin ${conn.id} connected.`);
+      });
+
+      return;
+    }
+
     if (this.cleanupTimeout) {
       clearTimeout(this.cleanupTimeout);
       this.cleanupTimeout = null;
@@ -111,7 +117,7 @@ export default class Server implements Party.Server {
     // kick player if room is not created yet
     if (!this.validRoom) {
       conn.close(4000, "Room ID not found");
-      this.log(`${conn.id} tried connecting to an invalid room.`, "debug");
+      this.logger.debug(`${conn.id} tried connecting to an invalid room.`);
       return;
     }
 
@@ -120,7 +126,7 @@ export default class Server implements Party.Server {
       this.tickInterval = setInterval(() => this.validRoom?.onTick(), 1000);
     }
 
-    this.log(`${conn.id} connected.`);
+    this.logger.info(`${conn.id} connected.`);
 
     this.validRoom.onConnect(conn, ctx);
   }
@@ -151,14 +157,14 @@ export default class Server implements Party.Server {
       return;
     }
 
-    this.log(`${conn.id} left.`);
+    this.logger.info(`${conn.id} left.`);
 
     this.validRoom.onClose(conn);
 
     if (this.getOnlineCount() === 0) {
       this.delayedCleanup();
 
-      this.log(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
+      this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
     }
   }
 
@@ -188,7 +194,7 @@ export default class Server implements Party.Server {
         this.validRoom = new ValidRoom(this);
         this.delayedCleanup();
 
-        this.log("Room created.");
+        this.logger.info("Room created.");
         return new Response("ok", { status: 200 });
       }
 

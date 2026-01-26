@@ -138,7 +138,7 @@ export default abstract class Game implements IEventListener {
             this.room.sendConfirmationOrError(this.room.hostConnection, msg, e.message);
           } else if (this.room.hostConnection) {
             this.room.sendConfirmationOrError(this.room.hostConnection, msg, "Unknown error while starting game.");
-            this.room.server.log(e, "error");
+            this.room.server.logger.error(e);
           }
           return true;
         }
@@ -174,7 +174,7 @@ export default abstract class Game implements IEventListener {
     if (this.roundTicks >= this.room.config.getRoundStartNextTick()) {
       this.roundTicks = 0;
       this.currentQuestion++;
-      for (let conn of this.room.getPartyRoom().getConnections()) {
+      for (let conn of this.room.getPartyRoom().getConnections("user")) {
         this.resetPlayerAnswerData(conn);
       }
     }
@@ -263,7 +263,7 @@ export default abstract class Game implements IEventListener {
     this.room.sendConfirmationOrError(conn, msg);
 
     let everyoneVoted = true;
-    for (let conn of this.room.getPartyRoom().getConnections()) {
+    for (let conn of this.room.getPartyRoom().getConnections("user")) {
       let connState = conn.state as PlayerState;
       if (connState.answerTimestamp === undefined) {
         everyoneVoted = false;
@@ -398,7 +398,7 @@ export default abstract class Game implements IEventListener {
     this.room.state = "lobby";
 
     // reset points of all players
-    for (let conn of this.room.getPartyRoom().getConnections()) {
+    for (let conn of this.room.getPartyRoom().getConnections("user")) {
       this.resetPlayerAnswerData(conn, true);
     }
   }

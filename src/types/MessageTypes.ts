@@ -23,6 +23,7 @@ import {
   type PlayerStateSchema,
   QuestionMessageSchema, UpdateMessageSchema, UpdatePlayedSongsMessageSchema, UpdatePlaylistsMessageSchema
 } from "../schemas/ServerMessageSchemas";
+import {type AddLogMessageSchema, UpdateLogMessagesSchema} from "../schemas/ServerAdminMessageSchemas";
 
 export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
@@ -49,6 +50,8 @@ export type UpdatePlaylistsMessage = z.infer<typeof UpdatePlaylistsMessageSchema
 export type GameState = z.infer<typeof GameStateSchema>;
 export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;
 export type ReturnToMessage = z.infer<typeof ReturnToMessageSchema>;
+export type AddLogMessage = z.infer<typeof AddLogMessageSchema>;
+export type UpdateLogMessages = z.infer<typeof UpdateLogMessagesSchema>;
 
 /**
  * Default playlist object used when playlist information cannot be retrieved or is invalid.

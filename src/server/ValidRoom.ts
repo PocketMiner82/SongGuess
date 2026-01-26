@@ -178,7 +178,7 @@ export class ValidRoom implements Party.Server {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
-      this.server.log(`${conn.id} sent: ${message}`, "debug");
+      this.server.logger.debug(`${conn.id} sent: ${message}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
@@ -186,8 +186,8 @@ export class ValidRoom implements Party.Server {
     // check if received message is valid
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
-      this.server.log(`${conn.id} sent: ${message}`, "debug");
-      this.server.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
+      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.warn(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
@@ -196,7 +196,7 @@ export class ValidRoom implements Party.Server {
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
-      this.server.log(`${conn.id} sent: ${message}`, "debug");
+      this.server.logger.debug(`${conn.id} sent: ${message}`);
 
     this.listener.handleMessage(conn, msg);
   }
@@ -208,7 +208,7 @@ export class ValidRoom implements Party.Server {
     this.listener.handleTick();
 
     if (this.server.getOnlineCount() > 0) {
-      for (let conn of this.getPartyRoom().getConnections()) {
+      for (let conn of this.getPartyRoom().getConnections("user")) {
         if (!this.hostConnection || conn?.id === this.hostID)
           return;
       }
@@ -365,9 +365,9 @@ export class ValidRoom implements Party.Server {
 
     this.hostTransferTimeout = setTimeout(() => {
       if (this.hostConnection === null) {
-        let next = this.getPartyRoom().getConnections()[Symbol.iterator]().next();
+        let next = this.getPartyRoom().getConnections("user")[Symbol.iterator]().next();
         if (!next.done) {
-          this.server.log(`Host left, transferring host to ${next.value.id}`);
+          this.server.logger.info(`Host left, transferring host to ${next.value.id}`);
           this.transferHost(next.value);
         } else {
           this.transferHost(undefined);
@@ -400,7 +400,7 @@ export class ValidRoom implements Party.Server {
    */
   public getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
-    for (let conn of this.getPartyRoom().getConnections()) {
+    for (let conn of this.getPartyRoom().getConnections("user")) {
       let connState = conn.state as PlayerState;
 
       if (connState?.username && connState?.color && connState?.points !== undefined) {
@@ -497,7 +497,7 @@ export class ValidRoom implements Party.Server {
    * @see {@link getUpdateMessage}
    */
   public broadcastUpdateMessage() {
-    for (const conn of this.getPartyRoom().getConnections()) {
+    for (const conn of this.getPartyRoom().getConnections("user")) {
       conn.send(this.getUpdateMessage(conn));
     }
   }

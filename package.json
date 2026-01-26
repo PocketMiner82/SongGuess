@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "node build-html.js && postcss ./src/client/global.css -o ./public/dist/global.css",
-    "dev": "partykit dev --live --var VALIDATE_ROOM_TOKEN abc",
+    "dev": "partykit dev --live --var VALIDATE_ROOM_TOKEN abc --var ADMIN_USER admin --var ADMIN_PASSWORD admin",
     "deploy": "partykit deploy",
     "dev-deploy": "partykit deploy --preview dev",
     "clean": "rm -rf public/dist"
