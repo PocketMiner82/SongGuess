@@ -8,7 +8,9 @@ export class BaseConfig implements RoomConfigMessage {
 
   public endWhenAnswered: boolean = false;
 
-  public questionCount: number = 10;
+  public questionsCount: number = 10;
+
+  public timePerQuestion: number = 15;
 
   public distractionsPreferSameArtist: boolean = true;
 

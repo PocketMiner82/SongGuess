@@ -9,7 +9,7 @@ import type {
   SourceMessage,
   UpdateMessage
 } from "../types/MessageTypes";
-import {COLORS} from "./config/ServerConfigConstants";
+import {COLORS} from "../ConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import z from "zod";
 import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
@@ -307,8 +307,8 @@ export class ValidRoom implements Party.Server {
           break;
 
         case "min_song_count":
-          if (this.lobby.songs.length < this.config.questionCount) {
-            possibleErrorFunc(`Required at least ${this.config.questionCount} songs. Selected: ${this.lobby.songs.length}`);
+          if (this.lobby.songs.length < this.config.questionsCount) {
+            possibleErrorFunc(`Required at least ${this.config.questionsCount} songs. Selected: ${this.lobby.songs.length}`);
             successful = false;
           }
           break;

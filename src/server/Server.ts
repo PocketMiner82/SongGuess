@@ -2,7 +2,7 @@ import type * as Party from "partykit/server";
 import {clearInterval, clearTimeout} from "node:timers";
 import {
   ROOM_CLEANUP_TIMEOUT
-} from "./config/ServerConfigConstants";
+} from "../ConfigConstants";
 import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
 

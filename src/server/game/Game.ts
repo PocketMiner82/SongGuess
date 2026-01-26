@@ -8,13 +8,7 @@ import type {
   SelectAnswerMessage,
   Song, UpdatePlayedSongsMessage
 } from "../../types/MessageTypes";
-import {
-  ROUND_PAUSE_MUSIC,
-  ROUND_SHOW_ANSWER,
-  ROUND_START,
-  ROUND_START_MUSIC,
-  ROUND_START_NEXT
-} from "../config/ServerConfigConstants";
+import {ROUND_PADDING_TICKS, ROUND_START_TICK} from "../../ConfigConstants";
 import GamePhase from "./GamePhase";
 import Question, {InitError} from "./Question";
 import type {IEventListener} from "../listener/IEventListener";
@@ -119,7 +113,7 @@ export default abstract class Game implements IEventListener {
 
     switch (msg.type) {
       case "select_answer":
-        if (this.roundTicks > ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
+        if (this.roundTicks > this.room.config.getRoundShowAnswerTick() || this.roundTicks < ROUND_PADDING_TICKS) {
           conn.send(this.room.getUpdateMessage(conn));
           this.room.sendConfirmationOrError(conn, msg, "Can only accept answers during questioning phase.");
           return true;
@@ -177,7 +171,7 @@ export default abstract class Game implements IEventListener {
   onTick() {
     if (!this.isRunning) return;
 
-    if (this.roundTicks >= ROUND_START_NEXT) {
+    if (this.roundTicks >= this.room.config.getRoundStartNextTick()) {
       this.roundTicks = 0;
       this.currentQuestion++;
       for (let conn of this.room.getPartyRoom().getConnections()) {
@@ -185,29 +179,29 @@ export default abstract class Game implements IEventListener {
       }
     }
 
-    if (this.currentQuestion >= this.room.config.questionCount) {
+    if (this.currentQuestion >= this.room.config.questionsCount) {
       this.endGame();
       return;
     }
 
     let sendUpdate = false;
-    switch (this.roundTicks++) {
+    switch (this.roundTicks) {
       // show question of current round
-      case ROUND_START:
+      case ROUND_START_TICK:
         sendUpdate = true;
         this.gamePhase = GamePhase.QUESTION;
         this.room.broadcastUpdateMessage();
         break;
 
       // start music playback
-      case ROUND_START_MUSIC:
+      case ROUND_PADDING_TICKS:
         sendUpdate = true;
         this.gamePhase = GamePhase.ANSWERING;
         this.roundStartTime = Date.now();
         break;
 
       // show results of current round
-      case ROUND_SHOW_ANSWER:
+      case this.room.config.getRoundShowAnswerTick():
         sendUpdate = true;
         this.gamePhase = GamePhase.ANSWER;
         this.calculatePoints();
@@ -216,7 +210,7 @@ export default abstract class Game implements IEventListener {
         break;
 
       // pause music to allow fade out
-      case ROUND_PAUSE_MUSIC:
+      case this.room.config.getRoundPauseMusicTick():
         sendUpdate = true;
         this.gamePhase = GamePhase.PAUSE_MUSIC;
         break;
@@ -225,17 +219,19 @@ export default abstract class Game implements IEventListener {
     if (sendUpdate) {
       this.getGameMessages().forEach(msg => this.room.getPartyRoom().broadcast(msg));
     }
+
+    this.roundTicks++;
   }
 
   /**
    * Clears and then adds random song guessing questions to the room.
-   * Creates {@link ServerConfig.questionCount} random questions for the current game session.
+   * Creates {@link ServerConfig.questionsCount} random questions for the current game session.
    */
   private regenerateRandomQuestions() {
     this.questions = [];
 
     // add QUESTION_COUNT random questions
-    for (let i = 0; i < this.room.config.questionCount; i++) {
+    for (let i = 0; i < this.room.config.questionsCount; i++) {
       if (this.remainingSongs.length === 0) {
         const usedAudioUrls = new Set(this.questions.map(q => q.song.audioURL));
         this.remainingSongs = this.room.lobby.songs.filter(song => !usedAudioUrls.has(song.audioURL));
@@ -277,7 +273,7 @@ export default abstract class Game implements IEventListener {
 
     // show answers if everyone voted
     if (everyoneVoted && this.room.config.endWhenAnswered) {
-      this.roundTicks = ROUND_SHOW_ANSWER;
+      this.roundTicks = this.room.config.getRoundShowAnswerTick();
     }
   }
 
@@ -322,14 +318,14 @@ export default abstract class Game implements IEventListener {
       msg = {
         type: "audio_control",
         action: "load",
-        length: Math.max(0, ROUND_START_MUSIC - this.roundTicks),
+        position: this.roundTicks,
         audioURL: audioURL!
       };
     } else {
       msg = {
         type: "audio_control",
         action: action,
-        length: Math.max(0, ROUND_SHOW_ANSWER - this.roundTicks)
+        position: Math.max(0, this.roundTicks - ROUND_PADDING_TICKS)
       };
     }
 
