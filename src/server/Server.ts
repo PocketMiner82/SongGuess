@@ -6,7 +6,6 @@ import {
 import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
 import Logger from "./logger/Logger";
-import {DefaultLoggerStorage} from "../types/LoggerStorageTypes";
 import type {UpdateLogMessages} from "../types/MessageTypes";
 
 
