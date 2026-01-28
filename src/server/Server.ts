@@ -7,6 +7,7 @@ import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
 import Logger from "./logger/Logger";
 import type {UpdateLogMessages} from "../types/MessageTypes";
+import {getEnvironmentData} from "node:worker_threads";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -73,9 +74,10 @@ export default class Server implements Party.Server {
   //
 
   getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    let auth = ctx.request.headers.get("Authorization")?.split(" ");
-    if (auth && auth.length === 2 && auth[0] === "Basic") {
-      let userPw = Buffer.from(auth[0], "base64").toString().split(":");
+    const url = new URL(ctx.request.url);
+    const authParam = url.searchParams.get("auth");
+    if (authParam) {
+      let userPw = atob(authParam).split(":");
 
       if (userPw.length === 2 && userPw[0] === this.partyRoom.env.ADMIN_USER && userPw[1] === this.partyRoom.env.ADMIN_PASSWORD) {
         return ["admin"];

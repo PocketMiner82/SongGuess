@@ -54,7 +54,8 @@ export default class Logger {
   }
 
   private formatLogEntry(obj: any): string {
-    return util.inspect(obj, { showHidden: false, depth: null, colors: false });
+    return typeof obj === "string" ? obj :
+        util.inspect(obj, { showHidden: false, depth: null, colors: false });
   }
 
   private storeLogMessage(message: string, level: AddLogMessage["level"]): void {
