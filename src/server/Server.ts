@@ -7,7 +7,6 @@ import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
 import Logger from "./logger/Logger";
 import type {UpdateLogMessages} from "../types/MessageTypes";
-import {getEnvironmentData} from "node:worker_threads";
 
 
 // noinspection JSUnusedGlobalSymbols
