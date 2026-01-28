@@ -144,7 +144,7 @@ class IngameData {
   /**
    * The length of the current audio.
    */
-  currentAudioLength: number = 0;
+  currentAudioPosition: number = 0;
 }
 
 
@@ -470,7 +470,7 @@ export class RoomController {
         break;
       case "audio_control":
         this.ingameData.currentAudioState = msg.action;
-        this.ingameData.currentAudioLength = msg.length
+        this.ingameData.currentAudioPosition = msg.position;
         break;
     }
 

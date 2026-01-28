@@ -90,6 +90,7 @@ export function Audio() {
       case "play":
         if (audio.paused) {
           audio.volume = 0;
+          audio.currentTime = msg.position;
           audio.play().catch(e => {
             console.error("Failed to start playback:", e);
           });

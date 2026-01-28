@@ -13,7 +13,8 @@
       "entry": [
         "src/client/index.tsx",
         "src/client/room.tsx",
-        "src/client/transferPlaylist.tsx"
+        "src/client/transferPlaylist.tsx",
+        "src/client/admin.tsx"
       ]
     }
   },

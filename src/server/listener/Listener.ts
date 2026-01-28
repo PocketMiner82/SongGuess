@@ -35,7 +35,7 @@ export default class Listener {
         return;
       case "confirmation":
         if (msg.error) {
-          this.room.server.log(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`, "warn");
+          this.room.server.logger.warn(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
         }
         break;
     }

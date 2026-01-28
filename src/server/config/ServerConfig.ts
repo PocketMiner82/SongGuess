@@ -4,6 +4,7 @@ import type * as Party from "partykit/server";
 import type {ValidRoom} from "../ValidRoom";
 import {BaseConfig} from "../../BaseConfig";
 import _ from "lodash";
+import {ROUND_PADDING_TICKS} from "../../ConfigConstants";
 
 
 export default class ServerConfig extends BaseConfig implements IEventListener{
@@ -31,5 +32,26 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
       return true;
     }
     return false;
+  }
+
+  /**
+   * The tick count when the answer gets revealed.
+   */
+  getRoundShowAnswerTick() {
+    return this.timePerQuestion + ROUND_PADDING_TICKS;
+  }
+
+  /**
+   * The tick count when the music fades out.
+   */
+  getRoundPauseMusicTick() {
+    return this.timePerQuestion + ROUND_PADDING_TICKS * 2 - 1;
+  }
+
+  /**
+   * The tick count when a new round shall be started.
+   */
+  getRoundStartNextTick() {
+    return this.timePerQuestion + ROUND_PADDING_TICKS * 2;
   }
 }

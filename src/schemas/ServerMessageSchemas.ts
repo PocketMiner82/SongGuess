@@ -97,9 +97,9 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
     action: z.literal("load"),
 
     /**
-     * The length in seconds of the max time for this question.
+     * The elapsed time in seconds from the start of the load request.
      */
-    length: z.number().nonnegative(),
+    position: z.number().nonnegative(),
 
     /**
      * URL to load music from.
@@ -117,9 +117,9 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
     action: z.literal(["play", "pause"]),
 
     /**
-     * The length in seconds of the max time for this question.
+     * The elapsed time in seconds from the start of the audio track.
      */
-    length: z.number().nonnegative()
+    position: z.number().nonnegative()
   })
 
 ]);

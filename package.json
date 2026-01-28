@@ -1,11 +1,11 @@
 {
   "name": "songguess",
-  "version": "2.8.0",
+  "version": "2.9.0-dev.2",
   "type": "module",
   "private": true,
   "scripts": {
     "build": "node build-html.js && postcss ./src/client/global.css -o ./public/dist/global.css",
-    "dev": "partykit dev --live --var VALIDATE_ROOM_TOKEN abc",
+    "dev": "partykit dev --live --var VALIDATE_ROOM_TOKEN=\"abc\" --var ADMIN_USER=\"admin\" --var ADMIN_PASSWORD=\"admin\"",
     "deploy": "partykit deploy",
     "dev-deploy": "partykit deploy --preview dev",
     "clean": "rm -rf public/dist"
@@ -28,15 +28,15 @@
     "tailwindcss": "^4.1.18",
     "unique-username-generator": "^1.5.1",
     "uuid": "^13.0.0",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260118.0",
+    "@cloudflare/workers-types": "^4.20260124.0",
     "@types/chroma-js": "^3.1.2",
     "@types/lodash": "^4.17.23",
-    "@types/node": "^25.0.9",
+    "@types/node": "^25.0.10",
     "@types/papaparse": "^5.5.2",
-    "@types/react": "^19.2.8",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.23",
     "eslint": "^8.57.1",
