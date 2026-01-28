@@ -1,3 +1,11 @@
+# [2.9.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.1...2.9.0-dev.2) (2026-01-28)
+
+
+### Features
+
+* add admin panel ([802d332](https://github.com/PocketMiner82/SongGuess/commit/802d33282265daaa37a52eb0edc7ca3448cc4417))
+* **Server:** improve logging (with storage) ([e4d6973](https://github.com/PocketMiner82/SongGuess/commit/e4d697321fbf51c5a14b77671d09291eb61ba93e))
+
 # [2.9.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.8.0...2.9.0-dev.1) (2026-01-26)
 
 
