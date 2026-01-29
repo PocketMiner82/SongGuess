@@ -63,7 +63,10 @@ export default class Logger {
       conn.send(JSON.stringify({
         type: "add_log_message",
         level: level,
-        message: message,
+        entry: {
+          msg: message,
+          timestamp: Date.now()
+        },
       } satisfies AddLogMessage));
     }
 
@@ -75,8 +78,8 @@ export default class Logger {
         timestamp: Date.now()
       });
 
-      // limit log size to 50 messages
-      while (loggerStorage[level].length > 50) {
+      // limit log size to 50 messages (100 for debug)
+      while (loggerStorage[level].length > (level === "debug" ? 100 : 50)) {
         loggerStorage[level].shift();
       }
 

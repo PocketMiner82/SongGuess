@@ -29,7 +29,7 @@ export function TopBar({
   className = ''
 }: TopBarProps) {
   return (
-    <div className={`bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
+    <div className={`font-sans bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex-1">
           v{version}

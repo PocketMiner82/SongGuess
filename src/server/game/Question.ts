@@ -5,7 +5,7 @@ export default abstract class Question {
   /**
    * The list of songs for this question (1 correct answer + 3 distractors).
    */
-  questions: Song[] = [];
+  answers: Song[] = [];
 
   /**
    * Constructs a question asking which is the correct song.
@@ -15,7 +15,7 @@ export default abstract class Question {
    * @param config The room's config
    */
   constructor(readonly song: Song, readonly config: ServerConfig) {
-    this.questions.push(song);
+    this.answers.push(song);
   }
 
   /**
@@ -35,7 +35,7 @@ export default abstract class Question {
    * @returns An array of song names for the answer options.
    */
   getSongNames() {
-    return this.questions.map(s => s.name);
+    return this.answers.map(s => s.name);
   }
 
   /**

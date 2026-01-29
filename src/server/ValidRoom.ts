@@ -112,6 +112,7 @@ export class ValidRoom implements Party.Server {
     if (this.hostConnection === undefined) {
       this.transferHost(conn, false);
     } else if (this.hostConnection === null && this.hostID === conn.id) {
+      this.server.logger.info("Host reconnected.");
       // host joined again within timeout
       this.transferHost(conn, false);
 
@@ -387,6 +388,8 @@ export class ValidRoom implements Party.Server {
     this.hostConnection = newHost;
     this.hostID = newHost?.id;
 
+    this.server.logger.info(`Host transferred to ${this.hostID}`);
+
     if (newHost && sendUpdate) {
       this.broadcastUpdateMessage();
     }
@@ -448,6 +451,7 @@ export class ValidRoom implements Party.Server {
     }
 
     this.kickPlayerTimeouts.set(conn.id, setTimeout(() => {
+      this.server.logger.info(`Kicked ${conn.id} due to inactivity.`);
       conn.close(4001, "Didn't receive updates within 15 seconds.");
     }, 15000));
   }

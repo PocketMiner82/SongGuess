@@ -136,6 +136,7 @@ export default abstract class Game implements IEventListener {
         } catch (e) {
           if (this.room.hostConnection && e instanceof InitError) {
             this.room.sendConfirmationOrError(this.room.hostConnection, msg, e.message);
+            this.room.server.logger.warn(e);
           } else if (this.room.hostConnection) {
             this.room.sendConfirmationOrError(this.room.hostConnection, msg, "Unknown error while starting game.");
             this.room.server.logger.error(e);
@@ -245,6 +246,17 @@ export default abstract class Game implements IEventListener {
     for (const q of this.questions) {
       q.init(this.room.lobby.songs);
     }
+
+    let output = "Generated Questions:";
+    let i = 0;
+    for (const q of this.questions) {
+      output += `\nQuestion ${++i}:\n`
+      output += `  Solution: ${q.song.name} by ${q.song.artist}\n`;
+      output += "  All answers: ";
+      output += q.answers.map(q => `${q.name} by ${q.artist}`).join("; ");
+      output += "\n";
+    }
+    this.room.server.logger.info(output);
   }
 
   /**
@@ -340,6 +352,8 @@ export default abstract class Game implements IEventListener {
    * @see {@link endGame}
    */
   startGame() {
+    this.room.server.logger.info("Starting game...");
+
     // inform all players about the game start
     this.room.broadcastUpdateMessage();
 
@@ -360,6 +374,8 @@ export default abstract class Game implements IEventListener {
   endGame(sendUpdate: boolean = true) {
     if (!this.isRunning) return;
     this.isRunning = false;
+
+    this.room.server.logger.info("Ending game...");
 
     this.room.getPartyRoom().broadcast(this.getAudioControlMessage("pause"));
 
@@ -392,6 +408,8 @@ export default abstract class Game implements IEventListener {
   returnToLobby() {
     this.endGame(false);
     this.room.stopCountdown();
+
+    this.room.server.logger.info("Returning to lobby...");
 
     this.roundTicks = 0;
     this.currentQuestion = 0;

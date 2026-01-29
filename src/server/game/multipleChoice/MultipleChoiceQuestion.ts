@@ -39,12 +39,12 @@ export default class MultipleChoiceQuestion extends Question {
             "Please add more songs with unique names to the playlist!");
       }
 
-      this.questions.push(distraction);
+      this.answers.push(distraction);
     }
-    this.questions = _.shuffle(this.questions);
+    this.answers = _.shuffle(this.answers);
   }
 
   getCorrectAnswer() {
-    return this.questions.indexOf(this.song);
+    return this.answers.indexOf(this.song);
   }
 }

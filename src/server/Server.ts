@@ -72,18 +72,25 @@ export default class Server implements Party.Server {
   // ROOM WS EVENTS
   //
 
-  getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    const url = new URL(ctx.request.url);
+  static async onBeforeConnect(req: Party.Request, lobby: Party.Lobby, _ctx: Party.ExecutionContext) {
+    const url = new URL(req.url);
     const authParam = url.searchParams.get("auth");
+    const id = url.searchParams.get("_pk");
     if (authParam) {
-      let userPw = atob(authParam).split(":");
+      let credentials = atob(authParam).split(":");
 
-      if (userPw.length === 2 && userPw[0] === this.partyRoom.env.ADMIN_USER && userPw[1] === this.partyRoom.env.ADMIN_PASSWORD) {
-        return ["admin"];
+      if (!id?.startsWith("admin_") || credentials.length !== 2 ||
+              credentials[0] !== lobby.env.ADMIN_USER || credentials[1] !== lobby.env.ADMIN_PASSWORD) {
+        return new Response("Access denied", { status: 403 });
       }
     }
 
-    return ["user"];
+    return req;
+  }
+
+  getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    const url = new URL(ctx.request.url);
+    return url.searchParams.get("auth") ? ["admin"] : ["user"];
   }
 
   /**
@@ -117,13 +124,20 @@ export default class Server implements Party.Server {
     // kick player if room is not created yet
     if (!this.validRoom) {
       conn.close(4000, "Room ID not found");
-      this.logger.debug(`${conn.id} tried connecting to an invalid room.`);
+      this.logger.debug(`${conn.id} tried connecting to non-validated room.`);
       return;
     }
 
     // start the tick interval
     if (!this.tickInterval) {
-      this.tickInterval = setInterval(() => this.validRoom?.onTick(), 1000);
+      this.tickInterval = setInterval(() => {
+        try {
+          this.validRoom?.onTick();
+        } catch (e) {
+          this.logger.error("Error running onTick():");
+          this.logger.error(e);
+        }
+      }, 1000);
     }
 
     this.logger.info(`${conn.id} connected.`);
@@ -152,6 +166,11 @@ export default class Server implements Party.Server {
    * @param conn The connection that closed.
    */
   onClose(conn: Party.Connection) {
+    if (conn.id.startsWith("admin_")) {
+      this.logger.info(`Admin ${conn.id} left.`);
+      return;
+    }
+
     // ignore disconnects if room is not valid
     if (!this.validRoom) {
       return;
