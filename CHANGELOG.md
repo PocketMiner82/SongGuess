@@ -1,3 +1,10 @@
+# [2.9.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.3...2.9.0-dev.4) (2026-01-29)
+
+
+### Bug Fixes
+
+* **Server:** move auth to onConnect ([5c7c7b4](https://github.com/PocketMiner82/SongGuess/commit/5c7c7b4fde12f28b6e5cf94476e448c459979af4))
+
 # [2.9.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.2...2.9.0-dev.3) (2026-01-29)
 
 
