@@ -1,3 +1,10 @@
+# [2.9.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.2...2.9.0-dev.3) (2026-01-29)
+
+
+### Features
+
+* add more logging + improve logger styling ([03c4d61](https://github.com/PocketMiner82/SongGuess/commit/03c4d612cad8312d24ec5ee00e879ebfaf0e5214))
+
 # [2.9.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.1...2.9.0-dev.2) (2026-01-28)
 
 
