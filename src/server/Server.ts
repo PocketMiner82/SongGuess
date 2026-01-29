@@ -72,25 +72,20 @@ export default class Server implements Party.Server {
   // ROOM WS EVENTS
   //
 
-  static async onBeforeConnect(req: Party.Request, lobby: Party.Lobby, _ctx: Party.ExecutionContext) {
-    const url = new URL(req.url);
+  getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    const url = new URL(ctx.request.url);
     const authParam = url.searchParams.get("auth");
-    const id = url.searchParams.get("_pk");
     if (authParam) {
       let credentials = atob(authParam).split(":");
 
-      if (!id?.startsWith("admin_") || credentials.length !== 2 ||
-              credentials[0] !== lobby.env.ADMIN_USER || credentials[1] !== lobby.env.ADMIN_PASSWORD) {
-        return new Response("Access denied", { status: 403 });
+      if (conn.id.startsWith("admin_") && credentials.length === 2 &&
+          credentials[0] === this.partyRoom.env.ADMIN_USER && credentials[1] === this.partyRoom.env.ADMIN_PASSWORD) {
+        return ["admin"];
+      } else {
+        return ["unauthorized"];
       }
     }
-
-    return req;
-  }
-
-  getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    const url = new URL(ctx.request.url);
-    return url.searchParams.get("auth") ? ["admin"] : ["user"];
+    return ["user"];
   }
 
   /**
@@ -100,6 +95,11 @@ export default class Server implements Party.Server {
    * @param ctx The connection context.
    */
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    if (this.getConnectionTags(conn, ctx).indexOf("unauthorized") !== -1) {
+      conn.close(403, "Access denied.");
+      return;
+    }
+
     // admin should not be registered "normally" to the room.
     if (this.getConnectionTags(conn, ctx).indexOf("admin") !== -1) {
       this.logger.getLogMessages().then(async loggerStorage => {
