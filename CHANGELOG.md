@@ -1,3 +1,10 @@
+# [2.9.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.7...2.9.0-dev.8) (2026-01-30)
+
+
+### Bug Fixes
+
+* **Logger:** avoid logging log update messages ([f21cba2](https://github.com/PocketMiner82/SongGuess/commit/f21cba2577b926eb3416b1c216630798bad9f62c))
+
 # [2.9.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.6...2.9.0-dev.7) (2026-01-30)
 
 
