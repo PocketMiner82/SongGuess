@@ -6,7 +6,7 @@ import {
 import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
 import Logger from "./logger/Logger";
-import type {UpdateLogMessages} from "../types/MessageTypes";
+import type {ServerMessage} from "../types/MessageTypes";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -46,8 +46,13 @@ export default class Server implements Party.Server {
    *
    * @returns The count of connected clients.
    */
-  public getOnlineCount(): number {
-    return Array.from(this.partyRoom.getConnections("user")).length;
+  public getOnlinePlayersCount(): number {
+    let count = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const _ of this.getActiveConnections("player")) {
+      count++;
+    }
+    return count;
   }
 
   /**
@@ -56,7 +61,7 @@ export default class Server implements Party.Server {
    */
   private delayedCleanup() {
     this.cleanupTimeout = setTimeout(() => {
-      if (this.getOnlineCount() === 0) {
+      if (this.getOnlinePlayersCount() === 0) {
         clearInterval(this.tickInterval!);
         this.tickInterval = null;
 
@@ -66,6 +71,49 @@ export default class Server implements Party.Server {
       }
       this.cleanupTimeout = null;
     }, ROOM_CLEANUP_TIMEOUT * 1000);
+  }
+
+  /**
+   * Broadcasts a message to all connected clients, optionally filtered by a specific tag.
+   *
+   * @param msg The message object to be broadcasted to the connections.
+   * @param tag An optional filter to target a specific subset of connections.
+   */
+  public safeBroadcast(msg: ServerMessage, tag?: string) {
+    for (let conn of this.getActiveConnections(tag)) {
+      this.safeSend(conn, msg);
+    }
+  }
+
+  /**
+   * Safely sends a JSON-serialized message over a connection if it is currently open.
+   *
+   * @param conn The active party connection object used to send the data.
+   * @param msg The message object to be stringified and transmitted to the client.
+   */
+  public safeSend(conn: Party.Connection, msg: ServerMessage) {
+    try {
+      // silently ignore if not open
+      if (conn.readyState === WebSocket.OPEN) {
+        conn.send(JSON.stringify(msg));
+      }
+    } catch (e) {
+      this.logger.error(`Failed to send ${msg.type} message to ${conn.id}:`);
+      this.logger.error(e);
+    }
+  }
+
+  /**
+   * Returns a list of connections with OPEN state.
+   *
+   * @param tag An optional filter to target a specific subset of connections.
+   */
+  public *getActiveConnections(tag?: string): Iterable<Party.Connection> {
+    for (const conn of this.partyRoom.getConnections(tag)) {
+      if (conn && conn.readyState === WebSocket.OPEN) {
+        yield conn;
+      }
+    }
   }
 
   //
@@ -85,7 +133,7 @@ export default class Server implements Party.Server {
         return ["unauthorized"];
       }
     }
-    return ["user"];
+    return ["player"];
   }
 
   /**
@@ -104,10 +152,10 @@ export default class Server implements Party.Server {
     if (this.getConnectionTags(conn, ctx).indexOf("admin") !== -1) {
       this.logger.getLogMessages().then(async loggerStorage => {
         if (loggerStorage) {
-          conn.send(JSON.stringify({
+          this.safeSend(conn, {
             type: "update_log_messages",
             messages: loggerStorage
-          } satisfies UpdateLogMessages));
+          });
         }
 
         this.logger.info(`Admin ${conn.id} connected.`);
@@ -180,7 +228,7 @@ export default class Server implements Party.Server {
 
     this.validRoom.onClose(conn);
 
-    if (this.getOnlineCount() === 0) {
+    if (this.getOnlinePlayersCount() === 0) {
       this.delayedCleanup();
 
       this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
@@ -201,7 +249,7 @@ export default class Server implements Party.Server {
     // respond with JSON containing the current online count and if the room is valid
     if (req.method === "GET") {
       let json: RoomGetResponse = {
-        onlineCount: this.getOnlineCount(),
+        onlineCount: this.getOnlinePlayersCount(),
         isValidRoom: this.validRoom !== undefined
       };
 

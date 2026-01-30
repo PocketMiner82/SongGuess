@@ -62,15 +62,15 @@ export default class Logger {
   }
 
   private storeLogMessage(message: string, level: AddLogMessage["level"]): void {
-    for (let conn of this.server.partyRoom.getConnections("admin")) {
-      conn.send(JSON.stringify({
+    for (let conn of this.server.getActiveConnections("admin")) {
+      this.server.safeSend(conn, {
         type: "add_log_message",
         level: level,
         entry: {
           msg: message,
           timestamp: Date.now()
         },
-      } satisfies AddLogMessage));
+      });
     }
 
     this.writeQueue = this.writeQueue.then(async () => {

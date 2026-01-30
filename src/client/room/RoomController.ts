@@ -505,7 +505,7 @@ export class RoomController {
    * Asks the server to update config.
    */
   public sendConfig() {
-    this.socket.send(this.config.getConfigMessage());
+    this.socket.send(JSON.stringify(this.config.getConfigMessage()));
   }
 
   /**

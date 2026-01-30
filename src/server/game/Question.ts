@@ -42,31 +42,29 @@ export default abstract class Question {
    * Creates a question message for sending to clients.
    *
    * @param n The question number.
-   * @returns A JSON string containing the question message.
+   * @returns The question message.
    */
-  getQuestionMessage(n: number): string {
-    let questionMsg: QuestionMessage = {
+  getQuestionMessage(n: number): QuestionMessage {
+    return {
       type: "question",
       number: n,
       answerOptions: this.getSongNames()
-    }
-    return JSON.stringify(questionMsg);
+    };
   }
 
   /**
    * Creates an answer message for sending to clients.
    *
    * @param n The question number.
-   * @returns A JSON string containing the answer message.
+   * @returns The answer message.
    */
-  getAnswerMessage(n: number): string {
-    let answerMsg: AnswerMessage = {
+  getAnswerMessage(n: number): AnswerMessage {
+    return {
       type: "answer",
       number: n,
       answerOptions: this.getSongNames(),
       correctAnswer: this.getCorrectAnswer()
-    }
-    return JSON.stringify(answerMsg);
+    };
   }
 }
 

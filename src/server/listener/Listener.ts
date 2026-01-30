@@ -1,5 +1,5 @@
 import type * as Party from "partykit/server";
-import type {ClientMessage, PongMessage} from "../../types/MessageTypes";
+import type {ClientMessage} from "../../types/MessageTypes";
 import type {IEventListener} from "./IEventListener";
 import type {ValidRoom} from "../ValidRoom";
 
@@ -25,10 +25,10 @@ export default class Listener {
     switch(msg.type) {
       case "ping":
         // always directly answer pings
-        conn.send(JSON.stringify({
+        this.room.server.safeSend(conn, {
           type: "pong",
           seq: msg.seq
-        } satisfies PongMessage));
+        });
         return;
       case "pong":
         // currently ignored

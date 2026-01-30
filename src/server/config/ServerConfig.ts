@@ -24,10 +24,10 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
       this.applyMessage(msg);
       this.room.lobby.filterSongs();
 
-      this.room.getPartyRoom().broadcast(this.getConfigMessage());
+      this.room.server.safeBroadcast(this.getConfigMessage());
 
       if (!_.isEqual(oldSongs, this.room.lobby.songs)) {
-        this.room.getPartyRoom().broadcast(this.room.lobby.getPlaylistsUpdateMessage(true));
+        this.room.server.safeBroadcast(this.room.lobby.getPlaylistsUpdateMessage(true));
       }
       return true;
     }

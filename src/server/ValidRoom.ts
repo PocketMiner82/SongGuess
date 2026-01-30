@@ -6,8 +6,7 @@ import type {
   GameState,
   PlayerState,
   SelectAnswerMessage,
-  SourceMessage,
-  UpdateMessage
+  SourceMessage
 } from "../types/MessageTypes";
 import {COLORS} from "../ConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
@@ -142,10 +141,10 @@ export class ValidRoom implements Party.Server {
     }
 
     // send the current playlist to the connection
-    conn.send(this.lobby.getPlaylistsUpdateMessage());
+    this.server.safeSend(conn, this.lobby.getPlaylistsUpdateMessage());
 
     // inform client about current round state
-    this.game.getGameMessages(true).forEach(msg => conn.send(msg));
+    this.game.getGameMessages(true).forEach(msg => this.server.safeSend(conn, msg));
 
     // send client's answer if client selected one previously
     if (connState.answerIndex !== undefined) {
@@ -157,11 +156,11 @@ export class ValidRoom implements Party.Server {
 
     // send played songs to client
     if (this.state === "results") {
-      conn.send(this.game.getPlayedSongsUpdateMessage());
+      this.server.safeSend(conn, this.game.getPlayedSongsUpdateMessage());
     }
 
     // send current config
-    this.getPartyRoom().broadcast(this.config.getConfigMessage());
+    this.server.safeBroadcast(this.config.getConfigMessage());
 
     // kicks player if inactive
     this.refreshKickPlayerTimeout(conn);
@@ -208,8 +207,8 @@ export class ValidRoom implements Party.Server {
   onTick() {
     this.listener.handleTick();
 
-    if (this.server.getOnlineCount() > 0) {
-      for (let conn of this.getPartyRoom().getConnections("user")) {
+    if (this.server.getOnlinePlayersCount() > 0) {
+      for (let conn of this.server.getActiveConnections("player")) {
         if (!this.hostConnection || conn?.id === this.hostID)
           return;
       }
@@ -264,7 +263,7 @@ export class ValidRoom implements Party.Server {
                        ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count")[]): boolean {
     let possibleErrorFunc = conn
         ? (error: string)=> {
-          conn.send(this.getUpdateMessage(conn));
+          this.sendUpdateMessage(conn);
           this.sendConfirmationOrError(conn, msg, error);
         }
         : () => {};
@@ -318,7 +317,7 @@ export class ValidRoom implements Party.Server {
 
     // always send update when not successful
     if (!successful && conn) {
-      conn.send(this.getUpdateMessage(conn));
+      this.sendUpdateMessage(conn);
     }
 
     return successful;
@@ -331,7 +330,7 @@ export class ValidRoom implements Party.Server {
    */
   public startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
-      this.getPartyRoom().broadcast(this.getCountdownMessage());
+      this.server.safeBroadcast(this.getCountdownMessage());
 
       if (this.countdown === 0) {
         this.stopCountdown();
@@ -366,7 +365,7 @@ export class ValidRoom implements Party.Server {
 
     this.hostTransferTimeout = setTimeout(() => {
       if (this.hostConnection === null) {
-        let next = this.getPartyRoom().getConnections("user")[Symbol.iterator]().next();
+        let next = this.server.getActiveConnections("player")[Symbol.iterator]().next();
         if (!next.done) {
           this.server.logger.info(`Host left, transferring host to ${next.value.id}`);
           this.transferHost(next.value);
@@ -403,7 +402,7 @@ export class ValidRoom implements Party.Server {
    */
   public getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
-    for (let conn of this.getPartyRoom().getConnections("user")) {
+    for (let conn of this.server.getActiveConnections("player")) {
       let connState = conn.state as PlayerState;
 
       if (connState?.username && connState?.color && connState?.points !== undefined) {
@@ -470,39 +469,38 @@ export class ValidRoom implements Party.Server {
       error: error
     }
 
-    conn.send(JSON.stringify(resp));
+    this.server.safeSend(conn, resp);
   }
 
   /**
-   * Constructs an update message with the current room/connection states to the connection.
+   * Constructs and sends an update message with the current room/connection states to the connection.
    *
    * @param conn the connection to send the update to
-   * @returns a JSON string of the constructed {@link UpdateMessage}
    */
-  public getUpdateMessage(conn: Party.Connection): string {
-    let connState = conn.state as PlayerState;
+  public sendUpdateMessage(conn: Party.Connection) {
+    let connState = conn.state as PlayerState|null;
 
-    let msg: UpdateMessage = {
-      type: "update",
-      version: version,
-      state: this.state,
-      players: this.getPlayerStates(),
-      username: connState.username,
-      color: connState.color,
-      isHost: conn === this.hostConnection
-    };
-
-    return JSON.stringify(msg);
+    if (connState?.username && connState?.color) {
+      this.server.safeSend(conn, {
+        type: "update",
+        version: version,
+        state: this.state,
+        players: this.getPlayerStates(),
+        username: connState.username,
+        color: connState.color,
+        isHost: conn === this.hostConnection
+      });
+    }
   }
 
   /**
    * Broadcast an update to all connected clients.
    *
-   * @see {@link getUpdateMessage}
+   * @see {@link sendUpdateMessage}
    */
   public broadcastUpdateMessage() {
-    for (const conn of this.getPartyRoom().getConnections("user")) {
-      conn.send(this.getUpdateMessage(conn));
+    for (const conn of this.server.getActiveConnections()) {
+      this.sendUpdateMessage(conn);
     }
   }
 
@@ -510,15 +508,12 @@ export class ValidRoom implements Party.Server {
    * Constructs a JSON string representing a countdown message.
    * The countdown message is sent to connected clients when the countdown is updated.
    *
-   * @returns a JSON string representing the countdown message.
-   * @see {@link CountdownMessage}
+   * @returns The countdown message
    */
-  public getCountdownMessage(): string {
-    let msg: CountdownMessage = {
+  public getCountdownMessage(): CountdownMessage {
+    return {
       type: "countdown",
       countdown: this.countdown
     };
-
-    return JSON.stringify(msg);
   }
 }

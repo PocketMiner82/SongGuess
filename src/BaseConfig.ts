@@ -32,8 +32,10 @@ export class BaseConfig implements RoomConfigMessage {
    *
    * @returns a JSON string of the constructed {@link RoomConfigMessage}
    */
-  public getConfigMessage(): string {
-    const baseKeys: (keyof BaseConfig)[] = Object.keys(RoomConfigMessageSchema.shape) as (keyof BaseConfig)[];
-    return JSON.stringify(this, baseKeys);
+  public getConfigMessage(): RoomConfigMessage {
+    const baseKeys = Object.keys(RoomConfigMessageSchema.shape);
+
+    const entries = baseKeys.map(key => [key, this[key as keyof this]]);
+    return Object.fromEntries(entries) as RoomConfigMessage;
   }
 }
