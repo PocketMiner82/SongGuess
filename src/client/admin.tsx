@@ -179,7 +179,7 @@ function LogViewer({logs, filters, onFilterChange}: {
 function AuthenticatedApp({auth}: { auth: AuthData }) {
   const [logs, setLogs] = useState<LoggerStorage>({info: [], warn: [], error: [], debug: []});
   const [filters, setFilters] = useState<LogFilters>({info: true, warn: true, error: true, debug: false});
-  const [connected, setConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<string|null>("Connecting...");
 
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
   const [cookies, setCookie] = useCookies<"userID"|"userName", ICookieProps>(["userID", "userName"]);
@@ -196,13 +196,14 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
     maxRetries: 50,
     id: id,
     onOpen: () => {
-      setConnected(true);
+      setConnectionStatus(null);
     },
-    onClose: () => {
-      setConnected(false);
-    },
-    onError: () => {
-      setConnected(false);
+    onClose: e => {
+      if (e.code === 4403) {
+        setConnectionStatus(e.reason);
+      } else {
+        setConnectionStatus("Reconnecting...");
+      }
     },
     onMessage: (ev) => {
       try {
@@ -246,9 +247,9 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
 
   return (
       <div>
-        {!connected && (
+        {connectionStatus && (
             <div className="fixed bottom-0 left-0 right-0 bg-error text-white text-center py-2 z-5000">
-              Attempting to connect...
+              {connectionStatus}
             </div>
         )}
         <LogViewer logs={logs} filters={filters} onFilterChange={setFilters} />

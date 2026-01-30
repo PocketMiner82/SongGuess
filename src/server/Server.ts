@@ -96,7 +96,7 @@ export default class Server implements Party.Server {
    */
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     if (this.getConnectionTags(conn, ctx).indexOf("unauthorized") !== -1) {
-      conn.close(403, "Access denied.");
+      conn.close(4403, "Access denied.");
       return;
     }
 
