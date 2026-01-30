@@ -1,3 +1,10 @@
+# [2.9.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.5...2.9.0-dev.6) (2026-01-30)
+
+
+### Bug Fixes
+
+* **Server:** attempt to fix tick loop stalling when client connection times out ([a374c51](https://github.com/PocketMiner82/SongGuess/commit/a374c5113b3773fde1619aa791f4306c0bcb9d66))
+
 # [2.9.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.4...2.9.0-dev.5) (2026-01-30)
 
 
