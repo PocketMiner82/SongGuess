@@ -1,3 +1,10 @@
+# [2.9.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.8...2.9.0-dev.9) (2026-01-30)
+
+
+### Bug Fixes
+
+* **Logger:** avoid logging ping/pong messages ([7cb7309](https://github.com/PocketMiner82/SongGuess/commit/7cb7309df1bae494fb22fee7dcf730c2fb477c12))
+
 # [2.9.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.7...2.9.0-dev.8) (2026-01-30)
 
 
