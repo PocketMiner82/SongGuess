@@ -9,6 +9,9 @@ export default class Logger {
    */
   readonly LOG_PREFIX: string = `[Room ${this.server.partyRoom.id}]`;
 
+  // track last write operation
+  private writeQueue: Promise<void> = Promise.resolve();
+
 
   constructor(readonly server: Server) {}
 
@@ -70,9 +73,8 @@ export default class Logger {
       } satisfies AddLogMessage));
     }
 
-    this.getLogMessages().then(async loggerStorage => {
-      loggerStorage ||= DefaultLoggerStorage;
-
+    this.writeQueue = this.writeQueue.then(async () => {
+      let loggerStorage = await this.getLogMessages();
       loggerStorage[level].push({
         msg: message,
         timestamp: Date.now()
@@ -84,6 +86,8 @@ export default class Logger {
       }
 
       await this.server.partyRoom.storage.put("logger", loggerStorage);
+    }).catch(err => {
+      console.error("Failed to save log to storage:", err);
     });
   }
 
