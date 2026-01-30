@@ -80,8 +80,10 @@ export default class Server implements Party.Server {
    * @param tag An optional filter to target a specific subset of connections.
    */
   public safeBroadcast(msg: ServerMessage, tag?: string) {
+    this.logger.debug(`Broadcast: ${JSON.stringify(msg)}`);
+
     for (let conn of this.getActiveConnections(tag)) {
-      this.safeSend(conn, msg);
+      this.safeSend(conn, msg, false);
     }
   }
 
@@ -90,12 +92,18 @@ export default class Server implements Party.Server {
    *
    * @param conn The active party connection object used to send the data.
    * @param msg The message object to be stringified and transmitted to the client.
+   * @param log Whether to log the sended message
    */
-  public safeSend(conn: Party.Connection, msg: ServerMessage) {
+  public safeSend(conn: Party.Connection, msg: ServerMessage, log:boolean = true) {
     try {
       // silently ignore if not open
       if (conn.readyState === WebSocket.OPEN) {
-        conn.send(JSON.stringify(msg));
+        let textMsg = JSON.stringify(msg);
+        conn.send(textMsg);
+
+        if (log) {
+          this.logger.debug(`To ${conn.id}: ${textMsg}`);
+        }
       }
     } catch (e) {
       this.logger.error(`Failed to send ${msg.type} message to ${conn.id}:`);
