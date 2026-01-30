@@ -62,16 +62,14 @@ export default class Logger {
   }
 
   private storeLogMessage(message: string, level: AddLogMessage["level"]): void {
-    for (let conn of this.server.getActiveConnections("admin")) {
-      this.server.safeSend(conn, {
-        type: "add_log_message",
-        level: level,
-        entry: {
-          msg: message,
-          timestamp: Date.now()
-        },
-      });
-    }
+    this.server.safeBroadcast({
+      type: "add_log_message",
+      level: level,
+      entry: {
+        msg: message,
+        timestamp: Date.now()
+      },
+    }, "admin");
 
     this.writeQueue = this.writeQueue.then(async () => {
       let loggerStorage = await this.getLogMessages();
