@@ -1,3 +1,11 @@
+# [2.9.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.4...2.9.0-dev.5) (2026-01-30)
+
+
+### Bug Fixes
+
+* **admin:** show reason for disconnect if code=4403 ([621875f](https://github.com/PocketMiner82/SongGuess/commit/621875f90c972da46ad8355db236e95a258907aa))
+* **Logger:** fixed race condition while storing ([fab2440](https://github.com/PocketMiner82/SongGuess/commit/fab2440348d7cb1596b012f5927eb80b84189df1))
+
 # [2.9.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.3...2.9.0-dev.4) (2026-01-29)
 
 
