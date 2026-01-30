@@ -1,3 +1,10 @@
+# [2.9.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.6...2.9.0-dev.7) (2026-01-30)
+
+
+### Bug Fixes
+
+* **Server:** add more logging to send/broadcast ([c3895b4](https://github.com/PocketMiner82/SongGuess/commit/c3895b49b4ff5709422c00b30be8634e5bda5d3a))
+
 # [2.9.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.5...2.9.0-dev.6) (2026-01-30)
 
 
