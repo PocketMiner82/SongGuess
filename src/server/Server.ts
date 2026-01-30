@@ -80,7 +80,8 @@ export default class Server implements Party.Server {
    * @param tag An optional filter to target a specific subset of connections.
    */
   public safeBroadcast(msg: ServerMessage, tag?: string) {
-    if (msg.type !== "add_log_message" && msg.type !== "update_log_messages") {
+    if (msg.type !== "add_log_message" && msg.type !== "update_log_messages" &&
+        msg.type !== "ping" && msg.type !== "pong") {
       this.logger.debug(`Broadcast: ${JSON.stringify(msg)}`);
     }
 
@@ -103,7 +104,8 @@ export default class Server implements Party.Server {
         let textMsg = JSON.stringify(msg);
         conn.send(textMsg);
 
-        if (log && msg.type !== "add_log_message" && msg.type !== "update_log_messages") {
+        if (log && msg.type !== "add_log_message" && msg.type !== "update_log_messages" &&
+            msg.type !== "ping" && msg.type !== "pong") {
           this.logger.debug(`To ${conn.id}: ${textMsg}`);
         }
       }
