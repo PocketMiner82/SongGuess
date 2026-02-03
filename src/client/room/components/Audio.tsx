@@ -45,6 +45,7 @@ export function Audio() {
   }, []);
 
   const fadeIn = useCallback((duration: number = 1000) => {
+    console.debug("[Audio] fadeIn");
     if (!audioRef.current) return;
 
     if (fadeIntervalRef.current) {
@@ -64,6 +65,7 @@ export function Audio() {
       audio.volume = Math.min(finalVolume, newVolume);
 
       if (currentStep >= fadeSteps) {
+        console.debug("[Audio] fadeIn done");
         if (fadeIntervalRef.current) {
           clearInterval(fadeIntervalRef.current);
           fadeIntervalRef.current = null;
@@ -79,8 +81,8 @@ export function Audio() {
 
     const audio = audioRef.current;
 
-    const setStartPos = () => {
-      audio.currentTime = controller.ingameData.currentAudioPosition;
+    const setStartPosAndPlay = () => {
+      let pos = controller.ingameData.currentAudioPosition;
 
       const startPosition = controller.config.audioStartPosition === 3 ? controller.ingameData.rndStartPos :
           controller.config.audioStartPosition;
@@ -91,13 +93,21 @@ export function Audio() {
           break;
         case 1:
           // middle of audio
-          audio.currentTime += Math.max(0, (audio.duration - audioPlayTime) / 2);
+          pos += Math.max(0, (audio.duration - audioPlayTime) / 2);
           break;
         case 2:
           // end of audio
-          audio.currentTime += Math.max(0, audio.duration - audioPlayTime - 0.5);
+          pos += Math.max(0, audio.duration - audioPlayTime - 0.5);
           break;
       }
+
+      audio.currentTime = pos;
+
+      audio.play().catch(e => {
+        console.error("Failed to start playback:", e);
+      });
+      console.debug("[Audio] playing");
+      fadeIn();
     };
 
     // perform requested action
@@ -108,24 +118,17 @@ export function Audio() {
         // avoid resetting src if it is already correct
         if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
 
-        audio.onloadedmetadata = setStartPos;
-
         audio.load();
         break;
       case "play":
         console.log("[Audio] play");
-        if (audio.paused) {
-          audio.volume = 0;
+        audio.volume = 0;
 
-          try {
-            setStartPos();
-            audio.onloadedmetadata = null;
-          } catch {}
-
-          audio.play().catch(e => {
-            console.error("Failed to start playback:", e);
-          });
-          fadeIn();
+        try {
+          setStartPosAndPlay();
+          audio.onloadedmetadata = null;
+        } catch {
+          audio.onloadedmetadata = setStartPosAndPlay;
         }
         break;
       case "pause":
