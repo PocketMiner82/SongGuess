@@ -30,11 +30,18 @@ export function FatalErrorPopup() {
         </div>
         <p className="text-default mb-6 whitespace-pre-line">{error}</p>
         <Button
-          onClick={() => window.location.href = "/"}
-          className="w-full"
+            onClick={() => window.location.reload()}
+            className="w-full"
+        >
+          <span className="material-symbols-outlined mr-2">refresh</span>
+          Reload page
+        </Button>
+        <Button
+            onClick={() => window.location.href = "/"}
+            className="mt-2 w-full"
         >
           <span className="material-symbols-outlined mr-2">home</span>
-          Back to Main Page
+          Back to main page
         </Button>
       </div>
     </div>

@@ -33,7 +33,7 @@ function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (username && password) {
       onAuth({username, password});

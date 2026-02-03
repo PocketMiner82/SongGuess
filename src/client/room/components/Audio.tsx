@@ -3,6 +3,7 @@ import { useControllerContext, useRoomControllerListener } from '../RoomControll
 import {useCookies} from "react-cookie";
 import type ICookieProps from "../../../types/ICookieProps";
 import type {ServerMessage} from "../../../types/MessageTypes";
+import {ROUND_PADDING_TICKS} from "../../../ConfigConstants";
 
 /**
  * Audio component that handles audio playback and controls.
@@ -76,6 +77,27 @@ export function Audio() {
       return false;
     }
 
+    const setStartPos = () => {
+      audio.currentTime = controller.ingameData.currentAudioPosition;
+
+      const startPosition = controller.config.audioStartPosition === 3 ? controller.ingameData.rndStartPos :
+          controller.config.audioStartPosition;
+      const audioPlayTime = controller.config.timePerQuestion + ROUND_PADDING_TICKS;
+      switch (startPosition) {
+        case 0:
+          // 0 is start of audio, so nothing to change
+          break;
+        case 1:
+          // middle of audio
+          audio.currentTime += Math.max(0, (audio.duration - audioPlayTime) / 2);
+          break;
+        case 2:
+          // end of audio
+          audio.currentTime += Math.max(0, audio.duration - audioPlayTime - 0.5);
+          break;
+      }
+    };
+
     const audio = audioRef.current;
 
     // perform requested action
@@ -85,12 +107,19 @@ export function Audio() {
         // avoid resetting src if it is already correct
         if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
 
+        audio.onloadedmetadata = setStartPos;
+
         audio.load();
         break;
       case "play":
         if (audio.paused) {
           audio.volume = 0;
-          audio.currentTime = msg.position;
+
+          try {
+            setStartPos();
+            audio.onloadedmetadata = null;
+          } catch {}
+
           audio.play().catch(e => {
             console.error("Failed to start playback:", e);
           });
@@ -103,7 +132,8 @@ export function Audio() {
         break;
     }
     return false;
-  }, [fadeIn, fadeOut]));
+  }, [controller.config.audioStartPosition, controller.config.timePerQuestion,
+      controller.ingameData.currentAudioPosition, controller.ingameData.rndStartPos, fadeIn, fadeOut]));
 
   useEffect(() => {
     if (audioRef.current && cookies.audioVolume !== undefined) {

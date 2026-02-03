@@ -1,7 +1,14 @@
 import type {AnswerMessage, QuestionMessage, Song} from "../../types/MessageTypes";
 import type ServerConfig from "../config/ServerConfig";
+import _ from "lodash";
 
 export default abstract class Question {
+  /**
+   * The random start position index (0-2) for this question.
+   * @see RoomConfigMessageSchema.audioStartPosition
+   */
+  readonly rndStartPos: number = _.random(0, 2);
+
   /**
    * The list of songs for this question (1 correct answer + 3 distractors).
    */
@@ -48,7 +55,8 @@ export default abstract class Question {
     return {
       type: "question",
       number: n,
-      answerOptions: this.getSongNames()
+      answerOptions: this.getSongNames(),
+      rndStartPos: this.rndStartPos
     };
   }
 

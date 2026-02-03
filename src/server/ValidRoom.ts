@@ -143,6 +143,17 @@ export class ValidRoom implements Party.Server {
     // send the current playlist to the connection
     this.server.safeSend(conn, this.lobby.getPlaylistsUpdateMessage());
 
+    // send played songs to client
+    if (this.state === "results") {
+      this.server.safeSend(conn, this.game.getPlayedSongsUpdateMessage());
+    }
+
+    // send current config
+    this.server.safeSend(conn, this.config.getConfigMessage());
+
+    // send the first update to the connection (and inform all other connections about the new player)
+    this.broadcastUpdateMessage();
+
     // inform client about current round state
     this.game.getGameMessages(true).forEach(msg => this.server.safeSend(conn, msg));
 
@@ -154,19 +165,8 @@ export class ValidRoom implements Party.Server {
       } satisfies SelectAnswerMessage);
     }
 
-    // send played songs to client
-    if (this.state === "results") {
-      this.server.safeSend(conn, this.game.getPlayedSongsUpdateMessage());
-    }
-
-    // send current config
-    this.server.safeBroadcast(this.config.getConfigMessage());
-
     // kicks player if inactive
     this.refreshKickPlayerTimeout(conn);
-
-    // send the first update to the connection (and inform all other connections about the new player)
-    this.broadcastUpdateMessage();
   }
 
   onMessage(message: string, conn: Party.Connection) {

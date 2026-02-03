@@ -57,7 +57,13 @@ export const QuestionMessageSchema = z.object({
   /**
    * The current 4 question answer options.
    */
-  answerOptions: z.array(z.string()).length(4)
+  answerOptions: z.array(z.string()).length(4),
+
+  /**
+   * The random start position index (0-2) for this question.
+   * @see RoomConfigMessageSchema.audioStartPosition
+   */
+  rndStartPos: z.number().min(0).max(2),
 });
 
 

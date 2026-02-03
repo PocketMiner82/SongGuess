@@ -145,6 +145,12 @@ class IngameData {
    * The length of the current audio.
    */
   currentAudioPosition: number = 0;
+
+  /**
+   * The random start position index (0-2) for this question
+   * @see RoomConfigMessageSchema.audioStartPosition
+   */
+  rndStartPos: number = 0;
 }
 
 
@@ -458,6 +464,7 @@ export class RoomController {
         break;
       case "question":
         this.ingameData.currentQuestion = msg;
+        this.ingameData.rndStartPos = msg.rndStartPos;
         this.ingameData.currentAnswer = null;
         this.ingameData.selectedAnswer = null;
         break;

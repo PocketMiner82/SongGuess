@@ -103,7 +103,16 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * Whether to prefer distractions by the same artist.
    */
-  distractionsPreferSameArtist: z.boolean()
+  distractionsPreferSameArtist: z.boolean(),
+
+  /**
+   * The music start position.
+   *  - 0: start of audio
+   *  - 1: close to middle of audio
+   *  - 2: close to end of audio
+   *  - 3: random of the above
+   */
+  audioStartPosition: z.number().min(0).max(3)
 });
 
 

@@ -23,7 +23,7 @@ export default abstract class Game implements IEventListener {
   /**
    * The current tick count within the ongoing round.
    */
-  roundTicks: number = 0;
+  roundTicks: number = -1;
 
   /**
    * The timestamp when the current round started.
@@ -173,7 +173,7 @@ export default abstract class Game implements IEventListener {
     if (!this.isRunning) return;
 
     if (this.roundTicks >= this.room.config.getRoundStartNextTick()) {
-      this.roundTicks = 0;
+      this.roundTicks = -1;
       this.currentQuestion++;
       for (let conn of this.room.server.getActiveConnections("player")) {
         this.resetPlayerAnswerData(conn);
@@ -186,7 +186,7 @@ export default abstract class Game implements IEventListener {
     }
 
     let sendUpdate = false;
-    switch (this.roundTicks) {
+    switch (++this.roundTicks) {
       // show question of current round
       case ROUND_START_TICK:
         sendUpdate = true;
@@ -220,8 +220,6 @@ export default abstract class Game implements IEventListener {
     if (sendUpdate) {
       this.getGameMessages().forEach(msg => this.room.server.safeBroadcast(msg));
     }
-
-    this.roundTicks++;
   }
 
   /**
@@ -285,7 +283,7 @@ export default abstract class Game implements IEventListener {
 
     // show answers if everyone voted
     if (everyoneVoted && this.room.config.endWhenAnswered) {
-      this.roundTicks = this.room.config.getRoundShowAnswerTick();
+      this.roundTicks = this.room.config.getRoundShowAnswerTick() - 1;
     }
   }
 
@@ -411,7 +409,7 @@ export default abstract class Game implements IEventListener {
 
     this.room.server.logger.info("Resetting game to lobby state...");
 
-    this.roundTicks = 0;
+    this.roundTicks = -1;
     this.currentQuestion = 0;
     this.room.state = "lobby";
 
