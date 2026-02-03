@@ -22,7 +22,7 @@ export function FatalErrorPopup() {
   if (!error) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-default-bg flex items-center justify-center z-50">
       <div className="bg-card-bg rounded-lg p-6 max-w-md mx-4 shadow-xl">
         <div className="flex items-center mb-4">
           <span className="material-icons text-error mr-3 text-2xl">error</span>

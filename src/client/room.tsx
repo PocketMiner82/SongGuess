@@ -73,7 +73,7 @@ function Room() {
           This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
         </CookieConsent>
 
-        {hasJoined && <FatalErrorPopup/>}
+        <FatalErrorPopup/>
 
         <TopBar>
           {controller.isHost && controller.state === "ingame" && (
