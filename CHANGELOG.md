@@ -1,3 +1,10 @@
+# [2.9.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.9...2.9.0-dev.10) (2026-02-03)
+
+
+### Features
+
+* **Config:** add audio start position selection ([05b045a](https://github.com/PocketMiner82/SongGuess/commit/05b045a657d34c3efb54fac098a6cc8fc0b221d6))
+
 # [2.9.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.8...2.9.0-dev.9) (2026-01-30)
 
 
