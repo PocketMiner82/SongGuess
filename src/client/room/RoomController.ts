@@ -283,6 +283,7 @@ export class RoomController {
    * (Re)connect to the PartyKit server.
    */
   public reconnect() {
+    this.ingameData = new IngameData();
     this.socket.reconnect();
   }
 

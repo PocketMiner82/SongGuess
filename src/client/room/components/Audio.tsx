@@ -108,6 +108,7 @@ export function Audio() {
       });
       console.debug("[Audio] playing");
       fadeIn();
+      audio.onloadedmetadata = null;
     };
 
     // perform requested action
@@ -126,7 +127,6 @@ export function Audio() {
 
         try {
           setStartPosAndPlay();
-          audio.onloadedmetadata = null;
         } catch {
           audio.onloadedmetadata = setStartPosAndPlay;
         }
