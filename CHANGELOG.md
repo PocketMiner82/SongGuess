@@ -1,3 +1,10 @@
+# [2.9.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.13...2.9.0-dev.14) (2026-02-03)
+
+
+### Bug Fixes
+
+* **Audio:** dont show audio component if not joined ([f6a4b79](https://github.com/PocketMiner82/SongGuess/commit/f6a4b79f8dc1b639ccea86f0777b3439d7654ff7))
+
 # [2.9.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.12...2.9.0-dev.13) (2026-02-03)
 
 
