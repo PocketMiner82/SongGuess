@@ -1,3 +1,10 @@
+# [2.9.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.14...2.9.0-dev.15) (2026-02-03)
+
+
+### Bug Fixes
+
+* **RoomController:** only show fatal errors when not reconnecting ([65c1b95](https://github.com/PocketMiner82/SongGuess/commit/65c1b95b6d8b10875c384388660309c44b316f6e))
+
 # [2.9.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.13...2.9.0-dev.14) (2026-02-03)
 
 
