@@ -77,6 +77,8 @@ export function Audio() {
       return false;
     }
 
+    const audio = audioRef.current;
+
     const setStartPos = () => {
       audio.currentTime = controller.ingameData.currentAudioPosition;
 
@@ -98,11 +100,10 @@ export function Audio() {
       }
     };
 
-    const audio = audioRef.current;
-
     // perform requested action
     switch (msg.action) {
       case "load":
+        console.log("[Audio] load");
         const currentAudioURL = msg.audioURL;
         // avoid resetting src if it is already correct
         if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
@@ -112,6 +113,7 @@ export function Audio() {
         audio.load();
         break;
       case "play":
+        console.log("[Audio] play");
         if (audio.paused) {
           audio.volume = 0;
 
@@ -127,6 +129,7 @@ export function Audio() {
         }
         break;
       case "pause":
+        console.log("[Audio] pause");
         fadeOut();
         setTimeout(() => audio.pause(), 1000);
         break;
