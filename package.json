@@ -38,7 +38,7 @@
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
-    "autoprefixer": "^10.4.23",
+    "autoprefixer": "^10.4.24",
     "eslint": "^8.57.1",
     "eslint-config-react-app": "^7.0.1",
     "partykit": "^0.0.115",
