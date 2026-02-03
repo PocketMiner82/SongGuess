@@ -1,3 +1,10 @@
+# [2.9.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.11...2.9.0-dev.12) (2026-02-03)
+
+
+### Bug Fixes
+
+* **Audio:** try fixing not playing after refresh ([e413137](https://github.com/PocketMiner82/SongGuess/commit/e4131370d57e0fda64d39646c5f17089d18ca7f5))
+
 # [2.9.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.10...2.9.0-dev.11) (2026-02-03)
 
 
