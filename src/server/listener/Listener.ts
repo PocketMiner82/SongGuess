@@ -1,5 +1,5 @@
 import type * as Party from "partykit/server";
-import type {ClientMessage, PlayerState} from "../../types/MessageTypes";
+import type {ClientMessage} from "../../types/MessageTypes";
 import type {IEventListener} from "./IEventListener";
 import type {ValidRoom} from "../ValidRoom";
 

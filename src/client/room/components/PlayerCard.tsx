@@ -1,4 +1,4 @@
-import {memo, type ReactNode, useState} from "react";
+import {type ReactNode, useState} from "react";
 import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerAvatar} from "./PlayerAvatar";
 import type {PlayerState} from "../../../types/MessageTypes";
@@ -9,25 +9,23 @@ import {usernameRegex} from "../../../schemas/ValidationRegexes";
  * to edit their username by clicking on it.
  *
  * @param player The player's state or null for empty slot
- * @param username The current user's username
+ * @param children children to show on the card
  */
-export const PlayerCard = memo(function PlayerCard({
+export function PlayerCard({
   player,
-  username,
   children
 }: {
   player: PlayerState|null;
-  username?: string|undefined;
   children?: ReactNode
 }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(username);
   const controller = useControllerContext();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(controller.username);
 
   useRoomControllerMessageTypeListener(controller, "update");
 
   const handleNameUpdate = () => {
-    if (editedName && editedName !== username && usernameRegex.test(editedName)) {
+    if (editedName && editedName !== controller.username && usernameRegex.test(editedName)) {
       controller.updateUsername(editedName);
     }
     setIsEditing(false);
@@ -47,19 +45,21 @@ export const PlayerCard = memo(function PlayerCard({
             onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
             autoFocus
             maxLength={16}
-            className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none 
+            className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
               ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}/>
           ) : (
             <>
               <span
-              className={`text-lg font-medium ${player.username === username ? "cursor-pointer hover:underline" : ""}`}
+              className={`text-lg font-medium wrap-anywhere leading-none ${
+                player.username === controller.username ? "cursor-pointer hover:underline" : ""
+              }`}
               onClick={() => {
-                if (player.username === username) {
-                  setEditedName(username);
+                if (player.username === controller.username) {
+                  setEditedName(controller.username);
                   setIsEditing(true);
                 }
               }}>
-                {player.username + (player.username === username ? " (You)" : "")}
+                {player.username + (player.username === controller.username ? " (You)" : "")}
               </span>
               {children !== undefined &&
                 <span
@@ -75,4 +75,4 @@ export const PlayerCard = memo(function PlayerCard({
       )}
     </li>
   );
-});
+}

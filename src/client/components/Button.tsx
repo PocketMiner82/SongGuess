@@ -8,6 +8,11 @@ type ButtonProps = {
    * Click event handler for the button.
    */
   onClick?: () => void;
+
+  /**
+   * The tooltip on hover for the button.
+   */
+  title?: string;
   
   /**
    * Whether the button is disabled.
@@ -38,6 +43,7 @@ type ButtonProps = {
  */
 export function Button({
   onClick,
+  title,
   disabled = false,
   className = '',
   defaultColors = true,
@@ -55,6 +61,7 @@ export function Button({
       className={`${colorClasses} rounded disabled:cursor-not-allowed
         cursor-pointer font-bold text-lg py-2 px-4 ${className}`}
       onClick={onClick}
+      title={title}
     >
       <div className="flex items-center text-center justify-center">
         {children}

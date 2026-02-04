@@ -24,13 +24,26 @@ function PlayerList() {
   return (
     <div className="mb-12">
       <h3 className="text-xl font-bold mb-3">Players</h3>
-      <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
+      <ul className="grid grid-cols-1 lg:max-h-none lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
         {slots.map((player, idx) => (
           <PlayerCard
             key={player?.username || `empty-${idx}`}
-            player={player}
-            username={controller.username}
-          />
+            player={player}>
+            {controller.isHost && player?.username && player.username !== controller.username ? (
+                <Button
+                    onClick={() => {
+                      const isConfirmed = window.confirm(
+                          `Do you really want to transfer host to '${player.username}'?`
+                      );
+                      if (!isConfirmed) return;
+
+                      controller.transferHost(player.username);
+                    }}
+                    title="Transfer Host">
+                  <span className="material-symbols-outlined text-2xl">crown</span>
+                </Button>
+            ) : undefined}
+          </PlayerCard>
         ))}
       </ul>
     </div>
