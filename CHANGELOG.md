@@ -1,3 +1,10 @@
+# [2.10.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.10.0-dev.1...2.10.0-dev.2) (2026-02-04)
+
+
+### Features
+
+* **admin:** add input to force transfer host ([f10d8de](https://github.com/PocketMiner82/SongGuess/commit/f10d8de1acfc3205de48f4c5c79683e3c40e5ee9))
+
 # [2.10.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.9.0...2.10.0-dev.1) (2026-02-04)
 
 
