@@ -170,15 +170,17 @@ export class ValidRoom implements Party.Server {
   }
 
   onMessage(message: string, conn: Party.Connection) {
-    // always refresh inactive timeout
-    this.refreshKickPlayerTimeout(conn);
+    // refresh inactive timeout (admins don't have that)
+    if (!this.server.hasTag(conn, "admin")) {
+      this.refreshKickPlayerTimeout(conn);
+    }
 
     // try to parse JSON
     try {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
-      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.debug(`From ${conn.id}: ${message}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
@@ -186,7 +188,7 @@ export class ValidRoom implements Party.Server {
     // check if received message is valid
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
-      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.debug(`From ${conn.id}: ${message}`);
       this.server.logger.warn(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
@@ -196,7 +198,7 @@ export class ValidRoom implements Party.Server {
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
-      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.debug(`From ${conn.id}: ${message}`);
 
     this.listener.handleMessage(conn, msg);
   }
