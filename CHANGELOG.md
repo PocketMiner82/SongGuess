@@ -1,3 +1,19 @@
+# [2.10.0](https://github.com/PocketMiner82/SongGuess/compare/2.9.0...2.10.0) (2026-02-04)
+
+
+### Bug Fixes
+
+* **ConfigConstants:** add ROOM_HOST_TRANSFER_TIMEOUT and ROOM_INACTIVITY_KICK_TIMEOUT ([9571aac](https://github.com/PocketMiner82/SongGuess/commit/9571aacef4166b1c485dccad132c1fe3f841a917))
+* **Lobby:** improve styling ([a2a0062](https://github.com/PocketMiner82/SongGuess/commit/a2a0062f8dbefdc6b7f83786da9934bee0f448d6))
+* **ValidRoom:** don't kick admins on timeout ([7ea01a2](https://github.com/PocketMiner82/SongGuess/commit/7ea01a2b39d46d323e7df96e7b4ac4e393cac7d1))
+
+
+### Features
+
+* **admin:** add input to force transfer host ([f10d8de](https://github.com/PocketMiner82/SongGuess/commit/f10d8de1acfc3205de48f4c5c79683e3c40e5ee9))
+* **Client:** add button to transfer host ([af2bc14](https://github.com/PocketMiner82/SongGuess/commit/af2bc14f958e307e8deb2b635a3098385c549e1f))
+* **Server:** add transferHost message handling ([3a20888](https://github.com/PocketMiner82/SongGuess/commit/3a20888bb76f2c439bcd1dfd4a380e161b36028d))
+
 # [2.10.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.10.0-dev.3...2.10.0-dev.4) (2026-02-04)
 
 
