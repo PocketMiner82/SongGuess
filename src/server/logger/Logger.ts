@@ -78,8 +78,8 @@ export default class Logger {
         timestamp: Date.now()
       });
 
-      // limit log size to 50 messages (100 for debug)
-      while (loggerStorage[level].length > (level === "debug" ? 100 : 50)) {
+      // limit log size to 50 messages (200 for debug)
+      while (loggerStorage[level].length > (level === "debug" ? 200 : 50)) {
         loggerStorage[level].shift();
       }
 

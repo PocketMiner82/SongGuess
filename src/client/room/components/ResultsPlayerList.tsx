@@ -1,6 +1,5 @@
 import React from "react";
 import {PlayerCard} from "./PlayerCard";
-import {useControllerContext} from "../RoomController";
 import type {PlayerState} from "../../../types/MessageTypes";
 
 
@@ -12,8 +11,6 @@ function getShowField(player: PlayerState, showField: keyof PlayerState) {
 
 export function ResultsPlayerList({rankedPlayers, showField, showField2, showRankingNumbers = true}:
       {rankedPlayers: PlayerState[], showField: keyof PlayerState, showField2?: keyof PlayerState, showRankingNumbers?: boolean}) {
-  const controller = useControllerContext();
-
   rankedPlayers = rankedPlayers.filter(p => p[showField] !== undefined);
 
   return (
@@ -33,9 +30,7 @@ export function ResultsPlayerList({rankedPlayers, showField, showField2, showRan
 
               <div className="flex-1 flex items-center gap-y-4">
                 <div className="flex-1">
-                  <PlayerCard
-                      player={player}
-                      username={controller.username}>
+                  <PlayerCard player={player}>
                     {getShowField(player, showField)}
                   </PlayerCard>
                 </div>

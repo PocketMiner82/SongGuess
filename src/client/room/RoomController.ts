@@ -14,7 +14,7 @@ import type {
   PlayerState,
   Playlist, PlaylistsFile,
   QuestionMessage, RemovePlaylistMessage, ReturnToMessage, SelectAnswerMessage,
-  ServerMessage, Song, StartGameMessage
+  ServerMessage, Song, StartGameMessage, TransferHostMessage
 } from "../../types/MessageTypes";
 import {BaseConfig} from "../../BaseConfig";
 
@@ -504,6 +504,18 @@ export class RoomController {
       username: newName
     };
     this.socket.send(JSON.stringify(msg));
+  }
+
+  /**
+   * Requests a host transfer from the server.
+   *
+   * @param player The name of the player that should get host.
+   */
+  public transferHost(player: string) {
+    this.socket.send(JSON.stringify({
+      type: "transfer_host",
+      playerName: player
+    } satisfies TransferHostMessage));
   }
 
   /**

@@ -8,7 +8,7 @@ import type {
   SelectAnswerMessage,
   SourceMessage
 } from "../types/MessageTypes";
-import {COLORS} from "../ConfigConstants";
+import {COLORS, ROOM_HOST_TRANSFER_TIMEOUT, ROOM_INACTIVITY_KICK_TIMEOUT} from "../ConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import z from "zod";
 import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
@@ -170,15 +170,17 @@ export class ValidRoom implements Party.Server {
   }
 
   onMessage(message: string, conn: Party.Connection) {
-    // always refresh inactive timeout
-    this.refreshKickPlayerTimeout(conn);
+    // refresh inactive timeout (admins don't have that)
+    if (!this.server.hasTag(conn, "admin")) {
+      this.refreshKickPlayerTimeout(conn);
+    }
 
     // try to parse JSON
     try {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
-      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.debug(`From ${conn.id}: ${message}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
@@ -186,7 +188,7 @@ export class ValidRoom implements Party.Server {
     // check if received message is valid
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
-      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.debug(`From ${conn.id}: ${message}`);
       this.server.logger.warn(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
@@ -196,7 +198,7 @@ export class ValidRoom implements Party.Server {
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
-      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.debug(`From ${conn.id}: ${message}`);
 
     this.listener.handleMessage(conn, msg);
   }
@@ -251,12 +253,12 @@ export class ValidRoom implements Party.Server {
    * @param conn The connection to perform the checks for.
    * @param msg The message that caused the check.
    * @param checks One of the following:
-   *               - "host": Checks whether the connection is the host.
-   *               - "lobby": Checks whether the game is currently in lobby.
-   *               - "not_lobby": Checks for the opposite.
-   *               - "not_contdown": Checks whether a countdown is currently running.
-   *               - "not_ingame": Checks whether currently not ingame.
-   *               - "min_song_count": Checks whether the minimum song count is reached.
+   *  - "host": Checks whether the connection is the host or an admin.
+   *  - "lobby": Checks whether the game is currently in lobby.
+   *  - "not_lobby": Checks for the opposite.
+   *  - "not_contdown": Checks whether a countdown is currently running.
+   *  - "not_ingame": Checks whether currently not ingame.
+   *  - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
   public performChecks(conn: Party.Connection|null, msg: SourceMessage,
@@ -272,7 +274,7 @@ export class ValidRoom implements Party.Server {
     for (const element of checks) {
       switch (element) {
         case "host":
-          if (this.hostConnection !== conn) {
+          if (!conn || (this.hostConnection !== conn && !this.server.hasTag(conn, "admin"))) {
             possibleErrorFunc("Action can only be used by host.");
             successful = false;
           }
@@ -375,7 +377,7 @@ export class ValidRoom implements Party.Server {
       }
 
       this.hostTransferTimeout = null;
-    }, 3000);
+    }, ROOM_HOST_TRANSFER_TIMEOUT * 1000);
   }
 
   /**
@@ -392,6 +394,25 @@ export class ValidRoom implements Party.Server {
     if (newHost && sendUpdate) {
       this.broadcastUpdateMessage();
     }
+  }
+
+  /**
+   * Attempts to find a player by name.
+   * @param name The username to search for.
+   * @returns the {@link Party.Connection} associated with the name or null if not found.
+   */
+  public getPlayerByName(name: string): Party.Connection|null {
+    let player: Party.Connection|null = null;
+    for (let conn of this.server.getActiveConnections("player")) {
+      let playerState = conn.state as PlayerState;
+
+      if (playerState.username && playerState.username === name) {
+        player = conn;
+        break;
+      }
+    }
+
+    return player;
   }
 
   /**
@@ -452,7 +473,7 @@ export class ValidRoom implements Party.Server {
     this.kickPlayerTimeouts.set(conn.id, setTimeout(() => {
       this.server.logger.info(`Kicked ${conn.id} due to inactivity.`);
       conn.close(4001, "Didn't receive updates within 15 seconds.");
-    }, 15000));
+    }, ROOM_INACTIVITY_KICK_TIMEOUT * 1000));
   }
 
   /**

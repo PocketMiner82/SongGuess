@@ -22,15 +22,28 @@ function PlayerList() {
   }, [controller.players]);
 
   return (
-    <div className="mb-12">
+    <div className="mb-8">
       <h3 className="text-xl font-bold mb-3">Players</h3>
-      <ul className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
+      <ul className="grid grid-cols-1 lg:max-h-none lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
         {slots.map((player, idx) => (
           <PlayerCard
             key={player?.username || `empty-${idx}`}
-            player={player}
-            username={controller.username}
-          />
+            player={player}>
+            {controller.isHost && player?.username && player.username !== controller.username ? (
+                <Button
+                    onClick={() => {
+                      const isConfirmed = window.confirm(
+                          `Do you really want to transfer host to '${player.username}'?`
+                      );
+                      if (!isConfirmed) return;
+
+                      controller.transferHost(player.username);
+                    }}
+                    title="Transfer Host">
+                  <span className="material-symbols-outlined text-2xl">crown</span>
+                </Button>
+            ) : undefined}
+          </PlayerCard>
         ))}
       </ul>
     </div>
@@ -140,8 +153,7 @@ function AddPlaylistInput() {
 
   return (
     <div>
-      <a target="_blank" rel="noopener noreferrer" href="https://music.apple.com/" className="text-primary hover:underline">Search Apple Music</a>
-      <div className="relative mt-6 flex gap-2">
+      <div className="relative flex gap-2 mb-1">
         <input
             placeholder="Enter apple music artist or album URL"
             className={`flex-1 outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
@@ -171,6 +183,11 @@ function AddPlaylistInput() {
           Add
         </Button>
       </div>
+      <a target="_blank" rel="noopener noreferrer"
+         href="https://music.apple.com/"
+         className="text-primary hover:underline">
+        Search Apple Music
+      </a>
     </div>
   );
 }
@@ -425,7 +442,7 @@ function Settings() {
           <ImportPlaylists />
         </div>
 
-        <div className="border-t border-disabled-bg my-2"></div>
+        <div className="border-t border-disabled-bg my-1"></div>
 
         <SettingsToggle value={controller.config.advancedSongFiltering}
           onToggle={v => {
@@ -494,7 +511,7 @@ function Settings() {
           Audio start position
         </SettingsDropdown>
 
-        <div className="border-t border-disabled-bg my-2"></div>
+        <div className="border-t border-disabled-bg my-1"></div>
 
         <div className="grid grid-cols-2 gap-4">
           <CopyLink />
@@ -518,9 +535,7 @@ export function Lobby() {
 
   return (
     <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
-      <div className="mb-12 shrink-0">
-        <PlayerList />
-      </div>
+      <PlayerList />
       <div className={`grid gap-4 grid-cols-1 flex-1 ${controller.isHost ? "lg:grid-cols-2" : ""}`}>
         <div className="lg:order-last">
           {controller.isHost && <Settings />}
