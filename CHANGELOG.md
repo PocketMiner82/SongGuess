@@ -1,3 +1,11 @@
+# [2.10.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.10.0-dev.2...2.10.0-dev.3) (2026-02-04)
+
+
+### Bug Fixes
+
+* **Lobby:** improve styling ([a2a0062](https://github.com/PocketMiner82/SongGuess/commit/a2a0062f8dbefdc6b7f83786da9934bee0f448d6))
+* **ValidRoom:** don't kick admins on timeout ([7ea01a2](https://github.com/PocketMiner82/SongGuess/commit/7ea01a2b39d46d323e7df96e7b4ac4e393cac7d1))
+
 # [2.10.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.10.0-dev.1...2.10.0-dev.2) (2026-02-04)
 
 
