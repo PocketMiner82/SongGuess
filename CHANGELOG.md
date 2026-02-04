@@ -1,3 +1,10 @@
+# [2.10.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.10.0-dev.3...2.10.0-dev.4) (2026-02-04)
+
+
+### Bug Fixes
+
+* **ConfigConstants:** add ROOM_HOST_TRANSFER_TIMEOUT and ROOM_INACTIVITY_KICK_TIMEOUT ([9571aac](https://github.com/PocketMiner82/SongGuess/commit/9571aacef4166b1c485dccad132c1fe3f841a917))
+
 # [2.10.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.10.0-dev.2...2.10.0-dev.3) (2026-02-04)
 
 
