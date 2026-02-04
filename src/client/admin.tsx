@@ -9,6 +9,8 @@ import type {LogEntry, LoggerStorage} from "../types/LoggerStorageTypes";
 import React, {useEffect, useMemo, useState, useRef, useCallback} from "react";
 import {TopBar} from "./components/TopBar";
 import {Button} from "./components/Button";
+import type {TransferHostMessage} from "../types/MessageTypes";
+import {ToastError} from "./components/ToastError";
 
 
 /**
@@ -76,6 +78,47 @@ function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
   );
 }
 
+/**
+ * Input component for admins to transfer host to any player.
+ * Handles validation and confirmation.
+ */
+function TransferHostInput({onTransferHost}: { onTransferHost: (username: string) => void }) {
+  const [targetUsername, setTargetUsername] = useState("");
+
+  const handleTransfer = () => {
+    if (!targetUsername.trim()) return;
+
+    onTransferHost(targetUsername.trim());
+  };
+
+  return (
+    <div className="bg-card-bg rounded-lg border border-gray-300 dark:border-gray-700 p-4 mb-4">
+      <h3 className="text-lg font-bold mb-3">Transfer Host</h3>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Enter username to transfer host"
+          value={targetUsername}
+          onChange={(e) => setTargetUsername(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && targetUsername.trim()) {
+              handleTransfer();
+            }
+          }}
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-default-bg text-default focus:outline-none focus:ring-2 focus:ring-secondary disabled:opacity-50"
+        />
+        <Button
+          onClick={handleTransfer}
+          disabled={!targetUsername.trim()}
+          className="px-4 py-2"
+        >
+          Transfer
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function LogViewer({logs, filters, onFilterChange}: {
   logs: LoggerStorage;
   filters: LogFilters;
@@ -135,9 +178,8 @@ function LogViewer({logs, filters, onFilterChange}: {
   }, [filteredLogs.length, scrollToBottom]);
 
   return (
-    <div className="flex flex-col h-screen font-mono">
-      <TopBar />
-      <div className="bg-card-bg border-b border-gray-300 dark:border-gray-700 p-4">
+    <div className="flex flex-col max-h-2/3 font-mono">
+      <div className="bg-card-bg border-b rounded-lg border border-gray-300 dark:border-gray-700 p-4">
         <h2 className="text-xl font-bold mb-3">Server Logs</h2>
         <div className="flex flex-wrap gap-4">
           {Object.entries(filters).map(([level, enabled]) => (
@@ -158,7 +200,7 @@ function LogViewer({logs, filters, onFilterChange}: {
       <div 
         ref={logContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-auto p-4"
+        className="flex-1 overflow-auto mt-2"
       >
         {filteredLogs.map(({level, entry}, index) => (
           <div key={index} className={`mb-0.5 ${getLogColor(level)}`}>
@@ -190,7 +232,7 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
 
   let id = `admin_${cookies.userID ? cookies.userID : uuidv4()}`;
 
-  usePartySocket({
+  const socketRef = usePartySocket({
     host: PARTYKIT_HOST,
     room: roomID,
     maxRetries: 50,
@@ -229,6 +271,14 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
           case "update_log_messages":
             setLogs(msg.messages);
             break;
+          case "confirmation":
+            if (msg.error) {
+              console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
+              if ((window as any).showToastError) {
+                (window as any).showToastError(msg.error);
+              }
+            }
+            break;
         }
       } catch (e) {
         console.debug("Server sent:", ev.data);
@@ -238,6 +288,17 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
     // Use query parameter for authentication
     query: {auth: generateAuthQuery(auth)}
   });
+
+  // Function to send transfer host message
+  const sendTransferHost = (username: string) => {
+    if (socketRef && socketRef.readyState === WebSocket.OPEN) {
+      const message: TransferHostMessage = {
+        type: "transfer_host",
+        playerName: username.trim()
+      };
+      socketRef.send(JSON.stringify(message));
+    }
+  };
 
   useEffect(() => {
     if (!cookies.userID) {
@@ -252,7 +313,14 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
               {connectionStatus}
             </div>
         )}
-        <LogViewer logs={logs} filters={filters} onFilterChange={setFilters} />
+        <div className="flex flex-col h-screen">
+          <TopBar />
+          <ToastError />
+          <div className="flex-1 overflow-auto p-4">
+            <TransferHostInput onTransferHost={sendTransferHost} />
+            <LogViewer logs={logs} filters={filters} onFilterChange={setFilters} />
+          </div>
+        </div>
       </div>
   );
 }
