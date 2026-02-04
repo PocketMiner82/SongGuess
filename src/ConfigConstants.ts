@@ -9,6 +9,16 @@ export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black
 export const ROOM_CLEANUP_TIMEOUT = 30;
 
 /**
+ * The time (in seconds) after the host leaved where a new player will get host.
+ */
+export const ROOM_HOST_TRANSFER_TIMEOUT = 10;
+
+/**
+ * The time (in seconds) after which an inactive player will get kicked.
+ */
+export const ROOM_INACTIVITY_KICK_TIMEOUT = 15;
+
+/**
  * The tick count when a round starts.
  */
 export const ROUND_START_TICK = 0;

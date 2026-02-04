@@ -8,7 +8,7 @@ import type {
   SelectAnswerMessage,
   SourceMessage
 } from "../types/MessageTypes";
-import {COLORS} from "../ConfigConstants";
+import {COLORS, ROOM_HOST_TRANSFER_TIMEOUT, ROOM_INACTIVITY_KICK_TIMEOUT} from "../ConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import z from "zod";
 import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
@@ -377,7 +377,7 @@ export class ValidRoom implements Party.Server {
       }
 
       this.hostTransferTimeout = null;
-    }, 3000);
+    }, ROOM_HOST_TRANSFER_TIMEOUT * 1000);
   }
 
   /**
@@ -473,7 +473,7 @@ export class ValidRoom implements Party.Server {
     this.kickPlayerTimeouts.set(conn.id, setTimeout(() => {
       this.server.logger.info(`Kicked ${conn.id} due to inactivity.`);
       conn.close(4001, "Didn't receive updates within 15 seconds.");
-    }, 15000));
+    }, ROOM_INACTIVITY_KICK_TIMEOUT * 1000));
   }
 
   /**
