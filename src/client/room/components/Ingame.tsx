@@ -4,6 +4,7 @@ import { PlayerAvatar } from "./PlayerAvatar";
 import {useControllerContext, useRoomControllerListener, useRoomControllerMessageTypeListener} from "../RoomController";
 import {ResultsPlayerList} from "./ResultsPlayerList";
 import type {PlayerState} from "../../../types/MessageTypes";
+import {ROUND_PADDING_TICKS} from "../../../ConfigConstants";
 
 /**
  * Individual answer option button that handles selection and styling.
@@ -83,10 +84,12 @@ const AnswerOption = memo(function AnswerOption({
  */
 const ProgressBar = memo(function ProgressBar({ 
   duration, 
-  isPlaying 
+  isPlaying,
+  positionOffset = 0 
 }: { 
   duration: number; 
   isPlaying: boolean; 
+  positionOffset?: number; 
 }) {
   const [progress, setProgress] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -100,8 +103,10 @@ const ProgressBar = memo(function ProgressBar({
         duration = -duration;
       }
 
-      // Reset when starting
-      setProgress(reversed ? 0 : 100);
+      // Calculate initial progress based on position offset
+      const offsetProgress = (positionOffset / duration) * 100;
+      const initialProgress = reversed ? offsetProgress : (100 - offsetProgress);
+      setProgress(Math.max(0, Math.min(100, initialProgress)));
       
       // Update progress every 100ms for smooth animation
       const intervalTime = 100;
@@ -132,7 +137,7 @@ const ProgressBar = memo(function ProgressBar({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, duration]);
+  }, [isPlaying, duration, positionOffset]);
 
   return (
     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -210,7 +215,7 @@ function QuestionDisplay() {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">
-          Question {questionNumber!}/{controller.config.questionCount}
+          Question {questionNumber!}/{controller.config.questionsCount}
         </h2>
         <p className="text-disabled-text">
           Select the correct song title
@@ -219,9 +224,9 @@ function QuestionDisplay() {
 
       <div className="mx-auto w-3/4">
         <ProgressBar duration={controller.ingameData.currentAudioState === "load"
-            ? -controller.ingameData.currentAudioLength
-            : controller.ingameData.currentAudioLength
-        } isPlaying={isPlaying} />
+            ? -(ROUND_PADDING_TICKS - 0.5)
+            : controller.config.timePerQuestion - 0.5
+        } isPlaying={isPlaying} positionOffset={controller.ingameData.currentAudioPosition} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -6,10 +6,9 @@ import type {
   GameState,
   PlayerState,
   SelectAnswerMessage,
-  SourceMessage,
-  UpdateMessage
+  SourceMessage
 } from "../types/MessageTypes";
-import {COLORS} from "./config/ServerConfigConstants";
+import {COLORS} from "../ConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import z from "zod";
 import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
@@ -112,6 +111,7 @@ export class ValidRoom implements Party.Server {
     if (this.hostConnection === undefined) {
       this.transferHost(conn, false);
     } else if (this.hostConnection === null && this.hostID === conn.id) {
+      this.server.logger.info("Host reconnected.");
       // host joined again within timeout
       this.transferHost(conn, false);
 
@@ -141,10 +141,21 @@ export class ValidRoom implements Party.Server {
     }
 
     // send the current playlist to the connection
-    conn.send(this.lobby.getPlaylistsUpdateMessage());
+    this.server.safeSend(conn, this.lobby.getPlaylistsUpdateMessage());
+
+    // send played songs to client
+    if (this.state === "results") {
+      this.server.safeSend(conn, this.game.getPlayedSongsUpdateMessage());
+    }
+
+    // send current config
+    this.server.safeSend(conn, this.config.getConfigMessage());
+
+    // send the first update to the connection (and inform all other connections about the new player)
+    this.broadcastUpdateMessage();
 
     // inform client about current round state
-    this.game.getGameMessages(true).forEach(msg => conn.send(msg));
+    this.game.getGameMessages(true).forEach(msg => this.server.safeSend(conn, msg));
 
     // send client's answer if client selected one previously
     if (connState.answerIndex !== undefined) {
@@ -154,19 +165,8 @@ export class ValidRoom implements Party.Server {
       } satisfies SelectAnswerMessage);
     }
 
-    // send played songs to client
-    if (this.state === "results") {
-      conn.send(this.game.getPlayedSongsUpdateMessage());
-    }
-
-    // send current config
-    this.getPartyRoom().broadcast(this.config.getConfigMessage());
-
     // kicks player if inactive
     this.refreshKickPlayerTimeout(conn);
-
-    // send the first update to the connection (and inform all other connections about the new player)
-    this.broadcastUpdateMessage();
   }
 
   onMessage(message: string, conn: Party.Connection) {
@@ -178,7 +178,7 @@ export class ValidRoom implements Party.Server {
       // noinspection ES6ConvertVarToLetConst
       var json = JSON.parse(message);
     } catch {
-      this.server.log(`${conn.id} sent: ${message}`, "debug");
+      this.server.logger.debug(`${conn.id} sent: ${message}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
@@ -186,8 +186,8 @@ export class ValidRoom implements Party.Server {
     // check if received message is valid
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
-      this.server.log(`${conn.id} sent: ${message}`, "debug");
-      this.server.log(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`, "warn");
+      this.server.logger.debug(`${conn.id} sent: ${message}`);
+      this.server.logger.warn(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`);
       this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
@@ -196,7 +196,7 @@ export class ValidRoom implements Party.Server {
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
-      this.server.log(`${conn.id} sent: ${message}`, "debug");
+      this.server.logger.debug(`${conn.id} sent: ${message}`);
 
     this.listener.handleMessage(conn, msg);
   }
@@ -207,8 +207,8 @@ export class ValidRoom implements Party.Server {
   onTick() {
     this.listener.handleTick();
 
-    if (this.server.getOnlineCount() > 0) {
-      for (let conn of this.getPartyRoom().getConnections()) {
+    if (this.server.getOnlinePlayersCount() > 0) {
+      for (let conn of this.server.getActiveConnections("player")) {
         if (!this.hostConnection || conn?.id === this.hostID)
           return;
       }
@@ -263,7 +263,7 @@ export class ValidRoom implements Party.Server {
                        ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count")[]): boolean {
     let possibleErrorFunc = conn
         ? (error: string)=> {
-          conn.send(this.getUpdateMessage(conn));
+          this.sendUpdateMessage(conn);
           this.sendConfirmationOrError(conn, msg, error);
         }
         : () => {};
@@ -307,8 +307,8 @@ export class ValidRoom implements Party.Server {
           break;
 
         case "min_song_count":
-          if (this.lobby.songs.length < this.config.questionCount) {
-            possibleErrorFunc(`Required at least ${this.config.questionCount} songs. Selected: ${this.lobby.songs.length}`);
+          if (this.lobby.songs.length < this.config.questionsCount) {
+            possibleErrorFunc(`Required at least ${this.config.questionsCount} songs. Selected: ${this.lobby.songs.length}`);
             successful = false;
           }
           break;
@@ -317,7 +317,7 @@ export class ValidRoom implements Party.Server {
 
     // always send update when not successful
     if (!successful && conn) {
-      conn.send(this.getUpdateMessage(conn));
+      this.sendUpdateMessage(conn);
     }
 
     return successful;
@@ -330,7 +330,7 @@ export class ValidRoom implements Party.Server {
    */
   public startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
-      this.getPartyRoom().broadcast(this.getCountdownMessage());
+      this.server.safeBroadcast(this.getCountdownMessage());
 
       if (this.countdown === 0) {
         this.stopCountdown();
@@ -365,9 +365,9 @@ export class ValidRoom implements Party.Server {
 
     this.hostTransferTimeout = setTimeout(() => {
       if (this.hostConnection === null) {
-        let next = this.getPartyRoom().getConnections()[Symbol.iterator]().next();
+        let next = this.server.getActiveConnections("player")[Symbol.iterator]().next();
         if (!next.done) {
-          this.server.log(`Host left, transferring host to ${next.value.id}`);
+          this.server.logger.info(`Host left, transferring host to ${next.value.id}`);
           this.transferHost(next.value);
         } else {
           this.transferHost(undefined);
@@ -387,6 +387,8 @@ export class ValidRoom implements Party.Server {
     this.hostConnection = newHost;
     this.hostID = newHost?.id;
 
+    this.server.logger.info(`Host transferred to ${this.hostID}`);
+
     if (newHost && sendUpdate) {
       this.broadcastUpdateMessage();
     }
@@ -400,7 +402,7 @@ export class ValidRoom implements Party.Server {
    */
   public getPlayerStates(): PlayerState[] {
     let states: PlayerState[] = [];
-    for (let conn of this.getPartyRoom().getConnections()) {
+    for (let conn of this.server.getActiveConnections("player")) {
       let connState = conn.state as PlayerState;
 
       if (connState?.username && connState?.color && connState?.points !== undefined) {
@@ -448,6 +450,7 @@ export class ValidRoom implements Party.Server {
     }
 
     this.kickPlayerTimeouts.set(conn.id, setTimeout(() => {
+      this.server.logger.info(`Kicked ${conn.id} due to inactivity.`);
       conn.close(4001, "Didn't receive updates within 15 seconds.");
     }, 15000));
   }
@@ -466,39 +469,38 @@ export class ValidRoom implements Party.Server {
       error: error
     }
 
-    conn.send(JSON.stringify(resp));
+    this.server.safeSend(conn, resp);
   }
 
   /**
-   * Constructs an update message with the current room/connection states to the connection.
+   * Constructs and sends an update message with the current room/connection states to the connection.
    *
    * @param conn the connection to send the update to
-   * @returns a JSON string of the constructed {@link UpdateMessage}
    */
-  public getUpdateMessage(conn: Party.Connection): string {
-    let connState = conn.state as PlayerState;
+  public sendUpdateMessage(conn: Party.Connection) {
+    let connState = conn.state as PlayerState|null;
 
-    let msg: UpdateMessage = {
-      type: "update",
-      version: version,
-      state: this.state,
-      players: this.getPlayerStates(),
-      username: connState.username,
-      color: connState.color,
-      isHost: conn === this.hostConnection
-    };
-
-    return JSON.stringify(msg);
+    if (connState?.username && connState?.color) {
+      this.server.safeSend(conn, {
+        type: "update",
+        version: version,
+        state: this.state,
+        players: this.getPlayerStates(),
+        username: connState.username,
+        color: connState.color,
+        isHost: conn === this.hostConnection
+      });
+    }
   }
 
   /**
    * Broadcast an update to all connected clients.
    *
-   * @see {@link getUpdateMessage}
+   * @see {@link sendUpdateMessage}
    */
   public broadcastUpdateMessage() {
-    for (const conn of this.getPartyRoom().getConnections()) {
-      conn.send(this.getUpdateMessage(conn));
+    for (const conn of this.server.getActiveConnections()) {
+      this.sendUpdateMessage(conn);
     }
   }
 
@@ -506,15 +508,12 @@ export class ValidRoom implements Party.Server {
    * Constructs a JSON string representing a countdown message.
    * The countdown message is sent to connected clients when the countdown is updated.
    *
-   * @returns a JSON string representing the countdown message.
-   * @see {@link CountdownMessage}
+   * @returns The countdown message
    */
-  public getCountdownMessage(): string {
-    let msg: CountdownMessage = {
+  public getCountdownMessage(): CountdownMessage {
+    return {
       type: "countdown",
       countdown: this.countdown
     };
-
-    return JSON.stringify(msg);
   }
 }

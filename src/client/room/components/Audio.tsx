@@ -3,6 +3,7 @@ import { useControllerContext, useRoomControllerListener } from '../RoomControll
 import {useCookies} from "react-cookie";
 import type ICookieProps from "../../../types/ICookieProps";
 import type {ServerMessage} from "../../../types/MessageTypes";
+import {ROUND_PADDING_TICKS} from "../../../ConfigConstants";
 
 /**
  * Audio component that handles audio playback and controls.
@@ -44,6 +45,7 @@ export function Audio() {
   }, []);
 
   const fadeIn = useCallback((duration: number = 1000) => {
+    console.debug("[Audio] fadeIn");
     if (!audioRef.current) return;
 
     if (fadeIntervalRef.current) {
@@ -63,6 +65,7 @@ export function Audio() {
       audio.volume = Math.min(finalVolume, newVolume);
 
       if (currentStep >= fadeSteps) {
+        console.debug("[Audio] fadeIn done");
         if (fadeIntervalRef.current) {
           clearInterval(fadeIntervalRef.current);
           fadeIntervalRef.current = null;
@@ -78,9 +81,40 @@ export function Audio() {
 
     const audio = audioRef.current;
 
+    const setStartPosAndPlay = () => {
+      let pos = controller.ingameData.currentAudioPosition;
+
+      const startPosition = controller.config.audioStartPosition === 3 ? controller.ingameData.rndStartPos :
+          controller.config.audioStartPosition;
+      const audioPlayTime = controller.config.timePerQuestion + ROUND_PADDING_TICKS;
+      switch (startPosition) {
+        case 0:
+          // 0 is start of audio, so nothing to change
+          break;
+        case 1:
+          // middle of audio
+          pos += Math.max(0, (audio.duration - audioPlayTime) / 2);
+          break;
+        case 2:
+          // end of audio
+          pos += Math.max(0, audio.duration - audioPlayTime - 0.5);
+          break;
+      }
+
+      audio.currentTime = pos;
+
+      audio.play().catch(e => {
+        console.error("Failed to start playback:", e);
+      });
+      console.debug("[Audio] playing");
+      fadeIn();
+      audio.onloadedmetadata = null;
+    };
+
     // perform requested action
     switch (msg.action) {
       case "load":
+        console.log("[Audio] load");
         const currentAudioURL = msg.audioURL;
         // avoid resetting src if it is already correct
         if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
@@ -88,21 +122,24 @@ export function Audio() {
         audio.load();
         break;
       case "play":
-        if (audio.paused) {
-          audio.volume = 0;
-          audio.play().catch(e => {
-            console.error("Failed to start playback:", e);
-          });
-          fadeIn();
+        console.log("[Audio] play");
+        audio.volume = 0;
+
+        try {
+          setStartPosAndPlay();
+        } catch {
+          audio.onloadedmetadata = setStartPosAndPlay;
         }
         break;
       case "pause":
+        console.log("[Audio] pause");
         fadeOut();
         setTimeout(() => audio.pause(), 1000);
         break;
     }
     return false;
-  }, [fadeIn, fadeOut]));
+  }, [controller.config.audioStartPosition, controller.config.timePerQuestion,
+      controller.ingameData.currentAudioPosition, controller.ingameData.rndStartPos, fadeIn, fadeOut]));
 
   useEffect(() => {
     if (audioRef.current && cookies.audioVolume !== undefined) {

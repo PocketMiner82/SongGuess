@@ -5,7 +5,7 @@ import type {
   SelectAnswerMessage, Song
 } from "../../../types/MessageTypes";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
-import {POINTS_PER_QUESTION, TIME_PER_QUESTION} from "../../config/ServerConfigConstants";
+import {ROUND_POINTS_PER_QUESTION} from "../../../ConfigConstants";
 import type Question from "../Question";
 
 
@@ -27,17 +27,17 @@ export class MultipleChoiceGame extends Game{
   }
 
   calculatePoints() {
-    for (let conn of this.room.getPartyRoom().getConnections()) {
+    for (let conn of this.room.server.getActiveConnections("player")) {
       let connState = conn.state as PlayerState;
 
       if (connState.answerTimestamp && connState.answerIndex === this.questions[this.currentQuestion].getCorrectAnswer()) {
         // half the points for correct answer
-        connState.points += POINTS_PER_QUESTION / 2;
+        connState.points += ROUND_POINTS_PER_QUESTION / 2;
 
         // remaining points depend on speed of answer
-        let factor = Math.max(0, (TIME_PER_QUESTION * 1000 - (connState.answerTimestamp - this.roundStartTime)))
-            / (TIME_PER_QUESTION * 1000);
-        connState.points += (POINTS_PER_QUESTION / 2) * factor;
+        let factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (connState.answerTimestamp - this.roundStartTime)))
+            / (this.room.config.timePerQuestion * 1000);
+        connState.points += (ROUND_POINTS_PER_QUESTION / 2) * factor;
 
         connState.points = Math.round(connState.points);
 

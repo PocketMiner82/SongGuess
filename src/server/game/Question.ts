@@ -1,11 +1,18 @@
 import type {AnswerMessage, QuestionMessage, Song} from "../../types/MessageTypes";
 import type ServerConfig from "../config/ServerConfig";
+import _ from "lodash";
 
 export default abstract class Question {
   /**
+   * The random start position index (0-2) for this question.
+   * @see RoomConfigMessageSchema.audioStartPosition
+   */
+  readonly rndStartPos: number = _.random(0, 2);
+
+  /**
    * The list of songs for this question (1 correct answer + 3 distractors).
    */
-  questions: Song[] = [];
+  answers: Song[] = [];
 
   /**
    * Constructs a question asking which is the correct song.
@@ -15,7 +22,7 @@ export default abstract class Question {
    * @param config The room's config
    */
   constructor(readonly song: Song, readonly config: ServerConfig) {
-    this.questions.push(song);
+    this.answers.push(song);
   }
 
   /**
@@ -35,38 +42,37 @@ export default abstract class Question {
    * @returns An array of song names for the answer options.
    */
   getSongNames() {
-    return this.questions.map(s => s.name);
+    return this.answers.map(s => s.name);
   }
 
   /**
    * Creates a question message for sending to clients.
    *
    * @param n The question number.
-   * @returns A JSON string containing the question message.
+   * @returns The question message.
    */
-  getQuestionMessage(n: number): string {
-    let questionMsg: QuestionMessage = {
+  getQuestionMessage(n: number): QuestionMessage {
+    return {
       type: "question",
       number: n,
-      answerOptions: this.getSongNames()
-    }
-    return JSON.stringify(questionMsg);
+      answerOptions: this.getSongNames(),
+      rndStartPos: this.rndStartPos
+    };
   }
 
   /**
    * Creates an answer message for sending to clients.
    *
    * @param n The question number.
-   * @returns A JSON string containing the answer message.
+   * @returns The answer message.
    */
-  getAnswerMessage(n: number): string {
-    let answerMsg: AnswerMessage = {
+  getAnswerMessage(n: number): AnswerMessage {
+    return {
       type: "answer",
       number: n,
       answerOptions: this.getSongNames(),
       correctAnswer: this.getCorrectAnswer()
-    }
-    return JSON.stringify(answerMsg);
+    };
   }
 }
 

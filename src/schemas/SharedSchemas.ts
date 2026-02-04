@@ -93,12 +93,26 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * The amount of questions to ask per round.
    */
-  questionCount: z.number().min(1).max(30),
+  questionsCount: z.number().min(1).max(30),
+
+  /**
+   * The time per question in each round.
+   */
+  timePerQuestion: z.number().min(5).max(25),
 
   /**
    * Whether to prefer distractions by the same artist.
    */
-  distractionsPreferSameArtist: z.boolean()
+  distractionsPreferSameArtist: z.boolean(),
+
+  /**
+   * The music start position.
+   *  - 0: start of audio
+   *  - 1: close to middle of audio
+   *  - 2: close to end of audio
+   *  - 3: random of the above
+   */
+  audioStartPosition: z.number().min(0).max(3)
 });
 
 

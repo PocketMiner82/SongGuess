@@ -2,7 +2,7 @@ import React, {useState, useCallback, useMemo, type ReactNode} from "react";
 import { Button } from "../../components/Button";
 import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
-import {COLORS} from "../../../server/config/ServerConfigConstants";
+import {COLORS} from "../../../ConfigConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
 import { downloadFile, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
 import {albumRegex, artistRegex, songRegex} from "../../../schemas/ValidationRegexes";
@@ -380,6 +380,36 @@ function SettingsNumberInput({ value, onChange, min, max, children }: {
   );
 }
 
+/**
+ * Dropdown select component for settings with predefined options.
+ * Features left-aligned label and right-aligned dropdown.
+ */
+function SettingsDropdown({ value, onChange, options, children }: { 
+  value: number; 
+  onChange: (value: number) => void; 
+  options: { value: number; label: string }[]; 
+  children: ReactNode 
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span>
+        {children}
+      </span>
+      <select
+        value={value}
+        onChange={e => onChange(parseInt(e.target.value, 10))}
+        className="px-2 py-1 border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0 bg-transparent"
+      >
+        {options.map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function Settings() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "room_config");
@@ -415,18 +445,6 @@ function Settings() {
           End round when all players answered
         </SettingsToggle>
 
-        <SettingsNumberInput 
-          value={controller.config.questionCount} 
-          onChange={v => {
-            controller.config.questionCount = v;
-            controller.sendConfig();
-          }}
-          min={1}
-          max={30}
-        >
-          Questions per round (1-30)
-        </SettingsNumberInput>
-
         <SettingsToggle value={controller.config.distractionsPreferSameArtist}
                         onToggle={v => {
                           controller.config.distractionsPreferSameArtist = v;
@@ -435,6 +453,46 @@ function Settings() {
         >
           Distractions: Prefer songs by same artist
         </SettingsToggle>
+
+        <SettingsNumberInput 
+          value={controller.config.questionsCount}
+          onChange={v => {
+            controller.config.questionsCount = v;
+            controller.sendConfig();
+          }}
+          min={1}
+          max={30}
+        >
+          Questions per round (1-30)
+        </SettingsNumberInput>
+
+        <SettingsNumberInput
+            value={controller.config.timePerQuestion}
+            onChange={v => {
+              controller.config.timePerQuestion = v;
+              controller.sendConfig();
+            }}
+            min={5}
+            max={25}
+        >
+          Time per question (5-25s)
+        </SettingsNumberInput>
+
+        <SettingsDropdown
+          value={controller.config.audioStartPosition}
+          onChange={v => {
+            controller.config.audioStartPosition = v;
+            controller.sendConfig();
+          }}
+          options={[
+            { value: 0, label: "Start of audio" },
+            { value: 1, label: "Close to middle" },
+            { value: 2, label: "Close to end" },
+            { value: 3, label: "Randomize above" }
+          ]}
+        >
+          Audio start position
+        </SettingsDropdown>
 
         <div className="border-t border-disabled-bg my-2"></div>
 

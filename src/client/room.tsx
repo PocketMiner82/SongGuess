@@ -24,7 +24,7 @@ import type {ServerMessage} from "../types/MessageTypes";
  */
 function Loading() {
   return (
-    <div className="flex items-center justify-center h-full p-4">
+    <div className="flex items-center justify-center min-h-screen p-4">
       <div className="text-2xl">Loading...</div>
     </div>
   );
@@ -54,9 +54,18 @@ function Countdown() {
 
 function Room() {
   const controller = useControllerContext();
+  const [hasJoined, setHasJoined] = useState(false);
   
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "pong");
+
+  useRoomControllerListener(controller, useCallback((msg: ServerMessage|null) => {
+    if (msg?.type === "update" && msg.state !== "ingame") {
+      // only require button press if game is already running
+      setHasJoined(true);
+    }
+    return false;
+  }, []));
 
   return (
       <div className="flex flex-col h-screen">
@@ -81,17 +90,36 @@ function Room() {
           )}
         </TopBar>
 
-        <ToastError />
+        {
+          !hasJoined ? (
+              <div className="flex items-center justify-center h-full p-4">
+                <div className="text-center">
+                  <h1 className="text-3xl font-bold mb-8">Game is running...</h1>
+                  <Button onClick={() => {
+                    setHasJoined(true);
+                    controller.reconnect();
+                  }}>
+                    Join Game
+                  </Button>
+                </div>
+              </div>
+          ) : (
+              <>
+                <ToastError />
 
-        <main className="flex-1 overflow-auto">
-          <Lobby />
-          <Ingame />
-          <Results />
-          <Countdown />
-        </main>
+                <main className="flex-1 overflow-auto">
+                  <Lobby />
+                  <Ingame />
+                  <Results />
+                  <Countdown />
+                </main>
+              </>
+          )
+        }
+
         <BottomBar>
           <div className="flex-1 flex justify-start">
-            <Audio />
+            {hasJoined && <Audio />}
           </div>
           {controller.currentPingMs >= 0 && (
               <div className="flex-1 flex justify-end">

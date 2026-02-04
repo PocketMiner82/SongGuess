@@ -47,13 +47,13 @@ export default class Lobby implements IEventListener {
 
             // everything was omitted
             if (omitted === msg.playlists.length) {
-              conn.send(this.getPlaylistsUpdateMessage());
+              this.room.server.safeSend(conn, this.getPlaylistsUpdateMessage());
               return true;
             }
           }
         } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
           this.room.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
-          conn.send(this.getPlaylistsUpdateMessage());
+          this.room.server.safeSend(conn, this.getPlaylistsUpdateMessage());
           return true;
         }
         // always re-filter songs after playlist update
@@ -63,7 +63,7 @@ export default class Lobby implements IEventListener {
         this.room.game.remainingSongs = [];
 
         // send the update to all players + confirmation to the host
-        this.room.getPartyRoom().broadcast(this.getPlaylistsUpdateMessage());
+        this.room.server.safeBroadcast(this.getPlaylistsUpdateMessage());
         this.room.sendConfirmationOrError(conn, msg);
         return true;
     }
@@ -84,7 +84,7 @@ export default class Lobby implements IEventListener {
 
     if (playlists.length > 0) {
       this.playlists.push(...playlists);
-      this.room.server.log(`The playlist(s) ${
+      this.room.server.logger.info(`The playlist(s) ${
           playlists.map(p => p.name).join("; ")
       } has/have been added.`);
     }
@@ -136,10 +136,10 @@ export default class Lobby implements IEventListener {
     if (msg.index !== null) {
       let playlistName = this.playlists[msg.index].name;
       this.playlists.splice(msg.index, 1);
-      this.room.server.log(`The playlist "${playlistName}" has been removed.`);
+      this.room.server.logger.info(`The playlist "${playlistName}" has been removed.`);
     } else {
       this.playlists = [];
-      this.room.server.log(`All playlists have been removed.`);
+      this.room.server.logger.info(`All playlists have been removed.`);
     }
     return true;
   }
@@ -152,10 +152,10 @@ export default class Lobby implements IEventListener {
    */
   public changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
     // username is already validated, just check if it's used by another player
-    for (let connection of this.room.getPartyRoom().getConnections()) {
+    for (let connection of this.room.server.getActiveConnections("player")) {
       let state = connection.state as PlayerState;
       if (connection !== conn && state.username === msg.username) {
-        conn.send(this.room.getUpdateMessage(conn));
+        this.room.sendUpdateMessage(conn);
         this.room.sendConfirmationOrError(conn, msg, "Username is already taken.");
         return;
       }
@@ -171,13 +171,13 @@ export default class Lobby implements IEventListener {
    * Constructs a playlist update message with the current playlist array.
    *
    * @param onlyCount whether to only update the filtered songs count.
-   * @returns a JSON string of the constructed {@link UpdatePlaylistsMessage}
+   * @returns an {@link UpdatePlaylistsMessage}
    */
-  public getPlaylistsUpdateMessage(onlyCount: boolean = false): string {
-    return JSON.stringify({
+  public getPlaylistsUpdateMessage(onlyCount: boolean = false): UpdatePlaylistsMessage {
+    return {
       type: "update_playlists",
       playlists: onlyCount ? undefined : this.playlists,
       filteredSongsCount: this.songs.length
-    } satisfies UpdatePlaylistsMessage);
+    };
   }
 }

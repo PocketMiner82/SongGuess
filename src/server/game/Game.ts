@@ -5,16 +5,10 @@ import type {
   AudioControlMessage,
   ClientMessage,
   PlayerState,
-  SelectAnswerMessage,
+  SelectAnswerMessage, ServerMessage,
   Song, UpdatePlayedSongsMessage
 } from "../../types/MessageTypes";
-import {
-  ROUND_PAUSE_MUSIC,
-  ROUND_SHOW_ANSWER,
-  ROUND_START,
-  ROUND_START_MUSIC,
-  ROUND_START_NEXT
-} from "../config/ServerConfigConstants";
+import {ROUND_PADDING_TICKS, ROUND_START_TICK} from "../../ConfigConstants";
 import GamePhase from "./GamePhase";
 import Question, {InitError} from "./Question";
 import type {IEventListener} from "../listener/IEventListener";
@@ -29,7 +23,7 @@ export default abstract class Game implements IEventListener {
   /**
    * The current tick count within the ongoing round.
    */
-  roundTicks: number = 0;
+  roundTicks: number = -1;
 
   /**
    * The timestamp when the current round started.
@@ -77,8 +71,8 @@ export default abstract class Game implements IEventListener {
    * Should return an array of all required {@link ServerMessage}s so clients know about the current game state.
    * @param sendPrevious whether to include all messages for the round. Useful when client joins.
    */
-  getGameMessages(sendPrevious?: boolean): string[] {
-    let msgs: string[] = [];
+  getGameMessages(sendPrevious?: boolean): ServerMessage[] {
+    let msgs: ServerMessage[] = [];
     let q = this.questions[this.currentQuestion];
 
     // nothing to send if game is not running
@@ -119,12 +113,12 @@ export default abstract class Game implements IEventListener {
 
     switch (msg.type) {
       case "select_answer":
-        if (this.roundTicks > ROUND_SHOW_ANSWER || this.roundTicks < ROUND_START_MUSIC) {
-          conn.send(this.room.getUpdateMessage(conn));
+        if (this.roundTicks > this.room.config.getRoundShowAnswerTick() || this.roundTicks < ROUND_PADDING_TICKS) {
+          this.room.sendUpdateMessage(conn);
           this.room.sendConfirmationOrError(conn, msg, "Can only accept answers during questioning phase.");
           return true;
         } else if (conn && connState.answerIndex !== undefined) {
-          conn.send(this.room.getUpdateMessage(conn));
+          this.room.sendUpdateMessage(conn);
           this.room.sendConfirmationOrError(conn, msg, "You already selected an answer.");
           return true;
         }
@@ -142,9 +136,10 @@ export default abstract class Game implements IEventListener {
         } catch (e) {
           if (this.room.hostConnection && e instanceof InitError) {
             this.room.sendConfirmationOrError(this.room.hostConnection, msg, e.message);
+            this.room.server.logger.warn(e);
           } else if (this.room.hostConnection) {
             this.room.sendConfirmationOrError(this.room.hostConnection, msg, "Unknown error while starting game.");
-            this.room.server.log(e, "error");
+            this.room.server.logger.error(e);
           }
           return true;
         }
@@ -160,7 +155,7 @@ export default abstract class Game implements IEventListener {
 
         switch (msg.where) {
           case "lobby":
-            this.returnToLobby();
+            this.resetToLobby();
             break;
           case "results":
             this.endGame();
@@ -177,37 +172,37 @@ export default abstract class Game implements IEventListener {
   onTick() {
     if (!this.isRunning) return;
 
-    if (this.roundTicks >= ROUND_START_NEXT) {
-      this.roundTicks = 0;
+    if (this.roundTicks >= this.room.config.getRoundStartNextTick()) {
+      this.roundTicks = -1;
       this.currentQuestion++;
-      for (let conn of this.room.getPartyRoom().getConnections()) {
+      for (let conn of this.room.server.getActiveConnections("player")) {
         this.resetPlayerAnswerData(conn);
       }
     }
 
-    if (this.currentQuestion >= this.room.config.questionCount) {
+    if (this.currentQuestion >= this.room.config.questionsCount) {
       this.endGame();
       return;
     }
 
     let sendUpdate = false;
-    switch (this.roundTicks++) {
+    switch (++this.roundTicks) {
       // show question of current round
-      case ROUND_START:
+      case ROUND_START_TICK:
         sendUpdate = true;
         this.gamePhase = GamePhase.QUESTION;
         this.room.broadcastUpdateMessage();
         break;
 
       // start music playback
-      case ROUND_START_MUSIC:
+      case ROUND_PADDING_TICKS:
         sendUpdate = true;
         this.gamePhase = GamePhase.ANSWERING;
         this.roundStartTime = Date.now();
         break;
 
       // show results of current round
-      case ROUND_SHOW_ANSWER:
+      case this.room.config.getRoundShowAnswerTick():
         sendUpdate = true;
         this.gamePhase = GamePhase.ANSWER;
         this.calculatePoints();
@@ -216,26 +211,26 @@ export default abstract class Game implements IEventListener {
         break;
 
       // pause music to allow fade out
-      case ROUND_PAUSE_MUSIC:
+      case this.room.config.getRoundPauseMusicTick():
         sendUpdate = true;
         this.gamePhase = GamePhase.PAUSE_MUSIC;
         break;
     }
 
     if (sendUpdate) {
-      this.getGameMessages().forEach(msg => this.room.getPartyRoom().broadcast(msg));
+      this.getGameMessages().forEach(msg => this.room.server.safeBroadcast(msg));
     }
   }
 
   /**
    * Clears and then adds random song guessing questions to the room.
-   * Creates {@link ServerConfig.questionCount} random questions for the current game session.
+   * Creates {@link ServerConfig.questionsCount} random questions for the current game session.
    */
   private regenerateRandomQuestions() {
     this.questions = [];
 
     // add QUESTION_COUNT random questions
-    for (let i = 0; i < this.room.config.questionCount; i++) {
+    for (let i = 0; i < this.room.config.questionsCount; i++) {
       if (this.remainingSongs.length === 0) {
         const usedAudioUrls = new Set(this.questions.map(q => q.song.audioURL));
         this.remainingSongs = this.room.lobby.songs.filter(song => !usedAudioUrls.has(song.audioURL));
@@ -249,6 +244,17 @@ export default abstract class Game implements IEventListener {
     for (const q of this.questions) {
       q.init(this.room.lobby.songs);
     }
+
+    let output = "Generated Questions:";
+    let i = 0;
+    for (const q of this.questions) {
+      output += `\nQuestion ${++i}:\n`
+      output += `  Solution: ${q.song.name} by ${q.song.artist}\n`;
+      output += "  All answers: ";
+      output += q.answers.map(q => `${q.name} by ${q.artist}`).join("; ");
+      output += "\n";
+    }
+    this.room.server.logger.info(output);
   }
 
   /**
@@ -267,7 +273,7 @@ export default abstract class Game implements IEventListener {
     this.room.sendConfirmationOrError(conn, msg);
 
     let everyoneVoted = true;
-    for (let conn of this.room.getPartyRoom().getConnections()) {
+    for (let conn of this.room.server.getActiveConnections("player")) {
       let connState = conn.state as PlayerState;
       if (connState.answerTimestamp === undefined) {
         everyoneVoted = false;
@@ -277,7 +283,7 @@ export default abstract class Game implements IEventListener {
 
     // show answers if everyone voted
     if (everyoneVoted && this.room.config.endWhenAnswered) {
-      this.roundTicks = ROUND_SHOW_ANSWER;
+      this.roundTicks = this.room.config.getRoundShowAnswerTick() - 1;
     }
   }
 
@@ -305,7 +311,7 @@ export default abstract class Game implements IEventListener {
    * @param audioURL an {@link Song["audioURL"]} to a music file that the client should preload.
    * @returns a JSON string of the constructed {@link AudioControlMessage}
    */
-  getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): string;
+  getAudioControlMessage(action: "load", audioURL?: Song["audioURL"]): AudioControlMessage;
   /**
    * Constructs an audio control message.
    *
@@ -313,8 +319,8 @@ export default abstract class Game implements IEventListener {
    * @param audioURL can only be provided for load action.
    * @returns a JSON string of the constructed {@link AudioControlMessage}
    */
-  getAudioControlMessage(action: Exclude<AudioControlMessage["action"], "load">, audioURL?: never): string;
-  getAudioControlMessage(action: AudioControlMessage["action"], audioURL?: Song["audioURL"]): string {
+  getAudioControlMessage(action: Exclude<AudioControlMessage["action"], "load">, audioURL?: never): AudioControlMessage;
+  getAudioControlMessage(action: AudioControlMessage["action"], audioURL?: Song["audioURL"]): AudioControlMessage {
     let msg: AudioControlMessage;
 
     if (action === "load") {
@@ -322,33 +328,35 @@ export default abstract class Game implements IEventListener {
       msg = {
         type: "audio_control",
         action: "load",
-        length: Math.max(0, ROUND_START_MUSIC - this.roundTicks),
+        position: this.roundTicks,
         audioURL: audioURL!
       };
     } else {
       msg = {
         type: "audio_control",
         action: action,
-        length: Math.max(0, ROUND_SHOW_ANSWER - this.roundTicks)
+        position: Math.max(0, this.roundTicks - ROUND_PADDING_TICKS)
       };
     }
 
-    return JSON.stringify(msg);
+    return msg;
   }
 
   /**
    * Starts a countdown, then starts the game loop. Also resets the game before starting.
    * You must set/regenerate questions before calling this.
-   * @see {@link returnToLobby}
+   * @see {@link resetToLobby}
    * @see {@link regenerateRandomQuestions}
    * @see {@link endGame}
    */
   startGame() {
+    this.room.server.logger.info("Starting game...");
+
     // inform all players about the game start
     this.room.broadcastUpdateMessage();
 
     this.room.startCountdown(3, () => {
-      this.returnToLobby();
+      this.resetToLobby();
       this.room.state = "ingame";
       this.room.broadcastUpdateMessage();
 
@@ -365,14 +373,16 @@ export default abstract class Game implements IEventListener {
     if (!this.isRunning) return;
     this.isRunning = false;
 
-    this.room.getPartyRoom().broadcast(this.getAudioControlMessage("pause"));
+    this.room.server.logger.info("Ending game...");
+
+    this.room.server.safeBroadcast(this.getAudioControlMessage("pause"));
 
     this.room.state = "results";
 
     // the update message always contains the points, displaying ranks is handled client-side
     if (sendUpdate) {
       this.room.broadcastUpdateMessage();
-      this.room.getPartyRoom().broadcast(this.getPlayedSongsUpdateMessage());
+      this.room.server.safeBroadcast(this.getPlayedSongsUpdateMessage());
     }
   }
 
@@ -381,11 +391,11 @@ export default abstract class Game implements IEventListener {
    *
    * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
    */
-  public getPlayedSongsUpdateMessage() {
-    return JSON.stringify({
+  public getPlayedSongsUpdateMessage(): UpdatePlayedSongsMessage {
+    return {
       type: "update_played_songs",
       songs: this.questions.map(q => q.song)
-    } satisfies UpdatePlayedSongsMessage);
+    };
   }
 
   /**
@@ -393,16 +403,18 @@ export default abstract class Game implements IEventListener {
    *
    * @see {@link endGame}
    */
-  returnToLobby() {
+  resetToLobby() {
     this.endGame(false);
     this.room.stopCountdown();
 
-    this.roundTicks = 0;
+    this.room.server.logger.info("Resetting game to lobby state...");
+
+    this.roundTicks = -1;
     this.currentQuestion = 0;
     this.room.state = "lobby";
 
     // reset points of all players
-    for (let conn of this.room.getPartyRoom().getConnections()) {
+    for (let conn of this.room.server.getActiveConnections("player")) {
       this.resetPlayerAnswerData(conn, true);
     }
   }

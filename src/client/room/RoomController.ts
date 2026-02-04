@@ -144,7 +144,13 @@ class IngameData {
   /**
    * The length of the current audio.
    */
-  currentAudioLength: number = 0;
+  currentAudioPosition: number = 0;
+
+  /**
+   * The random start position index (0-2) for this question
+   * @see RoomConfigMessageSchema.audioStartPosition
+   */
+  rndStartPos: number = 0;
 }
 
 
@@ -156,6 +162,11 @@ export class RoomController {
    * The PartySocket instance used for server communication.
    */
   private socket: PartySocket;
+
+  /**
+   * Whether the WebSocket is currently reconnecting
+   */
+  reconnecting: boolean = false;
 
   /**
    * Listeners that are called whenever the state of the room changes.
@@ -277,6 +288,8 @@ export class RoomController {
    * (Re)connect to the PartyKit server.
    */
   public reconnect() {
+    this.ingameData = new IngameData();
+    this.reconnecting = true;
     this.socket.reconnect();
   }
 
@@ -314,6 +327,7 @@ export class RoomController {
    * Handles the "open" event of the socket connection.
    */
   private onOpen() {
+    this.reconnecting = false;
     console.log(`Connected to ${this.socket.room}`);
 
     // send username cookie if saved
@@ -334,7 +348,7 @@ export class RoomController {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
 
     // Show fatal error for disconnection
-    if ((window as any).showFatalError) {
+    if ((window as any).showFatalError && !this.reconnecting) {
       (window as any).showFatalError(`Disconnected: ${ev.reason || ev.code}`);
     }
   }
@@ -348,7 +362,7 @@ export class RoomController {
     console.error(`Disconnected from ${this.socket.room} due to:`, ev);
     
     // Show fatal error for connection failure
-    if ((window as any).showFatalError) {
+    if ((window as any).showFatalError && !this.reconnecting) {
       (window as any).showFatalError(`${ev.message || "WebSocket error. See console for details."}`);
     }
   }
@@ -458,6 +472,7 @@ export class RoomController {
         break;
       case "question":
         this.ingameData.currentQuestion = msg;
+        this.ingameData.rndStartPos = msg.rndStartPos;
         this.ingameData.currentAnswer = null;
         this.ingameData.selectedAnswer = null;
         break;
@@ -470,7 +485,7 @@ export class RoomController {
         break;
       case "audio_control":
         this.ingameData.currentAudioState = msg.action;
-        this.ingameData.currentAudioLength = msg.length
+        this.ingameData.currentAudioPosition = msg.position;
         break;
     }
 
@@ -505,7 +520,7 @@ export class RoomController {
    * Asks the server to update config.
    */
   public sendConfig() {
-    this.socket.send(this.config.getConfigMessage());
+    this.socket.send(JSON.stringify(this.config.getConfigMessage()));
   }
 
   /**

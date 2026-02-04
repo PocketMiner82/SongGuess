@@ -4,7 +4,7 @@
 export type RoomGetResponse = {
   /**
    * The amount of players online in the room
-   * @see {@link Server#getOnlineCount}
+   * @see {@link Server#getOnlinePlayersCount}
    */
   onlineCount: number,
 

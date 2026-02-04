@@ -2,18 +2,19 @@ import type * as Party from "partykit/server";
 import {clearInterval, clearTimeout} from "node:timers";
 import {
   ROOM_CLEANUP_TIMEOUT
-} from "./config/ServerConfigConstants";
+} from "../ConfigConstants";
 import type {RoomGetResponse} from "../types/APIResponseTypes";
 import {ValidRoom} from "./ValidRoom";
+import Logger from "./logger/Logger";
+import type {ServerMessage} from "../types/MessageTypes";
 
 
 // noinspection JSUnusedGlobalSymbols
 export default class Server implements Party.Server {
   /**
-   * Log messages are prefixed with this string.
+   * The main logger, logging messages to console and storage.
    */
-  readonly LOG_PREFIX: string = `[Room ${this.partyRoom.id}]`;
-
+  readonly logger: Logger;
 
   /**
    * Only set, if this room was created by a request to /createRoom
@@ -36,33 +37,8 @@ export default class Server implements Party.Server {
    *
    * @param partyRoom The room to serve
    */
-  constructor(readonly partyRoom: Party.Room) { }
-
-  /**
-   * Logs a message with the {@link LOG_PREFIX}
-   *
-   * @param text the text to log
-   * @param level the log level to use
-   */
-  public log(text: any, level: "debug"|"warn"|"error"|"info" = "info") {
-    let logFunction: (...data: any) => void;
-    switch(level) {
-      case "debug":
-        logFunction = console.debug;
-        break;
-      case "warn":
-        logFunction = console.error;
-        break;
-      case "error":
-        logFunction = console.error;
-        break;
-      case "info":
-      default:
-        logFunction = console.info;
-        break;
-    }
-
-    logFunction(`${this.LOG_PREFIX} ${text}`);
+  constructor(readonly partyRoom: Party.Room) {
+    this.logger = new Logger(this);
   }
 
   /**
@@ -70,8 +46,13 @@ export default class Server implements Party.Server {
    *
    * @returns The count of connected clients.
    */
-  public getOnlineCount(): number {
-    return Array.from(this.partyRoom.getConnections()).length;
+  public getOnlinePlayersCount(): number {
+    let count = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const _ of this.getActiveConnections("player")) {
+      count++;
+    }
+    return count;
   }
 
   /**
@@ -80,21 +61,92 @@ export default class Server implements Party.Server {
    */
   private delayedCleanup() {
     this.cleanupTimeout = setTimeout(() => {
-      if (this.getOnlineCount() === 0) {
+      if (this.getOnlinePlayersCount() === 0) {
         clearInterval(this.tickInterval!);
         this.tickInterval = null;
 
         this.validRoom = undefined;
 
-        this.log("Room closed due to timeout.");
+        this.logger.info("Room closed due to timeout.");
       }
       this.cleanupTimeout = null;
     }, ROOM_CLEANUP_TIMEOUT * 1000);
   }
 
+  /**
+   * Broadcasts a message to all connected clients, optionally filtered by a specific tag.
+   *
+   * @param msg The message object to be broadcasted to the connections.
+   * @param tag An optional filter to target a specific subset of connections.
+   */
+  public safeBroadcast(msg: ServerMessage, tag?: string) {
+    if (msg.type !== "add_log_message" && msg.type !== "update_log_messages" &&
+        msg.type !== "ping" && msg.type !== "pong") {
+      this.logger.debug(`Broadcast: ${JSON.stringify(msg)}`);
+    }
+
+    for (let conn of this.getActiveConnections(tag)) {
+      this.safeSend(conn, msg, false);
+    }
+  }
+
+  /**
+   * Safely sends a JSON-serialized message over a connection if it is currently open.
+   *
+   * @param conn The active party connection object used to send the data.
+   * @param msg The message object to be stringified and transmitted to the client.
+   * @param log Whether to log the sended message
+   */
+  public safeSend(conn: Party.Connection, msg: ServerMessage, log:boolean = true) {
+    try {
+      // silently ignore if not open
+      if (conn.readyState === WebSocket.OPEN) {
+        let textMsg = JSON.stringify(msg);
+        conn.send(textMsg);
+
+        if (log && msg.type !== "add_log_message" && msg.type !== "update_log_messages" &&
+            msg.type !== "ping" && msg.type !== "pong") {
+          this.logger.debug(`To ${conn.id}: ${textMsg}`);
+        }
+      }
+    } catch (e) {
+      this.logger.error(`Failed to send ${msg.type} message to ${conn.id}:`);
+      this.logger.error(e);
+    }
+  }
+
+  /**
+   * Returns a list of connections with OPEN state.
+   *
+   * @param tag An optional filter to target a specific subset of connections.
+   */
+  public *getActiveConnections(tag?: string): Iterable<Party.Connection> {
+    for (const conn of this.partyRoom.getConnections(tag)) {
+      if (conn && conn.readyState === WebSocket.OPEN) {
+        yield conn;
+      }
+    }
+  }
+
   //
   // ROOM WS EVENTS
   //
+
+  getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    const url = new URL(ctx.request.url);
+    const authParam = url.searchParams.get("auth");
+    if (authParam) {
+      let credentials = atob(authParam).split(":");
+
+      if (conn.id.startsWith("admin_") && credentials.length === 2 &&
+          credentials[0] === this.partyRoom.env.ADMIN_USER && credentials[1] === this.partyRoom.env.ADMIN_PASSWORD) {
+        return ["admin"];
+      } else {
+        return ["unauthorized"];
+      }
+    }
+    return ["player"];
+  }
 
   /**
    * Handles a new WebSocket connection to the room.
@@ -103,6 +155,27 @@ export default class Server implements Party.Server {
    * @param ctx The connection context.
    */
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    if (this.getConnectionTags(conn, ctx).indexOf("unauthorized") !== -1) {
+      conn.close(4403, "Access denied.");
+      return;
+    }
+
+    // admin should not be registered "normally" to the room.
+    if (this.getConnectionTags(conn, ctx).indexOf("admin") !== -1) {
+      this.logger.getLogMessages().then(async loggerStorage => {
+        if (loggerStorage) {
+          this.safeSend(conn, {
+            type: "update_log_messages",
+            messages: loggerStorage
+          });
+        }
+
+        this.logger.info(`Admin ${conn.id} connected.`);
+      });
+
+      return;
+    }
+
     if (this.cleanupTimeout) {
       clearTimeout(this.cleanupTimeout);
       this.cleanupTimeout = null;
@@ -111,16 +184,23 @@ export default class Server implements Party.Server {
     // kick player if room is not created yet
     if (!this.validRoom) {
       conn.close(4000, "Room ID not found");
-      this.log(`${conn.id} tried connecting to an invalid room.`, "debug");
+      this.logger.debug(`${conn.id} tried connecting to non-validated room.`);
       return;
     }
 
     // start the tick interval
     if (!this.tickInterval) {
-      this.tickInterval = setInterval(() => this.validRoom?.onTick(), 1000);
+      this.tickInterval = setInterval(() => {
+        try {
+          this.validRoom?.onTick();
+        } catch (e) {
+          this.logger.error("Error running onTick():");
+          this.logger.error(e);
+        }
+      }, 1000);
     }
 
-    this.log(`${conn.id} connected.`);
+    this.logger.info(`${conn.id} connected.`);
 
     this.validRoom.onConnect(conn, ctx);
   }
@@ -146,19 +226,24 @@ export default class Server implements Party.Server {
    * @param conn The connection that closed.
    */
   onClose(conn: Party.Connection) {
+    if (conn.id.startsWith("admin_")) {
+      this.logger.info(`Admin ${conn.id} left.`);
+      return;
+    }
+
     // ignore disconnects if room is not valid
     if (!this.validRoom) {
       return;
     }
 
-    this.log(`${conn.id} left.`);
+    this.logger.info(`${conn.id} left.`);
 
     this.validRoom.onClose(conn);
 
-    if (this.getOnlineCount() === 0) {
+    if (this.getOnlinePlayersCount() === 0) {
       this.delayedCleanup();
 
-      this.log(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
+      this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
     }
   }
 
@@ -176,7 +261,7 @@ export default class Server implements Party.Server {
     // respond with JSON containing the current online count and if the room is valid
     if (req.method === "GET") {
       let json: RoomGetResponse = {
-        onlineCount: this.getOnlineCount(),
+        onlineCount: this.getOnlinePlayersCount(),
         isValidRoom: this.validRoom !== undefined
       };
 
@@ -188,7 +273,7 @@ export default class Server implements Party.Server {
         this.validRoom = new ValidRoom(this);
         this.delayedCleanup();
 
-        this.log("Room created.");
+        this.logger.info("Room created.");
         return new Response("ok", { status: 200 });
       }
 
