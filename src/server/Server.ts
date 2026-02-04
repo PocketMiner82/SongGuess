@@ -128,6 +128,21 @@ export default class Server implements Party.Server {
     }
   }
 
+  /**
+   * Checks whether a connection has a specific connection tag assigned by {@link getConnectionTags}.
+   * @param conn The connection to check.
+   * @param tag The tag that should be present.
+   * @returns whether the connection has the tag or not.
+   */
+  public hasTag(conn: Party.Connection, tag: string): boolean {
+    for (const activeConn of this.getActiveConnections(tag)) {
+      if (conn === activeConn) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   //
   // ROOM WS EVENTS
   //
@@ -155,13 +170,13 @@ export default class Server implements Party.Server {
    * @param ctx The connection context.
    */
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    if (this.getConnectionTags(conn, ctx).indexOf("unauthorized") !== -1) {
+    if (this.hasTag(conn, "unauthorized")) {
       conn.close(4403, "Access denied.");
       return;
     }
 
     // admin should not be registered "normally" to the room.
-    if (this.getConnectionTags(conn, ctx).indexOf("admin") !== -1) {
+    if (this.hasTag(conn, "admin")) {
       this.logger.getLogMessages().then(async loggerStorage => {
         if (loggerStorage) {
           this.safeSend(conn, {
@@ -226,7 +241,7 @@ export default class Server implements Party.Server {
    * @param conn The connection that closed.
    */
   onClose(conn: Party.Connection) {
-    if (conn.id.startsWith("admin_")) {
+    if (this.hasTag(conn, "admin")) {
       this.logger.info(`Admin ${conn.id} left.`);
       return;
     }

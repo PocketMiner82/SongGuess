@@ -1,7 +1,7 @@
 import {
   AddPlaylistsMessageSchema, ChangeUsernameMessageSchema, RemovePlaylistMessageSchema, ReturnToMessageSchema,
   SelectAnswerMessageSchema,
-  StartGameMessageSchema
+  StartGameMessageSchema, TransferHostMessageSchema
 } from "../schemas/ClientMessageSchemas";
 import z from "zod";
 import {
@@ -52,6 +52,7 @@ export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;
 export type ReturnToMessage = z.infer<typeof ReturnToMessageSchema>;
 export type AddLogMessage = z.infer<typeof AddLogMessageSchema>;
 export type UpdateLogMessages = z.infer<typeof UpdateLogMessagesSchema>;
+export type TransferHostMessage = z.infer<typeof TransferHostMessageSchema>;
 
 /**
  * Default playlist object used when playlist information cannot be retrieved or is invalid.

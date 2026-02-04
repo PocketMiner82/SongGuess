@@ -1,5 +1,5 @@
 import type * as Party from "partykit/server";
-import type {ClientMessage} from "../../types/MessageTypes";
+import type {ClientMessage, PlayerState} from "../../types/MessageTypes";
 import type {IEventListener} from "./IEventListener";
 import type {ValidRoom} from "../ValidRoom";
 
@@ -38,6 +38,20 @@ export default class Listener {
           this.room.server.logger.warn(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
         }
         break;
+      case "transfer_host":
+        if (!this.room.performChecks(conn, msg, "host")) {
+          return;
+        }
+
+        let newHost = this.room.getPlayerByName(msg.playerName);
+        if (!newHost) {
+          this.room.sendConfirmationOrError(conn, msg, `Player '${msg.playerName}' not found.`);
+          return;
+        }
+
+        this.room.sendConfirmationOrError(conn, msg);
+        this.room.transferHost(newHost);
+        return;
     }
 
     if (!this.messageListeners.some(l => l.onMessage?.(conn, msg))) {

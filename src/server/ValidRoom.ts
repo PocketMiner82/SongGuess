@@ -251,12 +251,12 @@ export class ValidRoom implements Party.Server {
    * @param conn The connection to perform the checks for.
    * @param msg The message that caused the check.
    * @param checks One of the following:
-   *               - "host": Checks whether the connection is the host.
-   *               - "lobby": Checks whether the game is currently in lobby.
-   *               - "not_lobby": Checks for the opposite.
-   *               - "not_contdown": Checks whether a countdown is currently running.
-   *               - "not_ingame": Checks whether currently not ingame.
-   *               - "min_song_count": Checks whether the minimum song count is reached.
+   *  - "host": Checks whether the connection is the host or an admin.
+   *  - "lobby": Checks whether the game is currently in lobby.
+   *  - "not_lobby": Checks for the opposite.
+   *  - "not_contdown": Checks whether a countdown is currently running.
+   *  - "not_ingame": Checks whether currently not ingame.
+   *  - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
   public performChecks(conn: Party.Connection|null, msg: SourceMessage,
@@ -272,7 +272,7 @@ export class ValidRoom implements Party.Server {
     for (const element of checks) {
       switch (element) {
         case "host":
-          if (this.hostConnection !== conn) {
+          if (!conn || (this.hostConnection !== conn && !this.server.hasTag(conn, "admin"))) {
             possibleErrorFunc("Action can only be used by host.");
             successful = false;
           }
@@ -392,6 +392,25 @@ export class ValidRoom implements Party.Server {
     if (newHost && sendUpdate) {
       this.broadcastUpdateMessage();
     }
+  }
+
+  /**
+   * Attempts to find a player by name.
+   * @param name The username to search for.
+   * @returns the {@link Party.Connection} associated with the name or null if not found.
+   */
+  public getPlayerByName(name: string): Party.Connection|null {
+    let player: Party.Connection|null = null;
+    for (let conn of this.server.getActiveConnections("player")) {
+      let playerState = conn.state as PlayerState;
+
+      if (playerState.username && playerState.username === name) {
+        player = conn;
+        break;
+      }
+    }
+
+    return player;
   }
 
   /**

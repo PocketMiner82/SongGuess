@@ -1,5 +1,5 @@
 import {memo, type ReactNode, useState} from "react";
-import {useControllerContext} from "../RoomController";
+import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerAvatar} from "./PlayerAvatar";
 import type {PlayerState} from "../../../types/MessageTypes";
 import {usernameRegex} from "../../../schemas/ValidationRegexes";
@@ -23,6 +23,8 @@ export const PlayerCard = memo(function PlayerCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(username);
   const controller = useControllerContext();
+
+  useRoomControllerMessageTypeListener(controller, "update");
 
   const handleNameUpdate = () => {
     if (editedName && editedName !== username && usernameRegex.test(editedName)) {

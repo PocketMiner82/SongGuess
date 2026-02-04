@@ -5,6 +5,19 @@ import {PlaylistSchema, UsernameSchema} from "./SharedSchemas";
 /**
  * Schema for messages requesting to return to the lobby from the game.
  */
+export const TransferHostMessageSchema = z.object({
+  type: z.literal("transfer_host").default("transfer_host"),
+
+  /**
+   * The name of the player that should get host.
+   */
+  playerName: z.string()
+});
+
+
+/**
+ * Schema for messages requesting to return to the lobby from the game.
+ */
 export const ReturnToMessageSchema = z.object({
   type: z.literal("return_to").default("return_to"),
 
