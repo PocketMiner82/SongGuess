@@ -1,3 +1,11 @@
+# [2.10.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.9.0...2.10.0-dev.1) (2026-02-04)
+
+
+### Features
+
+* **Client:** add button to transfer host ([af2bc14](https://github.com/PocketMiner82/SongGuess/commit/af2bc14f958e307e8deb2b635a3098385c549e1f))
+* **Server:** add transferHost message handling ([3a20888](https://github.com/PocketMiner82/SongGuess/commit/3a20888bb76f2c439bcd1dfd4a380e161b36028d))
+
 # [2.9.0](https://github.com/PocketMiner82/SongGuess/compare/2.8.0...2.9.0) (2026-02-04)
 
 
