@@ -1,3 +1,30 @@
+# [2.9.0](https://github.com/PocketMiner82/SongGuess/compare/2.8.0...2.9.0) (2026-02-04)
+
+
+### Bug Fixes
+
+* **admin:** show reason for disconnect if code=4403 ([621875f](https://github.com/PocketMiner82/SongGuess/commit/621875f90c972da46ad8355db236e95a258907aa))
+* **Audio:** add logging to debug why not playing after refresh ([21a8bec](https://github.com/PocketMiner82/SongGuess/commit/21a8bec6922d5429bf7860d68bbb88b8c3e8030f))
+* **Audio:** dont show audio component if not joined ([f6a4b79](https://github.com/PocketMiner82/SongGuess/commit/f6a4b79f8dc1b639ccea86f0777b3439d7654ff7))
+* **Audio:** fix not playing after page reload ([18c2360](https://github.com/PocketMiner82/SongGuess/commit/18c23608089a6d470240e25be014dc2df31785c3))
+* **Audio:** try fixing not playing after refresh ([e413137](https://github.com/PocketMiner82/SongGuess/commit/e4131370d57e0fda64d39646c5f17089d18ca7f5))
+* **Logger:** avoid logging log update messages ([f21cba2](https://github.com/PocketMiner82/SongGuess/commit/f21cba2577b926eb3416b1c216630798bad9f62c))
+* **Logger:** avoid logging ping/pong messages ([7cb7309](https://github.com/PocketMiner82/SongGuess/commit/7cb7309df1bae494fb22fee7dcf730c2fb477c12))
+* **Logger:** fixed race condition while storing ([fab2440](https://github.com/PocketMiner82/SongGuess/commit/fab2440348d7cb1596b012f5927eb80b84189df1))
+* **RoomController:** only show fatal errors when not reconnecting ([65c1b95](https://github.com/PocketMiner82/SongGuess/commit/65c1b95b6d8b10875c384388660309c44b316f6e))
+* **Server:** add more logging to send/broadcast ([c3895b4](https://github.com/PocketMiner82/SongGuess/commit/c3895b49b4ff5709422c00b30be8634e5bda5d3a))
+* **Server:** attempt to fix tick loop stalling when client connection times out ([a374c51](https://github.com/PocketMiner82/SongGuess/commit/a374c5113b3773fde1619aa791f4306c0bcb9d66))
+* **Server:** move auth to onConnect ([5c7c7b4](https://github.com/PocketMiner82/SongGuess/commit/5c7c7b4fde12f28b6e5cf94476e448c459979af4))
+
+
+### Features
+
+* add admin panel ([802d332](https://github.com/PocketMiner82/SongGuess/commit/802d33282265daaa37a52eb0edc7ca3448cc4417))
+* add more logging + improve logger styling ([03c4d61](https://github.com/PocketMiner82/SongGuess/commit/03c4d612cad8312d24ec5ee00e879ebfaf0e5214))
+* **Config:** add audio start position selection ([05b045a](https://github.com/PocketMiner82/SongGuess/commit/05b045a657d34c3efb54fac098a6cc8fc0b221d6))
+* **Config:** Allow configuring time per question ([838e064](https://github.com/PocketMiner82/SongGuess/commit/838e064a0beb49d19482bcb256a14ff732631dc4))
+* **Server:** improve logging (with storage) ([e4d6973](https://github.com/PocketMiner82/SongGuess/commit/e4d697321fbf51c5a14b77671d09291eb61ba93e))
+
 # [2.9.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/2.9.0-dev.14...2.9.0-dev.15) (2026-02-03)
 
 
