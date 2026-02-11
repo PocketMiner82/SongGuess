@@ -1,7 +1,7 @@
 /**
  * Available player colors that can be assigned to players in the game room.
  */
-export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan"];
+export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black", "White", "Cyan", "Purple", "Pink", "Yellow", "Brown"];
 
 /**
  * The time (in seconds) after which an empty room is cleaned up.
