@@ -1,3 +1,10 @@
+## [2.10.2-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.10.1...2.10.2-dev.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* update cache refresh message to also ask for CTRL+F5 ([c0f419b](https://github.com/PocketMiner82/SongGuess/commit/c0f419b8f0892a15a2361078136222956e2fafb7))
+
 ## [2.10.1](https://github.com/PocketMiner82/SongGuess/compare/2.10.0...2.10.1) (2026-02-11)
 
 
