@@ -1,3 +1,17 @@
+## [2.10.1](https://github.com/PocketMiner82/SongGuess/compare/2.10.0...2.10.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* add more colors to allow more slots ([1d4f7a8](https://github.com/PocketMiner82/SongGuess/commit/1d4f7a8c84edf806d64bdec6e2a334d30037ba1f))
+
+## [2.10.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.10.0...2.10.1-dev.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* add more colors to allow more slots ([1d4f7a8](https://github.com/PocketMiner82/SongGuess/commit/1d4f7a8c84edf806d64bdec6e2a334d30037ba1f))
+
 # [2.10.0](https://github.com/PocketMiner82/SongGuess/compare/2.9.0...2.10.0) (2026-02-04)
 
 
