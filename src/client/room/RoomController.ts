@@ -434,7 +434,7 @@ export class RoomController {
         if (msg.version !== version) {
           this.socket.close();
           alert("Client outdated. Click OK to reload the page and try again.\n\n"
-              + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or delete all cookies and data from this page.");
+              + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or CTRL+F5 or delete all cookies and data from this page.");
 
           // try reloading with refreshing cache
           try {
