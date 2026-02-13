@@ -252,19 +252,28 @@ export class RoomController {
    * @param setCookies A function to allow updating cookies.
    */
   constructor(roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
-    // generate uuid if not set via cookie
-    let id = getCookies().userID ? getCookies().userID : uuidv4();
+    let cookies = getCookies();
 
+    // generate uuid if not set via cookie
+    let id: string;
+    if (cookies.userID) {
+      id = cookies.userID;
+    } else {
+      id = uuidv4();
+      this.setCookies("userID", id);
+    }
+
+    let newUsername = cookies.userName;
     this.socket = new PartySocket({
       host: PARTYKIT_HOST,
       room: roomID,
       maxRetries: 0,
-      id: id
+      id: id,
+      // send username if cookie saved
+      query: !newUsername ? undefined : {
+        username: newUsername
+      }
     });
-
-    if (!getCookies().userID) {
-      this.setCookies("userID", id);
-    }
 
     this.socket.addEventListener("message", this.onMessage.bind(this));
     this.socket.addEventListener("open", this.onOpen.bind(this));
@@ -329,11 +338,6 @@ export class RoomController {
   private onOpen() {
     this.reconnecting = false;
     console.log(`Connected to ${this.socket.room}`);
-
-    // send username cookie if saved
-    if (this.getCookies().userName) {
-      this.updateUsername(this.getCookies().userName!);
-    }
 
     // send a ping every second
     this.pingInterval = window.setInterval(() => this.sendPing(), 1000);

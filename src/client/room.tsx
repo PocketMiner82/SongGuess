@@ -90,6 +90,8 @@ function Room() {
           )}
         </TopBar>
 
+        <ToastError />
+
         {
           !hasJoined ? (
               <div className="flex items-center justify-center h-full p-4">
@@ -105,8 +107,6 @@ function Room() {
               </div>
           ) : (
               <>
-                <ToastError />
-
                 <main className="flex-1 overflow-auto">
                   <Lobby />
                   <Ingame />
