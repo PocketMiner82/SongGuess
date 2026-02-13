@@ -17,6 +17,38 @@ import {albumRegex, artistRegex, songRegex} from "./schemas/ValidationRegexes";
 
 
 /**
+ * Formats a given Date object into a string using the browser's local time zone.
+ *
+ * @param date The Date object to be formatted.
+ * @returns A formatted (`yyyy-MM-dd_HHmmss`) string representation of the date and time.
+ */
+export function formatLocalDateTime(date: Date): string {
+  // Configuration for the DateTimeFormat to ensure correct padding and 24h clock
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  };
+
+  // The Intl formatter using Canadian English for ISO-like date order
+  const formatter = new Intl.DateTimeFormat('en-CA', options);
+
+  // Array of formatted date/time components
+  const parts = formatter.formatToParts(date);
+
+  // Record mapping component types (e.g., 'year') to their string values
+  const p = Object.fromEntries(
+      parts.map((part) => [part.type, part.value])
+  ) as Record<Intl.DateTimeFormatPartTypes, string>;
+
+  return `${p.year}-${p.month}-${p.day}_${p.hour}${p.minute}${p.second}`;
+}
+
+/**
  * Attempts to retrieve a {@link Playlist} by fetching songs from the iTunes Search API and (via proxy) music.apple.com.
  * @param url The Apple Music URL of the artist, song or album.
  */

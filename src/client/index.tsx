@@ -5,7 +5,7 @@ import { Button } from "./components/Button";
 import { ToastError } from "./components/ToastError";
 import { TopBar } from "./components/TopBar";
 import {CookieConsent} from "react-cookie-consent";
-import { downloadFile, importPlaylistFile, refreshPlaylists, validatePlaylistsFile } from "../Utils";
+import {downloadFile, formatLocalDateTime, importPlaylistFile, refreshPlaylists, validatePlaylistsFile} from "../Utils";
 import type {PlaylistsFile} from "../types/MessageTypes";
 
 
@@ -104,7 +104,7 @@ function App() {
 
         // Download the refreshed file
         const content = JSON.stringify(refreshedFile, null, 2);
-        const filename = `SongGuessPlaylists_Refreshed_${new Date().toISOString().slice(0, 10)}.sgjson`;
+        const filename = `SongGuessPlaylists_Refreshed_${formatLocalDateTime(new Date())}.sgjson`;
         downloadFile(content, filename);
 
         setRefreshStatus("success");
