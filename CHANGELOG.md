@@ -1,3 +1,10 @@
+## [2.10.2-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.10.2-dev.1...2.10.2-dev.2) (2026-02-13)
+
+
+### Bug Fixes
+
+* try to force loading new assets when new version is available ([4f1030f](https://github.com/PocketMiner82/SongGuess/commit/4f1030f0a1194be5f28496090e7888f093216283))
+
 ## [2.10.2-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.10.1...2.10.2-dev.1) (2026-02-11)
 
 
