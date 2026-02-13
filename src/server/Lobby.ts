@@ -32,7 +32,7 @@ export default class Lobby implements IEventListener {
   onMessage(conn: Connection, msg: ClientMessage): boolean {
     switch (msg.type) {
       case "change_username":
-        this.changeUsername(conn, msg);
+        this.requestChangeUsername(conn, msg);
         return true;
       case "add_playlists":
       case "remove_playlist":
@@ -150,21 +150,34 @@ export default class Lobby implements IEventListener {
    * @param conn The connection of the player requesting the change.
    * @param msg The message with the username change request.
    */
-  public changeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
+  public requestChangeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
+    if (this.changeUsername(conn, msg?.username)) {
+      // inform all players about the username change + send confirmation to the user
+      this.room.broadcastUpdateMessage();
+      this.room.sendConfirmationOrError(conn, msg);
+    } else {
+      this.room.sendUpdateMessage(conn);
+      this.room.sendConfirmationOrError(conn, msg, "Username is already taken.");
+    }
+  }
+
+  /**
+   * Changes the username for a player connection.
+   * @param conn - The player's connection
+   * @param username - The new username to set
+   * @returns true if the username was successfully changed, false if it's already in use
+   */
+  public changeUsername(conn: Party.Connection, username: string): boolean {
     // username is already validated, just check if it's used by another player
     for (let connection of this.room.server.getActiveConnections("player")) {
       let state = connection.state as PlayerState;
-      if (connection !== conn && state.username === msg.username) {
-        this.room.sendUpdateMessage(conn);
-        this.room.sendConfirmationOrError(conn, msg, "Username is already taken.");
-        return;
+      if (connection !== conn && state.username === username) {
+        return false;
       }
     }
-    (conn.state as PlayerState).username = msg.username;
+    (conn.state as PlayerState).username = username;
 
-    // inform all players about the username change + send confirmation to the user
-    this.room.sendConfirmationOrError(conn, msg);
-    this.room.broadcastUpdateMessage();
+    return true;
   }
 
   /**

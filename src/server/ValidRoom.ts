@@ -1,6 +1,7 @@
 import type Server from "./Server";
 import type * as Party from "partykit/server";
 import type {
+  ChangeUsernameMessage,
   ConfirmationMessage,
   CountdownMessage,
   GameState,
@@ -19,6 +20,7 @@ import type Game from "./game/Game";
 import {MultipleChoiceGame} from "./game/multipleChoice/MultipleChoiceGame";
 import GamePhase from "./game/GamePhase";
 import Lobby from "./Lobby";
+import {usernameRegex} from "../schemas/ValidationRegexes";
 
 
 /**
@@ -100,9 +102,10 @@ export class ValidRoom implements Party.Server {
     this.lobby = new Lobby(this);
   }
 
-  onConnect(conn: Party.Connection, _ctx: Party.ConnectionContext) {
-    let color = this.getUnusedColors()[0];
+  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    let url = new URL(ctx.request.url);
 
+    let color = this.getUnusedColors()[0];
     if (!color) {
       conn.close(4002, "Room is full.");
       return;
@@ -134,6 +137,21 @@ export class ValidRoom implements Party.Server {
     connState.points = connState.points ?? 0;
 
     conn.setState(connState);
+
+    let newUsername = url.searchParams.get("username");
+    if (newUsername && usernameRegex.test(newUsername)) {
+      if (!this.lobby.changeUsername(conn, newUsername)) {
+        this.sendConfirmationOrError(conn, {
+          type: "change_username",
+          username: newUsername
+        } satisfies ChangeUsernameMessage, "Username reset because someone in the room already uses that name.");
+      }
+    } else if (newUsername) {
+      this.sendConfirmationOrError(conn, {
+        type: "change_username",
+        username: "?"
+      } satisfies ChangeUsernameMessage, "Username reset because it was invalid.");
+    }
 
     // clear cached answer when we're already at the next question
     if (connState.questionNumber !== this.game.currentQuestion) {
