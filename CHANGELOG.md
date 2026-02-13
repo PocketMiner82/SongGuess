@@ -1,3 +1,10 @@
+## [2.10.2-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.10.2-dev.3...2.10.2-dev.4) (2026-02-13)
+
+
+### Bug Fixes
+
+* **Lobby:** calculate empty slots based on grid columns ([03eadbb](https://github.com/PocketMiner82/SongGuess/commit/03eadbb743e150e8593d89f12659254bc4b354b0))
+
 ## [2.10.2-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.10.2-dev.2...2.10.2-dev.3) (2026-02-13)
 
 
