@@ -4,7 +4,7 @@ import {useRoomControllerListener, useControllerContext, useRoomControllerMessag
 import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../ConfigConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
-import { downloadFile, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
+import {downloadFile, formatLocalDateTime, importPlaylistFile, validatePlaylistsFile} from "../../../Utils";
 import {albumRegex, artistRegex, songRegex} from "../../../schemas/ValidationRegexes";
 
 
@@ -59,7 +59,7 @@ function DownloadPlaylists() {
 
   const handleDownload = () => {
     const content = controller.generatePlaylistsFile();
-    downloadFile(content, "SongGuessPlaylists.sgjson");
+    downloadFile(content, `SongGuessPlaylists_${formatLocalDateTime(new Date())}.sgjson`);
   };
 
   return (

@@ -8,7 +8,7 @@ import {
   getFirstSong,
   downloadFile,
   fetchSongByISRC,
-  safeSearch
+  safeSearch, formatLocalDateTime
 } from "../Utils";
 import Papa from "papaparse";
 import type {Playlist, PlaylistsFile, Song} from "../types/MessageTypes";
@@ -219,7 +219,7 @@ function ImportCSV() {
 
       // Download the file
       const content = JSON.stringify(playlistsFile, null, 2);
-      const filename = `SongGuessPlaylists_Imported_${new Date().toISOString()}.sgjson`;
+      const filename = `SongGuessPlaylists_Imported_${formatLocalDateTime(new Date())}.sgjson`;
       downloadFile(content, filename);
 
       setStatus("success");
