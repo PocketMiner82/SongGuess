@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo, type ReactNode} from "react";
+import React, {useState, useCallback, useMemo, useRef, useEffect, type ReactNode} from "react";
 import { Button } from "../../components/Button";
 import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
@@ -15,16 +15,43 @@ import {albumRegex, artistRegex, songRegex} from "../../../schemas/ValidationReg
 function PlayerList() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "update");
-  
+
+  const gridRef = useRef<HTMLUListElement>(null);
+  const [columns, setColumns] = useState(1);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const updateColumns = () => {
+      const style = window.getComputedStyle(grid);
+      const gridTemplateColumns = style.getPropertyValue("grid-template-columns");
+      const count = gridTemplateColumns.split(" ").length;
+      setColumns(count);
+    };
+
+    updateColumns();
+
+    const resizeObserver = new ResizeObserver(updateColumns);
+    resizeObserver.observe(grid);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   const slots = useMemo(() => {
-    const emptySlots = Math.max(0, COLORS.length - controller.players.length);
+    const rows = Math.ceil(controller.players.length / columns);
+    const filledSlots = rows * columns;
+    const emptySlots = Math.max(0, Math.min(COLORS.length, filledSlots) - controller.players.length);
     return [...controller.players, ...Array(emptySlots).fill(null)];
-  }, [controller.players]);
+  }, [controller.players, columns]);
 
   return (
     <div className="mb-8">
       <h3 className="text-xl font-bold mb-3">Players</h3>
-      <ul className="grid grid-cols-1 lg:max-h-none lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto">
+      <ul 
+        ref={gridRef}
+        className="grid grid-cols-1 lg:max-h-none lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto"
+      >
         {slots.map((player, idx) => (
           <PlayerCard
             key={player?.username || `empty-${idx}`}
