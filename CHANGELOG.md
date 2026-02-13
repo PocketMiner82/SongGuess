@@ -1,3 +1,13 @@
+## [2.10.2](https://github.com/PocketMiner82/SongGuess/compare/2.10.1...2.10.2) (2026-02-13)
+
+
+### Bug Fixes
+
+* change time format of sgjson filename ([a780058](https://github.com/PocketMiner82/SongGuess/commit/a780058bb608d8f7d885ceb5922c5303657006e5))
+* **Lobby:** calculate empty slots based on grid columns ([03eadbb](https://github.com/PocketMiner82/SongGuess/commit/03eadbb743e150e8593d89f12659254bc4b354b0))
+* try to force loading new assets when new version is available ([4f1030f](https://github.com/PocketMiner82/SongGuess/commit/4f1030f0a1194be5f28496090e7888f093216283))
+* update cache refresh message to also ask for CTRL+F5 ([c0f419b](https://github.com/PocketMiner82/SongGuess/commit/c0f419b8f0892a15a2361078136222956e2fafb7))
+
 ## [2.10.2-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.10.2-dev.3...2.10.2-dev.4) (2026-02-13)
 
 
