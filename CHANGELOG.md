@@ -1,3 +1,10 @@
+## [2.10.2-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.10.2-dev.2...2.10.2-dev.3) (2026-02-13)
+
+
+### Bug Fixes
+
+* change time format of sgjson filename ([a780058](https://github.com/PocketMiner82/SongGuess/commit/a780058bb608d8f7d885ceb5922c5303657006e5))
+
 ## [2.10.2-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.10.2-dev.1...2.10.2-dev.2) (2026-02-13)
 
 
