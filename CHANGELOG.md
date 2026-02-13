@@ -1,3 +1,10 @@
+## [2.10.3-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.10.2...2.10.3-dev.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* send username by query param to avoid flickering of random name before cookie name is sent ([2f2a836](https://github.com/PocketMiner82/SongGuess/commit/2f2a836fe5bb492bd5c131e631d5ccb9a0002818))
+
 ## [2.10.2](https://github.com/PocketMiner82/SongGuess/compare/2.10.1...2.10.2) (2026-02-13)
 
 
