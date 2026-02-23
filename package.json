@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@syncfm/applemusic-api": "^0.0.4",
-    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/postcss": "^4.2.0",
     "chroma-js": "^3.2.0",
     "cookie": "^1.1.1",
     "itunes-store-api": "^2.1.0",
