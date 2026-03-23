@@ -25,7 +25,7 @@
     "react-cookie": "^8.0.1",
     "react-cookie-consent": "^10.0.1",
     "react-dom": "^19.2.4",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.2",
     "unique-username-generator": "^1.5.1",
     "uuid": "^13.0.0",
     "zod": "^4.3.6"
