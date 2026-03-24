@@ -1,3 +1,10 @@
+# [2.11.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.10.3...2.11.0-dev.1) (2026-03-24)
+
+
+### Features
+
+* **Audio:** add sound when countdown is running ([ca5c8cc](https://github.com/PocketMiner82/SongGuess/commit/ca5c8cc6a8061cc84fe197f21baa8f2a8792269a))
+
 ## [2.10.3](https://github.com/PocketMiner82/SongGuess/compare/2.10.2...2.10.3) (2026-02-13)
 
 
