@@ -1,10 +1,14 @@
-import { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { useControllerContext, useRoomControllerListener } from '../RoomController';
 import {useCookies} from "react-cookie";
 import type ICookieProps from "../../../types/ICookieProps";
 import type {ServerMessage} from "../../../types/MessageTypes";
 import {ROUND_PADDING_TICKS} from "../../../ConfigConstants";
 
+/**
+ * Audio component that handles audio playback and controls.
+ * Manages audio element, volume control, and responds to server audio control messages.
+ */
 export function Audio() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -128,6 +132,7 @@ export function Audio() {
     }
     const audio = audioRef.current;
 
+    // perform requested action
     if (msg?.type === "audio_control") {
       const setStartPosAndPlay = () => {
         let pos = controller.ingameData.currentAudioPosition;
@@ -137,11 +142,14 @@ export function Audio() {
         const audioPlayTime = controller.config.timePerQuestion + ROUND_PADDING_TICKS;
         switch (startPosition) {
           case 0:
+            // 0 is start of audio, so nothing to change
             break;
           case 1:
+            // middle of audio
             pos += Math.max(0, (audio.duration - audioPlayTime) / 2);
             break;
           case 2:
+            // end of audio
             pos += Math.max(0, audio.duration - audioPlayTime - 0.5);
             break;
         }
@@ -160,6 +168,7 @@ export function Audio() {
         case "load":
           console.debug("[Audio] load");
           const currentAudioURL = msg.audioURL;
+          // avoid resetting src if it is already correct
           if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
           audio.load();
           break;
