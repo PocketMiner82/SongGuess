@@ -1,21 +1,69 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { useControllerContext, useRoomControllerListener } from '../RoomController';
 import {useCookies} from "react-cookie";
 import type ICookieProps from "../../../types/ICookieProps";
 import type {ServerMessage} from "../../../types/MessageTypes";
 import {ROUND_PADDING_TICKS} from "../../../ConfigConstants";
 
-/**
- * Audio component that handles audio playback and controls.
- * Manages audio element, volume control, and responds to server audio control messages.
- */
 export function Audio() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const countdownRunningBufferRef = useRef<AudioBuffer | null>(null);
+  const countdownDoneBufferRef = useRef<AudioBuffer | null>(null);
   const controller = useControllerContext();
   const [cookies, setCookie] = useCookies<"audioVolume"|"audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
-  const [targetVolume, setTargetVolume] = useState(cookies.audioVolume || 0.2);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   if (cookies.audioVolume === undefined) setCookie('audioVolume', 0.2);
+
+  const initAudioContext = useCallback(() => {
+    if (audioContextRef.current) return audioContextRef.current;
+    
+    const ctx = new AudioContext();
+    audioContextRef.current = ctx;
+    
+    const gainNode = ctx.createGain();
+    gainNode.connect(ctx.destination);
+    gainNodeRef.current = gainNode;
+    
+    return ctx;
+  }, []);
+
+  const loadAudioBuffer = useCallback(async (url: string): Promise<AudioBuffer | null> => {
+    const ctx = initAudioContext();
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      return await ctx.decodeAudioData(arrayBuffer);
+    } catch (e) {
+      console.error(`[Audio] Failed to load buffer: ${url}`, e);
+      return null;
+    }
+  }, [initAudioContext]);
+
+  useEffect(() => {
+    initAudioContext();
+    loadAudioBuffer('/sounds/countdown_running.mp3').then(buffer => {
+      countdownRunningBufferRef.current = buffer;
+    });
+    loadAudioBuffer('/sounds/countdown_done.mp3').then(buffer => {
+      countdownDoneBufferRef.current = buffer;
+    });
+  }, [initAudioContext, loadAudioBuffer]);
+
+  const playBuffer = useCallback((buffer: AudioBuffer | null) => {
+    if (!buffer || !audioContextRef.current || !gainNodeRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(gainNodeRef.current);
+    
+    const volume = cookies.audioMuted ? 0 : (cookies.audioVolume ?? 0.2);
+    gainNodeRef.current.gain.setValueAtTime(volume, ctx.currentTime);
+    
+    source.start(0);
+  }, [cookies.audioMuted, cookies.audioVolume]);
 
   const fadeOut = useCallback((duration: number = 1000) => {
     if (!audioRef.current) return;
@@ -53,7 +101,7 @@ export function Audio() {
     }
 
     const audio = audioRef.current;
-    const finalVolume = targetVolume;
+    const finalVolume = cookies.audioMuted ? 0 : (cookies.audioVolume ?? 0.2);
     const fadeSteps = 20;
     const stepDuration = duration / fadeSteps;
     let currentStep = 0;
@@ -72,80 +120,82 @@ export function Audio() {
         }
       }
     }, stepDuration);
-  }, [targetVolume]);
+  }, [cookies.audioMuted, cookies.audioVolume]);
 
   useRoomControllerListener(controller, useCallback((msg: ServerMessage|null) => {
-    if (!msg || msg.type !== "audio_control" || !audioRef.current) {
+    if (!audioRef.current) {
       return false;
     }
-
     const audio = audioRef.current;
 
-    const setStartPosAndPlay = () => {
-      let pos = controller.ingameData.currentAudioPosition;
+    if (msg?.type === "audio_control") {
+      const setStartPosAndPlay = () => {
+        let pos = controller.ingameData.currentAudioPosition;
 
-      const startPosition = controller.config.audioStartPosition === 3 ? controller.ingameData.rndStartPos :
-          controller.config.audioStartPosition;
-      const audioPlayTime = controller.config.timePerQuestion + ROUND_PADDING_TICKS;
-      switch (startPosition) {
-        case 0:
-          // 0 is start of audio, so nothing to change
+        const startPosition = controller.config.audioStartPosition === 3 ? controller.ingameData.rndStartPos :
+            controller.config.audioStartPosition;
+        const audioPlayTime = controller.config.timePerQuestion + ROUND_PADDING_TICKS;
+        switch (startPosition) {
+          case 0:
+            break;
+          case 1:
+            pos += Math.max(0, (audio.duration - audioPlayTime) / 2);
+            break;
+          case 2:
+            pos += Math.max(0, audio.duration - audioPlayTime - 0.5);
+            break;
+        }
+
+        audio.currentTime = pos;
+
+        audio.play().catch(e => {
+          console.error("[Audio] Failed to start playback:", e);
+        });
+        console.debug("[Audio] playing");
+        fadeIn();
+        audio.onloadedmetadata = null;
+      };
+      
+      switch (msg.action) {
+        case "load":
+          console.debug("[Audio] load");
+          const currentAudioURL = msg.audioURL;
+          if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
+          audio.load();
           break;
-        case 1:
-          // middle of audio
-          pos += Math.max(0, (audio.duration - audioPlayTime) / 2);
+        case "play":
+          console.debug("[Audio] play");
+          audio.volume = 0;
+
+          try {
+            setStartPosAndPlay();
+          } catch {
+            audio.onloadedmetadata = setStartPosAndPlay;
+          }
           break;
-        case 2:
-          // end of audio
-          pos += Math.max(0, audio.duration - audioPlayTime - 0.5);
+        case "pause":
+          console.debug("[Audio] pause");
+          fadeOut();
+          setTimeout(() => audio.pause(), 1000);
           break;
       }
-
-      audio.currentTime = pos;
-
-      audio.play().catch(e => {
-        console.error("Failed to start playback:", e);
-      });
-      console.debug("[Audio] playing");
-      fadeIn();
-      audio.onloadedmetadata = null;
-    };
-
-    // perform requested action
-    switch (msg.action) {
-      case "load":
-        console.log("[Audio] load");
-        const currentAudioURL = msg.audioURL;
-        // avoid resetting src if it is already correct
-        if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
-
-        audio.load();
-        break;
-      case "play":
-        console.log("[Audio] play");
-        audio.volume = 0;
-
-        try {
-          setStartPosAndPlay();
-        } catch {
-          audio.onloadedmetadata = setStartPosAndPlay;
-        }
-        break;
-      case "pause":
-        console.log("[Audio] pause");
-        fadeOut();
-        setTimeout(() => audio.pause(), 1000);
-        break;
+    } else if (msg?.type === "countdown") {
+      const buffer = msg.countdown > 0 ? countdownRunningBufferRef.current : countdownDoneBufferRef.current;
+      playBuffer(buffer);
     }
+    
     return false;
-  }, [controller.config.audioStartPosition, controller.config.timePerQuestion,
-      controller.ingameData.currentAudioPosition, controller.ingameData.rndStartPos, fadeIn, fadeOut]));
+  }, [controller.config.audioStartPosition, controller.config.timePerQuestion, controller.ingameData.currentAudioPosition, controller.ingameData.rndStartPos, fadeIn, fadeOut, playBuffer]));
 
   useEffect(() => {
-    if (audioRef.current && cookies.audioVolume !== undefined) {
-      audioRef.current.volume = cookies.audioVolume;
-      audioRef.current.muted = cookies.audioMuted === true;
-      setTargetVolume(cookies.audioVolume);
+    const volume = cookies.audioMuted ? 0 : (cookies.audioVolume ?? 0.2);
+
+    if (gainNodeRef.current && audioContextRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(volume, audioContextRef.current.currentTime);
+    }
+
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
     }
   }, [cookies.audioMuted, cookies.audioVolume]);
 
@@ -159,6 +209,7 @@ export function Audio() {
   return (
     <>
       <audio ref={audioRef} preload="auto" />
+
       <div className="flex items-center gap-2">
         <button
           onClick={() => setCookie("audioMuted", !cookies.audioMuted)}
