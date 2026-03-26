@@ -17,6 +17,7 @@ import {CookieConsent} from "react-cookie-consent";
 import {CookiesProvider, useCookies} from "react-cookie";
 import type ICookieProps from "../types/ICookieProps";
 import type {ServerMessage} from "../types/MessageTypes";
+import {UsernameInputField} from "./room/components/UsernameInputField";
 
 
 /**
@@ -52,20 +53,40 @@ function Countdown() {
   ) : null;
 }
 
+/**
+ * Screen component displayed when a user needs to choose a username before joining the room.
+ * Shows the room ID and provides an input field for username selection.
+ *
+ * @param onChoose - Callback function called after the user successfully chooses a username
+ * @constructor
+ */
+function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
+  const controller = useControllerContext();
+
+  return (
+      <div className="flex items-center justify-center h-full w-full p-4">
+        <div className="bg-card-bg rounded-lg p-6 max-w-md mx-4 shadow-xl w-full">
+          <h2 className="text-xl font-bold text-default mb-6">Room {controller.roomID}</h2>
+          <p className="text-default mb-2">Please choose your username:</p>
+
+          <div className="mb-4">
+            <UsernameInputField onEnd={(editedName) => {
+              controller.reconnect(editedName);
+              onChoose();
+            }} requireEnter={true} showButton={true} />
+          </div>
+          <p className="text-sm text-disabled-text">Tip: You can later click on your username to change it.</p>
+        </div>
+      </div>
+  );
+}
+
 function Room() {
   const controller = useControllerContext();
   const [hasJoined, setHasJoined] = useState(false);
   
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "pong");
-
-  useRoomControllerListener(controller, useCallback((msg: ServerMessage|null) => {
-    if (msg?.type === "update" && msg.state !== "ingame") {
-      // only require button press if game is already running
-      setHasJoined(true);
-    }
-    return false;
-  }, []));
 
   return (
       <div className="flex flex-col h-screen">
@@ -83,7 +104,7 @@ function Room() {
                 );
                 if (!isConfirmed) return;
 
-                controller.returnTo("results")
+                controller.returnTo("results");
               }}>
                 Abort
               </Button>
@@ -94,17 +115,7 @@ function Room() {
 
         {
           !hasJoined ? (
-              <div className="flex items-center justify-center h-full p-4">
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold mb-8">Game is running...</h1>
-                  <Button onClick={() => {
-                    setHasJoined(true);
-                    controller.reconnect();
-                  }}>
-                    Join Game
-                  </Button>
-                </div>
-              </div>
+              <ChooseUsernameScreen onChoose={() => setHasJoined(true)} />
           ) : (
               <>
                 <main className="flex-1 overflow-auto">

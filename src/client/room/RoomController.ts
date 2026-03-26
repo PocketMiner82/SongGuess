@@ -181,7 +181,7 @@ export class RoomController {
   /**
    * The current username of the player.
    */
-  username: string = "Unknown";
+  username?: string;
 
   /**
    * Whether the current player is the host of the room.
@@ -251,7 +251,7 @@ export class RoomController {
    * @param getCookies What cookies are currently set.
    * @param setCookies A function to allow updating cookies.
    */
-  constructor(roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
+  constructor(readonly roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
     let cookies = getCookies();
 
     // generate uuid if not set via cookie
@@ -295,10 +295,18 @@ export class RoomController {
 
   /**
    * (Re)connect to the PartyKit server.
+   * @param newUsername optionally request a new username when reconnecting.
    */
-  public reconnect() {
+  public reconnect(newUsername?: string) {
     this.ingameData = new IngameData();
     this.reconnecting = true;
+
+    this.socket.updateProperties({
+      query: !newUsername ? undefined : {
+        username: newUsername
+      }
+    });
+
     this.socket.reconnect();
   }
 
@@ -351,6 +359,10 @@ export class RoomController {
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
 
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+    }
+
     // Show fatal error for disconnection
     if ((window as any).showFatalError && !this.reconnecting) {
       (window as any).showFatalError(`Disconnected: ${ev.reason || ev.code}`);
@@ -364,6 +376,10 @@ export class RoomController {
    */
   private onError(ev: ErrorEvent) {
     console.error(`Disconnected from ${this.socket.room} due to:`, ev);
+
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+    }
     
     // Show fatal error for connection failure
     if ((window as any).showFatalError && !this.reconnecting) {

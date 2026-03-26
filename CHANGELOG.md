@@ -1,3 +1,50 @@
+# [2.12.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.5...2.12.0-dev.6) (2026-03-26)
+
+
+### Bug Fixes
+
+* **sounds:** maximize recording volume ([7b48d3b](https://github.com/PocketMiner82/SongGuess/commit/7b48d3be661ddd2b1a37fd9a5643783fe0e4277a))
+
+# [2.12.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.4...2.12.0-dev.5) (2026-03-26)
+
+
+### Features
+
+* **TopBar:** add important feature ([f4ccae4](https://github.com/PocketMiner82/SongGuess/commit/f4ccae432978f91b388af849cf3ff197b44bb789))
+
+# [2.12.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.3...2.12.0-dev.4) (2026-03-26)
+
+
+### Bug Fixes
+
+* **UsernameInputField:** allow entering same name as cached ([b828a07](https://github.com/PocketMiner82/SongGuess/commit/b828a073d1a5052c30322cd9ff7e8012015acd21))
+
+# [2.12.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.2...2.12.0-dev.3) (2026-03-26)
+
+
+### Bug Fixes
+
+* **UsernameInputField:** validate username before calling onEnd ([34edc4b](https://github.com/PocketMiner82/SongGuess/commit/34edc4b8942b814eaad2fb89a669bc8aa1929d46))
+
+# [2.12.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.1...2.12.0-dev.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **RoomController:** stop ping interval when disconnected ([87bdce2](https://github.com/PocketMiner82/SongGuess/commit/87bdce23adf0dafc2f753fbaca677bb63865d627))
+
+# [2.12.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.11.0...2.12.0-dev.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* **room:** update styling of ChooseUsernameScreen to be more consistent with the remaining UI ([12f6743](https://github.com/PocketMiner82/SongGuess/commit/12f6743350f73221dcdb1a8857de53461fc6abe6))
+
+
+### Features
+
+* **room:** show username select dialog on join. ([0f449af](https://github.com/PocketMiner82/SongGuess/commit/0f449afb1659447e2e5474fc8bbbb492c2a1eb3f))
+
 # [2.11.0](https://github.com/PocketMiner82/SongGuess/compare/2.10.3...2.11.0) (2026-03-24)
 
 

@@ -2,7 +2,7 @@ import {type ReactNode, useState} from "react";
 import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerAvatar} from "./PlayerAvatar";
 import type {PlayerState} from "../../../types/MessageTypes";
-import {usernameRegex} from "../../../schemas/ValidationRegexes";
+import {UsernameInputField} from "./UsernameInputField";
 
 /**
  * Interactive list entry for a single player. Allows the current user
@@ -20,16 +20,7 @@ export function PlayerCard({
 }) {
   const controller = useControllerContext();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(controller.username);
-
   useRoomControllerMessageTypeListener(controller, "update");
-
-  const handleNameUpdate = () => {
-    if (editedName && editedName !== controller.username && usernameRegex.test(editedName)) {
-      controller.updateUsername(editedName);
-    }
-    setIsEditing(false);
-  };
 
   return (
     <li className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
@@ -37,16 +28,12 @@ export function PlayerCard({
       {player ? (
         <div className="flex items-center justify-between flex-1">
           {isEditing ? (
-            <input
-            type="text"
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-            onBlur={handleNameUpdate}
-            onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
-            autoFocus
-            maxLength={16}
-            className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
-              ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}/>
+            <UsernameInputField onEnd={(editedName) => {
+              if (editedName !== controller.username) {
+                controller.updateUsername(editedName);
+              }
+              setIsEditing(false);
+            }} />
           ) : (
             <>
               <span
@@ -55,7 +42,6 @@ export function PlayerCard({
               }`}
               onClick={() => {
                 if (player.username === controller.username) {
-                  setEditedName(controller.username);
                   setIsEditing(true);
                 }
               }}>
