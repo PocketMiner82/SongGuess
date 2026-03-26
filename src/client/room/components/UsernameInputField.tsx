@@ -9,12 +9,12 @@ import {Button} from "../../components/Button";
  * Supports both enter-key submission and button-based submission.
  * Automatically validates the username against the username regex and updates visually on valid/invalid state.
  *
- * @param onEnd - Callback function called when the user submits a username
+ * @param onEnd - Callback function called when the user submits a valid username
  * @param requireEnter - If true, requires pressing Enter to submit; otherwise submits on blur
  * @param showButton - If true, displays a "Join Game" button alongside the input field
  * @constructor
  */
-export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd?: (editedName: string) => void, requireEnter?: boolean, showButton?: boolean}) {
+export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (editedName: string) => void, requireEnter?: boolean, showButton?: boolean}) {
   const controller = useControllerContext();
   const [editedName, setEditedName] = useState(controller.username ?? "");
 
@@ -26,8 +26,10 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd?: (
   }, [editedName]));
 
   const handleNameUpdate = useCallback(() => {
-    onEnd?.(editedName);
-  }, [editedName, onEnd]);
+    if (editedName && editedName !== controller.username && usernameRegex.test(editedName)) {
+      onEnd(editedName);
+    }
+  }, [controller.username, editedName, onEnd]);
 
   return (
       <div className="flex w-full">

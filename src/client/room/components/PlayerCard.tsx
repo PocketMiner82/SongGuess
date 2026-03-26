@@ -2,7 +2,6 @@ import {type ReactNode, useState} from "react";
 import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerAvatar} from "./PlayerAvatar";
 import type {PlayerState} from "../../../types/MessageTypes";
-import {usernameRegex} from "../../../schemas/ValidationRegexes";
 import {UsernameInputField} from "./UsernameInputField";
 
 /**
@@ -30,9 +29,7 @@ export function PlayerCard({
         <div className="flex items-center justify-between flex-1">
           {isEditing ? (
             <UsernameInputField onEnd={(editedName) => {
-              if (editedName && editedName !== controller.username && usernameRegex.test(editedName)) {
-                controller.updateUsername(editedName);
-              }
+              controller.updateUsername(editedName);
               setIsEditing(false);
             }} />
           ) : (
