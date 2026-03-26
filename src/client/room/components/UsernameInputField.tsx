@@ -26,10 +26,10 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (e
   }, [editedName]));
 
   const handleNameUpdate = useCallback(() => {
-    if (editedName && editedName !== controller.username && usernameRegex.test(editedName)) {
+    if (editedName && usernameRegex.test(editedName)) {
       onEnd(editedName);
     }
-  }, [controller.username, editedName, onEnd]);
+  }, [editedName, onEnd]);
 
   return (
       <div className="flex w-full">

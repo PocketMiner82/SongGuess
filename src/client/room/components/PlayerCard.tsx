@@ -29,7 +29,9 @@ export function PlayerCard({
         <div className="flex items-center justify-between flex-1">
           {isEditing ? (
             <UsernameInputField onEnd={(editedName) => {
-              controller.updateUsername(editedName);
+              if (editedName !== controller.username) {
+                controller.updateUsername(editedName);
+              }
               setIsEditing(false);
             }} />
           ) : (
