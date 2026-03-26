@@ -359,6 +359,10 @@ export class RoomController {
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
 
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+    }
+
     // Show fatal error for disconnection
     if ((window as any).showFatalError && !this.reconnecting) {
       (window as any).showFatalError(`Disconnected: ${ev.reason || ev.code}`);
@@ -372,6 +376,10 @@ export class RoomController {
    */
   private onError(ev: ErrorEvent) {
     console.error(`Disconnected from ${this.socket.room} due to:`, ev);
+
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+    }
     
     // Show fatal error for connection failure
     if ((window as any).showFatalError && !this.reconnecting) {
