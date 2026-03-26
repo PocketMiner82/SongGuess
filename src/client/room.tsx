@@ -54,8 +54,10 @@ function Countdown() {
 }
 
 /**
+ * Screen component displayed when a user needs to choose a username before joining the room.
+ * Shows the room ID and provides an input field for username selection.
  *
- * @param onChoose
+ * @param onChoose - Callback function called after the user successfully chooses a username
  * @constructor
  */
 function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
@@ -63,15 +65,17 @@ function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
 
   return (
       <div className="flex items-center justify-center h-full w-full p-4">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">Room: {controller.roomID}</h1>
-          <p className="mb-8">Choose your username:</p>
+        <div className="bg-card-bg rounded-lg p-6 max-w-md mx-4 shadow-xl w-full">
+          <h2 className="text-xl font-bold text-default mb-6">Room {controller.roomID}</h2>
+          <p className="text-default mb-2">Please choose your username:</p>
 
-          <UsernameInputField onEnd={(editedName) => {
-            controller.reconnect(editedName);
-            onChoose();
-          }} requireEnter={true} showButton={true} />
-          <p className="text-sm text-disabled-text mt-2 mb-4">Tip: You can later click on your username to change it.</p>
+          <div className="mb-4">
+            <UsernameInputField onEnd={(editedName) => {
+              controller.reconnect(editedName);
+              onChoose();
+            }} requireEnter={true} showButton={true} />
+          </div>
+          <p className="text-sm text-disabled-text">Tip: You can later click on your username to change it.</p>
         </div>
       </div>
   );
