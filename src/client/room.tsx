@@ -17,6 +17,7 @@ import {CookieConsent} from "react-cookie-consent";
 import {CookiesProvider, useCookies} from "react-cookie";
 import type ICookieProps from "../types/ICookieProps";
 import type {ServerMessage} from "../types/MessageTypes";
+import {UsernameInputField} from "./room/components/UsernameInputField";
 
 
 /**
@@ -52,20 +53,36 @@ function Countdown() {
   ) : null;
 }
 
+/**
+ *
+ * @param onChoose
+ * @constructor
+ */
+function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
+  const controller = useControllerContext();
+
+  return (
+      <div className="flex items-center justify-center h-full w-full p-4">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">Room: {controller.roomID}</h1>
+          <p className="mb-8">Choose your username:</p>
+
+          <UsernameInputField onEnd={(editedName) => {
+            controller.reconnect(editedName);
+            onChoose();
+          }} requireEnter={true} showButton={true} />
+          <p className="text-sm text-disabled-text mt-2 mb-4">Tip: You can later click on your username to change it.</p>
+        </div>
+      </div>
+  );
+}
+
 function Room() {
   const controller = useControllerContext();
   const [hasJoined, setHasJoined] = useState(false);
   
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "pong");
-
-  useRoomControllerListener(controller, useCallback((msg: ServerMessage|null) => {
-    if (msg?.type === "update" && msg.state !== "ingame") {
-      // only require button press if game is already running
-      setHasJoined(true);
-    }
-    return false;
-  }, []));
 
   return (
       <div className="flex flex-col h-screen">
@@ -83,7 +100,7 @@ function Room() {
                 );
                 if (!isConfirmed) return;
 
-                controller.returnTo("results")
+                controller.returnTo("results");
               }}>
                 Abort
               </Button>
@@ -94,17 +111,7 @@ function Room() {
 
         {
           !hasJoined ? (
-              <div className="flex items-center justify-center h-full p-4">
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold mb-8">Game is running...</h1>
-                  <Button onClick={() => {
-                    setHasJoined(true);
-                    controller.reconnect();
-                  }}>
-                    Join Game
-                  </Button>
-                </div>
-              </div>
+              <ChooseUsernameScreen onChoose={() => setHasJoined(true)} />
           ) : (
               <>
                 <main className="flex-1 overflow-auto">

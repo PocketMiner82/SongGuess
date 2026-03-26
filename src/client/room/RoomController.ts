@@ -181,7 +181,7 @@ export class RoomController {
   /**
    * The current username of the player.
    */
-  username: string = "Unknown";
+  username?: string;
 
   /**
    * Whether the current player is the host of the room.
@@ -251,7 +251,7 @@ export class RoomController {
    * @param getCookies What cookies are currently set.
    * @param setCookies A function to allow updating cookies.
    */
-  constructor(roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
+  constructor(readonly roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
     let cookies = getCookies();
 
     // generate uuid if not set via cookie
@@ -295,10 +295,18 @@ export class RoomController {
 
   /**
    * (Re)connect to the PartyKit server.
+   * @param newUsername optionally request a new username when reconnecting.
    */
-  public reconnect() {
+  public reconnect(newUsername?: string) {
     this.ingameData = new IngameData();
     this.reconnecting = true;
+
+    this.socket.updateProperties({
+      query: !newUsername ? undefined : {
+        username: newUsername
+      }
+    });
+
     this.socket.reconnect();
   }
 
