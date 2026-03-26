@@ -1,3 +1,10 @@
+# [2.12.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.1...2.12.0-dev.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **RoomController:** stop ping interval when disconnected ([87bdce2](https://github.com/PocketMiner82/SongGuess/commit/87bdce23adf0dafc2f753fbaca677bb63865d627))
+
 # [2.12.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.11.0...2.12.0-dev.1) (2026-03-26)
 
 
