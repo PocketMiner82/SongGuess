@@ -1,3 +1,10 @@
+# [2.12.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.3...2.12.0-dev.4) (2026-03-26)
+
+
+### Bug Fixes
+
+* **UsernameInputField:** allow entering same name as cached ([b828a07](https://github.com/PocketMiner82/SongGuess/commit/b828a073d1a5052c30322cd9ff7e8012015acd21))
+
 # [2.12.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.2...2.12.0-dev.3) (2026-03-26)
 
 
