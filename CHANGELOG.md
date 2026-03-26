@@ -1,3 +1,10 @@
+# [2.12.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.4...2.12.0-dev.5) (2026-03-26)
+
+
+### Features
+
+* **TopBar:** add important feature ([f4ccae4](https://github.com/PocketMiner82/SongGuess/commit/f4ccae432978f91b388af849cf3ff197b44bb789))
+
 # [2.12.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.3...2.12.0-dev.4) (2026-03-26)
 
 
