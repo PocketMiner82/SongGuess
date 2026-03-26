@@ -1,3 +1,15 @@
+# [2.12.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.11.0...2.12.0-dev.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* **room:** update styling of ChooseUsernameScreen to be more consistent with the remaining UI ([12f6743](https://github.com/PocketMiner82/SongGuess/commit/12f6743350f73221dcdb1a8857de53461fc6abe6))
+
+
+### Features
+
+* **room:** show username select dialog on join. ([0f449af](https://github.com/PocketMiner82/SongGuess/commit/0f449afb1659447e2e5474fc8bbbb492c2a1eb3f))
+
 # [2.11.0](https://github.com/PocketMiner82/SongGuess/compare/2.10.3...2.11.0) (2026-03-24)
 
 
