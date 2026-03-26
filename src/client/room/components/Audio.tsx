@@ -47,10 +47,10 @@ export function Audio() {
 
   useEffect(() => {
     initAudioContext();
-    loadAudioBuffer('/sounds/countdown_running.mp3').then(buffer => {
+    loadAudioBuffer('/sounds/countdown_running_1.mp3').then(buffer => {
       countdownRunningBufferRef.current = buffer;
     });
-    loadAudioBuffer('/sounds/countdown_done.mp3').then(buffer => {
+    loadAudioBuffer('/sounds/countdown_done_1.mp3').then(buffer => {
       countdownDoneBufferRef.current = buffer;
     });
   }, [initAudioContext, loadAudioBuffer]);
