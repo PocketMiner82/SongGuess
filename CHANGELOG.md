@@ -1,3 +1,10 @@
+# [2.12.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.2...2.12.0-dev.3) (2026-03-26)
+
+
+### Bug Fixes
+
+* **UsernameInputField:** validate username before calling onEnd ([34edc4b](https://github.com/PocketMiner82/SongGuess/commit/34edc4b8942b814eaad2fb89a669bc8aa1929d46))
+
 # [2.12.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.1...2.12.0-dev.2) (2026-03-26)
 
 
