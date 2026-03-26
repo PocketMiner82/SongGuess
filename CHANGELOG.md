@@ -1,3 +1,10 @@
+# [2.12.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.5...2.12.0-dev.6) (2026-03-26)
+
+
+### Bug Fixes
+
+* **sounds:** maximize recording volume ([7b48d3b](https://github.com/PocketMiner82/SongGuess/commit/7b48d3be661ddd2b1a37fd9a5643783fe0e4277a))
+
 # [2.12.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.12.0-dev.4...2.12.0-dev.5) (2026-03-26)
 
 
