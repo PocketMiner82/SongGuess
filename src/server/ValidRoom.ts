@@ -124,33 +124,34 @@ export class ValidRoom implements Party.Server {
       }
     }
 
-    let username = uniqueUsernameGenerator({
-      dictionaries: [adjectives, nouns],
-      style: "titleCase",
-      length: 16
-    });
-
     // load state if there is one from previous connect
     let connState = this.cachedStates.get(conn.id) ?? {} as PlayerState;
-    connState.username = username;
     connState.color = color;
     connState.points = connState.points ?? 0;
 
     conn.setState(connState);
 
-    let newUsername = url.searchParams.get("username");
-    if (newUsername && usernameRegex.test(newUsername)) {
-      if (!this.lobby.changeUsername(conn, newUsername)) {
+    let requestedUsername = url.searchParams.get("username");
+    let usernameValid = requestedUsername && usernameRegex.test(requestedUsername);
+    if (!usernameValid || !this.lobby.changeUsername(conn, requestedUsername!)) {
+      if (requestedUsername && !usernameValid) {
         this.sendConfirmationOrError(conn, {
           type: "change_username",
-          username: newUsername
+          username: "?"
+        } satisfies ChangeUsernameMessage, "Username reset because it was invalid.");
+      } else if (requestedUsername) {
+        this.sendConfirmationOrError(conn, {
+          type: "change_username",
+          username: requestedUsername!
         } satisfies ChangeUsernameMessage, "Username reset because someone in the room already uses that name.");
       }
-    } else if (newUsername) {
-      this.sendConfirmationOrError(conn, {
-        type: "change_username",
-        username: "?"
-      } satisfies ChangeUsernameMessage, "Username reset because it was invalid.");
+
+      connState.username = uniqueUsernameGenerator({
+        dictionaries: [adjectives, nouns],
+        style: "titleCase",
+        length: 16
+      });
+      conn.setState(connState);
     }
 
     // clear cached answer when we're already at the next question

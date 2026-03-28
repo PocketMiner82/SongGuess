@@ -160,7 +160,7 @@ export default class Server implements Party.Server {
         return ["unauthorized"];
       }
     }
-    return ["player"];
+    return url.searchParams.get("spectator") !== null ? ["spectator"] : ["player"];
   }
 
   /**
