@@ -9,12 +9,22 @@ import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
 import type {
   AddPlaylistsMessage,
-  AnswerMessage, AudioControlMessage, ChangeUsernameMessage,
-  GameState, PingMessage,
-  PlayerState,
-  Playlist, PlaylistsFile,
-  QuestionMessage, RemovePlaylistMessage, ReturnToMessage, SelectAnswerMessage,
-  ServerMessage, Song, StartGameMessage, TransferHostMessage
+  AnswerMessage,
+  AudioControlMessage,
+  ChangeUsernameMessage,
+  GameState,
+  PingMessage,
+  PlayerMessage,
+  Playlist,
+  PlaylistsFile,
+  QuestionMessage,
+  RemovePlaylistMessage,
+  ReturnToMessage,
+  SelectAnswerMessage,
+  ServerMessage,
+  Song,
+  StartGameMessage,
+  TransferHostMessage
 } from "../../types/MessageTypes";
 import {BaseConfig} from "../../BaseConfig";
 
@@ -176,7 +186,7 @@ export class RoomController {
   /**
    * The current list of players in the room.
    */
-  players: PlayerState[] = [];
+  players: PlayerMessage[] = [];
 
   /**
    * The current username of the player.
@@ -270,8 +280,9 @@ export class RoomController {
       maxRetries: 0,
       id: id,
       // send username if cookie saved
-      query: !newUsername ? undefined : {
-        username: newUsername
+      query: {
+        username: newUsername,
+        spectator: "true"
       }
     });
 
@@ -296,14 +307,16 @@ export class RoomController {
   /**
    * (Re)connect to the PartyKit server.
    * @param newUsername optionally request a new username when reconnecting.
+   * @param spectator whether the player wants to spectate the game.
    */
-  public reconnect(newUsername?: string) {
+  public reconnect(newUsername?: string, spectator: boolean = false) {
     this.ingameData = new IngameData();
     this.reconnecting = true;
 
     this.socket.updateProperties({
       query: !newUsername ? undefined : {
-        username: newUsername
+        username: newUsername,
+        spectator: spectator ? "true" : undefined
       }
     });
 
@@ -552,7 +565,7 @@ export class RoomController {
    * Asks the server to update config.
    */
   public sendConfig() {
-    this.socket.send(JSON.stringify(this.config.getConfigMessage()));
+    this.socket.send(JSON.stringify(this.config.toConfigMessage()));
   }
 
   /**

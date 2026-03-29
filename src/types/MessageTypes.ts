@@ -19,8 +19,8 @@ import {
 } from "../schemas/SharedSchemas";
 import {
   AnswerMessageSchema,
-  AudioControlMessageSchema, CountdownMessageSchema, GameStateSchema,
-  type PlayerStateSchema,
+  AudioControlMessageSchema, CountdownMessageSchema, GameStateSchema, PlayerMessageSchema,
+  type PlayerAnswerDataSchema,
   QuestionMessageSchema, UpdateMessageSchema, UpdatePlayedSongsMessageSchema, UpdatePlaylistsMessageSchema
 } from "../schemas/ServerMessageSchemas";
 import {type AddLogMessageSchema, UpdateLogMessagesSchema} from "../schemas/ServerAdminMessageSchemas";
@@ -40,7 +40,8 @@ export type ClientMessage = z.infer<typeof ClientMessageSchema>;
 export type Song = z.infer<typeof SongSchema>;
 export type Playlist = z.infer<typeof PlaylistSchema>;
 export type PlaylistsFile = z.infer<typeof PlaylistsFileSchema>;
-export type PlayerState = z.infer<typeof PlayerStateSchema>;
+export type PlayerMessage = z.infer<typeof PlayerMessageSchema>;
+export type PlayerAnswerData = z.infer<typeof PlayerAnswerDataSchema>;
 export type QuestionMessage = z.infer<typeof QuestionMessageSchema>;
 export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
 export type AudioControlMessage = z.infer<typeof AudioControlMessageSchema>;

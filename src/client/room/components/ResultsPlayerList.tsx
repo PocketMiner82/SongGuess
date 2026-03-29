@@ -1,17 +1,26 @@
 import React from "react";
 import {PlayerCard} from "./PlayerCard";
-import type {PlayerState} from "../../../types/MessageTypes";
+import type {PlayerAnswerData, PlayerMessage} from "../../../types/MessageTypes";
+import {PlayerMessageSchema} from "../../../schemas/ServerMessageSchemas";
 
+type PossibleFields = Exclude<(keyof PlayerAnswerData|keyof PlayerMessage), "answerData">;
 
-function getShowField(player: PlayerState, showField: keyof PlayerState) {
-  return (showField === "answerSpeed" && player.answerSpeed ?
-      `${(player.answerSpeed / 1000).toFixed(3)} s` :
-      player[showField]);
+function getShowField(player: PlayerMessage, showField: PossibleFields): string|number|undefined {
+  if (Object.keys(PlayerMessageSchema.shape).indexOf(showField) !== -1) {
+    return player[showField as Exclude<keyof PlayerMessage, "answerData">];
+  } else if (player.answerData) {
+    return (showField === "answerSpeed" ?
+        `${(player.answerData.answerSpeed / 1000).toFixed(3)} s` :
+        player.answerData[showField as keyof PlayerAnswerData]
+    );
+  }
+
+  return undefined;
 }
 
 export function ResultsPlayerList({rankedPlayers, showField, showField2, showRankingNumbers = true}:
-      {rankedPlayers: PlayerState[], showField: keyof PlayerState, showField2?: keyof PlayerState, showRankingNumbers?: boolean}) {
-  rankedPlayers = rankedPlayers.filter(p => p[showField] !== undefined);
+      {rankedPlayers: PlayerMessage[], showField: PossibleFields, showField2?: PossibleFields, showRankingNumbers?: boolean}) {
+  rankedPlayers = rankedPlayers.filter(p => getShowField(p, showField) !== undefined);
 
   return (
       <div className="space-y-3">

@@ -22,14 +22,14 @@ export function Audio() {
 
   const initAudioContext = useCallback(() => {
     if (audioContextRef.current) return audioContextRef.current;
-    
+
     const ctx = new AudioContext();
     audioContextRef.current = ctx;
-    
+
     const gainNode = ctx.createGain();
     gainNode.connect(ctx.destination);
     gainNodeRef.current = gainNode;
-    
+
     return ctx;
   }, []);
 
@@ -57,15 +57,15 @@ export function Audio() {
 
   const playBuffer = useCallback((buffer: AudioBuffer | null) => {
     if (!buffer || !audioContextRef.current || !gainNodeRef.current) return;
-    
+
     const ctx = audioContextRef.current;
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     source.connect(gainNodeRef.current);
-    
+
     const volume = cookies.audioMuted ? 0 : (cookies.audioVolume ?? 0.2);
     gainNodeRef.current.gain.setValueAtTime(volume, ctx.currentTime);
-    
+
     source.start(0);
   }, [cookies.audioMuted, cookies.audioVolume]);
 
@@ -163,7 +163,7 @@ export function Audio() {
         fadeIn();
         audio.onloadedmetadata = null;
       };
-      
+
       switch (msg.action) {
         case "load":
           console.debug("[Audio] load");
@@ -192,7 +192,7 @@ export function Audio() {
       const buffer = msg.countdown > 0 ? countdownRunningBufferRef.current : countdownDoneBufferRef.current;
       playBuffer(buffer);
     }
-    
+
     return false;
   }, [controller.config.audioStartPosition, controller.config.timePerQuestion, controller.ingameData.currentAudioPosition, controller.ingameData.rndStartPos, fadeIn, fadeOut, playBuffer]));
 

@@ -120,7 +120,7 @@ export default class Server implements Party.Server {
    *
    * @param tag An optional filter to target a specific subset of connections.
    */
-  public *getActiveConnections(tag?: string): Iterable<Party.Connection> {
+  private *getActiveConnections(tag?: string): Iterable<Party.Connection> {
     for (const conn of this.partyRoom.getConnections(tag)) {
       if (conn && conn.readyState === WebSocket.OPEN) {
         yield conn;

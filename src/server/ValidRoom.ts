@@ -1,26 +1,20 @@
 import type Server from "./Server";
 import type * as Party from "partykit/server";
 import type {
-  ChangeUsernameMessage,
-  ConfirmationMessage,
   CountdownMessage,
   GameState,
-  PlayerState,
-  SelectAnswerMessage,
+  PlayerMessage,
   SourceMessage
 } from "../types/MessageTypes";
-import {COLORS, ROOM_HOST_TRANSFER_TIMEOUT, ROOM_INACTIVITY_KICK_TIMEOUT} from "../ConfigConstants";
+import {COLORS, ROOM_HOST_TRANSFER_TIMEOUT} from "../ConfigConstants";
 import {ClientMessageSchema, OtherMessageSchema} from "../schemas/MessageSchemas";
 import z from "zod";
-import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
-import {version} from "../../package.json";
 import ServerConfig from "./config/ServerConfig";
 import Listener from "./listener/Listener";
 import type Game from "./game/Game";
 import {MultipleChoiceGame} from "./game/multipleChoice/MultipleChoiceGame";
-import GamePhase from "./game/GamePhase";
 import Lobby from "./Lobby";
-import {usernameRegex} from "../schemas/ValidationRegexes";
+import Player from "./Player";
 
 
 /**
@@ -48,19 +42,13 @@ export class ValidRoom implements Party.Server {
   readonly lobby: Lobby;
 
   /**
-   * Map containing timeouts to kick inactive players. Key is connection id.
-   */
-  kickPlayerTimeouts: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
-
-  /**
-   * This is the websocket connection of the host.
+   * The player object that has host permissions in this room.
    *
    * Can be:
-   *  - undefined: No host is set.
-   *  - null: Host left. If he doesn't reconnect within 3 seconds, another player will get host.
-   *  - the actual {@link Party.Connection} object if the host is online.
+   *  - undefined: No host is set. If hostID is set, host left. If he doesn't reconnect within 3 seconds, another player will get host.
+   *  - the actual {@link Player} object if the host is online.
    */
-  hostConnection: Party.Connection|null|undefined = undefined;
+  host?: Player;
 
   /**
    * The id of the current host.
@@ -74,10 +62,9 @@ export class ValidRoom implements Party.Server {
   hostTransferTimeout: NodeJS.Timeout|null = null;
 
   /**
-   * Cached player states for reconnection scenarios.
-   * Maps connection IDs to player states to preserve data when players disconnect and reconnect.
+   * Map containing all players, online and offline. Key is connection id.
    */
-  cachedStates: Map<string, PlayerState> = new Map();
+  players: Map<string, Player> = new Map();
 
   /**
    * The current countdown interval function
@@ -94,6 +81,19 @@ export class ValidRoom implements Party.Server {
    */
   state: GameState = "lobby";
 
+  /**
+   * List containing ALL online players.
+   */
+  get onlinePlayers(): Player[] {
+    return Array.from(this.players.values()).filter(player => player.isOnline);
+  }
+
+  /**
+   * List containing online, non-spectating players.
+   */
+  get activePlayers(): Player[] {
+    return Array.from(this.players.values()).filter(player => player.isOnline && !player.isSpectator);
+  }
 
   constructor(readonly server: Server) {
     this.listener = new Listener(this);
@@ -103,20 +103,16 @@ export class ValidRoom implements Party.Server {
   }
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    let url = new URL(ctx.request.url);
+    let player = this.getOrCreatePlayer(conn);
 
-    let color = this.getUnusedColors()[0];
-    if (!color) {
-      conn.close(4002, "Room is full.");
-      return;
-    }
+    if (!player.onConnect(ctx)) return;
 
-    if (this.hostConnection === undefined) {
-      this.transferHost(conn, false);
-    } else if (this.hostConnection === null && this.hostID === conn.id) {
+    if (!this.host && !this.hostID && !player.isSpectator) {
+      this.transferHost(player, false);
+    } else if (!this.host && this.hostID === conn.id && !player.isSpectator) {
       this.server.logger.info("Host reconnected.");
       // host joined again within timeout
-      this.transferHost(conn, false);
+      this.transferHost(player, false);
 
       if (this.hostTransferTimeout) {
         clearTimeout(this.hostTransferTimeout);
@@ -124,73 +120,16 @@ export class ValidRoom implements Party.Server {
       }
     }
 
-    let username = uniqueUsernameGenerator({
-      dictionaries: [adjectives, nouns],
-      style: "titleCase",
-      length: 16
-    });
-
-    // load state if there is one from previous connect
-    let connState = this.cachedStates.get(conn.id) ?? {} as PlayerState;
-    connState.username = username;
-    connState.color = color;
-    connState.points = connState.points ?? 0;
-
-    conn.setState(connState);
-
-    let newUsername = url.searchParams.get("username");
-    if (newUsername && usernameRegex.test(newUsername)) {
-      if (!this.lobby.changeUsername(conn, newUsername)) {
-        this.sendConfirmationOrError(conn, {
-          type: "change_username",
-          username: newUsername
-        } satisfies ChangeUsernameMessage, "Username reset because someone in the room already uses that name.");
-      }
-    } else if (newUsername) {
-      this.sendConfirmationOrError(conn, {
-        type: "change_username",
-        username: "?"
-      } satisfies ChangeUsernameMessage, "Username reset because it was invalid.");
-    }
-
-    // clear cached answer when we're already at the next question
-    if (connState.questionNumber !== this.game.currentQuestion) {
-      this.game.resetPlayerAnswerData(conn);
-    }
-
-    // send the current playlist to the connection
-    this.server.safeSend(conn, this.lobby.getPlaylistsUpdateMessage());
-
-    // send played songs to client
-    if (this.state === "results") {
-      this.server.safeSend(conn, this.game.getPlayedSongsUpdateMessage());
-    }
-
-    // send current config
-    this.server.safeSend(conn, this.config.getConfigMessage());
-
     // send the first update to the connection (and inform all other connections about the new player)
     this.broadcastUpdateMessage();
-
-    // inform client about current round state
-    this.game.getGameMessages(true).forEach(msg => this.server.safeSend(conn, msg));
-
-    // send client's answer if client selected one previously
-    if (connState.answerIndex !== undefined) {
-      this.sendConfirmationOrError(conn, {
-        type: "select_answer",
-        answerIndex: connState.answerIndex
-      } satisfies SelectAnswerMessage);
-    }
-
-    // kicks player if inactive
-    this.refreshKickPlayerTimeout(conn);
   }
 
   onMessage(message: string, conn: Party.Connection) {
+    let player = this.getOrCreatePlayer(conn);
+
     // refresh inactive timeout (admins don't have that)
     if (!this.server.hasTag(conn, "admin")) {
-      this.refreshKickPlayerTimeout(conn);
+      player.refreshKickTimeout();
     }
 
     // try to parse JSON
@@ -199,7 +138,7 @@ export class ValidRoom implements Party.Server {
       var json = JSON.parse(message);
     } catch {
       this.server.logger.debug(`From ${conn.id}: ${message}`);
-      this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), "Message is not JSON.");
+      player.sendConfirmationOrError(OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
 
@@ -208,7 +147,7 @@ export class ValidRoom implements Party.Server {
     if (!result.success) {
       this.server.logger.debug(`From ${conn.id}: ${message}`);
       this.server.logger.warn(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`);
-      this.sendConfirmationOrError(conn, OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
+      player.sendConfirmationOrError(OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
 
@@ -218,7 +157,24 @@ export class ValidRoom implements Party.Server {
     if (msg.type !== "ping" && msg.type !== "pong")
       this.server.logger.debug(`From ${conn.id}: ${message}`);
 
-    this.listener.handleMessage(conn, msg);
+    // handle host transfer request
+    if (msg.type === "transfer_host") {
+      if (!this.performChecks(player, msg, "host")) {
+        return;
+      }
+
+      let newHost = this.getActivePlayerByName(msg.playerName);
+      if (!newHost) {
+        player.sendConfirmationOrError(msg, `Player '${msg.playerName}' not found.`);
+        return;
+      }
+
+      player.sendConfirmationOrError(msg);
+      this.transferHost(newHost);
+      return;
+    }
+
+    this.listener.handleMessage(player, msg);
   }
 
   /**
@@ -227,9 +183,9 @@ export class ValidRoom implements Party.Server {
   onTick() {
     this.listener.handleTick();
 
-    if (this.server.getOnlinePlayersCount() > 0) {
-      for (let conn of this.server.getActiveConnections("player")) {
-        if (!this.hostConnection || conn?.id === this.hostID)
+    if (this.activePlayers.length > 0) {
+      for (let player of this.activePlayers) {
+        if (!this.host || player.conn.id === this.hostID)
           return;
       }
 
@@ -239,15 +195,7 @@ export class ValidRoom implements Party.Server {
   }
 
   onClose(conn: Party.Connection) {
-    // always remove inactive player timeouts
-    let playerTimeout = this.kickPlayerTimeouts.get(conn.id);
-    if (playerTimeout) {
-      clearTimeout(playerTimeout);
-      this.kickPlayerTimeouts.delete(conn.id);
-    }
-
-    // cache state of connection
-    this.cachedStates.set(conn.id, conn.state as PlayerState);
+    this.getOrCreatePlayer(conn).onClose();
 
     // host left
     if (this.hostID === conn.id) {
@@ -266,9 +214,24 @@ export class ValidRoom implements Party.Server {
   }
 
   /**
+   * Gets a player from the players map. If not found, create new player.
+   * @param conn the connection to search for
+   */
+  public getOrCreatePlayer(conn: Party.Connection): Player {
+    let player = this.players.get(conn.id);
+    if (!player) {
+      player = new Player(this, conn);
+      this.players.set(conn.id, player);
+    } else {
+      player.conn = conn;
+    }
+    return player;
+  }
+
+  /**
    * Performs one or more of the specified checks.
    *
-   * @param conn The connection to perform the checks for.
+   * @param player The player to perform the checks for.
    * @param msg The message that caused the check.
    * @param checks One of the following:
    *  - "host": Checks whether the connection is the host or an admin.
@@ -279,12 +242,12 @@ export class ValidRoom implements Party.Server {
    *  - "min_song_count": Checks whether the minimum song count is reached.
    * @returns true, if ALL checks were successful, false otherwise.
    */
-  public performChecks(conn: Party.Connection|null, msg: SourceMessage,
+  public performChecks(player: Player|null, msg: SourceMessage,
                        ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count")[]): boolean {
-    let possibleErrorFunc = conn
+    let possibleErrorFunc = player
         ? (error: string)=> {
-          this.sendUpdateMessage(conn);
-          this.sendConfirmationOrError(conn, msg, error);
+          player.sendUpdateMessage();
+          player.sendConfirmationOrError(msg, error);
         }
         : () => {};
     let successful: boolean = true;
@@ -292,7 +255,7 @@ export class ValidRoom implements Party.Server {
     for (const element of checks) {
       switch (element) {
         case "host":
-          if (!conn || (this.hostConnection !== conn && !this.server.hasTag(conn, "admin"))) {
+          if (!player || (this.host !== player && !this.server.hasTag(player.conn, "admin"))) {
             possibleErrorFunc("Action can only be used by host.");
             successful = false;
           }
@@ -336,11 +299,87 @@ export class ValidRoom implements Party.Server {
     }
 
     // always send update when not successful
-    if (!successful && conn) {
-      this.sendUpdateMessage(conn);
+    if (!successful && player) {
+      player.sendUpdateMessage();
     }
 
     return successful;
+  }
+
+  /**
+   * Transfers host to another client after ROOM_HOST_TRANSFER_TIMEOUT seconds if the client does not join again.
+   */
+  public delayedHostTransfer() {
+    this.host = undefined;
+
+    this.hostTransferTimeout = setTimeout(() => {
+      if (this.host === undefined) {
+        let next = this.activePlayers[Symbol.iterator]().next();
+        if (!next.done) {
+          this.server.logger.info(`Host left, transferring host to ${next.value.conn.id}`);
+          this.transferHost(next.value);
+        } else {
+          this.transferHost(undefined);
+        }
+      }
+
+      this.hostTransferTimeout = null;
+    }, ROOM_HOST_TRANSFER_TIMEOUT * 1000);
+  }
+
+  /**
+   * Transfers the host to another connection
+   * @param newHost the new host connection. Undefined if no one should be the host.
+   * @param sendUpdate whether to broadcast an update (that also informs the new host that it got host).
+   */
+  public transferHost(newHost: Player|undefined, sendUpdate: boolean = true) {
+    this.host = newHost;
+    this.hostID = newHost?.conn.id;
+
+    this.server.logger.info(`Host transferred to ${this.hostID}`);
+
+    if (newHost && sendUpdate) {
+      this.broadcastUpdateMessage();
+    }
+  }
+
+  /**
+   * Attempts to find a player by name.
+   * @param name The username to search for.
+   * @returns the {@link Player} associated with the name or null if not found.
+   */
+  public getActivePlayerByName(name: string): Player|null {
+    return this.activePlayers.find(player => player.username === name) ?? null;
+  }
+
+  /**
+   * Retrieves all valid player states from connected and active clients.
+   *
+   * @returns An array of valid PlayerMessage objects from all connected players.
+   */
+  public getActivePlayerMessages(): PlayerMessage[] {
+    return this.activePlayers.map(player => player.toPlayerMessage());
+  }
+
+  /**
+   * Get all colors, which aren't used by any player.
+   *
+   * @returns A string array of unused colors or an empty array if all colors are used.
+   */
+  public getUnusedColors(): string[] {
+    let usedColors = this.activePlayers.map(player => player.color);
+    return COLORS.filter(item => usedColors.indexOf(item) < 0);
+  }
+
+  /**
+   * Broadcast an update to all connected clients.
+   *
+   * @see {@link sendUpdateMessage}
+   */
+  public broadcastUpdateMessage() {
+    for (const player of this.onlinePlayers) {
+      player.sendUpdateMessage();
+    }
   }
 
   /**
@@ -374,172 +413,6 @@ export class ValidRoom implements Party.Server {
       clearInterval(this.countdownInterval!);
       this.countdownInterval = null;
       this.countdown = 0;
-    }
-  }
-
-  /**
-   * Transfers host to another client after 3 seconds if the client does not join again.
-   */
-  public delayedHostTransfer() {
-    this.hostConnection = null;
-
-    this.hostTransferTimeout = setTimeout(() => {
-      if (this.hostConnection === null) {
-        let next = this.server.getActiveConnections("player")[Symbol.iterator]().next();
-        if (!next.done) {
-          this.server.logger.info(`Host left, transferring host to ${next.value.id}`);
-          this.transferHost(next.value);
-        } else {
-          this.transferHost(undefined);
-        }
-      }
-
-      this.hostTransferTimeout = null;
-    }, ROOM_HOST_TRANSFER_TIMEOUT * 1000);
-  }
-
-  /**
-   * Transfers the host to another connection
-   * @param newHost the new host connection.
-   * @param sendUpdate whether to broadcast an update (that also informs the new host that it got host).
-   */
-  public transferHost(newHost: Party.Connection|undefined, sendUpdate: boolean = true) {
-    this.hostConnection = newHost;
-    this.hostID = newHost?.id;
-
-    this.server.logger.info(`Host transferred to ${this.hostID}`);
-
-    if (newHost && sendUpdate) {
-      this.broadcastUpdateMessage();
-    }
-  }
-
-  /**
-   * Attempts to find a player by name.
-   * @param name The username to search for.
-   * @returns the {@link Party.Connection} associated with the name or null if not found.
-   */
-  public getPlayerByName(name: string): Party.Connection|null {
-    let player: Party.Connection|null = null;
-    for (let conn of this.server.getActiveConnections("player")) {
-      let playerState = conn.state as PlayerState;
-
-      if (playerState.username && playerState.username === name) {
-        player = conn;
-        break;
-      }
-    }
-
-    return player;
-  }
-
-  /**
-   * Retrieves all valid player states from connected clients.
-   * Filters out incomplete or invalid player states that don't have required properties.
-   *
-   * @returns An array of valid PlayerState objects from all connected players.
-   */
-  public getPlayerStates(): PlayerState[] {
-    let states: PlayerState[] = [];
-    for (let conn of this.server.getActiveConnections("player")) {
-      let connState = conn.state as PlayerState;
-
-      if (connState?.username && connState?.color && connState?.points !== undefined) {
-        let newConnState: PlayerState = {
-          username: connState.username,
-          color: connState.color,
-          points: connState.points
-        };
-
-        // only send full state when answer is available
-        if (this.game.gamePhase === GamePhase.ANSWER) {
-          newConnState.answerTimestamp = connState.answerTimestamp;
-          newConnState.answerIndex = connState.answerIndex;
-          newConnState.answerSpeed = connState.answerSpeed;
-        }
-
-        states.push(newConnState);
-      }
-    }
-
-    return states;
-  }
-
-  /**
-   * Get all colors, which aren't used by any player.
-   *
-   * @returns A string array of unused colors or an empty array if all colors are used.
-   */
-  public getUnusedColors(): string[] {
-    let usedColors = this.getPlayerStates().map(item => item.color);
-
-    return COLORS.filter(item => usedColors.indexOf(item) < 0);
-  }
-
-  /**
-   * Resets the inactivity timer for a specific player connection.
-   * If the timer expires before being refreshed again, the connection is closed.
-   *
-   * @param conn - The player connection to monitor for inactivity.
-   */
-  public refreshKickPlayerTimeout(conn: Party.Connection) {
-    let playerTimeout = this.kickPlayerTimeouts.get(conn.id);
-    if (playerTimeout) {
-      clearTimeout(playerTimeout);
-    }
-
-    this.kickPlayerTimeouts.set(conn.id, setTimeout(() => {
-      this.server.logger.info(`Kicked ${conn.id} due to inactivity.`);
-      conn.close(4001, "Didn't receive updates within 15 seconds.");
-    }, ROOM_INACTIVITY_KICK_TIMEOUT * 1000));
-  }
-
-  /**
-   * Sends a confirmation or error message to the player.
-   *
-   * @param conn The connection of the player that should receive the messages
-   * @param source The source/type of the confirmation message
-   * @param error An optional error message to include in the confirmation
-   */
-  public sendConfirmationOrError(conn: Party.Connection, source: SourceMessage, error?: string) {
-    let resp: ConfirmationMessage = {
-      type: "confirmation",
-      sourceMessage: source,
-      error: error
-    }
-
-    this.server.safeSend(conn, resp);
-  }
-
-  /**
-   * Constructs and sends an update message with the current room/connection states to the connection.
-   *
-   * @param conn the connection to send the update to
-   */
-  public sendUpdateMessage(conn: Party.Connection) {
-    let connState = conn.state as PlayerState|null;
-
-    if (connState?.username && connState?.color) {
-      this.server.safeSend(conn, {
-        type: "update",
-        version: version,
-        state: this.state,
-        players: this.getPlayerStates(),
-        username: connState.username,
-        color: connState.color,
-        isHost: conn === this.hostConnection
-      });
-    }
-  }
-
-  /**
-   * Broadcast an update to all connected clients.
-   *
-   * @see {@link sendUpdateMessage}
-   */
-  public broadcastUpdateMessage() {
-    for (const conn of this.server.getActiveConnections()) {
-      this.sendUpdateMessage(conn);
     }
   }
 

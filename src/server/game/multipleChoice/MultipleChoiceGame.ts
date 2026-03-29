@@ -1,12 +1,11 @@
 import Game from "../Game";
-import type * as Party from "partykit/server";
 import type {
-  PlayerState,
   SelectAnswerMessage, Song
 } from "../../../types/MessageTypes";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
 import {ROUND_POINTS_PER_QUESTION} from "../../../ConfigConstants";
 import type Question from "../Question";
+import type Player from "../../Player";
 
 
 export class MultipleChoiceGame extends Game{
@@ -20,28 +19,23 @@ export class MultipleChoiceGame extends Game{
     return new MultipleChoiceQuestion(song, this.room.config);
   }
 
-  selectAnswer(conn: Party.Connection, msg: SelectAnswerMessage) {
-    let playerState: PlayerState = conn.state as PlayerState;
-    playerState.answerIndex = msg.answerIndex;
-    super.selectAnswer(conn, msg);
+  selectAnswer(player: Player, msg: SelectAnswerMessage) {
+    super.selectAnswer(player, msg);
+    player.answerData!.answerIndex = msg.answerIndex;
   }
 
   calculatePoints() {
-    for (let conn of this.room.server.getActiveConnections("player")) {
-      let connState = conn.state as PlayerState;
-
-      if (connState.answerTimestamp && connState.answerIndex === this.questions[this.currentQuestion].getCorrectAnswer()) {
+    for (let player of this.room.activePlayers) {
+      if (player.answerData?.answerIndex === this.questions[this.currentQuestion].getCorrectAnswer()) {
         // half the points for correct answer
-        connState.points += ROUND_POINTS_PER_QUESTION / 2;
+        player.points += ROUND_POINTS_PER_QUESTION / 2;
 
         // remaining points depend on speed of answer
-        let factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (connState.answerTimestamp - this.roundStartTime)))
+        let factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData.answerTimestamp - this.roundStartTime)))
             / (this.room.config.timePerQuestion * 1000);
-        connState.points += (ROUND_POINTS_PER_QUESTION / 2) * factor;
+        player.points += (ROUND_POINTS_PER_QUESTION / 2) * factor;
 
-        connState.points = Math.round(connState.points);
-
-        conn.setState(connState);
+        player.points = Math.round(player.points);
       }
     }
   }

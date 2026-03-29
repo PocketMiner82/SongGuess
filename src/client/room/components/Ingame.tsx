@@ -3,7 +3,7 @@ import { Button } from "../../components/Button";
 import { PlayerAvatar } from "./PlayerAvatar";
 import {useControllerContext, useRoomControllerListener, useRoomControllerMessageTypeListener} from "../RoomController";
 import {ResultsPlayerList} from "./ResultsPlayerList";
-import type {PlayerState} from "../../../types/MessageTypes";
+import type {PlayerMessage} from "../../../types/MessageTypes";
 import {ROUND_PADDING_TICKS} from "../../../ConfigConstants";
 
 /**
@@ -25,7 +25,7 @@ const AnswerOption = memo(function AnswerOption({
   isCorrect: boolean|null;
   isDisabled: boolean;
   onSelect: (index: number) => void;
-  playerAnswers: PlayerState[] | null;
+  playerAnswers: PlayerMessage[] | null;
 }) {
   const getButtonStyle = () => {
     if (isCorrect) {
@@ -43,8 +43,8 @@ const AnswerOption = memo(function AnswerOption({
   // Filter and sort players who selected this answer
   const playersForThisAnswer = playerAnswers
     ? playerAnswers
-        .filter(player => player.answerIndex === index)
-        .sort((a, b) => (a.answerTimestamp || 0) - (b.answerTimestamp || 0))
+        .filter(player => player.answerData?.answerIndex === index)
+        .sort((a, b) => (a.answerData?.answerTimestamp || 0) - (b.answerData?.answerTimestamp || 0))
     : [];
 
   return (
@@ -251,25 +251,25 @@ function AnswerResults() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "answer");
   useRoomControllerMessageTypeListener(controller, "question");
-  let rankedPlayers: PlayerState[] = [];
+  let rankedPlayers: PlayerMessage[] = [];
 
   if (controller.ingameData.currentAnswer) {
     rankedPlayers = controller.players
         .map(p => {
           // don't show time for wrong answers
-          if (p.answerIndex !== controller.ingameData.currentAnswer!.correctAnswer) {
-            p.answerSpeed = undefined;
+          if (p.answerData?.answerIndex !== controller.ingameData.currentAnswer!.correctAnswer) {
+            p.answerData = undefined;
           }
           return p;
         })
         .sort((a, b) => {
-          // 1. Handle "Correctness" (Presence of answerSpeed)
-          if (a.answerSpeed !== undefined && b.answerSpeed === undefined) return -1;
-          if (a.answerSpeed === undefined && b.answerSpeed !== undefined) return 1;
+          // 1. Handle "Correctness" (Presence of answerData)
+          if (a.answerData !== undefined && b.answerData === undefined) return -1;
+          if (a.answerData === undefined && b.answerData !== undefined) return 1;
 
           // 2. Both are correct: Sort by speed (ascending)
-          if (a.answerSpeed !== undefined && b.answerSpeed !== undefined) {
-            return a.answerSpeed - b.answerSpeed;
+          if (a.answerData !== undefined && b.answerData !== undefined) {
+            return a.answerData.answerSpeed - b.answerData.answerSpeed;
           }
 
           // 3. Both are wrong: Keep original order (or return 0)
