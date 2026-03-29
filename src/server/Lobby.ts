@@ -1,15 +1,12 @@
 import type {IEventListener} from "./listener/IEventListener";
 import type {ValidRoom} from "./ValidRoom";
-import type {Connection} from "partykit/server";
 import type {
   AddPlaylistsMessage,
-  ChangeUsernameMessage,
-  ClientMessage, PlayerState,
-  Playlist,
+  ClientMessage, Playlist,
   RemovePlaylistMessage,
   Song, UpdatePlaylistsMessage
 } from "../types/MessageTypes";
-import type * as Party from "partykit/server";
+import type Player from "./Player";
 
 
 export default class Lobby implements IEventListener {
@@ -29,31 +26,28 @@ export default class Lobby implements IEventListener {
   }
 
 
-  onMessage(conn: Connection, msg: ClientMessage): boolean {
+  onMessage(player: Player, msg: ClientMessage): boolean {
     switch (msg.type) {
-      case "change_username":
-        this.requestChangeUsername(conn, msg);
-        return true;
       case "add_playlists":
       case "remove_playlist":
-        if (!this.room.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
+        if (!this.room.performChecks(player, msg, "host", "lobby", "not_contdown")) {
           return true;
         }
 
         if (msg.type === "add_playlists") {
           let omitted = this.addPlaylists(msg);
           if (omitted > 0) {
-            this.room.sendConfirmationOrError(conn, msg, `${omitted}/${msg.playlists.length} playlist(s) were omitted because they don't have songs or they don't have a unique name and album cover.`);
+            player.sendConfirmationOrError(msg, `${omitted}/${msg.playlists.length} playlist(s) were omitted because they don't have songs or they don't have a unique name and album cover.`);
 
             // everything was omitted
             if (omitted === msg.playlists.length) {
-              this.room.server.safeSend(conn, this.getPlaylistsUpdateMessage());
+              player.safeSend(this.getPlaylistsUpdateMessage());
               return true;
             }
           }
         } else if (msg.type === "remove_playlist" && !this.removePlaylist(msg)) {
-          this.room.sendConfirmationOrError(conn, msg, `Index out of bounds: ${msg.index}`);
-          this.room.server.safeSend(conn, this.getPlaylistsUpdateMessage());
+          player.sendConfirmationOrError(msg, `Index out of bounds: ${msg.index}`);
+          player.safeSend(this.getPlaylistsUpdateMessage());
           return true;
         }
         // always re-filter songs after playlist update
@@ -64,7 +58,7 @@ export default class Lobby implements IEventListener {
 
         // send the update to all players + confirmation to the host
         this.room.server.safeBroadcast(this.getPlaylistsUpdateMessage());
-        this.room.sendConfirmationOrError(conn, msg);
+        player.sendConfirmationOrError(msg);
         return true;
     }
     return false;
@@ -141,42 +135,6 @@ export default class Lobby implements IEventListener {
       this.playlists = [];
       this.room.server.logger.info(`All playlists have been removed.`);
     }
-    return true;
-  }
-
-  /**
-   * Changes the username for a connected player.
-   *
-   * @param conn The connection of the player requesting the change.
-   * @param msg The message with the username change request.
-   */
-  public requestChangeUsername(conn: Party.Connection, msg: ChangeUsernameMessage) {
-    if (this.changeUsername(conn, msg?.username)) {
-      // inform all players about the username change + send confirmation to the user
-      this.room.broadcastUpdateMessage();
-      this.room.sendConfirmationOrError(conn, msg);
-    } else {
-      this.room.sendUpdateMessage(conn);
-      this.room.sendConfirmationOrError(conn, msg, "Username is already taken.");
-    }
-  }
-
-  /**
-   * Changes the username for a player connection.
-   * @param conn - The player's connection
-   * @param username - The new username to set
-   * @returns true if the username was successfully changed, false if it's already in use
-   */
-  public changeUsername(conn: Party.Connection, username: string): boolean {
-    // username is already validated, just check if it's used by another player
-    for (let connection of this.room.server.getActiveConnections("player")) {
-      let state = connection.state as PlayerState;
-      if (connection !== conn && state.username === username) {
-        return false;
-      }
-    }
-    (conn.state as PlayerState).username = username;
-
     return true;
   }
 

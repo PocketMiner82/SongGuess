@@ -1,7 +1,7 @@
-import type * as Party from "partykit/server";
 import type {ClientMessage} from "../../types/MessageTypes";
 import type {IEventListener} from "./IEventListener";
 import type {ValidRoom} from "../ValidRoom";
+import type Player from "../Player";
 
 export default class Listener {
   /**
@@ -17,15 +17,15 @@ export default class Listener {
 
   /**
    * Handles incoming messages
-   * @param conn the connection that sent the message
+   * @param player the player that sent the message
    * @param msg the sent {@link ClientMessage}
    */
-  handleMessage(conn: Party.Connection, msg: ClientMessage) {
+  handleMessage(player: Player, msg: ClientMessage) {
     // handle each message type
     switch(msg.type) {
       case "ping":
         // always directly answer pings
-        this.room.server.safeSend(conn, {
+        player.safeSend({
           type: "pong",
           seq: msg.seq
         });
@@ -38,25 +38,17 @@ export default class Listener {
           this.room.server.logger.warn(`Client reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
         }
         break;
-      case "transfer_host":
-        if (!this.room.performChecks(conn, msg, "host")) {
-          return;
-        }
-
-        let newHost = this.room.getPlayerByName(msg.playerName);
-        if (!newHost) {
-          this.room.sendConfirmationOrError(conn, msg, `Player '${msg.playerName}' not found.`);
-          return;
-        }
-
-        this.room.sendConfirmationOrError(conn, msg);
-        this.room.transferHost(newHost);
-        return;
     }
 
-    if (!this.messageListeners.some(l => l.onMessage?.(conn, msg))) {
+    // ignore all other message types, if player is spectator
+    if (player.isSpectator && msg.type !== "confirmation") {
+      player.sendConfirmationOrError(msg, "You are currently spectating. To interact with the game, reload the page and join as a player!");
+      return;
+    }
+
+    if (!this.messageListeners.some(l => l.onMessage?.(player, msg))) {
       // in case a message was not handled by any listener
-      this.room.sendConfirmationOrError(conn, msg as any, `Not implemented: ${(msg as ClientMessage).type}`);
+      player.sendConfirmationOrError(msg as any, `Not implemented: ${(msg as ClientMessage).type}`);
     }
   }
 

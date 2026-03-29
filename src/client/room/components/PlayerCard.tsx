@@ -1,7 +1,7 @@
 import {type ReactNode, useState} from "react";
 import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerAvatar} from "./PlayerAvatar";
-import type {PlayerState} from "../../../types/MessageTypes";
+import type {PlayerMessage} from "../../../types/MessageTypes";
 import {UsernameInputField} from "./UsernameInputField";
 
 /**
@@ -15,7 +15,7 @@ export function PlayerCard({
   player,
   children
 }: {
-  player: PlayerState|null;
+  player: PlayerMessage|null;
   children?: ReactNode
 }) {
   const controller = useControllerContext();

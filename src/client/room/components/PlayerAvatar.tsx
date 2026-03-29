@@ -1,5 +1,5 @@
 import chroma from "chroma-js";
-import type {PlayerState} from "../../../types/MessageTypes";
+import type {PlayerMessage} from "../../../types/MessageTypes";
 
 
 /**
@@ -27,7 +27,7 @@ function getMaxContrastColor(colorName: string|undefined): string|undefined {
  * @param size The diameter of the avatar in pixels
  * @param playerState The player's state or null for empty slot
  */
-export function PlayerAvatar({size, player} : {size: number, player: PlayerState|null}) {
+export function PlayerAvatar({size, player} : {size: number, player: PlayerMessage|null}) {
   return (
     <div
       className="rounded-full flex items-center justify-center text-xl font-bold bg-disabled-bg text-disabled-text"

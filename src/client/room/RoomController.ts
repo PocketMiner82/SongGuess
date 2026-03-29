@@ -9,12 +9,22 @@ import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
 import type {
   AddPlaylistsMessage,
-  AnswerMessage, AudioControlMessage, ChangeUsernameMessage,
-  GameState, PingMessage,
-  PlayerState,
-  Playlist, PlaylistsFile,
-  QuestionMessage, RemovePlaylistMessage, ReturnToMessage, SelectAnswerMessage,
-  ServerMessage, Song, StartGameMessage, TransferHostMessage
+  AnswerMessage,
+  AudioControlMessage,
+  ChangeUsernameMessage,
+  GameState,
+  PingMessage,
+  PlayerMessage,
+  Playlist,
+  PlaylistsFile,
+  QuestionMessage,
+  RemovePlaylistMessage,
+  ReturnToMessage,
+  SelectAnswerMessage,
+  ServerMessage,
+  Song,
+  StartGameMessage,
+  TransferHostMessage
 } from "../../types/MessageTypes";
 import {BaseConfig} from "../../BaseConfig";
 
@@ -176,7 +186,7 @@ export class RoomController {
   /**
    * The current list of players in the room.
    */
-  players: PlayerState[] = [];
+  players: PlayerMessage[] = [];
 
   /**
    * The current username of the player.
@@ -552,7 +562,7 @@ export class RoomController {
    * Asks the server to update config.
    */
   public sendConfig() {
-    this.socket.send(JSON.stringify(this.config.getConfigMessage()));
+    this.socket.send(JSON.stringify(this.config.toConfigMessage()));
   }
 
   /**

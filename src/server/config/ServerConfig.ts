@@ -1,10 +1,10 @@
 import type {ClientMessage} from "../../types/MessageTypes";
 import type {IEventListener} from "../listener/IEventListener";
-import type * as Party from "partykit/server";
 import type {ValidRoom} from "../ValidRoom";
 import {BaseConfig} from "../../BaseConfig";
 import _ from "lodash";
 import {ROUND_PADDING_TICKS} from "../../ConfigConstants";
+import type Player from "../Player";
 
 
 export default class ServerConfig extends BaseConfig implements IEventListener{
@@ -13,9 +13,9 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
     room.listener.registerEvents(this);
   }
 
-  onMessage(conn: Party.Connection, msg: ClientMessage): boolean {
+  onMessage(player: Player, msg: ClientMessage): boolean {
     if (msg.type === "room_config") {
-      if (!this.room.performChecks(conn, msg, "host", "lobby", "not_contdown")) {
+      if (!this.room.performChecks(player, msg, "host", "lobby", "not_contdown")) {
         return true;
       }
 
@@ -24,7 +24,7 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
       this.applyMessage(msg);
       this.room.lobby.filterSongs();
 
-      this.room.server.safeBroadcast(this.getConfigMessage());
+      this.room.server.safeBroadcast(this.toConfigMessage());
 
       if (!_.isEqual(oldSongs, this.room.lobby.songs)) {
         this.room.server.safeBroadcast(this.room.lobby.getPlaylistsUpdateMessage(true));

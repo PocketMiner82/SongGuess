@@ -3,9 +3,35 @@ import { PlaylistSchema, SongSchema, UsernameSchema } from "./SharedSchemas";
 
 
 /**
- * Schema for representing the current state of a player in the game room.
+ * Schema for the possible answer a player gave to a question.
  */
-export const PlayerStateSchema = z.object({
+export const PlayerAnswerDataSchema = z.object({
+  /**
+   * The last question the player answered for.
+   */
+  questionNumber: z.number(),
+
+  /**
+   * The absolute time in ms where the player answered a round question.
+   */
+  answerTimestamp: z.number(),
+
+  /**
+   * The relative time in ms a player took to answer a round question.
+   */
+  answerSpeed: z.number(),
+
+  /**
+   * The index of the question the player selected.
+   */
+  answerIndex: z.optional(z.int().min(0).max(3))
+});
+
+
+/**
+ * Schema containing information about a player.
+ */
+export const PlayerMessageSchema = z.object({
   /**
    * The player's username
    */
@@ -17,29 +43,14 @@ export const PlayerStateSchema = z.object({
   color: z.string(),
 
   /**
-   * How many points player has since he joined the room.
+   * How many points the player had in the last round.
    */
   points: z.number(),
 
   /**
-   * The last question the player answered for.
+   * The current answer of this player.
    */
-  questionNumber: z.optional(z.number()),
-
-  /**
-   * The absolute time in ms where the player answered a round question.
-   */
-  answerTimestamp: z.optional(z.number()),
-
-  /**
-   * The relative time in ms a player took to answer a round question.
-   */
-  answerSpeed: z.optional(z.number()),
-
-  /**
-   * The index of the question the player selected.
-   */
-  answerIndex: z.optional(z.int().min(0).max(3))
+  answerData: z.optional(PlayerAnswerDataSchema)
 });
 
 
@@ -200,9 +211,9 @@ export const UpdateMessageSchema = z.object({
   state: GameStateSchema,
 
   /**
-   * A map of display names and color of the players
+   * A map of all active (online, non-spectating) players
    */
-  players: z.array(PlayerStateSchema),
+  players: z.array(PlayerMessageSchema),
 
   /**
    * The friendly username of the player (which the user can request to change)
