@@ -1,3 +1,10 @@
+# [2.13.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.12.0...2.13.0-dev.1) (2026-03-29)
+
+
+### Features
+
+* add spectator mode + fix refactoring issues ([7949424](https://github.com/PocketMiner82/SongGuess/commit/794942496f98c5a14ca906352f80ef6063b04ca6))
+
 # [2.12.0](https://github.com/PocketMiner82/SongGuess/compare/2.11.0...2.12.0) (2026-03-26)
 
 
