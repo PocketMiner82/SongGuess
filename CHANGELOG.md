@@ -1,3 +1,10 @@
+# [2.13.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.13.0-dev.1...2.13.0-dev.2) (2026-03-29)
+
+
+### Bug Fixes
+
+* **UsernameInputField:** put button below input field ([30cc97c](https://github.com/PocketMiner82/SongGuess/commit/30cc97cfe078eab679fe82ee253183c98b45ef59))
+
 # [2.13.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.12.0...2.13.0-dev.1) (2026-03-29)
 
 
