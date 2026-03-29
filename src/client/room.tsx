@@ -69,14 +69,14 @@ function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
           <h2 className="text-xl font-bold text-default mb-6">Room {controller.roomID}</h2>
           <p className="text-default mb-2">Please choose your username:</p>
 
-          <div className="mb-4">
+          <div className="mb-2">
             <UsernameInputField onEnd={(editedName) => {
               controller.reconnect(editedName);
               onChoose();
             }} requireEnter={true} showButton={true} />
           </div>
 
-          <div className="mb-2 w-full">
+          <div className="mb-4 w-full">
             <Button className="w-full" onClick={() => {
               const nameInput = document.querySelector<HTMLInputElement>("#username-input");
               const name = nameInput?.value ?? "";

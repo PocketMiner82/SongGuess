@@ -32,7 +32,7 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (e
   }, [editedName, onEnd]);
 
   return (
-      <div className="flex w-full">
+      <div className="w-full">
         <input
           id="username-input"
           type="text"
@@ -42,10 +42,10 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (e
           onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
           autoFocus
           maxLength={16}
-          className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none ${showButton ? "flex-1" : "w-full"}
+          className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
                 ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}/>
         {showButton ?
-            <Button className="ml-2" onClick={handleNameUpdate}>
+            <Button className="mt-4 w-full" onClick={handleNameUpdate}>
               Join Game
             </Button>
              : undefined}
