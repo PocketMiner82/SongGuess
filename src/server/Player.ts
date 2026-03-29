@@ -40,7 +40,7 @@ export default class Player implements PlayerMessage, IEventListener {
   isOnline: boolean = false;
 
 
-  constructor(readonly room: ValidRoom, readonly conn: Party.Connection) {
+  constructor(readonly room: ValidRoom, public conn: Party.Connection) {
     room.listener.registerEvents(this);
   }
 
@@ -57,8 +57,8 @@ export default class Player implements PlayerMessage, IEventListener {
       this.kick(4002, "Room is full.");
       return false;
     }
-
-    this.room.activePlayers.push(this);
+    this.color = color;
+    this.isOnline = true;
 
     let requestedUsername = url.searchParams.get("username");
     let usernameValid = requestedUsername && usernameRegex.test(requestedUsername);
@@ -113,7 +113,6 @@ export default class Player implements PlayerMessage, IEventListener {
 
     // kicks player if inactive
     this.refreshKickTimeout();
-    this.isOnline = true;
     return true;
   }
 

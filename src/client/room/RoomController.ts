@@ -280,8 +280,9 @@ export class RoomController {
       maxRetries: 0,
       id: id,
       // send username if cookie saved
-      query: !newUsername ? undefined : {
-        username: newUsername
+      query: {
+        username: newUsername,
+        spectator: "true"
       }
     });
 
@@ -306,14 +307,16 @@ export class RoomController {
   /**
    * (Re)connect to the PartyKit server.
    * @param newUsername optionally request a new username when reconnecting.
+   * @param spectator whether the player wants to spectate the game.
    */
-  public reconnect(newUsername?: string) {
+  public reconnect(newUsername?: string, spectator: boolean = false) {
     this.ingameData = new IngameData();
     this.reconnecting = true;
 
     this.socket.updateProperties({
       query: !newUsername ? undefined : {
-        username: newUsername
+        username: newUsername,
+        spectator: spectator ? "true" : undefined
       }
     });
 

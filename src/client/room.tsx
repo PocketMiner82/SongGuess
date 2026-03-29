@@ -75,6 +75,18 @@ function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
               onChoose();
             }} requireEnter={true} showButton={true} />
           </div>
+
+          <div className="mb-2 w-full">
+            <Button className="w-full" onClick={() => {
+              const nameInput = document.querySelector<HTMLInputElement>("#username-input");
+              const name = nameInput?.value ?? "";
+              controller.reconnect(name, true);
+              onChoose();
+            }}>
+              Join as Spectator
+            </Button>
+          </div>
+
           <p className="text-sm text-disabled-text">Tip: You can later click on your username to change it.</p>
         </div>
       </div>

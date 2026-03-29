@@ -6,7 +6,7 @@ import {PlayerMessageSchema} from "../../../schemas/ServerMessageSchemas";
 type PossibleFields = Exclude<(keyof PlayerAnswerData|keyof PlayerMessage), "answerData">;
 
 function getShowField(player: PlayerMessage, showField: PossibleFields): string|number|undefined {
-  if (showField in Object.keys(PlayerMessageSchema.shape)) {
+  if (Object.keys(PlayerMessageSchema.shape).indexOf(showField) !== -1) {
     return player[showField as Exclude<keyof PlayerMessage, "answerData">];
   } else if (player.answerData) {
     return (showField === "answerSpeed" ?

@@ -34,6 +34,7 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (e
   return (
       <div className="flex w-full">
         <input
+          id="username-input"
           type="text"
           value={editedName}
           onChange={(e) => setEditedName(e.target.value)}

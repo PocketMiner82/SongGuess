@@ -222,6 +222,8 @@ export class ValidRoom implements Party.Server {
     if (!player) {
       player = new Player(this, conn);
       this.players.set(conn.id, player);
+    } else {
+      player.conn = conn;
     }
     return player;
   }
