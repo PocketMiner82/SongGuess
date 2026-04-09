@@ -1,3 +1,15 @@
+# [2.14.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.13.0...2.14.0-dev.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* **FatalErrorPopup:** always show on top ([d81bc0f](https://github.com/PocketMiner82/SongGuess/commit/d81bc0f0138be3f6bdd14723116e228626daf500))
+
+
+### Features
+
+* add music search dialog ([4d76719](https://github.com/PocketMiner82/SongGuess/commit/4d767193e3917ea4d2731867598bad54c6f1f97f))
+
 # [2.13.0](https://github.com/PocketMiner82/SongGuess/compare/2.12.0...2.13.0) (2026-03-29)
 
 
