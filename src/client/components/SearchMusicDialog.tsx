@@ -237,7 +237,7 @@ export function SearchMusicDialog({
       onClick={handleClose}
     >
       <div 
-        className="bg-card-bg rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] flex flex-col"
+        className="bg-card-bg rounded-lg p-6 w-full mr-4 ml-4 lg:w-[60vw] lg:min-w-md mx-4 max-h-[80vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -279,7 +279,7 @@ export function SearchMusicDialog({
           <Button
             onClick={handleSearch}
             disabled={!searchQuery.trim() || searchStatus === "loading"}
-            className="min-w-[4rem]"
+            className="min-w-16"
           >
             <span className="material-symbols-outlined">search</span>
           </Button>
@@ -299,7 +299,7 @@ export function SearchMusicDialog({
                   <Button
                     onClick={() => handleSelectResult(item, idx)}
                     disabled={addedIndices.has(idx)}
-                    className="min-w-[5rem]"
+                    className="min-w-20"
                   >
                     Select
                   </Button>
