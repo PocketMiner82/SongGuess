@@ -20,40 +20,28 @@ export default class Logger {
    * Logs an informational message to storage and console.
    */
   public info(message: any): void {
-    let text = this.formatLogEntry(message);
-
-    console.log(`${this.LOG_PREFIX} ${text}`);
-    this.storeLogMessage(text, "info");
+    this.storeAndLogMessage(message, "info");
   }
 
   /**
    * Logs a warning message to storage and console.
    */
   public warn(message: any): void {
-    let text = this.formatLogEntry(message);
-
-    console.warn(`${this.LOG_PREFIX} ${text}`);
-    this.storeLogMessage(text, "warn");
+    this.storeAndLogMessage(message, "warn");
   }
 
   /**
    * Logs an error message to storage and console.
    */
   public error(message: any): void {
-    let text = this.formatLogEntry(message);
-
-    console.error(`${this.LOG_PREFIX} ${text}`);
-    this.storeLogMessage(text, "error");
+    this.storeAndLogMessage(message, "error");
   }
 
   /**
    * Logs a debug message to storage and console.
    */
   public debug(message: any): void {
-    let text = this.formatLogEntry(message);
-
-    console.debug(`${this.LOG_PREFIX} ${text}`);
-    this.storeLogMessage(text, "debug");
+    this.storeAndLogMessage(message, "debug");
   }
 
   private formatLogEntry(obj: any): string {
@@ -70,7 +58,10 @@ export default class Logger {
     return message.slice(0, halfLength) + header + message.slice(-halfLength);
   }
 
-  private storeLogMessage(message: string, level: AddLogMessage["level"]): void {
+  private storeAndLogMessage(message: string, level: AddLogMessage["level"]): void {
+    message = this.formatLogEntry(message);
+    console[level](`${this.LOG_PREFIX} ${message}`);
+
     if (level === "debug")
       message = this.truncateMessage(message);
 
