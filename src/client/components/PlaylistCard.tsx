@@ -1,4 +1,3 @@
-import {Button} from "./Button";
 import type {ReactNode} from "react";
 
 /**

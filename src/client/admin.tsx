@@ -210,7 +210,11 @@ function LogViewer({logs, filters, onFilterChange}: {
             <span className="font-bold ml-2 mr-2">
               [{level.toUpperCase()}]
             </span>
-            <span className="text-sm text-default whitespace-pre-wrap">{entry.msg}</span>
+            <span className="text-sm text-default whitespace-pre-wrap">
+              {React.createElement(React.Fragment, {}, ...entry.msg.split("[...]").flatMap((part, i) => 
+                i === 0 ? [part] : [<span key={i} className="text-gray-500">[...]</span>, part]
+              ))}
+            </span>
           </div>
         ))}
       </div>

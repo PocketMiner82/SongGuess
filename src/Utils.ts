@@ -57,22 +57,34 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
   let type: "Artist"|"Song"|"Album" = "Song";
 
   let match;
-  // test url using regexes to find what type of url it is
+  let cleanUrl = url;
   if (songRegex.test(url)) {
-    targetLookupUrl = url.replace(songRegex, (match, song, id) => {
-      return match.replace(id, `0?i=${id}`)
-          .replace(song, "album");
-    });
+    match = songRegex.exec(url)!;
+    const song = match.groups!.song;
+    const id = match.groups!.id;
+    const trackIdMatch = url.match(/[?&]i=(?<trackId>\d+)/);
+    const trackId = trackIdMatch?.groups?.trackId;
+    targetLookupUrl = trackId 
+      ? `https://music.apple.com/de/album/${song}/${id}?i=${trackId}`
+      : `https://music.apple.com/de/album/${song}/${id}`;
+    cleanUrl = match[0].replace(/(\?.*)?;?$/, '');
   } else if (artistRegex.test(url)) {
     type = "Artist";
-  } else if ((match = albumRegex.exec(url))) {
-    // check if the track id is set, then it is also a song
-    type = match.groups?.trackId ? "Song" : "Album";
+    cleanUrl = artistRegex.exec(url)![0].replace(/(\?.*)?;?$/, '');
+  } else if (albumRegex.test(url)) {
+    const match = albumRegex.exec(url)!;
+    const trackIdMatch = url.match(/[?&]i=(?<trackId>\d+)/);
+    const trackId = trackIdMatch?.groups?.trackId;
+    type = trackId ? "Song" : "Album";
+    cleanUrl = match[0].replace(/(\?[^;]*)?;?$/, '');
+    if (trackId) {
+      cleanUrl += `?i=${trackId}`;
+    }
   } else {
     return null;
   }
 
-  const playlist: Playlist = await fetchPlaylistInfo(url);
+  const playlist: Playlist = await fetchPlaylistInfo(cleanUrl);
 
   // server did not add tracks, we need to ask apple ourselves
   if (playlist.songs.length === 0) {

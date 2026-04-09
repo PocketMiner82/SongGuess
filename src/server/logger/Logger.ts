@@ -61,7 +61,19 @@ export default class Logger {
         util.inspect(obj, { showHidden: false, depth: null, colors: false });
   }
 
+  private truncateMessage(message: string, maxLength: number = 1500): string {
+    if (message.length <= maxLength) {
+      return message;
+    }
+    const header = "\n[...]\n";
+    const halfLength = Math.floor(maxLength / 2);
+    return message.slice(0, halfLength) + header + message.slice(-halfLength);
+  }
+
   private storeLogMessage(message: string, level: AddLogMessage["level"]): void {
+    if (level === "debug")
+      message = this.truncateMessage(message);
+
     this.server.safeBroadcast({
       type: "add_log_message",
       level: level,

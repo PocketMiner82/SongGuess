@@ -1,11 +1,11 @@
-import React, {useState, useCallback, useMemo, useRef, useEffect, type ReactNode} from "react";
+import React, {useState, useMemo, useRef, useEffect, type ReactNode} from "react";
 import { Button } from "../../components/Button";
-import {useRoomControllerListener, useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
+import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
 import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../ConfigConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
+import {SearchMusicDialog} from "../../components/SearchMusicDialog";
 import {downloadFile, formatLocalDateTime, importPlaylistFile, validatePlaylistsFile} from "../../../Utils";
-import {albumRegex, artistRegex, songRegex} from "../../../schemas/ValidationRegexes";
 
 
 /**
@@ -147,83 +147,30 @@ function PlaylistsList() {
 }
 
 /**
- * Input component for hosts to add Apple Music playlists by URL.
- * Handles validation and loading states.
+ * Button component that opens the search dialog for adding playlists.
  */
-function AddPlaylistInput() {
+function AddPlaylistButton() {
   const controller = useControllerContext();
-  const [playlistURL, setPlaylistURL] = useState("");
-  const [searchStatus, setSearchStatus] = useState<"idle" | "loading">("idle");
-
-  useRoomControllerListener(controller, useCallback(msg => {
-    if (msg && msg.type === "confirmation" && msg.sourceMessage.type === "add_playlists") {
-      setSearchStatus("idle");
-    }
-    return false;
-  }, []));
-
-  const isValidURL = artistRegex.test(playlistURL) || albumRegex.test(playlistURL) || songRegex.test(playlistURL);
-
-  const handleAdd = (text: string) => {
-    if (isValidURL) {
-      setSearchStatus("loading");
-      controller.tryAddPlaylists(text).then(success => {
-        if (!success) {
-          setSearchStatus("idle");
-        }
-      }).catch(() => {
-        setSearchStatus("idle");
-      });
-    }
-  };
-
-  const getStatusIcon = () => {
-    switch (searchStatus) {
-      case "loading":
-        return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
-      case "idle":
-        return null;
-    }
-  };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <div>
-      <div className="relative flex gap-2 mb-1">
-        <input
-            placeholder="Enter apple music artist or album URL"
-            className={`flex-1 outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
-              playlistURL && !isValidURL 
-                ? "focus:border-error" 
-                : "border-gray-500 focus:border-secondary"
-            }`}
-            value={playlistURL}
-            onChange={e => {
-              setPlaylistURL(e.target.value);
-              setSearchStatus("idle");
-            }}
-            onKeyDown={e => {
-              if (e.key === "Enter" && isValidURL && searchStatus !== "loading") {
-                handleAdd(playlistURL);
-              }
-            }}
-        />
-        <div className="bottom-1 flex items-center">
-          {getStatusIcon()}
-        </div>
-        <Button
-            onClick={() => handleAdd(playlistURL)}
-            disabled={!isValidURL || searchStatus === "loading"}
-            className=""
-        >
-          Add
-        </Button>
-      </div>
-      <a target="_blank" rel="noopener noreferrer"
-         href="https://music.apple.com/"
-         className="text-primary hover:underline">
-        Search Apple Music
-      </a>
-    </div>
+    <>
+      <Button
+        onClick={() => setIsDialogOpen(true)}
+        className="w-full"
+      >
+        <span className="material-symbols-outlined mr-2">add</span>
+        Add Playlist
+      </Button>
+      <SearchMusicDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onPlaylistSelected={playlist => {
+          console.debug("Selected Playlist:", playlist);
+          controller.tryAddPlaylists(playlist.hrefURL);
+        }}
+      />
+    </>
   );
 }
 
@@ -470,7 +417,7 @@ function Settings() {
     <div>
       <h3 className="text-xl font-bold mb-3">Settings</h3>
       <div className="grid gap-4">
-        <AddPlaylistInput />
+        <AddPlaylistButton />
 
         <div className="grid grid-cols-2 gap-4">
           <ClearPlaylists />
