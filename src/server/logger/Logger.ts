@@ -13,8 +13,10 @@ export default class Logger {
   private writeQueue: Promise<void> = Promise.resolve();
 
 
+  /**
+   * Creates a new Logger instance.
+   */
   constructor(readonly server: Server) {}
-
 
   /**
    * Logs an informational message to storage and console.
@@ -44,11 +46,19 @@ export default class Logger {
     this.storeAndLogMessage(message, "debug");
   }
 
+  /**
+   * Formats an object into a string representation for logging.
+   */
   private formatLogEntry(obj: any): string {
     return typeof obj === "string" ? obj :
         util.inspect(obj, { showHidden: false, depth: null, colors: false });
   }
 
+  /**
+   * Truncates a message if it exceeds the maximum length.
+   * @param message The message to truncate.
+   * @param maxLength Maximum allowed length (default 1500).
+   */
   private truncateMessage(message: string, maxLength: number = 1500): string {
     if (message.length <= maxLength) {
       return message;
@@ -58,6 +68,11 @@ export default class Logger {
     return message.slice(0, halfLength) + header + message.slice(-halfLength);
   }
 
+  /**
+   * Stores the message in storage and logs it to console.
+   * @param message The message to log.
+   * @param level The log level (info, warn, error, debug).
+   */
   private storeAndLogMessage(message: string, level: AddLogMessage["level"]): void {
     message = this.formatLogEntry(message);
     console[level](`${this.LOG_PREFIX} ${message}`);
