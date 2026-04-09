@@ -120,17 +120,25 @@ function PlaylistsList() {
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
         {controller.playlists.length === 0 ? (
-          <PlaylistCard index={-1} title="No playlists added yet." />
+          <PlaylistCard title="No playlists added yet." />
         ) : (
             controller.playlists.map((pl, idx) => (
             <PlaylistCard
                 key={idx}
-                index={idx}
                 title={pl.name}
                 subtitle={pl.subtitle}
                 coverURL={pl.cover}
-                hrefURL={pl.hrefURL}
-                onDeleteClick={controller.isHost ? () => controller.removePlaylist(idx) : undefined}/>
+                hrefURL={pl.hrefURL}>
+              {
+                controller.isHost ?
+                    <Button
+                        onClick={() => controller.removePlaylist(idx)}
+                    >
+                      <span className="material-symbols-outlined">delete</span>
+                    </Button>
+                    : undefined
+              }
+            </PlaylistCard>
           ))
         )}
       </ul>

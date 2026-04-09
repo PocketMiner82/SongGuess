@@ -1,4 +1,5 @@
 import {Button} from "./Button";
+import type {ReactNode} from "react";
 
 /**
  * Displays a single playlist entry with cover art, title and subtitle.
@@ -9,16 +10,15 @@ import {Button} from "./Button";
  * @param subtitle Optional secondary text
  * @param coverURL URL for the cover image or null
  * @param hrefURL URL to open in new tab when clicking the title.
- * @param onDeleteClick A function to call when the delete button is clicked.
+ * @param children What to show at the right part of the card (e.g. a button)
  */
-export function PlaylistCard({index, title, subtitle, coverURL, hrefURL, onDeleteClick}: {
-  index: number,
+export function PlaylistCard({title, subtitle, coverURL, hrefURL, children}: {
   title: string,
   subtitle?: string,
   coverURL?: string|null,
   hrefURL?: string,
   showDelete?: boolean,
-  onDeleteClick?: Function
+  children?: ReactNode
 }) {
   return (
       <li className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
@@ -38,14 +38,9 @@ export function PlaylistCard({index, title, subtitle, coverURL, hrefURL, onDelet
           </a>
           {subtitle && <div className="mt-1 text-sm text-disabled-text block">{subtitle}</div>}
         </div>
-        {onDeleteClick && index >= 0 ?
-            <Button
-                onClick={() => onDeleteClick()}
-                className="items-center flex justify-center"
-            >
-              <span className="material-symbols-outlined">delete</span>
-            </Button>
-            : null}
+        <div className="flex items-center justify-center">
+          {children}
+        </div>
       </li>
   );
 }

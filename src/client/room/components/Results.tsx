@@ -22,7 +22,6 @@ function PlayedSongsList() {
           {controller.playedSongs.map((song, idx) => (
               <PlaylistCard
                   key={idx}
-                  index={idx}
                   title={song.name}
                   subtitle={song.artist}
                   coverURL={song.cover}

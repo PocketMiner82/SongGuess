@@ -158,7 +158,7 @@ export async function fetchSongByISRC(isrc: string): Promise<Song|null> {
     let page = await fetch("/parties/api/songByISRC?isrc=" + encodeURIComponent(isrc));
     return await page.json();
   } catch (e) {
-    console.error("Error fetching from api.song.link:", e);
+    console.error("Error fetching song from api:", e);
     return null;
   }
 }
