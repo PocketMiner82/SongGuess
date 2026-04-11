@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "../components/Button";
 import { PlaylistCard } from "../components/PlaylistCard";
-import { getPlaylistByURL, safeSearch, fixedCoverSize } from "../../Utils";
-import { type Playlist } from "../../types/MessageTypes";
+import { safeSearch, fixedCoverSize } from "../../Utils";
 import { type ResultMusicTrack, type ResultAlbum, type ResultMusicArtist } from "itunes-store-api";
 import { artistRegex, albumRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { ModalContent } from "./ModalContent";
@@ -205,6 +204,7 @@ export function SearchMusicDialog({
                   }}
                   onKeyDown={e => {
                     if (e.key === "Enter") {
+                      // noinspection JSIgnoredPromiseFromCall
                       handleSearch();
                     }
                   }}
