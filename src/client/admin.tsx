@@ -10,7 +10,7 @@ import React, {useEffect, useMemo, useState, useRef, useCallback} from "react";
 import {TopBar} from "./components/TopBar";
 import {Button} from "./components/Button";
 import type {TransferHostMessage} from "../types/MessageTypes";
-import {ToastError} from "./components/ToastError";
+import {ToastError, showToastError} from "./components/ToastError";
 
 
 /**
@@ -278,9 +278,7 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
           case "confirmation":
             if (msg.error) {
               console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
-              if ((window as any).showToastError) {
-                (window as any).showToastError(msg.error);
-              }
+              showToastError(msg.error);
             }
             break;
         }
@@ -319,11 +317,12 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
         )}
         <div className="flex flex-col h-screen">
           <TopBar />
-          <ToastError />
+
           <div className="flex-1 overflow-auto p-4">
             <TransferHostInput onTransferHost={sendTransferHost} />
             <LogViewer logs={logs} filters={filters} onFilterChange={setFilters} />
           </div>
+          <ToastError />
         </div>
       </div>
   );

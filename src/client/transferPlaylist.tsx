@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {CookieConsent} from "react-cookie-consent";
 import {TopBar} from "./components/TopBar";
 import {Button} from "./components/Button";
-import { ToastError } from "./components/ToastError";
+import { ToastError, showToastError } from "./components/ToastError";
 import {
   getFirstSong,
   downloadFile,
@@ -109,9 +109,7 @@ function ImportCSV() {
       });
 
       if (!records || records.length === 0) {
-        if ((window as any).showToastError) {
-          (window as any).showToastError("CSV file is empty or invalid.");
-        }
+        showToastError("CSV file is empty or invalid.");
         return;
       }
 
@@ -203,9 +201,7 @@ function ImportCSV() {
       }
 
       if (playlists.length === 0) {
-        if ((window as any).showToastError) {
-          (window as any).showToastError("No songs were found. Please check your CSV file format.");
-        }
+        showToastError("No songs were found. Please check your CSV file format.");
         return;
       }
 
@@ -228,17 +224,13 @@ function ImportCSV() {
       
       if (notFoundSongs.length > 0) {
         const notFoundList = notFoundSongs.join("\n• ");
-        if ((window as any).showToastError) {
-          (window as any).showToastError(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
-        }
+        showToastError(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
       }
       
       setProgress(successMessage);
     } catch (error) {
       console.error("Error importing CSV:", error);
-      if ((window as any).showToastError) {
-        (window as any).showToastError("Failed to import CSV file. Please check the file format and try again.");
-      }
+      showToastError("Failed to import CSV file. Please check the file format and try again.");
       setProgress("");
     }
 
@@ -293,8 +285,6 @@ function App() {
         </CookieConsent>
 
         <TopBar />
-
-        <ToastError />
 
         <main className="flex-1 overflow-auto">
           <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
@@ -384,6 +374,8 @@ function App() {
             </div>
           </div>
         </main>
+
+        <ToastError />
       </div>
   );
 }

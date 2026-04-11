@@ -41,3 +41,25 @@ body {
         width: 0;
     }
 }
+
+.modal {
+    @apply fixed inset-0 z-50 transition-opacity duration-250;
+}
+
+.modal:not(.modal--active) {
+    @apply opacity-0 pointer-events-none;
+}
+
+.modal__container {
+    @apply absolute inset-0 flex justify-center items-center overflow-auto;
+    background: rgba(0, 0, 0, 0.5);
+    overscroll-behavior: contain;
+}
+
+.modal:not(.modal--active) .modal__container {
+    @apply overflow-hidden;
+}
+
+.modal__inner {
+    @apply p-4;
+}

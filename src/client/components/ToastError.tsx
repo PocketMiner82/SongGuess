@@ -1,31 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 
-/**
- * Props for the ToastError component.
- */
-type ToastErrorProps = {
-  /**
-   * Error message to display.
-   */
-  message: string;
-  /**
-   * Unique identifier for this toast message.
-   */
+type ToastMessage = {
   id: string;
-  /**
-   * Callback function to remove this toast after it expires.
-   */
-  onRemove: (id: string) => void;
+  message: string;
 };
 
-/**
- * Individual toast error message component that appears in the top-right corner.
- * Automatically disappears after 5 seconds.
- * 
- * @param props The toast error props.
- * @returns A toast message with error icon and auto-dismiss functionality.
- */
-function ToastErrorMessage({ message, id, onRemove }: ToastErrorProps) {
+function ToastErrorMessage({ message, id, onRemove }: { message: string; id: string; onRemove: (id: string) => void }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onRemove(id);
@@ -52,44 +32,39 @@ function ToastErrorMessage({ message, id, onRemove }: ToastErrorProps) {
   );
 }
 
-/**
- * Toast error container that manages multiple error messages in the top-right corner.
- * Messages stack vertically and automatically dismiss after 5 seconds.
- */
+let toasts: ToastMessage[] = [];
+const listeners: Set<() => void> = new Set();
+
+function notifyListeners() {
+  listeners.forEach(listener => listener());
+}
+
+export function showToastError(message: string) {
+  const id = Date.now().toString() + Math.random().toString(36).substring(2, 11);
+  toasts = [...toasts, { id, message }];
+  notifyListeners();
+}
+
 export function ToastError() {
-  const [toasts, setToasts] = useState<Array<{ id: string; message: string }>>([]);
+  const [, setUpdate] = useState(0);
 
-  /**
-   * Adds a new error message to the toast container.
-   * 
-   * @param message The error message to display.
-   */
-  const addError = useCallback((message: string) => {
-    const id = Date.now().toString() + Math.random().toString(36).substring(2, 11);
-    setToasts(prev => [...prev, { id, message }]);
-  }, []);
-
-  /**
-   * Removes a toast message by its ID.
-   * 
-   * @param id The ID of the toast to remove.
-   */
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
-
-  // Expose the addError function globally for use throughout the app
   useEffect(() => {
-    (window as any).showToastError = addError;
+    const listener = () => setUpdate(prev => prev + 1);
+    listeners.add(listener);
     return () => {
-      delete (window as any).showToastError;
+      listeners.delete(listener);
     };
-  }, [addError]);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    toasts = toasts.filter(toast => toast.id !== id);
+    notifyListeners();
+  }, []);
 
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col items-end">
+    <div className="fixed top-4 right-4 z-55 flex flex-col items-end">
       {toasts.map(toast => (
         <ToastErrorMessage
           key={toast.id}

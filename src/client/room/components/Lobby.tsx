@@ -4,8 +4,11 @@ import {useControllerContext, useRoomControllerMessageTypeListener} from "../Roo
 import {PlayerCard} from "./PlayerCard";
 import {COLORS} from "../../../ConfigConstants";
 import {PlaylistCard} from "../../components/PlaylistCard";
-import {SearchMusicDialog} from "../../components/SearchMusicDialog";
+import {showConfirm} from "../../modal/ConfirmDialog";
+import {showToastError} from "../../components/ToastError";
 import {downloadFile, formatLocalDateTime, importPlaylistFile, validatePlaylistsFile} from "../../../Utils";
+import {Modal} from "../../modal/Modal";
+import {SearchMusicDialog} from "../../modal/SearchMusicDialog";
 
 
 /**
@@ -58,8 +61,9 @@ function PlayerList() {
             player={player}>
             {controller.isHost && player?.username && player.username !== controller.username ? (
                 <Button
-                    onClick={() => {
-                      const isConfirmed = window.confirm(
+                    onClick={async () => {
+                      const isConfirmed = await showConfirm(
+                          "Transfer Host",
                           `Do you really want to transfer host to '${player.username}'?`
                       );
                       if (!isConfirmed) return;
@@ -151,26 +155,20 @@ function PlaylistsList() {
  */
 function AddPlaylistButton() {
   const controller = useControllerContext();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <>
-      <Button
-        onClick={() => setIsDialogOpen(true)}
-        className="w-full"
-      >
-        <span className="material-symbols-outlined mr-2">add</span>
-        Add Playlist
-      </Button>
-      <SearchMusicDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onPlaylistSelected={playlist => {
+    <Button
+      onClick={() => Modal.open(SearchMusicDialog, {
+        onPlaylistSelected: playlist => {
           console.debug("Selected Playlist:", playlist);
           controller.tryAddPlaylists(playlist.hrefURL);
-        }}
-      />
-    </>
+        }
+      })}
+      className="w-full"
+    >
+      <span className="material-symbols-outlined mr-2">add</span>
+      Add Playlist
+    </Button>
   );
 }
 
@@ -184,25 +182,19 @@ function ImportPlaylists() {
     try {
       const data = await importPlaylistFile(event);
       if (!data) {
-        if ((window as any).showToastError) {
-          (window as any).showToastError("Failed to read file.");
-        }
+        showToastError("Failed to read file.");
         return;
       }
 
       const playlistsFile = validatePlaylistsFile(data);
       if (!playlistsFile) {
-        if ((window as any).showToastError) {
-          (window as any).showToastError("Failed to import playlists. Please check the file format.");
-        }
+        showToastError("Failed to import playlists. Please check the file format.");
         return;
       }
 
       controller.importPlaylistsFromFile(playlistsFile);
     } catch (error) {
-      if ((window as any).showToastError) {
-        (window as any).showToastError("Failed to read file.");
-      }
+      showToastError("Failed to read file.");
     }
     
     // Reset file input
@@ -236,8 +228,11 @@ function ClearPlaylists() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "update_playlists");
 
-  const handleClearPlaylists = () => {
-    const isConfirmed = window.confirm("Are you sure you want to clear all playlists?");
+  const handleClearPlaylists = async () => {
+    const isConfirmed = await showConfirm(
+        "Clear Playlists",
+        "Are you sure you want to clear all playlists?"
+    );
     if (isConfirmed) {
       controller.removePlaylist(null);
     }
@@ -287,9 +282,7 @@ function CopyLink() {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy link:', err);
-      if ((window as any).showToastError) {
-        (window as any).showToastError("Failed to copy link.");
-      }
+      showToastError("Failed to copy link.");
     }
   };
 

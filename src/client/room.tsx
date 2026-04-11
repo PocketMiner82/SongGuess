@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   RoomContext, useControllerContext, useRoomController, useRoomControllerListener,
   useRoomControllerMessageTypeListener
@@ -12,12 +12,14 @@ import { TopBar } from "./components/TopBar";
 import { Button } from "./components/Button";
 import { Audio } from "./room/components/Audio";
 import { ToastError } from "./components/ToastError";
-import { FatalErrorPopup } from "./components/FatalErrorPopup";
+import {ModalContainer} from "react-modal-global";
+import {Modal} from "./modal/Modal";
+import {showConfirm} from "./modal/ConfirmDialog";
+import {ChooseUsernameDialog} from "./modal/ChooseUsernameDialog";
 import {CookieConsent} from "react-cookie-consent";
 import {CookiesProvider, useCookies} from "react-cookie";
 import type ICookieProps from "../types/ICookieProps";
 import type {ServerMessage} from "../types/MessageTypes";
-import {UsernameInputField} from "./room/components/UsernameInputField";
 
 
 /**
@@ -61,36 +63,11 @@ function Countdown() {
  * @constructor
  */
 function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
-  const controller = useControllerContext();
+  useEffect(() => {
+    Modal.open(ChooseUsernameDialog, { onComplete: onChoose, closable: false });
+  }, [onChoose]);
 
-  return (
-      <div className="flex items-center justify-center h-full w-full p-4">
-        <div className="bg-card-bg rounded-lg p-6 max-w-md mx-4 shadow-xl w-full">
-          <h2 className="text-xl font-bold text-default mb-6">Room {controller.roomID}</h2>
-          <p className="text-default mb-2">Please choose your username:</p>
-
-          <div className="mb-2">
-            <UsernameInputField onEnd={(editedName) => {
-              controller.reconnect(editedName);
-              onChoose();
-            }} requireEnter={true} showButton={true} />
-          </div>
-
-          <div className="mb-4 w-full">
-            <Button className="w-full" onClick={() => {
-              const nameInput = document.querySelector<HTMLInputElement>("#username-input");
-              const name = nameInput?.value ?? "";
-              controller.reconnect(name, true);
-              onChoose();
-            }}>
-              Join as Spectator
-            </Button>
-          </div>
-
-          <p className="text-sm text-disabled-text">Tip: You can later click on your username to change it.</p>
-        </div>
-      </div>
-  );
+  return <div className="h-full w-full"></div>;
 }
 
 function Room() {
@@ -106,12 +83,11 @@ function Room() {
           This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
         </CookieConsent>
 
-        <FatalErrorPopup/>
-
         <TopBar>
           {controller.isHost && controller.state === "ingame" && (
-              <Button onClick={() => {
-                const isConfirmed = window.confirm(
+              <Button onClick={async () => {
+                const isConfirmed = await showConfirm(
+                    "Abort Game",
                     "Do you really want to abort and send all players to the results screen?"
                 );
                 if (!isConfirmed) return;
@@ -122,8 +98,6 @@ function Room() {
               </Button>
           )}
         </TopBar>
-
-        <ToastError />
 
         {
           !hasJoined ? (
@@ -175,6 +149,8 @@ function App() {
   return (
       <RoomContext.Provider value={controller}>
         <Room />
+        <ToastError />
+        <ModalContainer controller={Modal} />
       </RoomContext.Provider>
   );
 }

@@ -7,6 +7,9 @@ import type {CookieGetter, CookieSetter} from "../../types/CookieFunctionTypes";
 import {v4 as uuidv4} from "uuid";
 import {getPlaylistByURL} from "../../Utils";
 import { version } from "../../../package.json";
+import {Modal} from "../modal/Modal";
+import {FatalErrorDialog} from "../modal/FatalErrorDialog";
+import {showToastError} from "../components/ToastError";
 import type {
   AddPlaylistsMessage,
   AnswerMessage,
@@ -377,8 +380,8 @@ export class RoomController {
     }
 
     // Show fatal error for disconnection
-    if ((window as any).showFatalError && !this.reconnecting) {
-      (window as any).showFatalError(`Disconnected: ${ev.reason || ev.code}`);
+    if (!this.reconnecting) {
+      Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false });
     }
   }
 
@@ -395,8 +398,8 @@ export class RoomController {
     }
     
     // Show fatal error for connection failure
-    if ((window as any).showFatalError && !this.reconnecting) {
-      (window as any).showFatalError(`${ev.message || "WebSocket error. See console for details."}`);
+    if (!this.reconnecting) {
+      Modal.open(FatalErrorDialog, { error: ev.message || "WebSocket error. See console for details.", closable: false });
     }
   }
 
@@ -453,9 +456,7 @@ export class RoomController {
       case "confirmation":
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
-          if ((window as any).showToastError) {
-            (window as any).showToastError(msg.error);
-          }
+          showToastError(msg.error);
         }
 
         if (msg.sourceMessage.type === "select_answer") {
@@ -648,9 +649,7 @@ export class RoomController {
     let playlist = await getPlaylistByURL(url);
 
     if (!playlist) {
-      if ((window as any).showToastError) {
-        (window as any).showToastError(`Failed to get playlist: ${url}`);
-      }
+      showToastError(`Failed to get playlist: ${url}`);
       return false;
     }
 

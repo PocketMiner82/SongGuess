@@ -2,8 +2,11 @@ import { createRoot } from "react-dom/client";
 import { useState } from "react";
 import { fetchPostCreateRoom } from "../RoomHTTPHelper";
 import { Button } from "./components/Button";
-import { ToastError } from "./components/ToastError";
+import { ToastError, showToastError } from "./components/ToastError";
 import { TopBar } from "./components/TopBar";
+import { ModalContainer } from "react-modal-global";
+import { Modal } from "./modal/Modal";
+import { showConfirm } from "./modal/ConfirmDialog";
 import {CookieConsent} from "react-cookie-consent";
 import {downloadFile, formatLocalDateTime, importPlaylistFile, refreshPlaylists, validatePlaylistsFile} from "../Utils";
 import type {PlaylistsFile} from "../types/MessageTypes";
@@ -25,16 +28,12 @@ function App() {
     const resp = await fetchPostCreateRoom("/parties/api/createRoom");
 
     if (!resp) {
-      if ((window as any).showToastError) {
-        (window as any).showToastError("Unknown server error");
-      }
+      showToastError("Unknown server error");
       return;
     }
 
     if (resp.error !== "") {
-      if ((window as any).showToastError) {
-        (window as any).showToastError(resp.error);
-      }
+      showToastError(resp.error);
       return;
     }
 
@@ -61,21 +60,18 @@ function App() {
         // Import and validate the playlist file
         const data = await importPlaylistFile(event);
         if (!data) {
-          if ((window as any).showToastError) {
-            (window as any).showToastError("Failed to read file.");
-          }
+          showToastError("Failed to read file.");
           return;
         }
 
         const playlistsFile = validatePlaylistsFile(data);
         if (!playlistsFile) {
-          if ((window as any).showToastError) {
-            (window as any).showToastError("Invalid playlist file format.");
-          }
+          showToastError("Invalid playlist file format.");
           return;
         }
 
-        const isConfirmed = window.confirm(
+        const isConfirmed = await showConfirm(
+            "Refresh Playlists",
             "This will refresh all playlists in the selected file.\n" +
             "This could take some time and make a lot of API calls." +
             "\n\nDo you want to continue?"
@@ -118,9 +114,7 @@ function App() {
 
       } catch (error) {
         console.error("Error refreshing playlists:", error);
-        if ((window as any).showToastError) {
-          (window as any).showToastError("Failed to refresh playlists. Please try again.");
-        }
+        showToastError("Failed to refresh playlists. Please try again.");
         setRefreshProgress("");
       }
     };
@@ -135,8 +129,6 @@ function App() {
       </CookieConsent>
 
       <TopBar />
-
-      <ToastError />
 
       <div className="flex items-center justify-center flex-1 p-4">
         <div className="m-auto justify-items-center text-center max-w-full">
@@ -178,6 +170,10 @@ function App() {
           </Button>
         </div>
       </div>
+
+      <ToastError />
+
+      <ModalContainer controller={Modal} />
     </div>
   );
 }
