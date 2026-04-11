@@ -1,3 +1,11 @@
+# [2.14.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.5...2.14.0-dev.6) (2026-04-11)
+
+
+### Bug Fixes
+
+* improve behavior of search dialog ([3fdb781](https://github.com/PocketMiner82/SongGuess/commit/3fdb7812da9c98f1d39ac1e573a03f160571ba2b))
+* **SearchMusicDialog:** improve styling ([cebc395](https://github.com/PocketMiner82/SongGuess/commit/cebc3956adffdaef29932ab87b7e004e0394808a))
+
 # [2.14.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.4...2.14.0-dev.5) (2026-04-11)
 
 
