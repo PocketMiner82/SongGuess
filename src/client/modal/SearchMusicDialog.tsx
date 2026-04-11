@@ -187,71 +187,75 @@ export function SearchMusicDialog({
   };
 
   return (
-    <ModalContent title={onlyAcceptSongs ? "Search Songs" : "Search Apple Music"} maxWidth="full">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="relative flex-1">
-          <input
-            placeholder={onlyAcceptSongs ? "Search for a song..." : "Enter apple music URL or search term"}
-            className={`w-full outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
-              searchQuery && searchQuery.startsWith("https://") && !isValidURL
-                ? "focus:border-error"
-                : "border-gray-500 focus:border-secondary"
-            }`}
-            value={searchQuery}
-            onChange={e => {
-              setSearchQuery(e.target.value);
-              if (searchStatus === "error" || searchStatus === "success") setSearchStatus("idle");
-            }}
-            onKeyDown={e => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-          />
-          <div className="absolute right-2 bottom-2 flex items-center">
-            {getStatusIcon()}
+      <ModalContent title={onlyAcceptSongs ? "Search Songs" : "Search Apple Music"} maxWidth="full">
+        <div className="flex flex-col max-h-[70vh] min-h-0">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="relative flex-1">
+              <input
+                  placeholder={onlyAcceptSongs ? "Search for a song..." : "Enter apple music URL or search term"}
+                  className={`w-full outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
+                      searchQuery && searchQuery.startsWith("https://") && !isValidURL
+                          ? "focus:border-error"
+                          : "border-gray-500 focus:border-secondary"
+                  }`}
+                  value={searchQuery}
+                  onChange={e => {
+                    setSearchQuery(e.target.value);
+                    if (searchStatus === "error" || searchStatus === "success") setSearchStatus("idle");
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+              />
+              <div className="absolute right-2 bottom-2 flex items-center">
+                {getStatusIcon()}
+              </div>
+            </div>
+            <Button
+                onClick={handleSearch}
+                disabled={!searchQuery.trim() || searchStatus === "loading"}
+                className="min-w-16"
+            >
+              <span className="material-symbols-outlined">search</span>
+            </Button>
           </div>
-        </div>
-        <Button
-          onClick={handleSearch}
-          disabled={!searchQuery.trim() || searchStatus === "loading"}
-          className="min-w-16"
-        >
-          <span className="material-symbols-outlined">search</span>
-        </Button>
-      </div>
 
-      {searchResults.length > 0 && (
-        <div className="mt-4 overflow-auto flex-1 -mx-2 px-2">
-          <ul className="space-y-2">
-            {searchResults.map((item, idx) => (
-              <PlaylistCard
-                key={idx}
-                title={getResultTitle(item)}
-                subtitle={getResultSubtitle(item)}
-                coverURL={getResultCover(item)}
-                hrefURL={getResultHref(item)}
-              >
-                <Button
-                  onClick={() => handleSelectResult(item, idx)}
-                  disabled={searchStatus === "loading" || addedIndices.has(idx)}
-                  className="min-w-20"
-                >
-                  Select
-                </Button>
-              </PlaylistCard>
-            ))}
-          </ul>
-        </div>
-      )}
+          {searchResults.length > 0 && (
+              <div className="mt-4 overflow-y-auto flex-1 -mx-2 px-2">
+                <ul className="space-y-2">
+                  {searchResults.map((item, idx) => (
+                      <PlaylistCard
+                          key={idx}
+                          title={getResultTitle(item)}
+                          subtitle={getResultSubtitle(item)}
+                          coverURL={getResultCover(item)}
+                          hrefURL={getResultHref(item)}
+                      >
+                        <Button
+                            onClick={() => handleSelectResult(item, idx)}
+                            disabled={searchStatus === "loading" || addedIndices.has(idx)}
+                            className="min-w-20"
+                        >
+                          Select
+                        </Button>
+                      </PlaylistCard>
+                  ))}
+                </ul>
+              </div>
+          )}
 
-      {searchStatus === "error" && (
-        <p className="text-error mt-2">
-          {searchResults.length === 0 && searchQuery.trim()
-            ? "No results found."
-            : "Failed to search. Please try again."}
-        </p>
-      )}
-    </ModalContent>
+          {searchStatus === "error" && (
+              <div className="mt-2">
+                <p className="text-error">
+                  {searchResults.length === 0 && searchQuery.trim()
+                      ? "No results found."
+                      : "Failed to search. Please try again."}
+                </p>
+              </div>
+          )}
+        </div>
+      </ModalContent>
   );
 }
