@@ -159,9 +159,9 @@ function AddPlaylistButton() {
   return (
     <Button
       onClick={() => Modal.open(SearchMusicDialog, {
-        onPlaylistSelected: playlist => {
-          console.debug("Selected Playlist:", playlist);
-          controller.tryAddPlaylists(playlist.hrefURL);
+        onPlaylistSelected: async url => {
+          console.debug("Selected Playlist:", url);
+          return await controller.tryAddPlaylists(url);
         }
       })}
       className="w-full"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../components/Button";
 import { PlaylistCard } from "../components/PlaylistCard";
 import { getPlaylistByURL, safeSearch, fixedCoverSize } from "../../Utils";
@@ -10,7 +10,7 @@ import { ModalContent } from "./ModalContent";
 /**
  * The current status of the search operation.
  */
-type SearchStatus = "idle" | "loading" | "error";
+type SearchStatus = "idle" | "loading" | "error" | "success";
 
 /**
  * Represents a single search result item from Apple Music.
@@ -25,7 +25,8 @@ type SearchResultItem =
  */
 interface SearchMusicDialogProps {
   onlyAcceptSongs?: boolean;
-  onPlaylistSelected: (playlist: Playlist) => void;
+  // should return true when the playlist add was sent successfully
+  onPlaylistSelected: (url: string) => Promise<boolean>;
 }
 
 /**
@@ -56,12 +57,13 @@ export function SearchMusicDialog({
     if (onlyAcceptSongs ? songRegex.test(query) : (artistRegex.test(query) || albumRegex.test(query) || songRegex.test(query))) {
       setSearchStatus("loading");
       try {
-        const playlist = await getPlaylistByURL(query);
-        if (playlist) {
-          onPlaylistSelected(playlist);
-        } else {
-          setSearchStatus("error");
-        }
+        onPlaylistSelected(query).then(successful => {
+          if (successful) {
+            setSearchStatus("success");
+          } else {
+            setSearchStatus("error");
+          }
+        });
       } catch {
         setSearchStatus("error");
       }
@@ -100,23 +102,32 @@ export function SearchMusicDialog({
 
   const handleSelectResult = async (item: SearchResultItem, index: number) => {
     const hrefURL = getResultHref(item);
-    if (!hrefURL) return;
-
-    if (!artistRegex.test(hrefURL) && !albumRegex.test(hrefURL) && !songRegex.test(hrefURL)) {
+    if (!hrefURL) {
+      setSearchStatus("error");
       return;
     }
 
-    setAddedIndices(prev => new Set([...prev, index]));
-    const playlist = await getPlaylistByURL(hrefURL);
-    if (!playlist) {
-      setAddedIndices(prev => {
-        const next = new Set(prev);
-        next.delete(index);
-        return next;
-      });
-    } else {
-      onPlaylistSelected(playlist);
+    if (!artistRegex.test(hrefURL) && !albumRegex.test(hrefURL) && !songRegex.test(hrefURL)) {
+      setSearchStatus("error");
+      return;
     }
+
+    setSearchStatus("loading");
+
+    setAddedIndices(prev => new Set([...prev, index]));
+
+    onPlaylistSelected(hrefURL).then(successful => {
+      if (successful) {
+        setSearchStatus("success");
+      } else {
+        setSearchStatus("error");
+        setAddedIndices(prev => {
+          const next = new Set(prev);
+          next.delete(index);
+          return next;
+        });
+      }
+    });
   };
 
   const getResultTitle = (item: SearchResultItem): string => {
@@ -168,6 +179,8 @@ export function SearchMusicDialog({
         return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
       case "error":
         return <span className="material-symbols-outlined text-error">error</span>;
+      case "success":
+        return <span className="material-symbols-outlined text-success">check_circle</span>;
       case "idle":
         return null;
     }
@@ -187,7 +200,7 @@ export function SearchMusicDialog({
             value={searchQuery}
             onChange={e => {
               setSearchQuery(e.target.value);
-              if (searchStatus === "error") setSearchStatus("idle");
+              if (searchStatus === "error" || searchStatus === "success") setSearchStatus("idle");
             }}
             onKeyDown={e => {
               if (e.key === "Enter") {
@@ -221,7 +234,7 @@ export function SearchMusicDialog({
               >
                 <Button
                   onClick={() => handleSelectResult(item, idx)}
-                  disabled={addedIndices.has(idx)}
+                  disabled={searchStatus === "loading" || addedIndices.has(idx)}
                   className="min-w-20"
                 >
                   Select
