@@ -36,7 +36,7 @@ export function ModalContent({ title, iconName, iconColor = "text-default", chil
   }, [modal]);
 
   return (
-    <div className={`bg-card-bg rounded-lg p-6 shadow-xl ${maxWidthClasses[maxWidth]} mx-4 w-full relative`}>
+    <div className={`bg-card-bg rounded-lg p-6 shadow-xl ${maxWidthClasses[maxWidth]} mx-4 w-full relative max-h-[85vh] overflow-y-auto`}>
       {modal.params.closable && (
         <button
           onClick={() => modal.close()}
