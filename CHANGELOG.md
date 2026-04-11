@@ -1,3 +1,10 @@
+# [2.14.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.2...2.14.0-dev.3) (2026-04-11)
+
+
+### Features
+
+* add confirm dialog + refactor dialog handling to use react-modal-global library ([620a8a1](https://github.com/PocketMiner82/SongGuess/commit/620a8a1a20b8b78c627c6940c0a780a4e81e5073))
+
 # [2.14.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.1...2.14.0-dev.2) (2026-04-11)
 
 
