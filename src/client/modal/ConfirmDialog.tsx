@@ -10,7 +10,6 @@ interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   onConfirm: () => void;
-  onCancel?: () => void;
 }
 
 /**
@@ -22,8 +21,7 @@ export function ConfirmDialog({
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  onConfirm,
-  onCancel
+  onConfirm
 }: ConfirmDialogProps) {
   const modal = useModalWindow();
 
@@ -31,11 +29,6 @@ export function ConfirmDialog({
     onConfirm();
     modal.close();
   }, [modal, onConfirm]);
-
-  const handleCancel = useCallback(() => {
-    onCancel?.();
-    modal.close();
-  }, [modal, onCancel]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,7 +48,7 @@ export function ConfirmDialog({
         <Button onClick={handleConfirm} className="w-full">
           {confirmText}
         </Button>
-        <Button onClick={handleCancel} defaultColors={false} className="w-full bg-disabled-text hover:bg-disabled-bg text-white">
+        <Button onClick={() => modal.close()} defaultColors={false} className="w-full bg-disabled-text hover:bg-disabled-bg text-white">
           {cancelText}
         </Button>
       </div>
@@ -79,13 +72,15 @@ export async function showConfirm(
   }
 ): Promise<boolean> {
   return new Promise(resolve => {
+    let isConfirmed = false;
     Modal.open(ConfirmDialog, {
       title,
       message,
       confirmText: options?.confirmText,
       cancelText: options?.cancelText,
-      onConfirm: () => resolve(true),
-      onCancel: () => resolve(false)
+      onConfirm: () => isConfirmed = true
+    }).on("close", () => {
+      resolve(isConfirmed);
     });
   });
 }

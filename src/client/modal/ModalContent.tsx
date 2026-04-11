@@ -36,7 +36,15 @@ export function ModalContent({ title, iconName, iconColor = "text-default", chil
   }, [modal]);
 
   return (
-    <div className={`bg-card-bg rounded-lg p-6 shadow-xl ${maxWidthClasses[maxWidth]} mx-4 w-full`}>
+    <div className={`bg-card-bg rounded-lg p-6 shadow-xl ${maxWidthClasses[maxWidth]} mx-4 w-full relative`}>
+      {modal.params.closable && (
+        <button
+          onClick={() => modal.close()}
+          className="text-default hover:text-primary transition-colors cursor-pointer p-1 absolute top-4 right-4"
+        >
+          <span className="material-symbols-outlined text-2xl">close</span>
+        </button>
+      )}
       {(title || iconName) && (
         <div className="flex items-center gap-3 mb-4">
           {iconName && (
