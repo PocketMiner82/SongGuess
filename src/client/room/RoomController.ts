@@ -584,14 +584,6 @@ export class RoomController {
    * @param playlistsFile The validated PlaylistsFile object containing playlist data.
    */
   public importPlaylistsFromFile(playlistsFile: PlaylistsFile) {
-    if (this.playlists.length > 0) {
-      let isConfirmed = window.confirm("Do you want to clear the old playlists first?");
-      if (isConfirmed) {
-        // clear old playlists
-        this.removePlaylist(null);
-      }
-    }
-
     this.addPlaylists(...playlistsFile.playlists);
   }
 
