@@ -1,3 +1,10 @@
+# [2.14.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.1...2.14.0-dev.2) (2026-04-11)
+
+
+### Bug Fixes
+
+* don't ask if user wants to clear when importing playlists ([b1a8f8c](https://github.com/PocketMiner82/SongGuess/commit/b1a8f8cb7ae5b7e595dbdcdfb0fd840bb4f73510))
+
 # [2.14.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.13.0...2.14.0-dev.1) (2026-04-09)
 
 
