@@ -1,3 +1,10 @@
+# [2.14.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.3...2.14.0-dev.4) (2026-04-11)
+
+
+### Bug Fixes
+
+* add back close button if modal is closable ([c1d2248](https://github.com/PocketMiner82/SongGuess/commit/c1d2248fd8f5b745e9a370eff3181fcbf05a099e))
+
 # [2.14.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.2...2.14.0-dev.3) (2026-04-11)
 
 
