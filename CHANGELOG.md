@@ -1,3 +1,10 @@
+# [2.14.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.4...2.14.0-dev.5) (2026-04-11)
+
+
+### Bug Fixes
+
+* fixed wrong styling (overflow) of dialogs ([513a902](https://github.com/PocketMiner82/SongGuess/commit/513a90216aba24c0cac27455cf76015be6c77723))
+
 # [2.14.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.3...2.14.0-dev.4) (2026-04-11)
 
 
