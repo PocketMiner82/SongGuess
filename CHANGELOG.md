@@ -1,3 +1,10 @@
+# [2.14.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.6...2.14.0-dev.7) (2026-04-12)
+
+
+### Bug Fixes
+
+* **wip:** start implementing PlayerPicksGame + refactor existing game logic to ease implementation ([d470886](https://github.com/PocketMiner82/SongGuess/commit/d470886e77d817589cb7df680803e1b16bf51294))
+
 # [2.14.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.5...2.14.0-dev.6) (2026-04-11)
 
 
