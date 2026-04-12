@@ -348,6 +348,9 @@ export default abstract class Game implements IEventListener {
   public startGame() {
     this.room.server.logger.info("Starting game...");
 
+    // always clear questions at start
+    this.questions = [];
+
     // inform all players about the game start
     this.room.broadcastUpdateMessage();
 
