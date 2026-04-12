@@ -1,3 +1,10 @@
+# [2.14.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.7...2.14.0-dev.8) (2026-04-12)
+
+
+### Bug Fixes
+
+* **Game:** clear questions at each game start ([b81712c](https://github.com/PocketMiner82/SongGuess/commit/b81712c4f9ddef889b9d9ce97825cffd850f97c3))
+
 # [2.14.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.6...2.14.0-dev.7) (2026-04-12)
 
 
