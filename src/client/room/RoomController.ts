@@ -147,7 +147,7 @@ class IngameData {
   /**
    * The currently selected answer.
    */
-  selectedAnswer: number|null = null;
+  selectedAnswer?: number|null = null;
 
   /**
    * The current state of the audio playback
@@ -254,7 +254,7 @@ export class RoomController {
   /**
    * The list of songs played in the last round.
    */
-  playedSongs: Song[] = [];
+  playedSongs: (Song|undefined)[] = [];
 
 
   /**

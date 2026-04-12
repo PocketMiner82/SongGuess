@@ -68,4 +68,15 @@ export default class Listener {
       this.messageListeners.push(listener);
     }
   }
+
+  /**
+   * Unregisters a registered event listener.
+   * @param listener the object that no longer wants to listen for client messages.
+   */
+  public unregisterEvents(listener: IEventListener) {
+    let index = this.messageListeners.indexOf(listener);
+    if (index >= 0) {
+      this.messageListeners.splice(index, 1);
+    }
+  }
 }

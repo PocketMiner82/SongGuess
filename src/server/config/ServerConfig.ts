@@ -3,8 +3,10 @@ import type {IEventListener} from "../listener/IEventListener";
 import type {ValidRoom} from "../ValidRoom";
 import {BaseConfig} from "../../BaseConfig";
 import _ from "lodash";
-import {ROUND_PADDING_TICKS} from "../../ConfigConstants";
+import {ROUND_PADDING_TICKS, ROUND_PICKED_SONG_TICK} from "../../ConfigConstants";
 import type Player from "../Player";
+import {MultipleChoiceGame} from "../game/multipleChoice/MultipleChoiceGame";
+import {PlayerPicksGame} from "../game/playerPicks/PlayerPicksGame";
 
 
 export default class ServerConfig extends BaseConfig implements IEventListener{
@@ -20,6 +22,19 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
       }
 
       let oldSongs = this.room.lobby.songs.slice();
+
+      if (this.gameMode !== msg.gameMode) {
+        this.room.game.destroy();
+
+        switch (msg.gameMode) {
+          case "multiple_choice":
+            this.room.game = new MultipleChoiceGame(this.room);
+            break;
+          case "player_picks":
+            this.room.game = new PlayerPicksGame(this.room);
+            break;
+        }
+      }
 
       this.applyMessage(msg);
       this.room.lobby.filterSongs();
@@ -38,20 +53,20 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
    * The tick count when the answer gets revealed.
    */
   getRoundShowAnswerTick() {
-    return this.timePerQuestion + ROUND_PADDING_TICKS;
+    return ROUND_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS;
   }
 
   /**
    * The tick count when the music fades out.
    */
   getRoundPauseMusicTick() {
-    return this.timePerQuestion + ROUND_PADDING_TICKS * 2 - 1;
+    return ROUND_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2 - 1;
   }
 
   /**
    * The tick count when a new round shall be started.
    */
   getRoundStartNextTick() {
-    return this.timePerQuestion + ROUND_PADDING_TICKS * 2;
+    return ROUND_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2;
   }
 }

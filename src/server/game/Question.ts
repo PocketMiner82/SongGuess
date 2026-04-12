@@ -4,58 +4,29 @@ import _ from "lodash";
 
 export default abstract class Question {
   /**
-   * The random start position index (0-2) for this question.
+   * The random audio start position index (0-2) for this question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
   readonly rndStartPos: number = _.random(0, 2);
 
   /**
-   * The list of songs for this question (1 correct answer + 3 distractors).
-   */
-  answers: Song[] = [];
-
-  /**
    * Constructs a question asking which is the correct song.
-   * After all questions are added, {@link init} MUST be called.
    *
-   * @param song The correct song for this question.
+   * @param num the question number.
    * @param config The room's config
+   * @param song The correct song for this question.
    */
-  constructor(readonly song: Song, readonly config: ServerConfig) {
-    this.answers.push(song);
-  }
-
-  /**
-   * Initializes this question. MUST be called AFTER all questions are added.
-   * @param remainingSongs can contain all songs that were not yet added. Needed for {@link MultipleChoiceQuestion}s.
-   */
-  abstract init(remainingSongs?: Song[]): void;
-
-  /**
-   * Should return the correct answer index.
-   */
-  abstract getCorrectAnswer(): number;
-
-  /**
-   * Extracts song names from the questions array.
-   *
-   * @returns An array of song names for the answer options.
-   */
-  getSongNames() {
-    return this.answers.map(s => s.name);
-  }
+  constructor(readonly num: number, readonly config: ServerConfig, public song?: Song) { }
 
   /**
    * Creates a question message for sending to clients.
    *
-   * @param n The question number.
    * @returns The question message.
    */
-  getQuestionMessage(n: number): QuestionMessage {
+  getQuestionMessage(): QuestionMessage {
     return {
       type: "question",
-      number: n,
-      answerOptions: this.getSongNames(),
+      number: this.num,
       rndStartPos: this.rndStartPos
     };
   }
@@ -63,15 +34,12 @@ export default abstract class Question {
   /**
    * Creates an answer message for sending to clients.
    *
-   * @param n The question number.
    * @returns The answer message.
    */
-  getAnswerMessage(n: number): AnswerMessage {
+  getAnswerMessage(): AnswerMessage {
     return {
       type: "answer",
-      number: n,
-      answerOptions: this.getSongNames(),
-      correctAnswer: this.getCorrectAnswer()
+      number: this.num
     };
   }
 }

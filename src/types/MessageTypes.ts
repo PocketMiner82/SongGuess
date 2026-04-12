@@ -1,7 +1,7 @@
 import {
   AddPlaylistsMessageSchema, ChangeUsernameMessageSchema, RemovePlaylistMessageSchema, ReturnToMessageSchema,
   SelectAnswerMessageSchema,
-  StartGameMessageSchema, TransferHostMessageSchema
+  StartGameMessageSchema, TransferHostMessageSchema, PlayerPickSongMessageSchema
 } from "../schemas/ClientMessageSchemas";
 import z from "zod";
 import {
@@ -25,6 +25,7 @@ import {
 } from "../schemas/ServerMessageSchemas";
 import {type AddLogMessageSchema, UpdateLogMessagesSchema} from "../schemas/ServerAdminMessageSchemas";
 
+export type PlayerPicksSongMessage = z.infer<typeof PlayerPickSongMessageSchema>;
 export type SelectAnswerMessage = z.infer<typeof SelectAnswerMessageSchema>;
 export type StartGameMessage = z.infer<typeof StartGameMessageSchema>;
 export type AddPlaylistsMessage = z.infer<typeof AddPlaylistsMessageSchema>;

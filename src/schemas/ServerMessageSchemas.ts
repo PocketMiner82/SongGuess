@@ -22,9 +22,16 @@ export const PlayerAnswerDataSchema = z.object({
   answerSpeed: z.number(),
 
   /**
+   * Can be provided only for MultipleChoiceGame.
    * The index of the question the player selected.
    */
-  answerIndex: z.optional(z.int().min(0).max(3))
+  answerIndex: z.optional(z.int().min(0).max(3)),
+
+  /**
+   * Can be provided only for PlayerPicks.
+   * The answer the player selected.
+   */
+  answer: z.optional(z.string())
 });
 
 
@@ -66,9 +73,16 @@ export const QuestionMessageSchema = z.object({
   number: z.int().min(1),
 
   /**
+   * Provided only for MultipleChoiceGame.
    * The current 4 question answer options.
    */
-  answerOptions: z.array(z.string()).length(4),
+  answerOptions: z.optional(z.array(z.string()).length(4)),
+
+  /**
+   * Provided only for PlayerPicksGame.
+   * The user currently selecting an answer or null if the selection finished.
+   */
+  picker: z.nullish(z.string()),
 
   /**
    * The random start position index (0-2) for this question.
@@ -90,14 +104,22 @@ export const AnswerMessageSchema = z.object({
   number: z.int().min(1),
 
   /**
+   * Provided only for MultipleChoiceGame.
    * The current 4 question answer options. 
    */
-  answerOptions: z.array(z.string()).length(4),
+  answerOptions: z.optional(z.array(z.string()).length(4)),
 
   /**
+   * Provided only for MultipleChoiceGame.
    * The index of the correct answer.
    */
-  correctAnswer: z.int().min(0).max(3)
+  correctIndex: z.optional(z.int().min(0).max(3)),
+
+  /**
+   * Provided only for PlayerPicksGame.
+   * The correct song that was requested this round.
+   */
+  correctSong: z.optional(SongSchema)
 });
 
 
@@ -161,7 +183,7 @@ export const UpdatePlayedSongsMessageSchema = z.object({
   /**
    * The songs that were played in this round.
    */
-  songs: z.array(SongSchema)
+  songs: z.array(z.optional(SongSchema))
 });
 
 

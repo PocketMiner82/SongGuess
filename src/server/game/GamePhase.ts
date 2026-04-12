@@ -1,4 +1,5 @@
 enum GamePhase {
+  PICKING,
   QUESTION,
   ANSWERING,
   ANSWER,

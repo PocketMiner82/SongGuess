@@ -32,14 +32,14 @@ export class ValidRoom implements Party.Server {
   readonly config: ServerConfig;
 
   /**
-   * The current game handler.
-   */
-  readonly game: Game;
-
-  /**
    * The lobby handler.
    */
   readonly lobby: Lobby;
+
+  /**
+   * The current game handler.
+   */
+  game: Game;
 
   /**
    * The player object that has host permissions in this room.

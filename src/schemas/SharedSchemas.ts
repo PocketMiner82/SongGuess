@@ -80,6 +80,15 @@ export const RoomConfigMessageSchema = z.object({
   type: z.literal("room_config").default("room_config"),
 
   /**
+   * The game mode being played.
+   * - multiple_choice: the server selects random songs from the provided playlist and provides a multiple choice
+   *   question with distractions.
+   * - player_picks: a player from the room picks a song for other players to guess each round. other players have to
+   *   guess the song title by typing.
+   */
+  gameMode: z.literal(["multiple_choice", "player_picks"]),
+
+  /**
    * Whether to perform advanced filtering tactics when generating the songs array.
    * Currently just ignores parens when filtering for identical song names.
    */

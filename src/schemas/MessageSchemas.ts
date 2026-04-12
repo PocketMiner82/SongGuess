@@ -1,7 +1,7 @@
 import z from "zod";
 import {
   ChangeUsernameMessageSchema, AddPlaylistsMessageSchema, RemovePlaylistMessageSchema, StartGameMessageSchema,
-  SelectAnswerMessageSchema, ReturnToMessageSchema, TransferHostMessageSchema
+  SelectAnswerMessageSchema, ReturnToMessageSchema, TransferHostMessageSchema, PlayerPickSongMessageSchema
 } from "./ClientMessageSchemas";
 import {
   UpdateMessageSchema,
@@ -24,7 +24,8 @@ const _ClientMessageSchema = z.discriminatedUnion("type", [
   StartGameMessageSchema,
   SelectAnswerMessageSchema,
   ReturnToMessageSchema,
-  TransferHostMessageSchema
+  TransferHostMessageSchema,
+  PlayerPickSongMessageSchema
 ]);
 
 const _ServerMessageSchema = z.discriminatedUnion("type", [

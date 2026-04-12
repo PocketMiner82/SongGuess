@@ -1,5 +1,5 @@
 import z from "zod";
-import {PlaylistSchema, UsernameSchema} from "./SharedSchemas";
+import {PlaylistSchema, SongSchema, UsernameSchema} from "./SharedSchemas";
 
 
 /**
@@ -29,16 +29,36 @@ export const ReturnToMessageSchema = z.object({
 
 
 /**
- * Schema for messages containing the player's selected answer during a question.
+ * Schema for messages containing the player's selected song in the choose step of a PlayerPicksGame.
+ */
+export const PlayerPickSongMessageSchema = z.object({
+  type: z.literal("player_pick_song").default("player_pick_song"),
+
+  /**
+   * The song the player picked in the choose step.
+   */
+  song: SongSchema
+});
+
+
+/**
+ * Schema for messages containing the player's selected answer index during a question in a MultipleChoiceGame.
  */
 export const SelectAnswerMessageSchema = z.object({
   type: z.literal("select_answer").default("select_answer"),
 
   /**
+   * Provided only for MultipleChoiceGame.
    * The index of the selected answer.
    */
-  answerIndex: z.int().min(0).max(3)
-})
+  answerIndex: z.int().min(0).max(3).optional(),
+
+  /**
+   * Provided only for PlayerPicksGame.
+   * The string of the song name the player guessed.
+   */
+  answer: z.string().optional()
+});
 
 
 /**

@@ -19,9 +19,14 @@ export const ROOM_HOST_TRANSFER_TIMEOUT = 10;
 export const ROOM_INACTIVITY_KICK_TIMEOUT = 15;
 
 /**
- * The tick count when a round starts.
+ * The tick count when a new round starts.
  */
 export const ROUND_START_TICK = 0;
+
+/**
+ * The tick count when a question was picked.
+ */
+export const ROUND_PICKED_SONG_TICK = ROUND_START_TICK + 60;
 
 /**
  * The amount of ticks before and after a question is/was displayed.

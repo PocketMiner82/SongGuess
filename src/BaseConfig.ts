@@ -4,6 +4,8 @@ import {RoomConfigMessageSchema} from "./schemas/SharedSchemas";
 export class BaseConfig implements RoomConfigMessage {
   public type: RoomConfigMessage["type"] = "room_config";
 
+  public gameMode: RoomConfigMessage["gameMode"] = "multiple_choice";
+
   public advancedSongFiltering: boolean = true;
 
   public endWhenAnswered: boolean = false;

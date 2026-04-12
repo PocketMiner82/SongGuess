@@ -7,6 +7,7 @@ import type {
   Song, UpdatePlaylistsMessage
 } from "../types/MessageTypes";
 import type Player from "./Player";
+import {MultipleChoiceGame} from "./game/multipleChoice/MultipleChoiceGame";
 
 
 export default class Lobby implements IEventListener {
@@ -54,7 +55,9 @@ export default class Lobby implements IEventListener {
         this.filterSongs();
 
         // playlist updates will force to include all songs again
-        this.room.game.remainingSongs = [];
+        if (this.room.game instanceof MultipleChoiceGame) {
+          this.room.game.remainingSongs = [];
+        }
 
         // send the update to all players + confirmation to the host
         this.room.server.safeBroadcast(this.getPlaylistsUpdateMessage());

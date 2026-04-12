@@ -20,12 +20,17 @@ function PlayedSongsList() {
         </h3>
         <div className="space-y-2 mx-auto">
           {controller.playedSongs.map((song, idx) => (
-              <PlaylistCard
-                  key={idx}
-                  title={song.name}
-                  subtitle={song.artist}
-                  coverURL={song.cover}
-                  hrefURL={song.hrefURL} />
+              song ?
+                  <PlaylistCard
+                      key={idx}
+                      title={song.name}
+                      subtitle={song.artist}
+                      coverURL={song.cover}
+                      hrefURL={song.hrefURL} />
+                  :
+                  <PlaylistCard
+                      key={idx}
+                      title="(Skipped Round)" />
           ))}
         </div>
       </div>
