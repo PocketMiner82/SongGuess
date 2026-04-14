@@ -290,7 +290,7 @@ export class ValidRoom implements Party.Server {
           break;
 
         case "min_song_count":
-          if (this.lobby.songs.length < this.config.questionsCount) {
+          if (this.lobby.songs.length < this.config.questionsCount && this.config.gameMode === "multiple_choice") {
             possibleErrorFunc(`Required at least ${this.config.questionsCount} songs. Selected: ${this.lobby.songs.length}`);
             successful = false;
           }

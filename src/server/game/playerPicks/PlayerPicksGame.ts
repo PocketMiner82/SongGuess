@@ -23,14 +23,14 @@ export class PlayerPicksGame extends Game {
   /**
    * The player currently selecting a song.
    */
-  picker?: Player;
+  picker: Player|null = null;
 
 
   protected getNextQuestion(): Question {
-    if (this.pickerIndex > this.room.activePlayers.length) {
+    if (this.pickerIndex >= this.room.activePlayers.length) {
       this.pickerIndex = 0;
     }
-    this.picker = Array.from(this.room.activePlayers.values())[this.pickerIndex];
+    this.picker = this.room.activePlayers[this.pickerIndex++];
 
     let q = new PlayerPicksQuestion(
         this.currentQuestionIndex + 1,
@@ -62,6 +62,14 @@ export class PlayerPicksGame extends Game {
     }
 
     return ret;
+  }
+
+  onGamePhaseChanged() {
+    if (this.gamePhase === GamePhase.QUESTION) {
+      (this.currentQuestion! as PlayerPicksQuestion).pickerId = null;
+    }
+
+    super.onGamePhaseChanged();
   }
 
   selectAnswer(player: Player, msg: SelectAnswerMessage) {

@@ -17,7 +17,7 @@ import type {
   ChangeUsernameMessage,
   GameState,
   PingMessage,
-  PlayerMessage,
+  PlayerMessage, PlayerPicksSongMessage,
   Playlist,
   PlaylistsFile,
   QuestionMessage,
@@ -175,6 +175,13 @@ export class RoomController {
    * The PartySocket instance used for server communication.
    */
   private socket: PartySocket;
+
+  /**
+   * The users id.
+   */
+  get userID(): string {
+    return this.socket.id;
+  }
 
   /**
    * Whether the WebSocket is currently reconnecting
@@ -592,15 +599,39 @@ export class RoomController {
     this.addPlaylists(...playlistsFile.playlists);
   }
 
-   /**
-    * Sends the selected answer to the server.
-    * @param answerIndex The index of the selected answer (0-3).
-    */
+  /**
+   * Sends the selected answer to the server for MultipleChoiceGame.
+   * @param answerIndex The index of the selected answer (0-3).
+   */
   public selectAnswer(answerIndex: number) {
     this.socket.send(JSON.stringify({
       type: "select_answer",
       answerIndex
     } satisfies SelectAnswerMessage));
+  }
+
+  /**
+   * Sends the text answer (song guess) to the server for PlayerPicksGame.
+   * @param answer The song name the player guessed.
+   */
+  public selectAnswerText(answer: string) {
+    this.socket.send(JSON.stringify({
+      type: "select_answer",
+      answer: answer
+    } satisfies SelectAnswerMessage));
+  }
+
+  /**
+   * Sends the picked song to the server for PlayerPicksGame.
+   * @param song The song the player picked.
+   * @param startPos The start position for the audio.
+   */
+  public pickSong(song: Song, startPos: number) {
+    this.socket.send(JSON.stringify({
+      type: "player_pick_song",
+      song: song,
+      startPos: startPos
+    } satisfies PlayerPicksSongMessage));
   }
 
   /**

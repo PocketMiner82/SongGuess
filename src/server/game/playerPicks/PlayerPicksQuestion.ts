@@ -3,7 +3,7 @@ import type ServerConfig from "../../config/ServerConfig";
 import type {AnswerMessage, QuestionMessage, Song} from "../../../types/MessageTypes";
 
 export default class PlayerPicksQuestion extends Question {
-  constructor(num: number, config: ServerConfig, private pickerId: string, song?: Song) {
+  constructor(num: number, config: ServerConfig, public pickerId: string|null, song?: Song) {
     super(num, config, song);
   }
 

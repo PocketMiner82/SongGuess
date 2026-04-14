@@ -5,6 +5,7 @@ import { safeSearch, fixedCoverSize } from "../../Utils";
 import { type ResultMusicTrack, type ResultAlbum, type ResultMusicArtist } from "itunes-store-api";
 import { artistRegex, albumRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { ModalContent } from "./ModalContent";
+import {useModalWindow} from "react-modal-global";
 
 /**
  * The current status of the search operation.
@@ -37,6 +38,7 @@ export function SearchMusicDialog({
   onlyAcceptSongs = false,
   onPlaylistSelected
 }: SearchMusicDialogProps) {
+  const modal = useModalWindow();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
@@ -59,6 +61,12 @@ export function SearchMusicDialog({
         onPlaylistSelected(query).then(successful => {
           if (successful) {
             setSearchStatus("success");
+
+            // close when successfully selected.
+            if (onlyAcceptSongs) {
+              modal.close();
+              console.log("close!!!")
+            }
           } else {
             setSearchStatus("error");
           }
@@ -118,6 +126,12 @@ export function SearchMusicDialog({
     onPlaylistSelected(hrefURL).then(successful => {
       if (successful) {
         setSearchStatus("success");
+
+        // close when successfully selected.
+        if (onlyAcceptSongs) {
+          modal.close();
+          console.log("close!!!")
+        }
       } else {
         setSearchStatus("error");
         setAddedIndices(prev => {

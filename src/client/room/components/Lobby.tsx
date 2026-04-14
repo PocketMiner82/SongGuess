@@ -260,7 +260,7 @@ function StartGame() {
 
   return (
     <Button
-      disabled={controller.playlists.length === 0}
+      disabled={controller.playlists.length === 0 && controller.config.gameMode === "multiple_choice"}
       onClick={() => controller.startGame()}
     >
       Start Game
@@ -402,6 +402,45 @@ function SettingsDropdown({ value, onChange, options, children }: {
   );
 }
 
+function GameModeSelector() {
+  const controller = useControllerContext();
+  
+  return (
+    <div className="mb-4">
+      <div className="flex border-b border-gray-600">
+        <button
+          type="button"
+          onClick={() => {
+            controller.config.gameMode = "multiple_choice";
+            controller.sendConfig();
+          }}
+          className={`flex-1 py-2 px-4 text-center transition-colors ${
+            controller.config.gameMode === "multiple_choice"
+              ? "border-b-2 border-secondary text-secondary"
+              : "text-disabled-text hover:text-default"
+          }`}
+        >
+          Multiple Choice
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            controller.config.gameMode = "player_picks";
+            controller.sendConfig();
+          }}
+          className={`flex-1 py-2 px-4 text-center transition-colors ${
+            controller.config.gameMode === "player_picks"
+              ? "border-b-2 border-secondary text-secondary"
+              : "text-disabled-text hover:text-default"
+          }`}
+        >
+          Player Picks
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Settings() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "room_config");
@@ -409,24 +448,41 @@ function Settings() {
   return (
     <div>
       <h3 className="text-xl font-bold mb-3">Settings</h3>
+      <GameModeSelector />
+
       <div className="grid gap-4">
-        <AddPlaylistButton />
+        {controller.config.gameMode === "multiple_choice" && (
+            <>
+              <AddPlaylistButton />
 
-        <div className="grid grid-cols-2 gap-4">
-          <ClearPlaylists />
-          <ImportPlaylists />
-        </div>
+              <div className="grid grid-cols-2 gap-4">
+                <ClearPlaylists />
+                <ImportPlaylists />
+              </div>
 
-        <div className="border-t border-disabled-bg my-1"></div>
+              <div className="border-t border-disabled-bg my-1"></div>
 
-        <SettingsToggle value={controller.config.advancedSongFiltering}
-          onToggle={v => {
-            controller.config.advancedSongFiltering = v;
-            controller.sendConfig();
-          }}
-        >
-          Perform advanced song filtering
-        </SettingsToggle>
+              <SettingsToggle value={controller.config.advancedSongFiltering}
+                              onToggle={v => {
+                                controller.config.advancedSongFiltering = v;
+                                controller.sendConfig();
+                              }}
+              >
+                Perform advanced song filtering
+              </SettingsToggle>
+
+              <SettingsToggle value={controller.config.distractionsPreferSameArtist}
+                              onToggle={v => {
+                                controller.config.distractionsPreferSameArtist = v;
+                                controller.sendConfig();
+                              }}
+              >
+                Distractions: Prefer songs by same artist
+              </SettingsToggle>
+
+              <div className="border-t border-disabled-bg my-1"></div>
+            </>
+        )}
 
         <SettingsToggle value={controller.config.endWhenAnswered}
           onToggle={v => {
@@ -437,16 +493,7 @@ function Settings() {
           End round when all players answered
         </SettingsToggle>
 
-        <SettingsToggle value={controller.config.distractionsPreferSameArtist}
-                        onToggle={v => {
-                          controller.config.distractionsPreferSameArtist = v;
-                          controller.sendConfig();
-                        }}
-        >
-          Distractions: Prefer songs by same artist
-        </SettingsToggle>
-
-        <SettingsNumberInput 
+        <SettingsNumberInput
           value={controller.config.questionsCount}
           onChange={v => {
             controller.config.questionsCount = v;

@@ -188,7 +188,7 @@ export const UpdatePlayedSongsMessageSchema = z.object({
   /**
    * The songs that were played in this round.
    */
-  songs: z.array(z.optional(SongSchema))
+  songs: z.array(SongSchema)
 });
 
 

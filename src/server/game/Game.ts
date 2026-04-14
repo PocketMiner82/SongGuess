@@ -195,12 +195,12 @@ export default abstract class Game implements IEventListener {
       return;
     }
 
-    let sendGameMessage = false;
+    let gamePhaseChange = false;
     let runAgain = false;
     switch (++this.roundTicks) {
       // allow picking question
       case ROUND_START_TICK:
-        sendGameMessage = true;
+        gamePhaseChange = true;
         this.gamePhase = GamePhase.PICKING;
         // skip to ROUND_PICKED_SONG_TICK if question add was instant
         runAgain = this.tryGetNextQuestion();
@@ -216,21 +216,21 @@ export default abstract class Game implements IEventListener {
           break;
         }
 
-        sendGameMessage = true;
+        gamePhaseChange = true;
         this.gamePhase = GamePhase.QUESTION;
         this.room.broadcastUpdateMessage();
         break;
 
       // start music playback
       case ROUND_PADDING_TICKS + ROUND_PICKED_SONG_TICK:
-        sendGameMessage = true;
+        gamePhaseChange = true;
         this.gamePhase = GamePhase.ANSWERING;
         this.roundStartTime = Date.now();
         break;
 
       // show results of current round
       case this.room.config.getRoundShowAnswerTick():
-        sendGameMessage = true;
+        gamePhaseChange = true;
         this.gamePhase = GamePhase.ANSWER;
         this.calculatePoints();
 
@@ -239,13 +239,15 @@ export default abstract class Game implements IEventListener {
 
       // pause music to allow fade out
       case this.room.config.getRoundPauseMusicTick():
-        sendGameMessage = true;
+        gamePhaseChange = true;
         this.gamePhase = GamePhase.PAUSE_MUSIC;
         break;
     }
 
-    if (sendGameMessage) {
-      this.getGameMessages().forEach(msg => this.room.server.safeBroadcast(msg));
+    if (gamePhaseChange) {
+      this.onGamePhaseChanged();
+      this.getGameMessages(this.gamePhase === GamePhase.QUESTION && this.room.config.gameMode === "player_picks")
+          .forEach(msg => this.room.server.safeBroadcast(msg));
     }
 
     // this allows directly jumping to the next tick interval, allowing to skip ticks
@@ -253,6 +255,11 @@ export default abstract class Game implements IEventListener {
       this.onTick();
     }
   }
+
+  /**
+   * Called every time the game phase changed but before the game messages are sent.
+   */
+  public onGamePhaseChanged() { }
 
   /**
    * Provides the next question that should be added to the list.
@@ -411,7 +418,7 @@ export default abstract class Game implements IEventListener {
   public getPlayedSongsUpdateMessage(): UpdatePlayedSongsMessage {
     return {
       type: "update_played_songs",
-      songs: this.questions.map(q => q.song)
+      songs: this.questions.filter(q => q.song).map(q => q.song!)
     };
   }
 
