@@ -9,10 +9,11 @@ function getShowField(player: PlayerMessage, showField: PossibleFields): string|
   if (Object.keys(PlayerMessageSchema.shape).indexOf(showField) !== -1) {
     return player[showField as Exclude<keyof PlayerMessage, "answerData">];
   } else if (player.answerData) {
-    return (showField === "answerSpeed" ?
-        `${(player.answerData.answerSpeed / 1000).toFixed(3)} s` :
-        player.answerData[showField as keyof PlayerAnswerData]
-    );
+    if (showField === "answerSpeed" && (player.answerData.roundPoints ?? 0) > 0) {
+      return `${(player.answerData.answerSpeed / 1000).toFixed(3)} s`;
+    } else if (showField !== "answerSpeed") {
+      return player.answerData[showField as keyof PlayerAnswerData];
+    }
   }
 
   return undefined;
