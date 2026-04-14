@@ -22,6 +22,11 @@ export const PlayerAnswerDataSchema = z.object({
   answerSpeed: z.number(),
 
   /**
+   * The points the player got this round
+   */
+  roundPoints: z.number(),
+
+  /**
    * Can be provided only for MultipleChoiceGame.
    * The index of the question the player selected.
    */

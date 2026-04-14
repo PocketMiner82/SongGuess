@@ -71,17 +71,14 @@ export class PlayerPicksGame extends Game {
 
   calculatePoints() {
     for (let player of this.room.activePlayers) {
-      // half of points depends on time the player needed to answer
-      player.points += this.getTimePoints(player);
-
       // if the player typed the song name perfectly (ignoring case)
-      if (normalizeSongName(player.answerData?.answer ?? "", false) ===
+      if (player.answerData && normalizeSongName(player.answerData.answer ?? "", false) ===
           normalizeSongName(this.currentQuestion!.song!.name, false)) {
         // this gives the max points, so there is a bonus added of half the max points
-        player.points += ROUND_POINTS_PER_QUESTION;
-      } else {
+        player.answerData.roundPoints = ROUND_POINTS_PER_QUESTION;
+      } else if (player.answerData) {
         // check for partial correctness (ignoring parens)
-        let playerAnswer = normalizeSongName(player.answerData?.answer ?? "", true);
+        let playerAnswer = normalizeSongName(player.answerData.answer ?? "", true);
         let correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
         let levenshteinDist = distance(playerAnswer, correctAnswer);
         let similarity = 1 - (levenshteinDist / correctAnswer.length);
@@ -89,11 +86,17 @@ export class PlayerPicksGame extends Game {
         // answer must be at least 75% correct to be counted
         if (similarity >= 0.75) {
           // scale 0-500 points linear with 75% - 100% similarity; will be at max half the points
-          player.points += (similarity - 0.75) * 4 * (ROUND_POINTS_PER_QUESTION / 2);
+          player.answerData.roundPoints = (similarity - 0.75) * 4 * (ROUND_POINTS_PER_QUESTION / 2);
         }
       }
 
-      player.points = Math.round(player.points);
+      if (player.answerData?.roundPoints !== undefined) {
+        // other half of points depends on time the player needed to answer
+        player.answerData!.roundPoints += this.getTimePoints(player);
+
+        player.answerData!.roundPoints = Math.round(player.answerData!.roundPoints);
+        player.points = player.answerData!.roundPoints;
+      }
     }
   }
 }

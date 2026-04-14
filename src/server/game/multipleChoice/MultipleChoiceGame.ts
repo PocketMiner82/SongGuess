@@ -56,11 +56,12 @@ export class MultipleChoiceGame extends Game {
     for (let player of this.room.activePlayers) {
       if (player.answerData?.answerIndex === (this.currentQuestion! as MultipleChoiceQuestion).getCorrectAnswer()) {
         // half the points for correct answer
-        player.points += ROUND_POINTS_PER_QUESTION / 2;
+        player.answerData.roundPoints = ROUND_POINTS_PER_QUESTION / 2;
         // remaining points depend on speed of answer
-        player.points += this.getTimePoints(player);
+        player.answerData.roundPoints += this.getTimePoints(player);
 
-        player.points = Math.round(player.points);
+        player.answerData.roundPoints = Math.round(player.answerData.roundPoints);
+        player.points += player.answerData.roundPoints;
       }
     }
   }

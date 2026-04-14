@@ -299,7 +299,8 @@ export default abstract class Game implements IEventListener {
     player.answerData = {
       answerSpeed: currentTime - this.roundStartTime,
       answerTimestamp: currentTime,
-      questionIndex: this.currentQuestionIndex
+      questionIndex: this.currentQuestionIndex,
+      points: NaN
     };
 
     if (this.room.config.endWhenAnswered) {

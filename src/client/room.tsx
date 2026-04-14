@@ -5,7 +5,7 @@ import {
   useRoomControllerMessageTypeListener
 } from "./room/RoomController";
 import { Lobby } from "./room/components/Lobby";
-import {Ingame} from "./room/components/Ingame";
+import {Ingame} from "./room/components/ingame/Ingame";
 import {Results} from "./room/components/Results";
 import { BottomBar } from "./room/components/BottomBar";
 import { TopBar } from "./components/TopBar";
