@@ -91,10 +91,10 @@ export class PlayerPicksGame extends Game {
         let levenshteinDist = distance(playerAnswer, correctAnswer);
         let similarity = 1 - (levenshteinDist / correctAnswer.length);
 
-        // answer must be at least 75% correct to be counted
-        if (similarity >= 0.75) {
+        // answer must be at least 40% correct to be counted
+        if (similarity >= 0.4) {
           // scale 0-500 points linear with 75% - 100% similarity; will be at max half the points
-          player.answerData.roundPoints = (similarity - 0.75) * 4 * (ROUND_POINTS_PER_QUESTION / 2);
+          player.answerData.roundPoints = ((similarity - 0.4) / 0.6) * (ROUND_POINTS_PER_QUESTION / 2);
         }
       }
 

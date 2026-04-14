@@ -23,8 +23,8 @@ function AnswerResults() {
           return 0;
         }).sort((a, b) => {
           // move incorrect answers down
-          if (a.answerData?.roundPoints !== undefined && b.answerData?.roundPoints === undefined) return -1;
-          if (a.answerData?.roundPoints === undefined && b.answerData?.roundPoints !== undefined) return 1;
+          if (a.answerData?.roundPoints && !b.answerData?.roundPoints) return -1;
+          if (!a.answerData?.roundPoints && b.answerData?.roundPoints) return 1;
 
           return 0;
         });
