@@ -1,3 +1,10 @@
+# [2.14.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.11...2.14.0-dev.12) (2026-04-14)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** add points instead of overwriting ([9c2442f](https://github.com/PocketMiner82/SongGuess/commit/9c2442f4f7b650b0ec6e5de673ed6546decc9c68))
+
 # [2.14.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.10...2.14.0-dev.11) (2026-04-14)
 
 
