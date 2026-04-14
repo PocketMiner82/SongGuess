@@ -1,3 +1,11 @@
+# [2.14.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.8...2.14.0-dev.9) (2026-04-14)
+
+
+### Features
+
+* implement PlayerPicksGame where a player selects the song others should guess ([beb56bb](https://github.com/PocketMiner82/SongGuess/commit/beb56bb3f85e12e09827ed9993c47113ba3de0f0))
+* **PlayerPicksGame:** first beta implementation in frontend ([f4e2943](https://github.com/PocketMiner82/SongGuess/commit/f4e2943a475fdf056a47ca2f86cfa95adea44b73))
+
 # [2.14.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.7...2.14.0-dev.8) (2026-04-12)
 
 
