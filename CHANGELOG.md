@@ -1,3 +1,10 @@
+# [2.14.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.9...2.14.0-dev.10) (2026-04-14)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** dont show wrong answer timestamps + more generous levenshtein points ([c362bd3](https://github.com/PocketMiner82/SongGuess/commit/c362bd3c5aef1157ee92f9e446e78188b9d1840b))
+
 # [2.14.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.8...2.14.0-dev.9) (2026-04-14)
 
 
