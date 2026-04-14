@@ -103,7 +103,7 @@ export class PlayerPicksGame extends Game {
         player.answerData!.roundPoints += this.getTimePoints(player);
 
         player.answerData!.roundPoints = Math.round(player.answerData!.roundPoints);
-        player.points = player.answerData!.roundPoints;
+        player.points += player.answerData!.roundPoints;
       }
     }
   }
