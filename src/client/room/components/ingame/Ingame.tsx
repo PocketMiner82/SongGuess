@@ -1,10 +1,7 @@
-import React, { useState, useCallback, memo, useEffect, useRef } from "react";
-import { Button } from "../../../components/Button";
-import { PlayerAvatar } from "../PlayerAvatar";
-import {useControllerContext, useRoomControllerListener, useRoomControllerMessageTypeListener} from "../../RoomController";
+import React from "react";
+import {useControllerContext, useRoomControllerMessageTypeListener} from "../../RoomController";
 import {ResultsPlayerList} from "../ResultsPlayerList";
 import type {PlayerMessage} from "../../../../types/MessageTypes";
-import {ROUND_PADDING_TICKS} from "../../../../ConfigConstants";
 import {MultipleChoiceQuestionDisplay} from "./MultipleChoiceQuestionDisplay";
 import {PlayerPicksQuestionDisplay} from "./PlayerPicksQuestionDisplay";
 
