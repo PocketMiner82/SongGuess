@@ -83,7 +83,7 @@ export default class Player implements PlayerMessage, IEventListener {
     }
 
     // clear cached answer when we're already at the next question
-    if (this.answerData?.questionNumber !== this.room.game.currentQuestion || this.room.state !== "ingame") {
+    if (this.answerData?.questionIndex !== this.room.game.currentQuestionIndex || this.room.state !== "ingame") {
       // reset points only if in lobby
       this.resetAnswerData(this.room.state === "lobby");
     }

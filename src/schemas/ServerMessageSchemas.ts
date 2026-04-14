@@ -9,7 +9,7 @@ export const PlayerAnswerDataSchema = z.object({
   /**
    * The last question the player answered for.
    */
-  questionNumber: z.number(),
+  questionIndex: z.number(),
 
   /**
    * The absolute time in ms where the player answered a round question.
@@ -80,15 +80,15 @@ export const QuestionMessageSchema = z.object({
 
   /**
    * Provided only for PlayerPicksGame.
-   * The user currently selecting an answer or null if the selection finished.
+   * The user id currently selecting an answer or null if the selection finished.
    */
-  picker: z.nullish(z.string()),
+  pickerId: z.nullish(z.string()),
 
   /**
-   * The random start position index (0-2) for this question.
+   * The random/user-defined audio start position index (0-2) for this question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  rndStartPos: z.number().min(0).max(2),
+  startPos: z.number().min(0).max(2),
 });
 
 
@@ -233,9 +233,9 @@ export const UpdateMessageSchema = z.object({
   state: GameStateSchema,
 
   /**
-   * A map of all active (online, non-spectating) players
+   * A map of all active (online, non-spectating) players. Key is connection ID.
    */
-  players: z.array(PlayerMessageSchema),
+  players: z.map(z.string(), PlayerMessageSchema),
 
   /**
    * The friendly username of the player (which the user can request to change)

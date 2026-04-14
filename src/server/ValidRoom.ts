@@ -357,8 +357,13 @@ export class ValidRoom implements Party.Server {
    *
    * @returns An array of valid PlayerMessage objects from all connected players.
    */
-  public getActivePlayerMessages(): PlayerMessage[] {
-    return this.activePlayers.map(player => player.toPlayerMessage());
+  public getActivePlayerMessages(): Map<string, PlayerMessage> {
+    return new Map(
+        this.activePlayers.map(player => [
+          player.conn.id,
+          player.toPlayerMessage()
+        ])
+    );
   }
 
   /**

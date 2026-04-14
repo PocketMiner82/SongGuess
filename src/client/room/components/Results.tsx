@@ -48,7 +48,7 @@ export function Results() {
   if (controller.state !== "results") return null;
 
   // sort by descending score
-  let rankedPlayers = controller.players.sort((a, b) => b.points - a.points);
+  let rankedPlayers = controller.playerMessages.sort((a, b) => b.points - a.points);
 
   return (
     <div className="space-y-6 lg:max-w-3/4 2xl:max-w-1/2 mx-auto p-4 min-h-full">

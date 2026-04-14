@@ -31,7 +31,7 @@ export class MultipleChoiceGame extends Game {
     }
 
     let q = new MultipleChoiceQuestion(
-        this.currentQuestion + 1,
+        this.currentQuestionIndex + 1,
         this.remainingSongs.pop()!,
         this.room.config,
         this.room.lobby.songs
@@ -54,14 +54,11 @@ export class MultipleChoiceGame extends Game {
 
   calculatePoints() {
     for (let player of this.room.activePlayers) {
-      if (player.answerData?.answerIndex === this.questions[this.currentQuestion].getCorrectAnswer()) {
+      if (player.answerData?.answerIndex === (this.currentQuestion! as MultipleChoiceQuestion).getCorrectAnswer()) {
         // half the points for correct answer
         player.points += ROUND_POINTS_PER_QUESTION / 2;
-
         // remaining points depend on speed of answer
-        let factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData.answerTimestamp - this.roundStartTime)))
-            / (this.room.config.timePerQuestion * 1000);
-        player.points += (ROUND_POINTS_PER_QUESTION / 2) * factor;
+        player.points += this.getTimePoints(player);
 
         player.points = Math.round(player.points);
       }

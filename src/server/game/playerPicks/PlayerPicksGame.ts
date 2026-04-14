@@ -5,6 +5,8 @@ import type Question from "../Question";
 import Player from "../../Player";
 import PlayerPicksQuestion from "./PlayerPicksQuestion";
 import GamePhase from "../GamePhase";
+import {distance} from "fastest-levenshtein";
+import {normalizeSongName} from "../../../Utils";
 
 
 export class PlayerPicksGame extends Game {
@@ -14,15 +16,26 @@ export class PlayerPicksGame extends Game {
   questions: PlayerPicksQuestion[] = [];
 
   /**
+   * The current index of the player selecting a song pointing to an online player.
+   */
+  pickerIndex: number = 0;
+
+  /**
    * The player currently selecting a song.
    */
   picker?: Player;
 
 
   protected getNextQuestion(): Question {
+    if (this.pickerIndex > this.room.activePlayers.length) {
+      this.pickerIndex = 0;
+    }
+    this.picker = Array.from(this.room.activePlayers.values())[this.pickerIndex];
+
     let q = new PlayerPicksQuestion(
-        this.currentQuestion + 1,
-        this.room.config
+        this.currentQuestionIndex + 1,
+        this.room.config,
+        this.picker.conn.id
     );
 
     this.room.server.logger.info(`Created PlayerPicksQuestion ${q.num}`);
@@ -37,12 +50,13 @@ export class PlayerPicksGame extends Game {
         player.sendConfirmationOrError(msg, "Can only pick songs during picking phase.");
         return true;
       } else if (this.picker !== player) {
-        player.sendConfirmationOrError(msg, "You are not allowed to pick a song.");
+        player.sendConfirmationOrError(msg, "It is not your turn to pick a song.");
         return true;
       }
 
       // song was selected, continue to picked phase
-      this.questions[this.currentQuestion].song = msg.song;
+      this.currentQuestion!.song = msg.song;
+      this.currentQuestion!.startPos = msg.startPos;
       this.roundTicks = ROUND_PICKED_SONG_TICK - 1;
       return true;
     }
@@ -52,22 +66,34 @@ export class PlayerPicksGame extends Game {
 
   selectAnswer(player: Player, msg: SelectAnswerMessage) {
     super.selectAnswer(player, msg);
-    //player.answerData!.answer = msg.answer!;
+    player.answerData!.answer = msg.answer!;
   }
 
   calculatePoints() {
-    // for (let player of this.room.activePlayers) {
-    //   if (player.answerData?.answerIndex === this.questions[this.currentQuestion].getCorrectAnswer()) {
-    //     // half the points for correct answer
-    //     player.points += ROUND_POINTS_PER_QUESTION / 2;
-    //
-    //     // remaining points depend on speed of answer
-    //     let factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData.answerTimestamp - this.roundStartTime)))
-    //         / (this.room.config.timePerQuestion * 1000);
-    //     player.points += (ROUND_POINTS_PER_QUESTION / 2) * factor;
-    //
-    //     player.points = Math.round(player.points);
-    //   }
-    // }
+    for (let player of this.room.activePlayers) {
+      // half of points depends on time the player needed to answer
+      player.points += this.getTimePoints(player);
+
+      // if the player typed the song name perfectly (ignoring case)
+      if (normalizeSongName(player.answerData?.answer ?? "", false) ===
+          normalizeSongName(this.currentQuestion!.song!.name, false)) {
+        // this gives the max points, so there is a bonus added of half the max points
+        player.points += ROUND_POINTS_PER_QUESTION;
+      } else {
+        // check for partial correctness (ignoring parens)
+        let playerAnswer = normalizeSongName(player.answerData?.answer ?? "", true);
+        let correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
+        let levenshteinDist = distance(playerAnswer, correctAnswer);
+        let similarity = 1 - (levenshteinDist / correctAnswer.length);
+
+        // answer must be at least 75% correct to be counted
+        if (similarity >= 0.75) {
+          // scale 0-500 points linear with 75% - 100% similarity; will be at max half the points
+          player.points += (similarity - 0.75) * 4 * (ROUND_POINTS_PER_QUESTION / 2);
+        }
+      }
+
+      player.points = Math.round(player.points);
+    }
   }
 }

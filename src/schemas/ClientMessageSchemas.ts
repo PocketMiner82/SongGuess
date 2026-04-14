@@ -37,7 +37,13 @@ export const PlayerPickSongMessageSchema = z.object({
   /**
    * The song the player picked in the choose step.
    */
-  song: SongSchema
+  song: SongSchema,
+
+  /**
+   * The selected start pos for the song.
+   * @see RoomConfigMessageSchema.audioStartPosition
+   */
+  startPos: z.number().min(0).max(2)
 });
 
 

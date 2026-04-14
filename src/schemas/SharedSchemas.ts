@@ -120,6 +120,8 @@ export const RoomConfigMessageSchema = z.object({
    *  - 1: close to middle of audio
    *  - 2: close to end of audio
    *  - 3: random of the above
+   *
+   * Used as default value in PlayerPicksGame, used as forced position in MultipleChoiceGame.
    */
   audioStartPosition: z.number().min(0).max(3)
 });

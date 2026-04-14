@@ -49,6 +49,28 @@ export function formatLocalDateTime(date: Date): string {
 }
 
 /**
+ * Normalizes a song title by converting it to lowercase and optionally
+ * stripping parenthetical metadata and non-alphanumeric characters.
+ *
+ * @param name - The original song title to be processed.
+ * @param removeParens - A boolean flag; when true, removes trailing
+ * bracketed or parenthesized content and non-standard characters.
+ * @returns The processed and normalized string.
+ */
+export function normalizeSongName(name: string, removeParens: boolean): string {
+  let normalizedName = name.toLowerCase();
+
+  if (removeParens) {
+    // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
+    normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
+    normalizedName = normalizedName.replace(/[^\p{L}\p{N} ]/gu, "");
+    normalizedName = normalizedName.replace(/ +/g, " ");
+  }
+
+  return normalizedName;
+}
+
+/**
  * Attempts to retrieve a {@link Playlist} by fetching songs from the iTunes Search API and (via proxy) music.apple.com.
  * @param url The Apple Music URL of the artist, song or album.
  */

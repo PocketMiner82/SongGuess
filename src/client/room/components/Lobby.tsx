@@ -42,9 +42,9 @@ function PlayerList() {
   }, []);
 
   const slots = useMemo(() => {
-    const rows = Math.ceil(controller.players.length / columns);
+    const rows = Math.ceil(controller.players.size / columns);
     const filledSlots = rows * columns;
-    const emptySlots = Math.max(0, Math.min(COLORS.length, filledSlots) - controller.players.length);
+    const emptySlots = Math.max(0, Math.min(COLORS.length, filledSlots) - controller.players.size);
     return [...controller.players, ...Array(emptySlots).fill(null)];
   }, [controller.players, columns]);
 

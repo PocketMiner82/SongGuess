@@ -189,7 +189,11 @@ export class RoomController {
   /**
    * The current list of players in the room.
    */
-  players: PlayerMessage[] = [];
+  players: Map<string, PlayerMessage> = new Map();
+
+  get playerMessages(): PlayerMessage[] {
+    return Array.from(this.players.values());
+  }
 
   /**
    * The current username of the player.
@@ -506,7 +510,7 @@ export class RoomController {
         break;
       case "question":
         this.ingameData.currentQuestion = msg;
-        this.ingameData.rndStartPos = msg.rndStartPos;
+        this.ingameData.rndStartPos = msg.startPos;
         this.ingameData.currentAnswer = null;
         this.ingameData.selectedAnswer = null;
         break;

@@ -7,7 +7,12 @@ import type {
   Song,
   UpdatePlayedSongsMessage
 } from "../../types/MessageTypes";
-import {ROUND_PADDING_TICKS, ROUND_PICKED_SONG_TICK, ROUND_START_TICK} from "../../ConfigConstants";
+import {
+  ROUND_PADDING_TICKS,
+  ROUND_PICKED_SONG_TICK,
+  ROUND_POINTS_PER_QUESTION,
+  ROUND_START_TICK
+} from "../../ConfigConstants";
 import GamePhase from "./GamePhase";
 import Question, {InitError} from "./Question";
 import type {IEventListener} from "../listener/IEventListener";
@@ -38,7 +43,14 @@ export default abstract class Game implements IEventListener {
   /**
    * The index of the current question. Zero-based.
    */
-  currentQuestion: number = 0;
+  currentQuestionIndex: number = 0;
+
+  /**
+   * The current question.
+   */
+  get currentQuestion(): Question|undefined {
+    return this.questions[this.currentQuestionIndex];
+  }
 
   /**
    * The list of questions for the current game.
@@ -57,11 +69,17 @@ export default abstract class Game implements IEventListener {
     this.room.listener.unregisterEvents(this);
   }
 
-
   /**
    * Should calculate the points for this round for all players that selected the correct answer.
    */
   abstract calculatePoints(): void;
+
+
+  protected getTimePoints(player: Player): number {
+    let factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData!.answerTimestamp - this.roundStartTime)))
+        / (this.room.config.timePerQuestion * 1000);
+    return (ROUND_POINTS_PER_QUESTION / 2) * factor;
+  }
 
   /**
    * Should return an array of all required {@link ServerMessage}s so clients know about the current game state.
@@ -69,7 +87,7 @@ export default abstract class Game implements IEventListener {
    */
   public getGameMessages(sendPrevious?: boolean): ServerMessage[] {
     let msgs: ServerMessage[] = [];
-    let q = this.questions[this.currentQuestion];
+    let q = this.currentQuestion!;
 
     // nothing to send if game is not running
     if (!this.isRunning) {
@@ -166,13 +184,13 @@ export default abstract class Game implements IEventListener {
 
     if (this.roundTicks >= this.room.config.getRoundStartNextTick()) {
       this.roundTicks = -1;
-      this.currentQuestion++;
+      this.currentQuestionIndex++;
       for (let player of this.room.activePlayers) {
         player.resetAnswerData();
       }
     }
 
-    if (this.currentQuestion >= this.room.config.questionsCount) {
+    if (this.currentQuestionIndex >= this.room.config.questionsCount) {
       this.endGame();
       return;
     }
@@ -193,7 +211,7 @@ export default abstract class Game implements IEventListener {
 
       // show question of current round
       case ROUND_PICKED_SONG_TICK:
-        if (!this.questions[this.currentQuestion].song) {
+        if (!this.currentQuestion?.song) {
           this.roundTicks = this.room.config.getRoundStartNextTick();
           break;
         }
@@ -257,10 +275,10 @@ export default abstract class Game implements IEventListener {
       }
     } catch (e) {
       if (e instanceof InitError) {
-        this.room.players.forEach((player: Player) => player.sendConfirmationOrError({type: "other"}, e.message));
+        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({type: "other"}, e.message));
         this.room.server.logger.warn(e);
       } else {
-        this.room.players.forEach((player: Player) => player.sendConfirmationOrError({type: "other"},
+        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({type: "other"},
             "Unknown error while getting next question."));
         this.room.server.logger.error(e);
       }
@@ -281,7 +299,7 @@ export default abstract class Game implements IEventListener {
     player.answerData = {
       answerSpeed: currentTime - this.roundStartTime,
       answerTimestamp: currentTime,
-      questionNumber: this.currentQuestion
+      questionIndex: this.currentQuestionIndex
     };
 
     if (this.room.config.endWhenAnswered) {
@@ -409,7 +427,7 @@ export default abstract class Game implements IEventListener {
     this.room.server.logger.info("Resetting game to lobby state...");
 
     this.roundTicks = -1;
-    this.currentQuestion = 0;
+    this.currentQuestionIndex = 0;
     this.room.state = "lobby";
 
     // reset points of all players

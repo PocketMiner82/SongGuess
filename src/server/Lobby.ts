@@ -8,6 +8,7 @@ import type {
 } from "../types/MessageTypes";
 import type Player from "./Player";
 import {MultipleChoiceGame} from "./game/multipleChoice/MultipleChoiceGame";
+import {normalizeSongName} from "../Utils";
 
 
 export default class Lobby implements IEventListener {
@@ -101,15 +102,8 @@ export default class Lobby implements IEventListener {
     this.songs = [
       ...new Map(this.songs.map(s => {
             // filter for unique name and artist
-            let normalizedName = s.name.toLowerCase();
+            let normalizedName = normalizeSongName(s.name, this.room.config.advancedSongFiltering);
             let normalizedArtist = s.artist.toLowerCase();
-
-            if (this.room.config.advancedSongFiltering) {
-              // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
-              normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
-              normalizedName = normalizedName.replace(/[^\p{L}\p{N} ]/gu, "");
-              normalizedName = normalizedName.replace(/ +/g, " ");
-            }
 
             return [`${normalizedName}|${normalizedArtist}`, s]
           }

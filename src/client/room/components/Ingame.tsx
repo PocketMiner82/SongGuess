@@ -239,7 +239,7 @@ function QuestionDisplay() {
             isCorrect={correctIndex !== undefined ? correctIndex === index : null}
             isDisabled={isDisabled}
             onSelect={handleAnswerSelect}
-            playerAnswers={controller.players}
+            playerAnswers={controller.playerMessages}
           />
         ))}
       </div>
@@ -254,7 +254,7 @@ function AnswerResults() {
   let rankedPlayers: PlayerMessage[] = [];
 
   if (controller.ingameData.currentAnswer) {
-    rankedPlayers = controller.players
+    rankedPlayers = controller.playerMessages
         .map(p => {
           // don't show time for wrong answers
           if (p.answerData?.answerIndex !== controller.ingameData.currentAnswer!.correctIndex) {
