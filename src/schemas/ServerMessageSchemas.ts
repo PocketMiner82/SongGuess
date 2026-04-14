@@ -22,9 +22,9 @@ export const PlayerAnswerDataSchema = z.object({
   answerSpeed: z.number(),
 
   /**
-   * The points the player got this round
+   * The points the player got this round.
    */
-  roundPoints: z.number(),
+  roundPoints: z.optional(z.number()),
 
   /**
    * Can be provided only for MultipleChoiceGame.
@@ -240,7 +240,7 @@ export const UpdateMessageSchema = z.object({
   /**
    * A map of all active (online, non-spectating) players. Key is connection ID.
    */
-  players: z.map(z.string(), PlayerMessageSchema),
+  players: z.record(z.string(), PlayerMessageSchema),
 
   /**
    * The friendly username of the player (which the user can request to change)

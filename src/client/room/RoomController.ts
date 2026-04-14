@@ -487,7 +487,7 @@ export class RoomController {
 
         this.username = msg.username;
         this.setCookies("userName", msg.username);
-        this.players = msg.players;
+        this.players = new Map<string, PlayerMessage>(Object.entries(msg.players));
         this.isHost = msg.isHost;
         this.state = msg.state;
 
