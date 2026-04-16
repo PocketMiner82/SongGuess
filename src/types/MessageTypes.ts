@@ -16,19 +16,7 @@ import type {
   SourceMessageSchema,
 } from "../schemas/MessageSchemas";
 import type { AddLogMessageSchema, UpdateLogMessagesSchema } from "../schemas/ServerAdminMessageSchemas";
-import type {
-  AnswerMessageSchema,
-  AudioControlMessageSchema,
-  CountdownMessageSchema,
-  GameStateSchema,
-  PlayerAnswerDataSchema,
-  PlayerMessageSchema,
-  QuestionMessageSchema,
-  UpdateMessageSchema,
-  UpdatePlayedSongsMessageSchema,
-  UpdatePlaylistsMessageSchema,
-
-} from "../schemas/ServerMessageSchemas";
+import type { AnswerMessageSchema, AudioControlMessageSchema, CountdownMessageSchema, GameStateSchema, PlayerAnswerDataSchema, PlayerMessageSchema, ProgressbarUpdateMessageSchema, QuestionMessageSchema, UpdateMessageSchema, UpdatePlayedSongsMessageSchema, UpdatePlaylistsMessageSchema } from "../schemas/ServerMessageSchemas";
 import type {
   PingMessageSchema,
   PlaylistSchema,
@@ -38,6 +26,11 @@ import type {
   SongSchema,
 } from "../schemas/SharedSchemas";
 
+
+/**
+ * Message sent when the progress bar shall be updated.
+ */
+export type ProgressbarUpdateMessage = z.infer<typeof ProgressbarUpdateMessageSchema>;
 /**
  * Message sent when a player picks a song for others to guess.
  */

@@ -152,7 +152,7 @@ function Room() {
  * Main application component for the game room.
  * Manages room initialization, routing between game states, and global room providers.
  */
-function App() {
+export function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
   const [cookies, setCookie] = useCookies<"userID" | "userName", ICookieProps>(["userID", "userName"]);
   const { getController, isReady } = useRoomController(roomID, () => cookies, setCookie);
@@ -163,11 +163,11 @@ function App() {
   const controller = getController();
 
   return (
-    <RoomContext.Provider value={controller}>
+    <RoomContext value={controller}>
       <Room />
       <ToastError />
       <ModalContainer controller={Modal} />
-    </RoomContext.Provider>
+    </RoomContext>
   );
 }
 

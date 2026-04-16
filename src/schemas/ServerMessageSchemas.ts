@@ -1,6 +1,7 @@
 import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./SharedSchemas";
 
+
 /**
  * Schema for the possible answer a player gave to a question.
  */
@@ -61,6 +62,23 @@ export const PlayerMessageSchema = z.object({
    * The current answer of this player.
    */
   answerData: z.optional(PlayerAnswerDataSchema),
+});
+
+/**
+ * Updates and starts the progressbar on the client.
+ */
+export const ProgressbarUpdateMessageSchema = z.object({
+  type: z.literal("progressbar_update").default("progressbar_update"),
+
+  /**
+   * The number of seconds to offset the progress bar start point.
+   */
+  startAt: z.number(),
+
+  /**
+   * The duration of the progressbar.
+   */
+  duration: z.number(),
 });
 
 /**

@@ -19,6 +19,11 @@ interface TopBarProps {
   className?: string;
 }
 
+function isAprilFools() {
+  const today = new Date();
+  return today.getMonth() === 3 && today.getDate() === 1;
+}
+
 /**
  * A top navigation bar component with centered "SongGuess" title that redirects to home.
  * Allows for additional elements to be positioned independently on the right side.
@@ -31,14 +36,12 @@ export function TopBar({
   className = "",
 }: TopBarProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const today = new Date();
-  const isAprilFools = today.getMonth() === 3 && today.getDate() === 1;
 
   return (
     <div className={`font-sans bg-default-bg border-b border-gray-300 dark:border-gray-700 z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex-1">
-          {isAprilFools
+          {isAprilFools()
             ? (
                 <>
                   <audio ref={audioRef} preload="auto">

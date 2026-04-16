@@ -1,5 +1,6 @@
 import random from "lodash/random";
-import React, { useCallback, useEffect, useState } from "react";
+import * as React from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ROUND_PADDING_TICKS } from "../../../../ConfigConstants";
 import { getPlaylistByURL } from "../../../../Utils";
 import { Button } from "../../../components/Button";
@@ -164,8 +165,7 @@ function AnswerInput() {
           duration={controller.ingameData.currentAudioState === "load"
             ? -(ROUND_PADDING_TICKS - 0.5)
             : controller.config.timePerQuestion - 0.5}
-          isPlaying={controller.ingameData.currentAnswer === null}
-          positionOffset={controller.ingameData.currentAudioPosition}
+          startAt={controller.ingameData.currentAudioPosition}
         />
       </div>
 

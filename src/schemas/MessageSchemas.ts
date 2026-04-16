@@ -14,6 +14,7 @@ import {
   AnswerMessageSchema,
   AudioControlMessageSchema,
   CountdownMessageSchema,
+  ProgressbarUpdateMessageSchema,
   QuestionMessageSchema,
   UpdateMessageSchema,
   UpdatePlayedSongsMessageSchema,
@@ -45,6 +46,7 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
   UpdatePlayedSongsMessageSchema,
   AddLogMessageSchema,
   UpdateLogMessagesSchema,
+  ProgressbarUpdateMessageSchema,
 ]);
 
 /**

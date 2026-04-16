@@ -5,18 +5,16 @@ import { memo, useEffect, useRef, useState } from "react";
  */
 export const ProgressBar = memo(({
   duration,
-  isPlaying,
-  positionOffset = 0,
+  startAt = 0,
 }: {
   duration: number;
-  isPlaying: boolean;
-  positionOffset?: number;
+  startAt?: number;
 }) => {
   const [progress, setProgress] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (isPlaying && duration) {
+    if (duration) {
       let reversed = false;
       let durationToUse = duration;
       if (duration < 0) {
@@ -25,7 +23,7 @@ export const ProgressBar = memo(({
       }
 
       // Calculate initial progress based on position offset
-      const offsetProgress = (positionOffset / durationToUse) * 100;
+      const offsetProgress = (startAt / durationToUse) * 100;
       const initialProgress = reversed ? offsetProgress : (100 - offsetProgress);
       setProgress(Math.max(0, Math.min(100, initialProgress)));
 
@@ -58,7 +56,7 @@ export const ProgressBar = memo(({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, duration, positionOffset]);
+  }, [duration, startAt]);
 
   return (
     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">

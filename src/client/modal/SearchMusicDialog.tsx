@@ -42,7 +42,7 @@ export function SearchMusicDialog({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
-  const [addedIndices, setAddedIndices] = useState<Set<number>>(new Set());
+  const [addedIndices, setAddedIndices] = useState<Set<number>>(() => new Set());
 
   const isValidURL = (onlyAcceptSongs
     ? songRegex.test(searchQuery)

@@ -2,7 +2,8 @@ import type ICookieProps from "../types/ICookieProps";
 import type { LogEntry, LoggerStorage } from "../types/LoggerStorageTypes";
 import type { ServerMessage, TransferHostMessage } from "../types/MessageTypes";
 import usePartySocket from "partysocket/react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CookiesProvider, useCookies } from "react-cookie";
 import { createRoot } from "react-dom/client";
 import z, { uuidv4 } from "zod";
@@ -332,7 +333,7 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
   );
 }
 
-function App() {
+export function App() {
   const [auth, setAuth] = useState<AuthData | null>(null);
 
   if (!auth) {

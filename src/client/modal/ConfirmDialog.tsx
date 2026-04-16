@@ -67,6 +67,8 @@ export function ConfirmDialog({
  * @param options - Optional confirm and cancel button text
  * @returns Promise resolving to true if confirmed, false if cancelled
  */
+// TODO
+// eslint-disable-next-line react-refresh/only-export-components
 export async function showConfirm(
   title: string,
   message: string,

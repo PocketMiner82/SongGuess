@@ -5,6 +5,7 @@ export default antfu({
   jsonc: false,
   yaml: false,
   typescript: true,
+  react: true,
   stylistic: {
     indent: 2,
     quotes: "double",

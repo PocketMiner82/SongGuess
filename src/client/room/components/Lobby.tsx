@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import * as React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { COLORS } from "../../../ConfigConstants";
 import { downloadFile, formatLocalDateTime, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
 import { Button } from "../../components/Button";
@@ -47,6 +48,7 @@ function PlayerList() {
     const filledSlots = rows * columns;
     const emptySlots = Math.max(0, Math.min(COLORS.length, filledSlots) - controller.playerMessages.length);
     return [...controller.playerMessages, ...Array.from({ length: emptySlots }).fill(null)] as unknown as typeof controller.playerMessages[number][];
+    // eslint-disable-next-line react/exhaustive-deps
   }, [controller.playerMessages, columns]);
 
   return (

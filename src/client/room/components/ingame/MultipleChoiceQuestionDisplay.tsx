@@ -11,7 +11,7 @@ import { PlayerAvatar } from "../PlayerAvatar";
 import { ProgressBar } from "./ProgressBar";
 
 
-type AnswerState = "pending" | "selected" | "correct" | "incorrect";
+type AnswerState = "pending" | "selected" | "correct" | "incorrect" | "disabled";
 
 /**
  * Returns the appropriate CSS class for the answer button based on its state.
@@ -25,6 +25,7 @@ function getAnswerButtonClass(state: AnswerState): string {
     case "selected":
       return "bg-secondary text-white";
     case "pending":
+    case "disabled":
     default:
       return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
   }
@@ -91,18 +92,15 @@ const AnswerOption = memo(({
 export function MultipleChoiceQuestionDisplay() {
   const controller = useControllerContext();
   const [canAnswer, setCanAnswer] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   useRoomControllerMessageTypeListener(controller, "audio_control");
 
   useRoomControllerListener(controller, useCallback((msg) => {
     if (msg?.type === "question") {
       // reset selection
-      setIsPlaying(false);
       return true;
     } else if (msg?.type === "answer") {
       // answering no longer allowed when server publishes correct answer
       setCanAnswer(false);
-      setIsPlaying(false);
       return true;
     } else if (msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer") {
       setCanAnswer(false);
@@ -115,13 +113,10 @@ export function MultipleChoiceQuestionDisplay() {
     if (controller.ingameData.currentAudioState === "play") {
       // allow answering when music starts
       setCanAnswer(controller.ingameData.currentAnswer === null && controller.ingameData.selectedAnswer === null);
-      setIsPlaying(controller.ingameData.currentAnswer === null);
     } else if (controller.ingameData.currentAudioState === "load") {
-      setIsPlaying(true);
       setCanAnswer(false);
     } else {
       // pause or null state
-      setIsPlaying(false);
       setCanAnswer(false);
     }
   }, [controller.ingameData.currentAudioState, controller.ingameData.currentAnswer, controller.ingameData.selectedAnswer]);
@@ -166,8 +161,7 @@ export function MultipleChoiceQuestionDisplay() {
           duration={controller.ingameData.currentAudioState === "load"
             ? -(ROUND_PADDING_TICKS - 0.5)
             : controller.config.timePerQuestion - 0.5}
-          isPlaying={isPlaying}
-          positionOffset={controller.ingameData.currentAudioPosition}
+          startAt={controller.ingameData.currentAudioPosition}
         />
       </div>
 
@@ -183,6 +177,8 @@ export function MultipleChoiceQuestionDisplay() {
             state = "incorrect";
           } else if (isSelected) {
             state = "selected";
+          } else if (controller.ingameData.currentAudioState === "load" || controller.ingameData.currentAnswer || controller.ingameData.selectedAnswer !== null) {
+            state = "disabled";
           }
 
           return (

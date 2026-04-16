@@ -1,5 +1,5 @@
 import type { Entities, Lookup, Media, Options, PlainObject, Response, ResultMusicTrack, Results } from "itunes-store-api";
-import type React from "react";
+import type * as React from "react";
 import type { Playlist, PlaylistsFile, Song } from "./types/MessageTypes";
 import { lookup } from "itunes-store-api";
 import z from "zod";

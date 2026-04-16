@@ -21,7 +21,8 @@ import type {
   TransferHostMessage,
 } from "../../types/MessageTypes";
 import PartySocket from "partysocket";
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import * as React from "react";
+import { createContext, use, useCallback, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
 import { version } from "../../../package.json";
@@ -55,22 +56,23 @@ type ListenerCallback = (msg: ServerMessage | null) => boolean;
 export function useRoomController(roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
   // hold the class instance so it persists across renders
   const controllerRef = useRef<RoomController | null>(null);
-  const [isReady, setIsReady] = useState(false);
+
+  if (!controllerRef.current) {
+    controllerRef.current = new RoomController(roomID, getCookies, setCookies);
+  }
 
   useEffect(() => {
-    // initialize the controller
-    controllerRef.current = new RoomController(roomID, getCookies, setCookies);
-    setIsReady(true);
-
+    // cleanup logic for when the component unmounts or roomID changes
     return () => {
       controllerRef.current?.destroy();
+      controllerRef.current = null;
     };
-    // only update on roomID change
   }, [roomID]);
 
   return {
     getController: (): RoomController => controllerRef.current!,
-    isReady,
+    // ready if the ref is populated
+    isReady: !!controllerRef.current,
   };
 }
 
@@ -86,7 +88,7 @@ export const RoomContext = createContext<RoomController | null>(null);
  * @throws Error if used outside a RoomProvider.
  */
 export function useControllerContext() {
-  const controller = useContext(RoomContext);
+  const controller = use(RoomContext);
   if (!controller)
     throw new Error("useRoom must be used within RoomProvider");
   return controller;
@@ -98,8 +100,9 @@ export function useControllerContext() {
  * @param cb The {@link ListenerCallback} function.
  */
 export function useRoomControllerListener(controller: RoomController, cb: ListenerCallback) {
-  const [updateVal, updateComponent] = React.useState(false);
-  const forceUpdateComponent = React.useCallback(() => updateComponent(!updateVal), [updateVal]);
+  const [updateVal, setUpdateVal] = React.useState(false);
+  // eslint-disable-next-line react/set-state-in-effect
+  const forceUpdateComponent = React.useCallback(() => setUpdateVal(!updateVal), [updateVal]);
 
   useEffect(() => {
     if (cb(null)) {

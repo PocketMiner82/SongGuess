@@ -10,7 +10,7 @@ export type ButtonVariant = "primary" | "secondary" | "plain";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "text-white bg-primary hover:bg-primary-hover disabled:bg-disabled-bg disabled:text-disabled-text",
-  secondary: "bg-disabled-text hover:bg-disabled-bg text-white disabled:opacity-50",
+  secondary: "bg-secondary hover:bg-secondary-hover text-white disabled:opacity-50",
   plain: "focus-visible:ring-2 focus-visible:ring-secondary",
 };
 

@@ -53,6 +53,8 @@ function notifyListeners() {
   }
 }
 
+// TODO
+// eslint-disable-next-line react-refresh/only-export-components
 export function showToastError(message: string) {
   const id = Date.now().toString() + Math.random().toString(36).substring(2, 11);
   toasts = [...toasts, { id, message }];
@@ -60,6 +62,7 @@ export function showToastError(message: string) {
 }
 
 export function ToastError() {
+  // eslint-disable-next-line react/use-state
   const [, setUpdate] = useState(0);
 
   useEffect(() => {

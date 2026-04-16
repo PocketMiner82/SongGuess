@@ -15,7 +15,7 @@ import { Modal } from "./modal/Modal";
  * Main application component for the landing page.
  * Displays the SongGuess title and a button to create a new room.
  */
-function App() {
+export function App() {
   const [refreshStatus, setRefreshStatus] = useState<"idle" | "loading" | "success">("idle");
   const [refreshProgress, setRefreshProgress] = useState<string>("");
 

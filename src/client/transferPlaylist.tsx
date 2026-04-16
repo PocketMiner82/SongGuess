@@ -1,6 +1,7 @@
 import type { Playlist, PlaylistsFile, Song } from "../types/MessageTypes";
 import Papa from "papaparse";
-import React, { useState } from "react";
+import * as React from "react";
+import { useState } from "react";
 import { CookieConsent } from "react-cookie-consent";
 import { createRoot } from "react-dom/client";
 import {
@@ -282,7 +283,7 @@ function ImportCSV() {
  * Main application component for transferring playlists to SongGuess.
  * Renders the UI with instructions and CSV import functionality.
  */
-function App() {
+export function App() {
   return (
     <div className="flex flex-col h-screen">
       <CookieConsent location="bottom" buttonText="I understand" overlay>
