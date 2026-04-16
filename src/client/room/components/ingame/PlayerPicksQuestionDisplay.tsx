@@ -3,7 +3,7 @@ import {
   useRoomControllerListener,
   useRoomControllerMessageTypeListener
 } from "../../RoomController";
-import {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {ProgressBar} from "./ProgressBar";
 import {ROUND_PADDING_TICKS} from "../../../../ConfigConstants";
 import {Button} from "../../../components/Button";
@@ -117,7 +117,7 @@ function AnswerInput() {
     }
   }, [controller.ingameData.currentAudioState, controller.ingameData.currentAnswer, hasAnswered]);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.SubmitEvent) => {
     e.preventDefault();
     if (!canAnswer || !answer.trim()) return;
     controller.selectAnswerText(answer.trim());

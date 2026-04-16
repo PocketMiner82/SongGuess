@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import {PlayerCard} from "./PlayerCard";
 import type {PlayerAnswerData, PlayerMessage} from "../../../types/MessageTypes";
 import {PlayerMessageSchema} from "../../../schemas/ServerMessageSchemas";
