@@ -1,3 +1,10 @@
+# [2.14.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.12...2.14.0-dev.13) (2026-04-16)
+
+
+### Bug Fixes
+
+* big cleanup + update ESLint + apply guides/patterns in .agents ([ab70442](https://github.com/PocketMiner82/SongGuess/commit/ab7044287cbc08dab8015a24dfdaa7cabc22fdba))
+
 # [2.14.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.11...2.14.0-dev.12) (2026-04-14)
 
 
