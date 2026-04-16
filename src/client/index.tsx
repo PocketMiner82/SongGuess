@@ -146,7 +146,7 @@ function App() {
               className="py-2 px-4 mb-2"
             >
               { refreshStatus === "loading" && (
-                  <span className="material-symbols-outlined mr-2 animate-spin">
+                  <span className="material-symbols-outlined mr-2 animate-spin" role="img" aria-label="Loading">
                     progress_activity
                   </span>
               )}

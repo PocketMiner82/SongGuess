@@ -28,7 +28,7 @@ import type {ServerMessage} from "../types/MessageTypes";
 function Loading() {
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="text-2xl">Loading...</div>
+      <div className="text-2xl">Loading…</div>
     </div>
   );
 }
@@ -49,7 +49,7 @@ function Countdown() {
   }, []));
 
   return visible ? (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/85">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/85" aria-live="polite">
       <div className="text-white text-9xl font-bold">{countdown}</div>
     </div>
   ) : null;

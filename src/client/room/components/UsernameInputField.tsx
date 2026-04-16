@@ -33,6 +33,7 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (e
 
   return (
       <div className="w-full">
+        <label htmlFor="username-input" className="sr-only">Username</label>
         <input
           id="username-input"
           type="text"
@@ -40,7 +41,7 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (e
           onChange={(e) => setEditedName(e.target.value)}
           onBlur={() => !requireEnter && handleNameUpdate()}
           onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
-          autoFocus
+          autoComplete="username"
           maxLength={16}
           className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
                 ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}/>

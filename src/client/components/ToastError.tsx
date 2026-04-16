@@ -20,6 +20,7 @@ function ToastErrorMessage({ message, id, onRemove }: { message: string; id: str
         <span className="material-icons text-error mr-2 text-sm">error</span>
         <p className="text-default text-sm flex-1 whitespace-pre-line leading-none wrap-anywhere">{message}</p>
         <button
+          type="button"
           onClick={() => onRemove(id)}
           className="ml-2 text-disabled-text hover:text-default transition-colors flex items-center justify-center"
           aria-label="Dismiss error"
@@ -64,7 +65,7 @@ export function ToastError() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-55 flex flex-col items-end">
+    <div className="fixed top-4 right-4 z-55 flex flex-col items-end" role="region" aria-label="Notifications" aria-live="polite">
       {toasts.map(toast => (
         <ToastErrorMessage
           key={toast.id}

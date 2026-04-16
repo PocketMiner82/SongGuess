@@ -36,17 +36,19 @@ export function PlayerCard({
             }} />
           ) : (
             <>
-              <span
-              className={`text-lg font-medium wrap-anywhere leading-none ${
-                player.username === controller.username ? "cursor-pointer hover:underline" : ""
-              }`}
-              onClick={() => {
-                if (player.username === controller.username) {
-                  setIsEditing(true);
-                }
-              }}>
-                {player.username + (player.username === controller.username ? " (You)" : "")}
-              </span>
+              {player.username === controller.username ? (
+                <button
+                  type="button"
+                  className="text-lg font-medium wrap-anywhere leading-none cursor-pointer hover:underline text-left"
+                  onClick={() => setIsEditing(true)}
+                >
+                  {player.username} (You)
+                </button>
+              ) : (
+                <span className="text-lg font-medium wrap-anywhere leading-none">
+                  {player.username}
+                </span>
+              )}
               {children !== undefined &&
                 <span
                 className="text-lg font-medium ml-3 mr-3">

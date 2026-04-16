@@ -48,7 +48,7 @@ export function ConfirmDialog({
         <Button onClick={handleConfirm} className="w-full">
           {confirmText}
         </Button>
-        <Button onClick={() => modal.close()} defaultColors={false} className="w-full bg-disabled-text hover:bg-disabled-bg text-white">
+        <Button onClick={() => modal.close()} variant="secondary" className="w-full">
           {cancelText}
         </Button>
       </div>

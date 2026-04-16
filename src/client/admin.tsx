@@ -51,7 +51,7 @@ function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
             <h2 className="text-2xl font-bold text-default mb-6 text-center">Admin Login</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
-                autoFocus
+                autoComplete="username"
                 type="text"
                 placeholder="Username"
                 value={username}
@@ -65,6 +65,7 @@ function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-default-bg text-default focus:outline-none focus:ring-2 focus:ring-secondary"
               />
               <Button onClick={() => document.querySelector('form')?.requestSubmit()} className="w-full">
@@ -175,7 +176,7 @@ function LogViewer({logs, filters, onFilterChange}: {
 
   useEffect(() => {
     scrollToBottom();
-  }, [filteredLogs.length, scrollToBottom]);
+  }, [filteredLogs, scrollToBottom]);
 
   return (
     <div className="flex flex-col max-h-2/3 font-mono">
@@ -311,7 +312,7 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
   return (
       <div>
         {connectionStatus && (
-            <div className="fixed bottom-0 left-0 right-0 bg-error text-white text-center py-2 z-5000">
+            <div className="fixed bottom-0 left-0 right-0 bg-error text-white text-center py-2 z-5000" aria-live="polite">
               {connectionStatus}
             </div>
         )}

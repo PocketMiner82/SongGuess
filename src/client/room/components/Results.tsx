@@ -65,16 +65,16 @@ export function Results() {
           rankedPlayers={rankedPlayers}
           showField="points"/>
 
-      {controller.isHost && (
+{controller.isHost && (
           <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
-            <Button onClick={() => controller.returnTo("lobby")}>
+            <Button type="button" onClick={() => controller.returnTo("lobby")} aria-label="Return to lobby">
               Return to Lobby
             </Button>
-            <Button onClick={() => controller.startGame()}>
+            <Button type="button" onClick={() => controller.startGame()} aria-label="Start new game">
               Play Again
             </Button>
           </div>
-      )}
+        )}
 
       <PlayedSongsList />
     </div>

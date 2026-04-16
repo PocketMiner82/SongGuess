@@ -18,7 +18,7 @@ export function FatalErrorDialog({ error }: FatalErrorDialogProps) {
           <span className="material-symbols-outlined mr-2">refresh</span>
           Reload page
         </Button>
-        <Button onClick={() => window.location.href = "/"} className="w-full bg-secondary hover:bg-secondary-hover" defaultColors={false}>
+        <Button onClick={() => window.location.href = "/"} variant="secondary" className="w-full">
           <span className="material-symbols-outlined mr-2">home</span>
           Back to main page
         </Button>

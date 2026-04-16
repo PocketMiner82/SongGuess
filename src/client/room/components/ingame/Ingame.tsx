@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {useControllerContext, useRoomControllerMessageTypeListener} from "../../RoomController";
 import {ResultsPlayerList} from "../ResultsPlayerList";
-import type {PlayerMessage} from "../../../../types/MessageTypes";
 import {MultipleChoiceQuestionDisplay} from "./MultipleChoiceQuestionDisplay";
 import {PlayerPicksQuestionDisplay} from "./PlayerPicksQuestionDisplay";
 
@@ -9,26 +8,22 @@ function AnswerResults() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "answer");
   useRoomControllerMessageTypeListener(controller, "question");
-  let rankedPlayers: PlayerMessage[] = [];
 
-  if (controller.ingameData.currentAnswer) {
-    rankedPlayers = controller.playerMessages
+  const rankedPlayers = useMemo(() => {
+    if (!controller.ingameData.currentAnswer) return [];
+    
+    return [...controller.playerMessages]
         .sort((a, b) => {
-          // Both are correct: Sort by speed (ascending)
           if (a.answerData && b.answerData) {
             return a.answerData.answerSpeed - b.answerData.answerSpeed;
           }
-
-          // Both are wrong: Keep original order (or return 0)
           return 0;
         }).sort((a, b) => {
-          // move incorrect answers down
           if (a.answerData?.roundPoints && !b.answerData?.roundPoints) return -1;
           if (!a.answerData?.roundPoints && b.answerData?.roundPoints) return 1;
-
           return 0;
         });
-  }
+  }, [controller.playerMessages, controller.ingameData.currentAnswer]);
 
   if (rankedPlayers.length === 0) return null;
 

@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {PlayerCard} from "./PlayerCard";
 import type {PlayerAnswerData, PlayerMessage} from "../../../types/MessageTypes";
 import {PlayerMessageSchema} from "../../../schemas/ServerMessageSchemas";
 
 type PossibleFields = Exclude<(keyof PlayerAnswerData|keyof PlayerMessage), "answerData">;
 
+const playerMessageFieldNames = Object.keys(PlayerMessageSchema.shape);
+
 function getShowField(player: PlayerMessage, showField: PossibleFields): string|number|undefined {
-  if (Object.keys(PlayerMessageSchema.shape).indexOf(showField) !== -1) {
+  if (playerMessageFieldNames.indexOf(showField) !== -1) {
     return player[showField as Exclude<keyof PlayerMessage, "answerData">];
   } else if (player.answerData) {
     if (showField === "answerSpeed" && (player.answerData.roundPoints ?? 0) > 0) {

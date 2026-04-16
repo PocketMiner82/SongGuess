@@ -1,64 +1,40 @@
 import { type ReactNode } from 'react';
 
 /**
- * Props for the Button component.
+ * Button variant styles.
  */
-type ButtonProps = {
-  /**
-   * Click event handler for the button.
-   */
-  onClick?: () => void;
+export type ButtonVariant = 'primary' | 'secondary' | 'plain';
 
-  /**
-   * The tooltip on hover for the button.
-   */
+const variantClasses: Record<ButtonVariant, string> = {
+  primary: "text-white bg-primary hover:bg-primary-hover disabled:bg-disabled-bg disabled:text-disabled-text",
+  secondary: "bg-disabled-text hover:bg-disabled-bg text-white disabled:opacity-50",
+  plain: "",
+};
+
+type ButtonProps = {
+  onClick?: () => void;
   title?: string;
-  
-  /**
-   * Whether the button is disabled.
-   */
   disabled?: boolean;
-  
-  /**
-   * Additional CSS classes to apply to the button.
-   */
   className?: string;
-  
-  /**
-   * Whether to use default button colors (primary theme colors).
-   */
-  defaultColors?: boolean;
-  
-  /**
-   * Content to render inside the button.
-   */
+  variant?: ButtonVariant;
+  type?: "button" | "submit" | "reset";
   children: ReactNode;
 };
 
-/**
- * A reusable button component with customizable styling and behavior.
- * 
- * @param props The button props including onClick handler, disabled state, and styling options.
- * @returns A styled button element.
- */
 export function Button({
   onClick,
   title,
   disabled = false,
   className = '',
-  defaultColors = true,
+  variant = 'primary',
+  type = 'button',
   children
 }: ButtonProps) {
-  let colorClasses = "";
-  if (defaultColors) {
-    colorClasses = "text-white bg-primary hover:bg-primary-hover " +
-        "disabled:bg-disabled-bg disabled:text-disabled-text";
-  }
-
   return (
     <button
+      type={type}
       disabled={disabled}
-      className={`${colorClasses} rounded disabled:cursor-not-allowed
+      className={`${variantClasses[variant]} rounded disabled:cursor-not-allowed
         cursor-pointer font-bold text-lg py-2 px-4 ${className}`}
       onClick={onClick}
       title={title}

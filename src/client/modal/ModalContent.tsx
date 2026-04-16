@@ -39,16 +39,18 @@ export function ModalContent({ title, iconName, iconColor = "text-default", chil
     <div className={`bg-card-bg rounded-lg p-6 shadow-xl ${maxWidthClasses[maxWidth]} mx-4 w-full relative max-h-[85vh]`}>
       {modal.params.closable && (
         <button
+          type="button"
           onClick={() => modal.close()}
           className="text-default hover:text-primary transition-colors cursor-pointer p-1 absolute top-4 right-4"
+          aria-label="Close"
         >
-          <span className="material-symbols-outlined text-2xl">close</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">close</span>
         </button>
       )}
       {(title || iconName) && (
         <div className="flex items-center gap-3 mb-4">
           {iconName && (
-            <span className={`material-icons text-2xl ${iconColor}`}>{iconName}</span>
+            <span className={`material-icons text-2xl ${iconColor}`} aria-hidden="true">{iconName}</span>
           )}
           {title && (
             <h2 className="text-xl font-bold text-default">{title}</h2>

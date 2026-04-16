@@ -221,10 +221,12 @@ export function Audio() {
 
       <div className="flex items-center gap-2">
         <button
+          type="button"
           onClick={() => setCookie("audioMuted", !cookies.audioMuted)}
           className="flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+          aria-label={cookies.audioMuted ? "Unmute" : "Mute"}
         >
-          <span className="material-icons text-default">
+          <span className="material-icons text-default" aria-hidden="true">
             {getVolumeIcon()}
           </span>
         </button>
@@ -236,6 +238,7 @@ export function Audio() {
           value={cookies.audioVolume}
           onChange={e => setCookie("audioVolume", parseFloat(e.target.value))}
           className="w-25 align-middle"
+          aria-label="Volume"
         />
       </div>
     </>

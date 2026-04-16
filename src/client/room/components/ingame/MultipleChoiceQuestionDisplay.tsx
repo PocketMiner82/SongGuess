@@ -15,6 +15,19 @@ import {PlayerAvatar} from "../PlayerAvatar";
  * Individual answer option button that handles selection and styling.
  * Shows different states based on whether it's selected, correct, or disabled.
  */
+const getAnswerButtonStyle = (isSelected: boolean, isCorrect: boolean | null): string => {
+  if (isCorrect) {
+    return "bg-success text-white";
+  }
+  if (isSelected && isCorrect === false) {
+    return "bg-error text-white";
+  }
+  if (isSelected) {
+    return "bg-secondary text-white";
+  }
+  return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
+};
+
 const AnswerOption = memo(function AnswerOption({
                                                   option,
                                                   index,
@@ -32,18 +45,6 @@ const AnswerOption = memo(function AnswerOption({
   onSelect: (index: number) => void;
   playerAnswers: PlayerMessage[] | null;
 }) {
-  const getButtonStyle = () => {
-    if (isCorrect) {
-      return "bg-success text-white";
-    }
-    if (isSelected && isCorrect === false) {
-      return "bg-error text-white";
-    }
-    if (isSelected) {
-      return "bg-secondary text-white";
-    }
-    return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
-  };
 
   // Filter and sort players who selected this answer
   const playersForThisAnswer = playerAnswers
@@ -57,8 +58,8 @@ const AnswerOption = memo(function AnswerOption({
         <Button
             onClick={() => onSelect(index)}
             disabled={isDisabled}
-            defaultColors={false}
-            className={`w-full min-w-75 min-h-15 xl:w-100 xl:h-25 text-center justify-start transition-colors ${getButtonStyle()}`}
+            variant="plain"
+            className={`w-full min-w-75 min-h-15 xl:w-100 xl:h-25 text-center justify-start transition-colors ${getAnswerButtonStyle(isSelected, isCorrect)}`}
         >
           {option}
         </Button>
@@ -135,8 +136,8 @@ export function MultipleChoiceQuestionDisplay() {
   if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
     return (
         <>
-          <div className="material-symbols-outlined animate-spin text-gray-500 mb-8">progress_activity</div>
-          <div className="text-2xl">Loading question...</div>
+          <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
+          <div className="text-2xl">Loading question…</div>
         </>
     );
   }

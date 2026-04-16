@@ -127,8 +127,8 @@ function AnswerInput() {
   if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
     return (
         <>
-          <div className="material-symbols-outlined animate-spin text-gray-500 mb-8">progress_activity</div>
-          <div className="text-2xl">Loading question...</div>
+          <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
+          <div className="text-2xl">Loading question…</div>
         </>
     );
   }
@@ -170,7 +170,7 @@ function AnswerInput() {
             type="text"
             value={answer}
             onChange={e => setAnswer(e.target.value)}
-            placeholder="Enter song name..."
+            placeholder="Enter song name…"
             disabled={!canAnswer || hasAnswered}
             className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
           />

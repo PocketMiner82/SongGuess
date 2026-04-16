@@ -204,35 +204,39 @@ export function SearchMusicDialog({
         <div className="flex flex-col max-h-[70vh] min-h-0">
           <div className="flex items-center gap-2 mb-2">
             <div className="relative flex-1">
+              <label htmlFor="music-search-input" className="sr-only">{onlyAcceptSongs ? "Search for a song" : "Search Apple Music"}</label>
               <input
-                  placeholder={onlyAcceptSongs ? "Search for a song..." : "Enter apple music URL or search term"}
-                  className={`w-full outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
-                      searchQuery && searchQuery.startsWith("https://") && !isValidURL
-                          ? "focus:border-error"
-                          : "border-gray-500 focus:border-secondary"
-                  }`}
-                  value={searchQuery}
-                  onChange={e => {
-                    setSearchQuery(e.target.value);
-                    if (searchStatus === "error" || searchStatus === "success") setSearchStatus("idle");
-                  }}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") {
-                      // noinspection JSIgnoredPromiseFromCall
-                      handleSearch();
-                    }
-                  }}
+                    id="music-search-input"
+                    placeholder={onlyAcceptSongs ? "Search for a song…" : "Enter apple music URL or search term"}
+                    className={`w-full outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
+                        searchQuery && searchQuery.startsWith("https://") && !isValidURL
+                            ? "focus:border-error"
+                            : "border-gray-500 focus:border-secondary"
+                    }`}
+                    value={searchQuery}
+                    onChange={e => {
+                      setSearchQuery(e.target.value);
+                      if (searchStatus === "error" || searchStatus === "success") setSearchStatus("idle");
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") {
+                        // noinspection JSIgnoredPromiseFromCall
+                        handleSearch();
+                      }
+                    }}
               />
               <div className="absolute right-2 bottom-2 flex items-center">
                 {getStatusIcon()}
               </div>
             </div>
             <Button
+                type="button"
                 onClick={handleSearch}
                 disabled={!searchQuery.trim() || searchStatus === "loading"}
                 className="min-w-16"
+                aria-label="Search"
             >
-              <span className="material-symbols-outlined">search</span>
+              <span className="material-symbols-outlined" aria-hidden="true">search</span>
             </Button>
           </div>
 

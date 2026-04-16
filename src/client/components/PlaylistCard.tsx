@@ -29,12 +29,16 @@ export function PlaylistCard({title, subtitle, coverURL, hrefURL, children}: {
             </div>
         )}
         <div className="w-full">
-          <a
-              target="_blank"
-              rel="noopener noreferrer" href={hrefURL}
-              className={`text-xl font-medium wrap-break-word ${hrefURL && "hover:underline hover:cursor-pointer"}`}>
-            {title}
-          </a>
+          {hrefURL ? (
+            <a
+                target="_blank"
+                rel="noopener noreferrer" href={hrefURL}
+                className="text-xl font-medium wrap-break-word hover:underline hover:cursor-pointer">
+              {title}
+            </a>
+          ) : (
+            <span className="text-xl font-medium wrap-break-word">{title}</span>
+          )}
           {subtitle && <div className="mt-1 text-sm text-disabled-text block">{subtitle}</div>}
         </div>
         <div className="flex items-center justify-center">

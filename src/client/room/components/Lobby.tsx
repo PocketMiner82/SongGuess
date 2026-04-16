@@ -70,8 +70,8 @@ function PlayerList() {
 
                       controller.transferHost(player.username);
                     }}
-                    title="Transfer Host">
-                  <span className="material-symbols-outlined text-2xl">crown</span>
+                    aria-label="Transfer host">
+                  <span className="material-symbols-outlined text-2xl" aria-hidden="true">crown</span>
                 </Button>
             ) : undefined}
           </PlayerCard>
@@ -95,11 +95,13 @@ function DownloadPlaylists() {
 
   return (
     <Button
+      type="button"
       onClick={handleDownload}
       disabled={controller.playlists.length === 0}
       className="items-center flex justify-center"
+      aria-label="Download playlists"
     >
-      <span className="material-symbols-outlined">download</span>
+      <span className="material-symbols-outlined" aria-hidden="true">download</span>
     </Button>
   );
 }
@@ -136,9 +138,11 @@ function PlaylistsList() {
               {
                 controller.isHost ?
                     <Button
+                        type="button"
                         onClick={() => controller.removePlaylist(idx)}
+                        aria-label="Delete playlist"
                     >
-                      <span className="material-symbols-outlined">delete</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                     </Button>
                     : undefined
               }
@@ -211,10 +215,12 @@ function ImportPlaylists() {
         id="playlist-import"
       />
       <Button
+        type="button"
         onClick={() => document.getElementById("playlist-import")?.click()}
         className="min-w-full"
+        aria-label="Import playlists from file"
       >
-        <span className="material-symbols-outlined mr-2">upload</span>
+        <span className="material-symbols-outlined mr-2" aria-hidden="true">upload</span>
         Import
       </Button>
     </div>
@@ -240,11 +246,13 @@ function ClearPlaylists() {
 
   return (
     <Button
+      type="button"
       onClick={handleClearPlaylists}
       disabled={controller.playlists.length === 0}
       className="items-center flex justify-center"
+      aria-label="Clear all playlists"
     >
-      <span className="material-symbols-outlined mr-2">delete</span>
+      <span className="material-symbols-outlined mr-2" aria-hidden="true">delete</span>
       Clear Playlists
     </Button>
   );
@@ -288,9 +296,11 @@ function CopyLink() {
 
   return (
     <Button
+      type="button"
       onClick={handleCopyLink}
+      aria-label={copied ? "Link copied" : "Copy room link"}
     >
-      <span className="material-symbols-outlined mr-2">
+      <span className="material-symbols-outlined mr-2" aria-hidden="true">
         {copied ? "check" : "content_copy"}
       </span>
       {copied ? "Copied!" : "Copy Link"}
@@ -309,10 +319,12 @@ function SettingsToggle({ value, onToggle, children }: { value: boolean; onToggl
         {children}
       </span>
       <button
+        type="button"
         onClick={() => onToggle(!value)}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
           value ? 'bg-secondary' : 'bg-gray-300'
         }`}
+        aria-label={value ? "Disable" : "Enable"}
       >
         <span
           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -407,9 +419,11 @@ function GameModeSelector() {
   
   return (
     <div className="mb-4">
-      <div className="flex border-b border-gray-600">
+      <div className="flex border-b border-gray-600" role="tablist">
         <button
           type="button"
+          role="tab"
+          aria-selected={controller.config.gameMode === "multiple_choice"}
           onClick={() => {
             controller.config.gameMode = "multiple_choice";
             controller.sendConfig();
@@ -424,6 +438,8 @@ function GameModeSelector() {
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={controller.config.gameMode === "player_picks"}
           onClick={() => {
             controller.config.gameMode = "player_picks";
             controller.sendConfig();
