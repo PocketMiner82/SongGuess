@@ -1,12 +1,12 @@
-import Game from "../Game";
-import type {ClientMessage, SelectAnswerMessage} from "../../../types/MessageTypes";
-import {ROUND_PICKED_SONG_TICK, ROUND_POINTS_PER_QUESTION} from "../../../ConfigConstants";
+import type { ClientMessage, SelectAnswerMessage } from "../../../types/MessageTypes";
+import type Player from "../../Player";
 import type Question from "../Question";
-import Player from "../../Player";
-import PlayerPicksQuestion from "./PlayerPicksQuestion";
+import { distance } from "fastest-levenshtein";
+import { ROUND_PICKED_SONG_TICK, ROUND_POINTS_PER_QUESTION } from "../../../ConfigConstants";
+import { normalizeSongName } from "../../../Utils";
+import Game from "../Game";
 import GamePhase from "../GamePhase";
-import {distance} from "fastest-levenshtein";
-import {normalizeSongName} from "../../../Utils";
+import PlayerPicksQuestion from "./PlayerPicksQuestion";
 
 
 export class PlayerPicksGame extends Game {
@@ -23,8 +23,7 @@ export class PlayerPicksGame extends Game {
   /**
    * The player currently selecting a song.
    */
-  picker: Player|null = null;
-
+  picker: Player | null = null;
 
   protected getNextQuestion(): Question {
     if (this.pickerIndex >= this.room.activePlayers.length) {
@@ -32,10 +31,10 @@ export class PlayerPicksGame extends Game {
     }
     this.picker = this.room.activePlayers[this.pickerIndex++];
 
-    let q = new PlayerPicksQuestion(
-        this.currentQuestionIndex + 1,
-        this.room.config,
-        this.picker.conn.id
+    const q = new PlayerPicksQuestion(
+      this.currentQuestionIndex + 1,
+      this.room.config,
+      this.picker.conn.id,
     );
 
     this.room.server.logger.info(`Created PlayerPicksQuestion ${q.num}`);
@@ -43,7 +42,7 @@ export class PlayerPicksGame extends Game {
   }
 
   onMessage(player: Player, msg: ClientMessage): boolean {
-    let ret = super.onMessage(player, msg);
+    const ret = super.onMessage(player, msg);
 
     if (msg.type === "player_pick_song") {
       if (this.gamePhase !== GamePhase.PICKING) {
@@ -78,18 +77,18 @@ export class PlayerPicksGame extends Game {
   }
 
   calculatePoints() {
-    for (let player of this.room.activePlayers) {
+    for (const player of this.room.activePlayers) {
       // if the player typed the song name perfectly (ignoring case)
-      if (player.answerData && normalizeSongName(player.answerData.answer ?? "", false) ===
-          normalizeSongName(this.currentQuestion!.song!.name, false)) {
+      if (player.answerData && normalizeSongName(player.answerData.answer ?? "", false)
+        === normalizeSongName(this.currentQuestion!.song!.name, false)) {
         // this gives the max points, so there is a bonus added of half the max points
         player.answerData.roundPoints = ROUND_POINTS_PER_QUESTION;
       } else if (player.answerData) {
         // check for partial correctness (ignoring parens)
-        let playerAnswer = normalizeSongName(player.answerData.answer ?? "", true);
-        let correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
-        let levenshteinDist = distance(playerAnswer, correctAnswer);
-        let similarity = 1 - (levenshteinDist / correctAnswer.length);
+        const playerAnswer = normalizeSongName(player.answerData.answer ?? "", true);
+        const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
+        const levenshteinDist = distance(playerAnswer, correctAnswer);
+        const similarity = 1 - (levenshteinDist / correctAnswer.length);
 
         // answer must be at least 40% correct to be counted
         if (similarity >= 0.4) {

@@ -1,15 +1,5 @@
-import PartySocket from "partysocket";
-import React, {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
-import type {CloseEvent, ErrorEvent} from "partysocket/ws";
-import z from "zod";
-import { ServerMessageSchema } from "../../schemas/MessageSchemas";
-import type {CookieGetter, CookieSetter} from "../../types/CookieFunctionTypes";
-import {v4 as uuidv4} from "uuid";
-import {getPlaylistByURL} from "../../Utils";
-import { version } from "../../../package.json";
-import {Modal} from "../modal/Modal";
-import {FatalErrorDialog} from "../modal/FatalErrorDialog";
-import {showToastError} from "../components/ToastError";
+import type { CloseEvent, ErrorEvent } from "partysocket/ws";
+import type { CookieGetter, CookieSetter } from "../../types/CookieFunctionTypes";
 import type {
   AddPlaylistsMessage,
   AnswerMessage,
@@ -17,7 +7,8 @@ import type {
   ChangeUsernameMessage,
   GameState,
   PingMessage,
-  PlayerMessage, PlayerPicksSongMessage,
+  PlayerMessage,
+  PlayerPicksSongMessage,
   Playlist,
   PlaylistsFile,
   QuestionMessage,
@@ -27,23 +18,30 @@ import type {
   ServerMessage,
   Song,
   StartGameMessage,
-  TransferHostMessage
+  TransferHostMessage,
 } from "../../types/MessageTypes";
-import {BaseConfig} from "../../BaseConfig";
-
+import PartySocket from "partysocket";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import z from "zod";
+import { version } from "../../../package.json";
+import { BaseConfig } from "../../BaseConfig";
+import { ServerMessageSchema } from "../../schemas/MessageSchemas";
+import { getPlaylistByURL } from "../../Utils";
+import { showToastError } from "../components/ToastError";
+import { FatalErrorDialog } from "../modal/FatalErrorDialog";
+import { Modal } from "../modal/Modal";
 
 /**
  * The PartyKit host URL for WebSocket connections.
  */
 declare const PARTYKIT_HOST: string;
 
-
 /**
  * A callback function that receives the RoomController instance when its state changes and returns a boolean
  * to indicate whether the update should trigger a component update, therefore also making new controller accissible.
  */
 type ListenerCallback = (msg: ServerMessage | null) => boolean;
-
 
 /**
  * Custom React hook that provides a {@link RoomController} instance for managing
@@ -68,15 +66,13 @@ export function useRoomController(roomID: string, getCookies: CookieGetter, setC
       controllerRef.current?.destroy();
     };
     // only update on roomID change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomID]);
 
   return {
     getController: (): RoomController => controllerRef.current!,
-    isReady
+    isReady,
   };
 }
-
 
 /**
  * React context for providing the RoomController instance to child components.
@@ -91,10 +87,10 @@ export const RoomContext = createContext<RoomController | null>(null);
  */
 export function useControllerContext() {
   const controller = useContext(RoomContext);
-  if (!controller) throw new Error("useRoom must be used within RoomProvider");
+  if (!controller)
+    throw new Error("useRoom must be used within RoomProvider");
   return controller;
 }
-
 
 /**
  * Custom React hook to subscribe to state changes in a {@link RoomController}.
@@ -110,8 +106,8 @@ export function useRoomControllerListener(controller: RoomController, cb: Listen
       forceUpdateComponent();
     }
 
-    return controller.registerOnStateChangeListener(msg => {
-      let update = cb(msg);
+    return controller.registerOnStateChangeListener((msg) => {
+      const update = cb(msg);
       if (update) {
         forceUpdateComponent();
       }
@@ -120,39 +116,37 @@ export function useRoomControllerListener(controller: RoomController, cb: Listen
   }, [controller, cb, forceUpdateComponent]);
 }
 
-
 /**
  * A wrapper around {@link useRoomControllerListener} that forces a React update when the specified message is received.
  * @param controller The RoomController instance to listen to.
  * @param msgType The {@link ServerMessage["type"]} to listen for.
  */
-export function useRoomControllerMessageTypeListener(controller: RoomController, msgType: ServerMessage["type"]|null) {
-  useRoomControllerListener(controller, useCallback(msg => {
+export function useRoomControllerMessageTypeListener(controller: RoomController, msgType: ServerMessage["type"] | null) {
+  useRoomControllerListener(controller, useCallback((msg) => {
     return (msg?.type ?? null) === msgType;
   }, [msgType]));
 }
-
 
 class IngameData {
   /**
    * The current question being asked to players.
    */
-  currentQuestion: QuestionMessage|null = null;
+  currentQuestion: QuestionMessage | null = null;
 
   /**
    * The current answer information revealed after question ends.
    */
-  currentAnswer: AnswerMessage|null = null;
+  currentAnswer: AnswerMessage | null = null;
 
   /**
    * The currently selected answer.
    */
-  selectedAnswer?: number|null = null;
+  selectedAnswer?: number | null = null;
 
   /**
    * The current state of the audio playback
    */
-  currentAudioState: AudioControlMessage["action"]|null = null;
+  currentAudioState: AudioControlMessage["action"] | null = null;
 
   /**
    * The length of the current audio.
@@ -165,7 +159,6 @@ class IngameData {
    */
   rndStartPos: number = 0;
 }
-
 
 /**
  * Manages the connection and state of a room.
@@ -265,8 +258,7 @@ export class RoomController {
   /**
    * The list of songs played in the last round.
    */
-  playedSongs: (Song|undefined)[] = [];
-
+  playedSongs: (Song | undefined)[] = [];
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -276,7 +268,7 @@ export class RoomController {
    * @param setCookies A function to allow updating cookies.
    */
   constructor(readonly roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
-    let cookies = getCookies();
+    const cookies = getCookies();
 
     // generate uuid if not set via cookie
     let id: string;
@@ -287,17 +279,17 @@ export class RoomController {
       this.setCookies("userID", id);
     }
 
-    let newUsername = cookies.userName;
+    const newUsername = cookies.userName;
     this.socket = new PartySocket({
       host: PARTYKIT_HOST,
       room: roomID,
       maxRetries: 0,
-      id: id,
+      id,
       // send username if cookie saved
       query: {
         username: newUsername,
-        spectator: "true"
-      }
+        spectator: "true",
+      },
     });
 
     this.socket.addEventListener("message", this.onMessage.bind(this));
@@ -328,10 +320,12 @@ export class RoomController {
     this.reconnecting = true;
 
     this.socket.updateProperties({
-      query: !newUsername ? undefined : {
-        username: newUsername,
-        spectator: spectator ? "true" : undefined
-      }
+      query: !newUsername
+        ? undefined
+        : {
+            username: newUsername,
+            spectator: spectator ? "true" : undefined,
+          },
     });
 
     this.socket.reconnect();
@@ -339,7 +333,7 @@ export class RoomController {
 
   /**
    * Registers a listener that will be called whenever the state of the room changes.
-   * 
+   *
    * @param listener The {@link ListenerCallback} function.
    * @returns A function to unregister the listener.
    */
@@ -358,10 +352,10 @@ export class RoomController {
 
   /**
    * Calls all registered state change listeners.
-   * 
+   *
    * @param msg the received {@link ServerMessage} that caused the state change
    */
-  private callOnStateChange(msg: ServerMessage|null) {
+  private callOnStateChange(msg: ServerMessage | null) {
     for (const listener of this.stateChangeEventListeners) {
       listener(msg);
     }
@@ -380,7 +374,7 @@ export class RoomController {
 
   /**
    * Handles the "close" event of the socket connection.
-   * 
+   *
    * @param ev The CloseEvent containing details about the disconnection.
    */
   private onClose(ev: CloseEvent) {
@@ -398,7 +392,7 @@ export class RoomController {
 
   /**
    * Handles the "error" event of the socket connection.
-   * 
+   *
    * @param ev The ErrorEvent containing details about the error.
    */
   private onError(ev: ErrorEvent) {
@@ -407,7 +401,7 @@ export class RoomController {
     if (this.pingInterval) {
       window.clearInterval(this.pingInterval);
     }
-    
+
     // Show fatal error for connection failure
     if (!this.reconnecting) {
       Modal.open(FatalErrorDialog, { error: ev.message || "WebSocket error. See console for details.", closable: false });
@@ -425,20 +419,20 @@ export class RoomController {
     this.pingStart = performance.now();
     this.socket.send(JSON.stringify({
       type: "ping",
-      seq: ++this.pingSeq
+      seq: ++this.pingSeq,
     } satisfies PingMessage));
   }
 
   /**
    * Handles incoming messages from the server.
-   * 
+   *
    * @param ev The MessageEvent containing the server message.
    */
   private onMessage(ev: MessageEvent) {
     // try to parse JSON
+    let json: ReturnType<typeof JSON.parse>;
     try {
-      // noinspection ES6ConvertVarToLetConst
-      var json = JSON.parse(ev.data);
+      json = JSON.parse(ev.data);
     } catch (e) {
       console.debug("Server sent:", ev.data);
       console.error("Server sent invalid JSON:", e);
@@ -453,7 +447,7 @@ export class RoomController {
       return;
     }
 
-    let msg: ServerMessage = result.data;
+    const msg: ServerMessage = result.data;
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
@@ -479,11 +473,11 @@ export class RoomController {
         if (msg.version !== version) {
           this.socket.close();
           alert("Client outdated. Click OK to reload the page and try again.\n\n"
-              + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or CTRL+F5 or delete all cookies and data from this page.");
+            + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or CTRL+F5 or delete all cookies and data from this page.");
 
           // try reloading with refreshing cache
           try {
-            // @ts-ignore
+            // @ts-expect-error - reload(forceGet) is deprecated but still works
             window.location.reload(true);
           } catch {
             window.location.reload();
@@ -544,9 +538,9 @@ export class RoomController {
    * @param newName The new username to set.
    */
   public updateUsername(newName: string) {
-    let msg: ChangeUsernameMessage = {
+    const msg: ChangeUsernameMessage = {
       type: "change_username",
-      username: newName
+      username: newName,
     };
     this.socket.send(JSON.stringify(msg));
   }
@@ -559,7 +553,7 @@ export class RoomController {
   public transferHost(player: string) {
     this.socket.send(JSON.stringify({
       type: "transfer_host",
-      playerName: player
+      playerName: player,
     } satisfies TransferHostMessage));
   }
 
@@ -567,8 +561,8 @@ export class RoomController {
    * Requests the server to start the game.
    */
   public startGame() {
-    let msg: StartGameMessage = {
-      type: "start_game"
+    const msg: StartGameMessage = {
+      type: "start_game",
     };
     this.socket.send(JSON.stringify(msg));
   }
@@ -584,9 +578,9 @@ export class RoomController {
    * Serializes the current collection of playlists into a standardized JSON string.
    */
   public generatePlaylistsFile(): string {
-    let data: PlaylistsFile = {
+    const data: PlaylistsFile = {
       version: "1.0",
-      playlists: this.playlists
+      playlists: this.playlists,
     };
     return JSON.stringify(data, null, 2);
   }
@@ -606,7 +600,7 @@ export class RoomController {
   public selectAnswer(answerIndex: number) {
     this.socket.send(JSON.stringify({
       type: "select_answer",
-      answerIndex
+      answerIndex,
     } satisfies SelectAnswerMessage));
   }
 
@@ -617,7 +611,7 @@ export class RoomController {
   public selectAnswerText(answer: string) {
     this.socket.send(JSON.stringify({
       type: "select_answer",
-      answer: answer
+      answer,
     } satisfies SelectAnswerMessage));
   }
 
@@ -629,8 +623,8 @@ export class RoomController {
   public pickSong(song: Song, startPos: number) {
     this.socket.send(JSON.stringify({
       type: "player_pick_song",
-      song: song,
-      startPos: startPos
+      song,
+      startPos,
     } satisfies PlayerPicksSongMessage));
   }
 
@@ -641,7 +635,7 @@ export class RoomController {
   public returnTo(where: ReturnToMessage["where"]) {
     this.socket.send(JSON.stringify({
       type: "return_to",
-      where: where
+      where,
     } satisfies ReturnToMessage));
   }
 
@@ -649,10 +643,10 @@ export class RoomController {
    * Requests the server to remove a playlist from the list.
    * @param index the index of the playlist to remove. null to remove all playlists.
    */
-  public removePlaylist(index: number|null) {
-    let req: RemovePlaylistMessage = {
+  public removePlaylist(index: number | null) {
+    const req: RemovePlaylistMessage = {
       type: "remove_playlist",
-      index: index
+      index,
     };
 
     this.socket.send(JSON.stringify(req));
@@ -664,10 +658,10 @@ export class RoomController {
    * @returns true, if all playlists were requested to be added without errors.
    */
   public async tryAddPlaylists(url: string): Promise<boolean> {
-    let urls: string[] = url.split(";");
+    const urls: string[] = url.split(";");
 
     const results: boolean[] = await Promise.all(
-      urls.map(u => this.tryAddPlaylist(u))
+      urls.map(u => this.tryAddPlaylist(u)),
     );
 
     return results.every(result => result);
@@ -676,12 +670,12 @@ export class RoomController {
   /**
    * Attempts to add a playlist from the given Apple Music URL.
    * If the URL is valid and songs are found, it sends an update to the server.
-   * 
+   *
    * @param url The Apple Music URL of the artist, song or album.
    * @returns true if the playlist was requested to be added, false otherwise.
    */
   public async tryAddPlaylist(url: string): Promise<boolean> {
-    let playlist = await getPlaylistByURL(url);
+    const playlist = await getPlaylistByURL(url);
 
     if (!playlist) {
       showToastError(`Failed to get playlist: ${url}`);
@@ -700,7 +694,7 @@ export class RoomController {
   public addPlaylists(...playlists: Playlist[]) {
     const req: AddPlaylistsMessage = {
       type: "add_playlists",
-      playlists: playlists
+      playlists,
     };
     this.socket.send(JSON.stringify(req));
   }

@@ -1,13 +1,12 @@
 import type * as Party from "partykit/server";
-import {clearInterval, clearTimeout} from "node:timers";
+import type { RoomGetResponse } from "../types/APIResponseTypes";
+import type { ServerMessage } from "../types/MessageTypes";
+import { clearInterval, clearTimeout } from "node:timers";
 import {
-  ROOM_CLEANUP_TIMEOUT
+  ROOM_CLEANUP_TIMEOUT,
 } from "../ConfigConstants";
-import type {RoomGetResponse} from "../types/APIResponseTypes";
-import {ValidRoom} from "./ValidRoom";
 import Logger from "./logger/Logger";
-import type {ServerMessage} from "../types/MessageTypes";
-
+import { ValidRoom } from "./ValidRoom";
 
 // noinspection JSUnusedGlobalSymbols
 export default class Server implements Party.Server {
@@ -24,13 +23,12 @@ export default class Server implements Party.Server {
   /**
    * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
-  cleanupTimeout: NodeJS.Timeout|null = null;
+  cleanupTimeout: NodeJS.Timeout | null = null;
 
   /**
    * The interval that ticks the room every second.
    */
-  tickInterval: NodeJS.Timeout|null = null;
-
+  tickInterval: NodeJS.Timeout | null = null;
 
   /**
    * Creates a new room server.
@@ -48,8 +46,7 @@ export default class Server implements Party.Server {
    */
   public getOnlinePlayersCount(): number {
     let count = 0;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const _ of this.getActiveConnections("player")) {
+    for (const _connection of this.getActiveConnections("player")) {
       count++;
     }
     return count;
@@ -80,12 +77,12 @@ export default class Server implements Party.Server {
    * @param tag An optional filter to target a specific subset of connections.
    */
   public safeBroadcast(msg: ServerMessage, tag?: string) {
-    if (msg.type !== "add_log_message" && msg.type !== "update_log_messages" &&
-        msg.type !== "ping" && msg.type !== "pong") {
+    if (msg.type !== "add_log_message" && msg.type !== "update_log_messages"
+      && msg.type !== "ping" && msg.type !== "pong") {
       this.logger.debug(`Broadcast: ${JSON.stringify(msg)}`);
     }
 
-    for (let conn of this.getActiveConnections(tag)) {
+    for (const conn of this.getActiveConnections(tag)) {
       this.safeSend(conn, msg, false);
     }
   }
@@ -97,15 +94,15 @@ export default class Server implements Party.Server {
    * @param msg The message object to be stringified and transmitted to the client.
    * @param log Whether to log the sended message
    */
-  public safeSend(conn: Party.Connection, msg: ServerMessage, log:boolean = true) {
+  public safeSend(conn: Party.Connection, msg: ServerMessage, log: boolean = true) {
     try {
       // silently ignore if not open
       if (conn.readyState === WebSocket.OPEN) {
-        let textMsg = JSON.stringify(msg);
+        const textMsg = JSON.stringify(msg);
         conn.send(textMsg);
 
-        if (log && msg.type !== "add_log_message" && msg.type !== "update_log_messages" &&
-            msg.type !== "ping" && msg.type !== "pong") {
+        if (log && msg.type !== "add_log_message" && msg.type !== "update_log_messages"
+          && msg.type !== "ping" && msg.type !== "pong") {
           this.logger.debug(`To ${conn.id}: ${textMsg}`);
         }
       }
@@ -120,7 +117,7 @@ export default class Server implements Party.Server {
    *
    * @param tag An optional filter to target a specific subset of connections.
    */
-  private *getActiveConnections(tag?: string): Iterable<Party.Connection> {
+  private* getActiveConnections(tag?: string): Iterable<Party.Connection> {
     for (const conn of this.partyRoom.getConnections(tag)) {
       if (conn && conn.readyState === WebSocket.OPEN) {
         yield conn;
@@ -151,10 +148,10 @@ export default class Server implements Party.Server {
     const url = new URL(ctx.request.url);
     const authParam = url.searchParams.get("auth");
     if (authParam) {
-      let credentials = atob(authParam).split(":");
+      const credentials = atob(authParam).split(":");
 
-      if (conn.id.startsWith("admin_") && credentials.length === 2 &&
-          credentials[0] === this.partyRoom.env.ADMIN_USER && credentials[1] === this.partyRoom.env.ADMIN_PASSWORD) {
+      if (conn.id.startsWith("admin_") && credentials.length === 2
+        && credentials[0] === this.partyRoom.env.ADMIN_USER && credentials[1] === this.partyRoom.env.ADMIN_PASSWORD) {
         return ["admin"];
       } else {
         return ["unauthorized"];
@@ -177,11 +174,11 @@ export default class Server implements Party.Server {
 
     // admin should not be registered "normally" to the room.
     if (this.hasTag(conn, "admin")) {
-      this.logger.getLogMessages().then(async loggerStorage => {
+      this.logger.getLogMessages().then(async (loggerStorage) => {
         if (loggerStorage) {
           this.safeSend(conn, {
             type: "update_log_messages",
-            messages: loggerStorage
+            messages: loggerStorage,
           });
         }
 
@@ -275,15 +272,15 @@ export default class Server implements Party.Server {
   async onRequest(req: Party.Request): Promise<Response> {
     // respond with JSON containing the current online count and if the room is valid
     if (req.method === "GET") {
-      let json: RoomGetResponse = {
+      const json: RoomGetResponse = {
         onlineCount: this.getOnlinePlayersCount(),
-        isValidRoom: this.validRoom !== undefined
+        isValidRoom: this.validRoom !== undefined,
       };
 
       return Response.json(json);
     // used to initially validate and activate the room, requires a secret token shared between this method and the static createRoom method
     } else if (req.method === "POST") {
-      let url = new URL(req.url);
+      const url = new URL(req.url);
       if (url.searchParams.has("token") && url.searchParams.get("token") === this.partyRoom.env.VALIDATE_ROOM_TOKEN) {
         this.validRoom = new ValidRoom(this);
         this.delayedCleanup();
@@ -311,11 +308,11 @@ export default class Server implements Party.Server {
    * @returns A Promise resolving to the fetch response.
    */
   static async onFetch(req: Party.Request, lobby: Party.FetchLobby, _ctx: Party.ExecutionContext) {
-    let url: URL = new URL(req.url);
+    const url: URL = new URL(req.url);
 
     // if room url is requested without HTML extension, add it
     if (!url.pathname.endsWith(".html")) {
-      let resp = await lobby.assets.fetch(`${url.pathname}.html${url.search}`);
+      const resp = await lobby.assets.fetch(`${url.pathname}.html${url.search}`);
       if (resp)
         return resp;
     }

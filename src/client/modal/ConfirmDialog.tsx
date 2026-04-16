@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect} from "react";
+import { useCallback, useEffect } from "react";
 import { useModalWindow } from "react-modal-global";
 import { Button } from "../components/Button";
 import { Modal } from "./Modal";
 import { ModalContent } from "./ModalContent";
+
 
 interface ConfirmDialogProps {
   title: string;
@@ -21,7 +22,7 @@ export function ConfirmDialog({
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  onConfirm
+  onConfirm,
 }: ConfirmDialogProps) {
   const modal = useModalWindow();
 
@@ -36,10 +37,13 @@ export function ConfirmDialog({
         e.preventDefault();
         handleConfirm();
       }
+      if (e.key === "Escape") {
+        modal.close();
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleConfirm]);
+  }, [handleConfirm, modal]);
 
   return (
     <ModalContent title={title}>
@@ -69,16 +73,16 @@ export async function showConfirm(
   options?: {
     confirmText?: string;
     cancelText?: string;
-  }
+  },
 ): Promise<boolean> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     let isConfirmed = false;
     Modal.open(ConfirmDialog, {
       title,
       message,
       confirmText: options?.confirmText,
       cancelText: options?.cancelText,
-      onConfirm: () => isConfirmed = true
+      onConfirm: () => isConfirmed = true,
     }).on("close", () => {
       resolve(isConfirmed);
     });

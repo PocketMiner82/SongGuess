@@ -1,7 +1,8 @@
-import type {ClientMessage} from "../../types/MessageTypes";
-import type {IEventListener} from "./IEventListener";
-import type {ValidRoom} from "../ValidRoom";
+import type { ClientMessage } from "../../types/MessageTypes";
 import type Player from "../Player";
+import type { ValidRoom } from "../ValidRoom";
+import type { IEventListener } from "./IEventListener";
+
 
 export default class Listener {
   /**
@@ -11,9 +12,7 @@ export default class Listener {
    */
   private messageListeners: IEventListener[] = [];
 
-
   constructor(readonly room: ValidRoom) {}
-
 
   /**
    * Handles incoming messages
@@ -22,12 +21,12 @@ export default class Listener {
    */
   handleMessage(player: Player, msg: ClientMessage) {
     // handle each message type
-    switch(msg.type) {
+    switch (msg.type) {
       case "ping":
         // always directly answer pings
         player.safeSend({
           type: "pong",
-          seq: msg.seq
+          seq: msg.seq,
         });
         return;
       case "pong":
@@ -64,7 +63,7 @@ export default class Listener {
    * @param listener the object that wants to listen for client messages.
    */
   public registerEvents(listener: IEventListener) {
-    if (this.messageListeners.indexOf(listener) < 0) {
+    if (!this.messageListeners.includes(listener)) {
       this.messageListeners.push(listener);
     }
   }
@@ -74,7 +73,7 @@ export default class Listener {
    * @param listener the object that no longer wants to listen for client messages.
    */
   public unregisterEvents(listener: IEventListener) {
-    let index = this.messageListeners.indexOf(listener);
+    const index = this.messageListeners.indexOf(listener);
     if (index >= 0) {
       this.messageListeners.splice(index, 1);
     }

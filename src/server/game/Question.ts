@@ -1,6 +1,7 @@
-import type {AnswerMessage, QuestionMessage, Song} from "../../types/MessageTypes";
+import type { AnswerMessage, QuestionMessage, Song } from "../../types/MessageTypes";
 import type ServerConfig from "../config/ServerConfig";
 import _ from "lodash";
+
 
 export default abstract class Question {
   /**
@@ -27,7 +28,7 @@ export default abstract class Question {
     return {
       type: "question",
       number: this.num,
-      startPos: this.startPos
+      startPos: this.startPos,
     };
   }
 
@@ -39,7 +40,7 @@ export default abstract class Question {
   getAnswerMessage(): AnswerMessage {
     return {
       type: "answer",
-      number: this.num
+      number: this.num,
     };
   }
 }

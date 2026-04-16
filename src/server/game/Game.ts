@@ -1,22 +1,23 @@
-import type {ValidRoom} from "../ValidRoom";
 import type {
   AudioControlMessage,
   ClientMessage,
   SelectAnswerMessage,
   ServerMessage,
   Song,
-  UpdatePlayedSongsMessage
+  UpdatePlayedSongsMessage,
 } from "../../types/MessageTypes";
+import type { IEventListener } from "../listener/IEventListener";
+import type Player from "../Player";
+import type { ValidRoom } from "../ValidRoom";
+import type Question from "./Question";
 import {
   ROUND_PADDING_TICKS,
   ROUND_PICKED_SONG_TICK,
   ROUND_POINTS_PER_QUESTION,
-  ROUND_START_TICK
+  ROUND_START_TICK,
 } from "../../ConfigConstants";
 import GamePhase from "./GamePhase";
-import Question, {InitError} from "./Question";
-import type {IEventListener} from "../listener/IEventListener";
-import type Player from "../Player";
+import { InitError } from "./Question";
 
 
 export default abstract class Game implements IEventListener {
@@ -48,7 +49,7 @@ export default abstract class Game implements IEventListener {
   /**
    * The current question.
    */
-  get currentQuestion(): Question|undefined {
+  get currentQuestion(): Question | undefined {
     return this.questions[this.currentQuestionIndex];
   }
 
@@ -56,7 +57,6 @@ export default abstract class Game implements IEventListener {
    * The list of questions for the current game.
    */
   abstract questions: Question[];
-
 
   constructor(readonly room: ValidRoom) {
     room.listener.registerEvents(this);
@@ -74,10 +74,9 @@ export default abstract class Game implements IEventListener {
    */
   abstract calculatePoints(): void;
 
-
   protected getTimePoints(player: Player): number {
-    let factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData!.answerTimestamp - this.roundStartTime)))
-        / (this.room.config.timePerQuestion * 1000);
+    const factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData!.answerTimestamp - this.roundStartTime)))
+      / (this.room.config.timePerQuestion * 1000);
     return (ROUND_POINTS_PER_QUESTION / 2) * factor;
   }
 
@@ -86,8 +85,8 @@ export default abstract class Game implements IEventListener {
    * @param sendPrevious whether to include all messages for the round. Useful when client joins.
    */
   public getGameMessages(sendPrevious?: boolean): ServerMessage[] {
-    let msgs: ServerMessage[] = [];
-    let q = this.currentQuestion!;
+    const msgs: ServerMessage[] = [];
+    const q = this.currentQuestion!;
 
     // nothing to send if game is not running
     if (!this.isRunning) {
@@ -150,7 +149,7 @@ export default abstract class Game implements IEventListener {
         player.sendConfirmationOrError(msg);
         return true;
       case "start_game":
-        if(!this.room.performChecks(player, msg, "host", "not_ingame", "not_contdown", "min_song_count")) {
+        if (!this.room.performChecks(player, msg, "host", "not_ingame", "not_contdown", "min_song_count")) {
           return true;
         }
 
@@ -180,12 +179,13 @@ export default abstract class Game implements IEventListener {
   }
 
   onTick() {
-    if (!this.isRunning) return;
+    if (!this.isRunning)
+      return;
 
     if (this.roundTicks >= this.room.config.getRoundStartNextTick()) {
       this.roundTicks = -1;
       this.currentQuestionIndex++;
-      for (let player of this.room.activePlayers) {
+      for (const player of this.room.activePlayers) {
         player.resetAnswerData();
       }
     }
@@ -247,7 +247,7 @@ export default abstract class Game implements IEventListener {
     if (gamePhaseChange) {
       this.onGamePhaseChanged();
       this.getGameMessages(this.gamePhase === GamePhase.QUESTION && this.room.config.gameMode === "player_picks")
-          .forEach(msg => this.room.server.safeBroadcast(msg));
+        .forEach(msg => this.room.server.safeBroadcast(msg));
     }
 
     // this allows directly jumping to the next tick interval, allowing to skip ticks
@@ -264,7 +264,7 @@ export default abstract class Game implements IEventListener {
   /**
    * Provides the next question that should be added to the list.
    */
-  protected abstract getNextQuestion(): Question
+  protected abstract getNextQuestion(): Question;
 
   /**
    * Tries to get the next question.
@@ -274,7 +274,7 @@ export default abstract class Game implements IEventListener {
    */
   private tryGetNextQuestion() {
     try {
-      let nextQuestion = this.getNextQuestion();
+      const nextQuestion = this.getNextQuestion();
       this.questions.push(nextQuestion);
 
       if (nextQuestion.song) {
@@ -282,11 +282,10 @@ export default abstract class Game implements IEventListener {
       }
     } catch (e) {
       if (e instanceof InitError) {
-        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({type: "other"}, e.message));
+        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({ type: "other" }, e.message));
         this.room.server.logger.warn(e);
       } else {
-        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({type: "other"},
-            "Unknown error while getting next question."));
+        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({ type: "other" }, "Unknown error while getting next question."));
         this.room.server.logger.error(e);
       }
 
@@ -302,16 +301,16 @@ export default abstract class Game implements IEventListener {
    * @param _msg the {@link SelectAnswerMessage} containing the selected answer.
    */
   public selectAnswer(player: Player, _msg: SelectAnswerMessage) {
-    let currentTime = Date.now();
+    const currentTime = Date.now();
     player.answerData = {
       answerSpeed: currentTime - this.roundStartTime,
       answerTimestamp: currentTime,
-      questionIndex: this.currentQuestionIndex
+      questionIndex: this.currentQuestionIndex,
     };
 
     if (this.room.config.endWhenAnswered) {
       let everyoneVoted = true;
-      for (let player of this.room.activePlayers) {
+      for (const player of this.room.activePlayers) {
         if (player.answerData === undefined) {
           everyoneVoted = false;
           break;
@@ -350,13 +349,13 @@ export default abstract class Game implements IEventListener {
         type: "audio_control",
         action: "load",
         position: this.roundTicks - ROUND_PICKED_SONG_TICK,
-        audioURL: audioURL!
+        audioURL: audioURL!,
       };
     } else {
       msg = {
         type: "audio_control",
-        action: action,
-        position: Math.max(0, this.roundTicks - ROUND_PADDING_TICKS - ROUND_PICKED_SONG_TICK)
+        action,
+        position: Math.max(0, this.roundTicks - ROUND_PADDING_TICKS - ROUND_PICKED_SONG_TICK),
       };
     }
 
@@ -394,7 +393,8 @@ export default abstract class Game implements IEventListener {
    * @param sendUpdate whether to send an update that the game ended to the players.
    */
   public endGame(sendUpdate: boolean = true) {
-    if (!this.isRunning) return;
+    if (!this.isRunning)
+      return;
     this.isRunning = false;
 
     this.room.server.logger.info("Ending game...");
@@ -418,7 +418,7 @@ export default abstract class Game implements IEventListener {
   public getPlayedSongsUpdateMessage(): UpdatePlayedSongsMessage {
     return {
       type: "update_played_songs",
-      songs: this.questions.filter(q => q.song).map(q => q.song!)
+      songs: this.questions.filter(q => q.song).map(q => q.song!),
     };
   }
 
@@ -438,7 +438,7 @@ export default abstract class Game implements IEventListener {
     this.room.state = "lobby";
 
     // reset points of all players
-    for (let player of this.room.activePlayers) {
+    for (const player of this.room.activePlayers) {
       player.resetAnswerData(true);
     }
   }

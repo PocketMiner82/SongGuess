@@ -1,19 +1,11 @@
-import {PlaylistsFileSchema} from "./schemas/SharedSchemas";
-import {
-  type Entities,
-  lookup,
-  type Lookup,
-  type Media,
-  type Options,
-  type PlainObject,
-  type Response,
-  type ResultMusicTrack,
-  type Results
-} from "itunes-store-api";
+import type { Entities, Lookup, Media, Options, PlainObject, Response, ResultMusicTrack, Results } from "itunes-store-api";
+import type React from "react";
+import type { Playlist, PlaylistsFile, Song } from "./types/MessageTypes";
+import { lookup } from "itunes-store-api";
 import z from "zod";
-import React from "react";
-import {DefaultPlaylist, type Playlist, type PlaylistsFile, type Song} from "./types/MessageTypes";
-import {albumRegex, artistRegex, songRegex} from "./schemas/ValidationRegexes";
+import { PlaylistsFileSchema } from "./schemas/SharedSchemas";
+import { albumRegex, artistRegex, songRegex } from "./schemas/ValidationRegexes";
+import { DefaultPlaylist } from "./types/MessageTypes";
 
 
 /**
@@ -25,24 +17,24 @@ import {albumRegex, artistRegex, songRegex} from "./schemas/ValidationRegexes";
 export function formatLocalDateTime(date: Date): string {
   // Configuration for the DateTimeFormat to ensure correct padding and 24h clock
   const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
     hour12: false,
   };
 
   // The Intl formatter using Canadian English for ISO-like date order
-  const formatter = new Intl.DateTimeFormat('en-CA', options);
+  const formatter = new Intl.DateTimeFormat("en-CA", options);
 
   // Array of formatted date/time components
   const parts = formatter.formatToParts(date);
 
   // Record mapping component types (e.g., 'year') to their string values
   const p = Object.fromEntries(
-      parts.map((part) => [part.type, part.value])
+    parts.map(part => [part.type, part.value]),
   ) as Record<Intl.DateTimeFormatPartTypes, string>;
 
   return `${p.year}-${p.month}-${p.day}_${p.hour}${p.minute}${p.second}`;
@@ -76,7 +68,7 @@ export function normalizeSongName(name: string, removeParens: boolean): string {
  */
 export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
   let targetLookupUrl: string = url;
-  let type: "Artist"|"Song"|"Album" = "Song";
+  let type: "Artist" | "Song" | "Album" = "Song";
 
   let match;
   let cleanUrl = url;
@@ -86,19 +78,19 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
     const id = match.groups!.id;
     const trackIdMatch = url.match(/[?&]i=(?<trackId>\d+)/);
     const trackId = trackIdMatch?.groups?.trackId;
-    targetLookupUrl = trackId 
+    targetLookupUrl = trackId
       ? `https://music.apple.com/de/album/${song}/${id}?i=${trackId}`
       : `https://music.apple.com/de/album/${song}/${id}`;
-    cleanUrl = match[0].replace(/(\?.*)?;?$/, '');
+    cleanUrl = match[0].replace(/(\?.*)?;?$/, "");
   } else if (artistRegex.test(url)) {
     type = "Artist";
-    cleanUrl = artistRegex.exec(url)![0].replace(/(\?.*)?;?$/, '');
+    cleanUrl = artistRegex.exec(url)![0].replace(/(\?.*)?;?$/, "");
   } else if (albumRegex.test(url)) {
     const match = albumRegex.exec(url)!;
     const trackIdMatch = url.match(/[?&]i=(?<trackId>\d+)/);
     const trackId = trackIdMatch?.groups?.trackId;
     type = trackId ? "Song" : "Album";
-    cleanUrl = match[0].replace(/(\?[^;]*)?;?$/, '');
+    cleanUrl = match[0].replace(/(\?[^;]*)?;?$/, "");
     if (trackId) {
       cleanUrl += `?i=${trackId}`;
     }
@@ -110,12 +102,13 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
 
   // server did not add tracks, we need to ask apple ourselves
   if (playlist.songs.length === 0) {
-    let results: ResultMusicTrack[] = await safeLookup("url", targetLookupUrl, {
+    const results: ResultMusicTrack[] = await safeLookup("url", targetLookupUrl, {
       entity: "song",
-      limit: 50
+      limit: 50,
     });
 
-    if (results.length === 0) return null;
+    if (results.length === 0)
+      return null;
 
     // filter only music tracks and map to our internal format
     playlist.songs = results.filter(r => r.wrapperType === "track").map(r => ({
@@ -123,13 +116,14 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
       audioURL: r.previewUrl,
       artist: r.artistName,
       hrefURL: r.trackViewUrl,
-      cover: fixedCoverSize(r.artworkUrl100)
+      cover: fixedCoverSize(r.artworkUrl100),
     } satisfies Song));
   }
 
   // add subtitle + show song count if playlist is not song type
   playlist.subtitle = type + (type !== "Song"
-      ? ` | ${playlist.songs.length} song${playlist.songs.length !== 1 ? "s" : ""}` : "");
+    ? ` | ${playlist.songs.length} song${playlist.songs.length !== 1 ? "s" : ""}`
+    : "");
 
   return playlist;
 }
@@ -139,10 +133,10 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
  * @param url The url to search and replace the dimensions in
  * @returns the replaced url or null if the provided param is not a string
  */
-export function fixedCoverSize(url: string|undefined|null): string|null {
+export function fixedCoverSize(url: string | undefined | null): string | null {
   return !url
-      ? null
-      : url.replace(/\/[^/]+x[^/]+bb\.([a-z]+)$/, "/486x486bb.$1");
+    ? null
+    : url.replace(/\/[^/][^/x]*x[^/]+bb\.([a-z]+)$/, "/486x486bb.$1");
 }
 
 /**
@@ -153,7 +147,7 @@ export function fixedCoverSize(url: string|undefined|null): string|null {
  */
 async function fetchPlaylistInfo(url: string): Promise<Playlist> {
   try {
-    let page = await fetch("/parties/api/playlistInfo?url=" + encodeURIComponent(url));
+    const page = await fetch(`/parties/api/playlistInfo?url=${encodeURIComponent(url)}`);
     return await page.json();
   } catch {
     return DefaultPlaylist;
@@ -165,20 +159,21 @@ async function fetchPlaylistInfo(url: string): Promise<Playlist> {
  * @param results the list of {@link ResultMusicTrack} to find and convert the first song
  * @returns a song with replaced bigger cover
  */
-export function getFirstSong(results: ResultMusicTrack[]): Song|null {
+export function getFirstSong(results: ResultMusicTrack[]): Song | null {
   // Find first musicTrack (not musicVideo)
   const track = results.find((result): result is ResultMusicTrack =>
-      result.kind === "song" && result.wrapperType === "track"
+    result.kind === "song" && result.wrapperType === "track",
   );
 
-  if (!track) return null;
+  if (!track)
+    return null;
 
   return {
     name: track.trackName,
     audioURL: track.previewUrl,
     artist: track.artistName,
     hrefURL: track.trackViewUrl,
-    cover: fixedCoverSize(track.artworkUrl100)
+    cover: fixedCoverSize(track.artworkUrl100),
   };
 }
 
@@ -187,9 +182,9 @@ export function getFirstSong(results: ResultMusicTrack[]): Song|null {
  * @param isrc The ISRC to lookup.
  * @returns the iTunes ID or null if not found.
  */
-export async function fetchSongByISRC(isrc: string): Promise<Song|null> {
+export async function fetchSongByISRC(isrc: string): Promise<Song | null> {
   try {
-    let page = await fetch("/parties/api/songByISRC?isrc=" + encodeURIComponent(isrc));
+    const page = await fetch(`/parties/api/songByISRC?isrc=${encodeURIComponent(isrc)}`);
     return await page.json();
   } catch (e) {
     console.error("Error fetching song from api:", e);
@@ -203,37 +198,37 @@ export async function fetchSongByISRC(isrc: string): Promise<Song|null> {
  * @returns Promise resolving to an array of results.
  */
 export async function safeLookup<M extends Media, E extends Entities[M]>(
-    type: Lookup,
-    value: number,
-    options?: Partial<Options<M, E>>
-): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]>
+  type: Lookup,
+  value: number,
+  options?: Partial<Options<M, E>>,
+): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]>;
 export async function safeLookup<M extends Media, E extends Entities[M]>(
-    type: "url",
-    value: string,
-    options?: Partial<Options<M, E>>
-): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]>
+  type: "url",
+  value: string,
+  options?: Partial<Options<M, E>>,
+): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]>;
 export async function safeLookup<M extends Media, E extends Entities[M]>(
-    type: Lookup | "url",
-    value: number | string,
-    options: Partial<Options<M, E>> = {}
+  type: Lookup | "url",
+  value: number | string,
+  options: Partial<Options<M, E>> = {},
 ): Promise<(E extends undefined ? Results[Entities[M]] : Results[E])[]> {
   let results: (E extends undefined ? Results[Entities[M]] : Results[E])[];
 
   try {
     try {
-      // @ts-ignore
+      // @ts-expect-error - third-party type mismatch
       results = (await lookup(type, value, options)).results;
     } catch {
       // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
       try {
-        let newOptions = { ...options, magicnumber: Date.now() };
-        // @ts-ignore
+        const newOptions = { ...options, magicnumber: Date.now() };
+        // @ts-expect-error - third-party type mismatch
         results = (await lookup(type, value, newOptions)).results;
       } catch {
         results = [];
       }
     }
-  } catch (e) {
+  } catch {
     results = [];
   }
 
@@ -255,14 +250,13 @@ export async function safeSearch<M extends Media, E extends Entities[M]>(term: s
     } catch {
       // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
       try {
-        let newOptions = { ...options, magicnumber: Date.now() };
-        // @ts-ignore
+        const newOptions = { ...options, magicnumber: Date.now() };
         results = (await search(term, newOptions)).results;
       } catch {
         results = [];
       }
     }
-  } catch (e) {
+  } catch {
     results = [];
   }
 
@@ -270,23 +264,23 @@ export async function safeSearch<M extends Media, E extends Entities[M]>(term: s
 }
 
 const defaultOptions: Partial<Options> = {
-  country: "de"
-}
+  country: "de",
+};
 
 async function search<M extends Media, E extends Entities[M]>(
-    search: string,
-    options: Partial<Options<M, E>> = {}
+  search: string,
+  options: Partial<Options<M, E>> = {},
 ): Promise<Response<M, E>> {
-  const resolvedOptions = { ...defaultOptions, ...options }
+  const resolvedOptions = { ...defaultOptions, ...options };
 
   return await query<Response<M, E>>("search", {
     ...resolvedOptions,
     explicit: resolvedOptions.explicit ? "Yes" : "No",
-    term: search
-  })
+    term: search,
+  });
 }
 
-const API = "https://itunes.apple.com"
+const API = "https://itunes.apple.com";
 
 /**
  * Query an endpoint from the iTunes Store API.
@@ -295,15 +289,15 @@ const API = "https://itunes.apple.com"
  * @param parameters - An object of URL parameters.
  */
 async function query<T = PlainObject>(
-    endpoint: string,
-    parameters: Record<string, boolean | number | string>
+  endpoint: string,
+  parameters: Record<string, boolean | number | string>,
 ): Promise<T> {
   // Map through entries and manually encode keys and values
   const queryString = Object.entries(parameters)
-      .map(([key, value]) => {
-        return `${encodeURIComponent(key).replace(/%20/g, "+")}=${encodeURIComponent(value).replace(/%20/g, "+")}`;
-      })
-      .join('&');
+    .map(([key, value]) => {
+      return `${encodeURIComponent(key).replace(/%20/g, "+")}=${encodeURIComponent(value).replace(/%20/g, "+")}`;
+    })
+    .join("&");
 
   try {
     const response = await fetch(`${API}/${endpoint}?${queryString}`);
@@ -343,16 +337,19 @@ export function downloadFile(content: string, filename: string): void {
  */
 export async function importPlaylistFile(event: React.ChangeEvent<HTMLInputElement>): Promise<PlaylistsFile | null> {
   const file = event.target.files?.[0];
-  if (!file) return null;
+  if (!file)
+    return null;
 
   try {
-    const content = await (file.text ? file.text() : new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    }));
-    
+    const content = await (file.text
+      ? file.text()
+      : new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target?.result as string);
+          reader.onerror = reject;
+          reader.readAsText(file);
+        }));
+
     return JSON.parse(content);
   } catch (e) {
     console.error("Failed to read or parse playlist file:", e);
@@ -381,15 +378,15 @@ export function validatePlaylistsFile(data: any): PlaylistsFile | null {
  * @returns Promise resolving to the refreshed playlists
  */
 export async function refreshPlaylists(
-  playlists: Playlist[], 
-  onProgress?: (current: number, total: number, playlist: Playlist | null) => void
+  playlists: Playlist[],
+  onProgress?: (current: number, total: number, playlist: Playlist | null) => void,
 ): Promise<Playlist[]> {
   const refreshedPlaylists: Playlist[] = [];
-  
+
   for (let i = 0; i < playlists.length; i++) {
     const playlist = playlists[i];
     onProgress?.(i + 1, playlists.length, playlist);
-    
+
     if (playlist.hrefURL) {
       try {
         const refreshedPlaylist = await getPlaylistByURL(playlist.hrefURL);
@@ -409,7 +406,7 @@ export async function refreshPlaylists(
       refreshedPlaylists.push(playlist);
     }
   }
-  
+
   onProgress?.(playlists.length, playlists.length, null);
   return refreshedPlaylists;
 }

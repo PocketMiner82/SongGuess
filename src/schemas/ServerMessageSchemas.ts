@@ -1,7 +1,6 @@
 import z from "zod";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./SharedSchemas";
 
-
 /**
  * Schema for the possible answer a player gave to a question.
  */
@@ -36,9 +35,8 @@ export const PlayerAnswerDataSchema = z.object({
    * Can be provided only for PlayerPicks.
    * The answer the player selected.
    */
-  answer: z.optional(z.string())
+  answer: z.optional(z.string()),
 });
-
 
 /**
  * Schema containing information about a player.
@@ -62,9 +60,8 @@ export const PlayerMessageSchema = z.object({
   /**
    * The current answer of this player.
    */
-  answerData: z.optional(PlayerAnswerDataSchema)
+  answerData: z.optional(PlayerAnswerDataSchema),
 });
-
 
 /**
  * Schema for messages containing a song guessing question.
@@ -96,7 +93,6 @@ export const QuestionMessageSchema = z.object({
   startPos: z.number().min(0).max(2),
 });
 
-
 /**
  * Schema for messages containing the answer to a question and player responses.
  */
@@ -110,7 +106,7 @@ export const AnswerMessageSchema = z.object({
 
   /**
    * Provided only for MultipleChoiceGame.
-   * The current 4 question answer options. 
+   * The current 4 question answer options.
    */
   answerOptions: z.optional(z.array(z.string()).length(4)),
 
@@ -124,9 +120,8 @@ export const AnswerMessageSchema = z.object({
    * Provided only for PlayerPicksGame.
    * The correct song that was requested this round.
    */
-  correctSong: z.optional(SongSchema)
+  correctSong: z.optional(SongSchema),
 });
-
 
 /**
  * Schema for messages controlling audio playback during the game.
@@ -149,7 +144,7 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
      * URL to load music from.
      * @see {@link SongSchema.shape.audioURL}
      */
-    audioURL: SongSchema.shape.audioURL
+    audioURL: SongSchema.shape.audioURL,
   }),
   z.object({
     type: z.literal("audio_control").default("audio_control"),
@@ -163,11 +158,10 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
     /**
      * The elapsed time in seconds from the start of the audio track.
      */
-    position: z.number().nonnegative()
-  })
+    position: z.number().nonnegative(),
+  }),
 
 ]);
-
 
 /**
  * Schema for messages containing the current countdown value.
@@ -178,9 +172,8 @@ export const CountdownMessageSchema = z.object({
   /**
    * The current countdown number. 0 to hide.
    */
-  countdown: z.int().min(0)
+  countdown: z.int().min(0),
 });
-
 
 export const UpdatePlayedSongsMessageSchema = z.object({
   type: z.literal("update_played_songs").default("update_played_songs"),
@@ -188,9 +181,8 @@ export const UpdatePlayedSongsMessageSchema = z.object({
   /**
    * The songs that were played in this round.
    */
-  songs: z.array(SongSchema)
+  songs: z.array(SongSchema),
 });
-
 
 /**
  * Schema for messages containing updates to the current playlists.
@@ -207,9 +199,8 @@ export const UpdatePlaylistsMessageSchema = z.object({
    * The count of filtered songs.
    * @see {@link filterSongs}
    */
-  filteredSongsCount: z.number().nonnegative()
+  filteredSongsCount: z.number().nonnegative(),
 });
-
 
 /**
  * All possible states of the game
@@ -217,9 +208,8 @@ export const UpdatePlaylistsMessageSchema = z.object({
 export const GameStateSchema = z.literal([
   "lobby",
   "ingame",
-  "results"
+  "results",
 ]);
-
 
 /**
  * Schema for messages containing the current room state update.
@@ -255,5 +245,5 @@ export const UpdateMessageSchema = z.object({
   /**
    * True, if the receiver is the host
    */
-  isHost: z.boolean()
+  isHost: z.boolean(),
 });

@@ -1,8 +1,9 @@
 import { useCallback } from "react";
 import { useModalWindow } from "react-modal-global";
-import { useControllerContext } from "../room/RoomController";
 import { Button } from "../components/Button";
 import { UsernameInputField } from "../room/components/UsernameInputField";
+import { useControllerContext } from "../room/RoomController";
+
 
 interface ChooseUsernameContentProps {
   onComplete: () => void;
@@ -29,11 +30,14 @@ export function ChooseUsernameDialog({ onComplete }: ChooseUsernameContentProps)
 
   return (
     <div className="bg-card-bg rounded-lg p-6 max-w-md mx-4 shadow-xl w-full">
-      <h2 className="text-xl font-bold text-default mb-6">Room {controller.roomID}</h2>
+      <h2 className="text-xl font-bold text-default mb-6">
+        Room
+        {controller.roomID}
+      </h2>
       <p className="text-default mb-2">Please choose your username:</p>
 
       <div className="mb-2">
-        <UsernameInputField onEnd={(name) => handleJoin(name)} requireEnter={true} showButton={true} />
+        <UsernameInputField onEnd={name => handleJoin(name)} requireEnter={true} showButton={true} />
       </div>
 
       <div className="mb-4 w-full">

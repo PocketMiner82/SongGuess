@@ -1,16 +1,15 @@
-import { createRoot } from "react-dom/client";
+import type { PlaylistsFile } from "../types/MessageTypes";
 import { useState } from "react";
-import { fetchPostCreateRoom } from "../RoomHTTPHelper";
-import { Button } from "./components/Button";
-import { ToastError, showToastError } from "./components/ToastError";
-import { TopBar } from "./components/TopBar";
+import { CookieConsent } from "react-cookie-consent";
+import { createRoot } from "react-dom/client";
 import { ModalContainer } from "react-modal-global";
-import { Modal } from "./modal/Modal";
+import { fetchPostCreateRoom } from "../RoomHTTPHelper";
+import { downloadFile, formatLocalDateTime, importPlaylistFile, refreshPlaylists, validatePlaylistsFile } from "../Utils";
+import { Button } from "./components/Button";
+import { showToastError, ToastError } from "./components/ToastError";
+import { TopBar } from "./components/TopBar";
 import { showConfirm } from "./modal/ConfirmDialog";
-import {CookieConsent} from "react-cookie-consent";
-import {downloadFile, formatLocalDateTime, importPlaylistFile, refreshPlaylists, validatePlaylistsFile} from "../Utils";
-import type {PlaylistsFile} from "../types/MessageTypes";
-
+import { Modal } from "./modal/Modal";
 
 /**
  * Main application component for the landing page.
@@ -51,7 +50,8 @@ function App() {
     fileInput.accept = ".sgjson";
     fileInput.onchange = async (e) => {
       const event = e as any;
-      if (!event.target.files?.[0]) return;
+      if (!event.target.files?.[0])
+        return;
 
       setRefreshStatus("loading");
       setRefreshProgress("Reading file...");
@@ -71,12 +71,13 @@ function App() {
         }
 
         const isConfirmed = await showConfirm(
-            "Refresh Playlists",
-            "This will refresh all playlists in the selected file.\n" +
-            "This could take some time and make a lot of API calls." +
-            "\n\nDo you want to continue?"
+          "Refresh Playlists",
+          "This will refresh all playlists in the selected file.\n"
+          + "This could take some time and make a lot of API calls."
+          + "\n\nDo you want to continue?",
         );
-        if (!isConfirmed) return;
+        if (!isConfirmed)
+          return;
 
         setRefreshProgress(`Refreshing ${playlistsFile.playlists.length} playlist(s)...`);
 
@@ -89,13 +90,13 @@ function App() {
             } else {
               setRefreshProgress("Complete! Preparing download...");
             }
-          }
+          },
         );
 
         // Create refreshed playlists file
         const refreshedFile: PlaylistsFile = {
           version: playlistsFile.version,
-          playlists: refreshedPlaylists
+          playlists: refreshedPlaylists,
         };
 
         // Download the refreshed file
@@ -111,7 +112,6 @@ function App() {
           setRefreshStatus("idle");
           setRefreshProgress("");
         }, 3000);
-
       } catch (error) {
         console.error("Error refreshing playlists:", error);
         showToastError("Failed to refresh playlists. Please try again.");
@@ -124,7 +124,7 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen">
-      <CookieConsent location="bottom" buttonText="I understand" overlay >
+      <CookieConsent location="bottom" buttonText="I understand" overlay>
         This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
       </CookieConsent>
 
@@ -133,8 +133,8 @@ function App() {
       <div className="flex items-center justify-center flex-1 p-4">
         <div className="m-auto justify-items-center text-center max-w-full">
           <Button
-              onClick={() => window.location.href = "/transferPlaylist"}
-              className="py-2 px-4 mb-4"
+            onClick={() => window.location.href = "/transferPlaylist"}
+            className="py-2 px-4 mb-4"
           >
             Transfer Playlist
           </Button>
@@ -146,18 +146,20 @@ function App() {
               className="py-2 px-4 mb-2"
             >
               { refreshStatus === "loading" && (
-                  <span className="material-symbols-outlined mr-2 animate-spin" role="img" aria-label="Loading">
-                    progress_activity
-                  </span>
+                <span className="material-symbols-outlined mr-2 animate-spin" role="img" aria-label="Loading">
+                  progress_activity
+                </span>
               )}
               Refresh Playlist
             </Button>
 
             {refreshStatus !== "idle" && (
               <div className={`text-sm mt-2 items-center justify-center ${
-                refreshStatus === "success" ? "text-success" : 
-                "text-gray-600"
-              }`}>
+                refreshStatus === "success"
+                  ? "text-success"
+                  : "text-gray-600"
+              }`}
+              >
                 {refreshProgress}
               </div>
             )}
@@ -165,7 +167,8 @@ function App() {
 
           <Button
             onClick={buttonClick}
-            className="md:text-3xl lg:text-4xl py-2 px-4 md:py-3 md:px-6 lg:py-4 lg:px-8">
+            className="md:text-3xl lg:text-4xl py-2 px-4 md:py-3 md:px-6 lg:py-4 lg:px-8"
+          >
             Create Room
           </Button>
         </div>

@@ -1,18 +1,21 @@
+import random from "lodash/random";
+import React, { useCallback, useEffect, useState } from "react";
+import { ROUND_PADDING_TICKS } from "../../../../ConfigConstants";
+import { getPlaylistByURL } from "../../../../Utils";
+import { Button } from "../../../components/Button";
+import { PlaylistCard } from "../../../components/PlaylistCard";
+import { Modal } from "../../../modal/Modal";
+import { SearchMusicDialog } from "../../../modal/SearchMusicDialog";
 import {
   useControllerContext,
   useRoomControllerListener,
-  useRoomControllerMessageTypeListener
+  useRoomControllerMessageTypeListener,
 } from "../../RoomController";
-import React, {useCallback, useEffect, useState} from "react";
-import {ProgressBar} from "./ProgressBar";
-import {ROUND_PADDING_TICKS} from "../../../../ConfigConstants";
-import {Button} from "../../../components/Button";
-import {PlayerAvatar} from "../PlayerAvatar";
-import {PlaylistCard} from "../../../components/PlaylistCard";
-import {Modal} from "../../../modal/Modal";
-import {SearchMusicDialog} from "../../../modal/SearchMusicDialog";
-import {getPlaylistByURL} from "../../../../Utils";
-import _ from "lodash";
+import { PlayerAvatar } from "../PlayerAvatar";
+import { ProgressBar } from "./ProgressBar";
+
+
+type AnswerPhase = "loading" | "answering" | "answered";
 
 function PlayerPickingDisplay() {
   const controller = useControllerContext();
@@ -36,7 +39,7 @@ function PlayerPickingDisplay() {
   const handlePickSong = useCallback(async (url: string) => {
     const playlist = await getPlaylistByURL(url);
     if (playlist && playlist.songs && playlist.songs.length > 0) {
-      controller.pickSong(playlist.songs[0], controller.config.audioStartPosition === 3 ? _.random(0, 2) : controller.config.audioStartPosition);
+      controller.pickSong(playlist.songs[0], controller.config.audioStartPosition === 3 ? random(0, 2) : controller.config.audioStartPosition);
       return true;
     }
     return false;
@@ -60,9 +63,11 @@ function PlayerPickingDisplay() {
           <Button onClick={() => {
             Modal.open(SearchMusicDialog, {
               onlyAcceptSongs: true,
-              onPlaylistSelected: handlePickSong
+              onPlaylistSelected: handlePickSong,
+              id: `PlayerPicksSearchMusicDialog${Date.now()}`,
             });
-          }}>
+          }}
+          >
             <span className="material-symbols-outlined mr-2">music_note</span>
             Pick a Song
           </Button>
@@ -80,25 +85,21 @@ function PlayerPickingDisplay() {
 
 function AnswerInput() {
   const controller = useControllerContext();
-  const [canAnswer, setCanAnswer] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [phase, setPhase] = useState<AnswerPhase>("loading");
   const [answer, setAnswer] = useState("");
-  const [hasAnswered, setHasAnswered] = useState(false);
 
   useRoomControllerMessageTypeListener(controller, "audio_control");
 
-  useRoomControllerListener(controller, useCallback(msg => {
+  useRoomControllerListener(controller, useCallback((msg) => {
     if (msg?.type === "question") {
-      setIsPlaying(false);
-      setHasAnswered(false);
+      setPhase("answering");
       setAnswer("");
       return true;
     } else if (msg?.type === "answer") {
-      setCanAnswer(false);
-      setIsPlaying(false);
+      setPhase("loading");
       return true;
     } else if (msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer") {
-      setHasAnswered(true);
+      setPhase("answered");
       return true;
     }
     return false;
@@ -106,30 +107,29 @@ function AnswerInput() {
 
   useEffect(() => {
     if (controller.ingameData.currentAudioState === "play") {
-      setCanAnswer(controller.ingameData.currentAnswer === null && !hasAnswered);
-      setIsPlaying(controller.ingameData.currentAnswer === null);
+      const canAnswer = controller.ingameData.currentAnswer === null && phase !== "answered";
+      setPhase(canAnswer ? "answering" : phase);
     } else if (controller.ingameData.currentAudioState === "load") {
-      setIsPlaying(true);
-      setCanAnswer(false);
+      setPhase("loading");
     } else {
-      setIsPlaying(false);
-      setCanAnswer(false);
+      setPhase("loading");
     }
-  }, [controller.ingameData.currentAudioState, controller.ingameData.currentAnswer, hasAnswered]);
+  }, [controller.ingameData.currentAudioState, controller.ingameData.currentAnswer, phase]);
 
   const handleSubmit = useCallback((e: React.SubmitEvent) => {
     e.preventDefault();
-    if (!canAnswer || !answer.trim()) return;
+    if (phase !== "answering" || !answer.trim())
+      return;
     controller.selectAnswerText(answer.trim());
-    setHasAnswered(true);
-  }, [canAnswer, answer, controller]);
+    setPhase("answered");
+  }, [phase, answer, controller]);
 
   if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
     return (
-        <>
-          <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
-          <div className="text-2xl">Loading question…</div>
-        </>
+      <>
+        <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
+        <div className="text-2xl">Loading question…</div>
+      </>
     );
   }
 
@@ -141,12 +141,18 @@ function AnswerInput() {
   }
 
   const correctSong = controller.ingameData.currentAnswer?.correctSong;
+  const canAnswer = phase === "answering";
+  const hasAnswered = phase === "answered";
 
   return (
     <div className="space-y-6 w-full lg:w-4xl xl:w-5xl">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">
-          Question {questionNumber!}/{controller.config.questionsCount}
+          Question
+          {" "}
+          {questionNumber!}
+          /
+          {controller.config.questionsCount}
         </h2>
         <p className="text-disabled-text">
           Type the song title you hear
@@ -154,13 +160,12 @@ function AnswerInput() {
       </div>
 
       <div className="mx-auto w-3/4">
-        <ProgressBar 
+        <ProgressBar
           duration={controller.ingameData.currentAudioState === "load"
-              ? -(ROUND_PADDING_TICKS - 0.5)
-              : controller.config.timePerQuestion - 0.5
-          } 
-          isPlaying={isPlaying} 
-          positionOffset={controller.ingameData.currentAudioPosition} 
+            ? -(ROUND_PADDING_TICKS - 0.5)
+            : controller.config.timePerQuestion - 0.5}
+          isPlaying={controller.ingameData.currentAnswer === null}
+          positionOffset={controller.ingameData.currentAudioPosition}
         />
       </div>
 
@@ -171,10 +176,10 @@ function AnswerInput() {
             value={answer}
             onChange={e => setAnswer(e.target.value)}
             placeholder="Enter song name…"
-            disabled={!canAnswer || hasAnswered}
+            disabled={!canAnswer}
             className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
           />
-          <Button disabled={!canAnswer || hasAnswered || !answer.trim()}>
+          <Button disabled={!canAnswer || !answer.trim()}>
             Submit
           </Button>
         </div>

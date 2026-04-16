@@ -1,12 +1,13 @@
-import Game from "../Game";
 import type {
-  SelectAnswerMessage, Song
+  SelectAnswerMessage,
+  Song,
 } from "../../../types/MessageTypes";
-import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
-import {ROUND_POINTS_PER_QUESTION} from "../../../ConfigConstants";
-import type Question from "../Question";
 import type Player from "../../Player";
+import type Question from "../Question";
 import _ from "lodash";
+import { ROUND_POINTS_PER_QUESTION } from "../../../ConfigConstants";
+import Game from "../Game";
+import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
 
 
 export class MultipleChoiceGame extends Game {
@@ -21,7 +22,6 @@ export class MultipleChoiceGame extends Game {
    */
   remainingSongs: Song[] = [];
 
-
   /**
    * Creates a random question for the next round.
    */
@@ -30,11 +30,11 @@ export class MultipleChoiceGame extends Game {
       this.remainingSongs = _.shuffle(this.room.lobby.songs);
     }
 
-    let q = new MultipleChoiceQuestion(
-        this.currentQuestionIndex + 1,
-        this.remainingSongs.pop()!,
-        this.room.config,
-        this.room.lobby.songs
+    const q = new MultipleChoiceQuestion(
+      this.currentQuestionIndex + 1,
+      this.remainingSongs.pop()!,
+      this.room.config,
+      this.room.lobby.songs,
     );
 
     let output = `Generated MultipleChoiceQuestion ${q.num}:`;
@@ -53,7 +53,7 @@ export class MultipleChoiceGame extends Game {
   }
 
   calculatePoints() {
-    for (let player of this.room.activePlayers) {
+    for (const player of this.room.activePlayers) {
       if (player.answerData?.answerIndex === (this.currentQuestion! as MultipleChoiceQuestion).getCorrectAnswer()) {
         // half the points for correct answer
         player.answerData.roundPoints = ROUND_POINTS_PER_QUESTION / 2;

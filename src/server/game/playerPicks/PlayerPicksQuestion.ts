@@ -1,20 +1,21 @@
-import Question from "../Question";
+import type { AnswerMessage, QuestionMessage, Song } from "../../../types/MessageTypes";
 import type ServerConfig from "../../config/ServerConfig";
-import type {AnswerMessage, QuestionMessage, Song} from "../../../types/MessageTypes";
+import Question from "../Question";
+
 
 export default class PlayerPicksQuestion extends Question {
-  constructor(num: number, config: ServerConfig, public pickerId: string|null, song?: Song) {
+  constructor(num: number, config: ServerConfig, public pickerId: string | null, song?: Song) {
     super(num, config, song);
   }
 
   getQuestionMessage(): QuestionMessage {
-    let q = super.getQuestionMessage();
+    const q = super.getQuestionMessage();
     q.pickerId = this.pickerId;
     return q;
   }
 
   getAnswerMessage(): AnswerMessage {
-    let a = super.getAnswerMessage();
+    const a = super.getAnswerMessage();
     a.correctSong = this.song;
     return a;
   }

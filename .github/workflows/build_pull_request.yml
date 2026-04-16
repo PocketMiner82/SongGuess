@@ -20,5 +20,7 @@ jobs:
       run: sudo apt install -y expect
     - name: Install dependencies
       run: npm ci --legacy-peer-deps
+    - name: Run ESLint
+      run: npx eslint src/
     - name: Verify build and startup
       run: expect -c 'set timeout 15; spawn npx partykit dev --no-hotkeys; expect "Ready on http" { exit 0 }; exit 1'

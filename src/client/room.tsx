@@ -1,26 +1,28 @@
-import { createRoot } from "react-dom/client";
-import { useState, useCallback, useEffect } from "react";
-import {
-  RoomContext, useControllerContext, useRoomController, useRoomControllerListener,
-  useRoomControllerMessageTypeListener
-} from "./room/RoomController";
-import { Lobby } from "./room/components/Lobby";
-import {Ingame} from "./room/components/ingame/Ingame";
-import {Results} from "./room/components/Results";
-import { BottomBar } from "./room/components/BottomBar";
-import { TopBar } from "./components/TopBar";
-import { Button } from "./components/Button";
-import { Audio } from "./room/components/Audio";
-import { ToastError } from "./components/ToastError";
-import {ModalContainer} from "react-modal-global";
-import {Modal} from "./modal/Modal";
-import {showConfirm} from "./modal/ConfirmDialog";
-import {ChooseUsernameDialog} from "./modal/ChooseUsernameDialog";
-import {CookieConsent} from "react-cookie-consent";
-import {CookiesProvider, useCookies} from "react-cookie";
 import type ICookieProps from "../types/ICookieProps";
-import type {ServerMessage} from "../types/MessageTypes";
-
+import type { ServerMessage } from "../types/MessageTypes";
+import { useCallback, useEffect, useState } from "react";
+import { CookiesProvider, useCookies } from "react-cookie";
+import { CookieConsent } from "react-cookie-consent";
+import { createRoot } from "react-dom/client";
+import { ModalContainer } from "react-modal-global";
+import { Button } from "./components/Button";
+import { ToastError } from "./components/ToastError";
+import { TopBar } from "./components/TopBar";
+import { ChooseUsernameDialog } from "./modal/ChooseUsernameDialog";
+import { showConfirm } from "./modal/ConfirmDialog";
+import { Modal } from "./modal/Modal";
+import { Audio } from "./room/components/Audio";
+import { BottomBar } from "./room/components/BottomBar";
+import { Ingame } from "./room/components/ingame/Ingame";
+import { Lobby } from "./room/components/Lobby";
+import { Results } from "./room/components/Results";
+import {
+  RoomContext,
+  useControllerContext,
+  useRoomController,
+  useRoomControllerListener,
+  useRoomControllerMessageTypeListener,
+} from "./room/RoomController";
 
 /**
  * Loading component displayed while the room controller is initializing.
@@ -41,18 +43,20 @@ function Countdown() {
   const [countdown, setCountdown] = useState(0);
   const visible = countdown > 0;
 
-  useRoomControllerListener(useControllerContext(), useCallback((msg: ServerMessage|null) => {
+  useRoomControllerListener(useControllerContext(), useCallback((msg: ServerMessage | null) => {
     if (msg && msg.type === "countdown") {
       setCountdown(msg.countdown);
     }
     return false;
   }, []));
 
-  return visible ? (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/85" aria-live="polite">
-      <div className="text-white text-9xl font-bold">{countdown}</div>
-    </div>
-  ) : null;
+  return visible
+    ? (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/85" aria-live="polite">
+          <div className="text-white text-9xl font-bold">{countdown}</div>
+        </div>
+      )
+    : null;
 }
 
 /**
@@ -62,7 +66,7 @@ function Countdown() {
  * @param onChoose - Callback function called after the user successfully chooses a username
  * @constructor
  */
-function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
+function ChooseUsernameScreen({ onChoose }: { onChoose: () => void }) {
   useEffect(() => {
     Modal.open(ChooseUsernameDialog, { onComplete: onChoose, closable: false });
   }, [onChoose]);
@@ -73,36 +77,40 @@ function ChooseUsernameScreen({onChoose}: {onChoose: () => void}) {
 function Room() {
   const controller = useControllerContext();
   const [hasJoined, setHasJoined] = useState(false);
-  
+
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "pong");
 
   return (
-      <div className="flex flex-col h-screen">
-        <CookieConsent location="bottom" buttonText="I understand" overlay >
-          This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
-        </CookieConsent>
+    <div className="flex flex-col h-screen">
+      <CookieConsent location="bottom" buttonText="I understand" overlay>
+        This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
+      </CookieConsent>
 
-        <TopBar>
-          {controller.isHost && controller.state === "ingame" && (
-              <Button onClick={async () => {
-                const isConfirmed = await showConfirm(
-                    "Abort Game",
-                    "Do you really want to abort and send all players to the results screen?"
-                );
-                if (!isConfirmed) return;
+      <TopBar>
+        {controller.isHost && controller.state === "ingame" && (
+          <Button onClick={async () => {
+            const isConfirmed = await showConfirm(
+              "Abort Game",
+              "Do you really want to abort and send all players to the results screen?",
+            );
+            if (!isConfirmed)
+              return;
 
-                controller.returnTo("results");
-              }}>
-                Abort
-              </Button>
-          )}
-        </TopBar>
+            controller.returnTo("results");
+          }}
+          >
+            Abort
+          </Button>
+        )}
+      </TopBar>
 
-        {
-          !hasJoined ? (
+      {
+        !hasJoined
+          ? (
               <ChooseUsernameScreen onChoose={() => setHasJoined(true)} />
-          ) : (
+            )
+          : (
               <>
                 <main className="flex-1 overflow-auto">
                   <Lobby />
@@ -111,25 +119,32 @@ function Room() {
                   <Countdown />
                 </main>
               </>
-          )
-        }
+            )
+      }
 
-        <BottomBar>
-          <div className="flex-1 flex justify-start">
-            {hasJoined && <Audio />}
+      <BottomBar>
+        <div className="flex-1 flex justify-start">
+          {hasJoined && <Audio />}
+        </div>
+        {controller.currentPingMs >= 0 && (
+          <div className="flex-1 flex justify-end">
+            <span>Ping:</span>
+            <span className={`ml-1 min-w-12 text-right ${
+              controller.currentPingMs > 250
+                ? "text-error"
+                : controller.currentPingMs > 100
+                  ? "text-yellow-500"
+                  : "text-success"
+            }`}
+            >
+              {controller.currentPingMs}
+              {" "}
+              ms
+            </span>
           </div>
-          {controller.currentPingMs >= 0 && (
-              <div className="flex-1 flex justify-end">
-                <span>Ping:</span>
-                <span className={`ml-1 min-w-12 text-right ${
-                    controller.currentPingMs > 250 ? "text-error" :
-                    controller.currentPingMs > 100 ? "text-yellow-500" :
-                    "text-success"
-                }`}>{controller.currentPingMs} ms</span>
-              </div>
-          )}
-        </BottomBar>
-      </div>
+        )}
+      </BottomBar>
+    </div>
   );
 }
 
@@ -139,28 +154,30 @@ function Room() {
  */
 function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
-  const [cookies, setCookie] = useCookies<"userID"|"userName", ICookieProps>(["userID", "userName"]);
+  const [cookies, setCookie] = useCookies<"userID" | "userName", ICookieProps>(["userID", "userName"]);
   const { getController, isReady } = useRoomController(roomID, () => cookies, setCookie);
 
-  if (!isReady) return <Loading />;
+  if (!isReady)
+    return <Loading />;
 
   const controller = getController();
 
   return (
-      <RoomContext.Provider value={controller}>
-        <Room />
-        <ToastError />
-        <ModalContainer controller={Modal} />
-      </RoomContext.Provider>
+    <RoomContext.Provider value={controller}>
+      <Room />
+      <ToastError />
+      <ModalContainer controller={Modal} />
+    </RoomContext.Provider>
   );
 }
 
 createRoot(document.getElementById("app")!).render(
-    <CookiesProvider defaultSetOptions={{
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: "lax"
-    }}>
-      <App />
-    </CookiesProvider>
+  <CookiesProvider defaultSetOptions={{
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  }}
+  >
+    <App />
+  </CookiesProvider>,
 );

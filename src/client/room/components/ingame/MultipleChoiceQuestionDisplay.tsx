@@ -1,87 +1,86 @@
+import type { PlayerMessage } from "../../../../types/MessageTypes";
+import { memo, useCallback, useEffect, useState } from "react";
+import { ROUND_PADDING_TICKS } from "../../../../ConfigConstants";
+import { Button } from "../../../components/Button";
 import {
   useControllerContext,
   useRoomControllerListener,
-  useRoomControllerMessageTypeListener
+  useRoomControllerMessageTypeListener,
 } from "../../RoomController";
-import {memo, useCallback, useEffect, useState} from "react";
-import {ProgressBar} from "./ProgressBar";
-import {ROUND_PADDING_TICKS} from "../../../../ConfigConstants";
-import type {PlayerMessage} from "../../../../types/MessageTypes";
-import {Button} from "../../../components/Button";
-import {PlayerAvatar} from "../PlayerAvatar";
+import { PlayerAvatar } from "../PlayerAvatar";
+import { ProgressBar } from "./ProgressBar";
 
+
+type AnswerState = "pending" | "selected" | "correct" | "incorrect";
 
 /**
- * Individual answer option button that handles selection and styling.
- * Shows different states based on whether it's selected, correct, or disabled.
+ * Returns the appropriate CSS class for the answer button based on its state.
  */
-const getAnswerButtonStyle = (isSelected: boolean, isCorrect: boolean | null): string => {
-  if (isCorrect) {
-    return "bg-success text-white";
+function getAnswerButtonClass(state: AnswerState): string {
+  switch (state) {
+    case "correct":
+      return "bg-success text-white";
+    case "incorrect":
+      return "bg-error text-white";
+    case "selected":
+      return "bg-secondary text-white";
+    case "pending":
+    default:
+      return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
   }
-  if (isSelected && isCorrect === false) {
-    return "bg-error text-white";
-  }
-  if (isSelected) {
-    return "bg-secondary text-white";
-  }
-  return "bg-card-bg disabled:bg-card-bg text-default hover:bg-card-hover-bg";
-};
+}
 
-const AnswerOption = memo(function AnswerOption({
-                                                  option,
-                                                  index,
-                                                  isSelected,
-                                                  isCorrect,
-                                                  isDisabled,
-                                                  onSelect,
-                                                  playerAnswers
-                                                }: {
+const AnswerOption = memo(({
+  option,
+  index,
+  state,
+  onSelect,
+  playerAnswers,
+}: {
   option: string;
   index: number;
-  isSelected: boolean;
-  isCorrect: boolean|null;
-  isDisabled: boolean;
+  state: AnswerState;
   onSelect: (index: number) => void;
   playerAnswers: PlayerMessage[] | null;
-}) {
-
+}) => {
   // Filter and sort players who selected this answer
   const playersForThisAnswer = playerAnswers
-      ? playerAnswers
-          .filter(player => player.answerData?.answerIndex === index)
-          .sort((a, b) => (a.answerData?.answerTimestamp || 0) - (b.answerData?.answerTimestamp || 0))
-      : [];
+    ? playerAnswers
+        .filter(player => player.answerData?.answerIndex === index)
+        .sort((a, b) => (a.answerData?.answerTimestamp || 0) - (b.answerData?.answerTimestamp || 0))
+    : [];
+
+  const showPlayers = state === "correct" || state === "incorrect";
 
   return (
-      <div className="relative">
-        <Button
-            onClick={() => onSelect(index)}
-            disabled={isDisabled}
-            variant="plain"
-            className={`w-full min-w-75 min-h-15 xl:w-100 xl:h-25 text-center justify-start transition-colors ${getAnswerButtonStyle(isSelected, isCorrect)}`}
-        >
-          {option}
-        </Button>
+    <div className="relative">
+      <Button
+        onClick={() => onSelect(index)}
+        disabled={state !== "pending"}
+        variant="plain"
+        className={`w-full min-w-75 min-h-15 xl:w-100 xl:h-25 text-center justify-start transition-colors ${getAnswerButtonClass(state)}`}
+      >
+        {option}
+      </Button>
 
-        {/* Show player avatars during answer phase */}
-        {isCorrect !== null && playersForThisAnswer.length > 0 && (
-            <div className="absolute -top-2 -right-2 flex">
-              {playersForThisAnswer.map((player, playerIndex) => (
-                  <div
-                      key={player.username}
-                      className="rounded-full border-2 border-card-bg"
-                      style={{
-                        marginLeft: playerIndex > 0 ? '-8px' : '0',
-                        zIndex: playersForThisAnswer.length - playerIndex
-                      }}
-                  >
-                    <PlayerAvatar size={24} player={player} />
-                  </div>
-              ))}
+      {/* Show player avatars during answer phase */}
+      {showPlayers && playersForThisAnswer.length > 0 && (
+        <div className="absolute -top-2 -right-2 flex">
+          {playersForThisAnswer.map((player, playerIndex) => (
+            <div
+              key={player.username}
+              className="rounded-full border-2 border-card-bg"
+              style={{
+                marginLeft: playerIndex > 0 ? "-8px" : "0",
+                zIndex: playersForThisAnswer.length - playerIndex,
+              }}
+            >
+              <PlayerAvatar size={24} player={player} />
             </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 });
 
@@ -95,7 +94,7 @@ export function MultipleChoiceQuestionDisplay() {
   const [isPlaying, setIsPlaying] = useState(false);
   useRoomControllerMessageTypeListener(controller, "audio_control");
 
-  useRoomControllerListener(controller, useCallback(msg => {
+  useRoomControllerListener(controller, useCallback((msg) => {
     if (msg?.type === "question") {
       // reset selection
       setIsPlaying(false);
@@ -129,56 +128,75 @@ export function MultipleChoiceQuestionDisplay() {
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
-    if (!canAnswer) return;
+    if (!canAnswer)
+      return;
     controller.selectAnswer(answerIndex);
   }, [canAnswer, controller]);
 
   if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
     return (
-        <>
-          <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
-          <div className="text-2xl">Loading question…</div>
-        </>
+      <>
+        <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
+        <div className="text-2xl">Loading question…</div>
+      </>
     );
   }
 
   const answerOptions = controller.ingameData.currentAnswer?.answerOptions || controller.ingameData.currentQuestion?.answerOptions;
   const correctIndex = controller.ingameData.currentAnswer?.correctIndex;
   const questionNumber = controller.ingameData.currentQuestion?.number || controller.ingameData.currentAnswer?.number;
-  const isDisabled = !canAnswer;
 
   return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">
-            Question {questionNumber!}/{controller.config.questionsCount}
-          </h2>
-          <p className="text-disabled-text">
-            Select the correct song title
-          </p>
-        </div>
-
-        <div className="mx-auto w-3/4">
-          <ProgressBar duration={controller.ingameData.currentAudioState === "load"
-              ? -(ROUND_PADDING_TICKS - 0.5)
-              : controller.config.timePerQuestion - 0.5
-          } isPlaying={isPlaying} positionOffset={controller.ingameData.currentAudioPosition} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {answerOptions!.map((option, index) => (
-              <AnswerOption
-                  key={index}
-                  option={option}
-                  index={index}
-                  isSelected={controller.ingameData.selectedAnswer === index}
-                  isCorrect={correctIndex !== undefined ? correctIndex === index : null}
-                  isDisabled={isDisabled}
-                  onSelect={handleAnswerSelect}
-                  playerAnswers={controller.playerMessages}
-              />
-          ))}
-        </div>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">
+          Question
+          {" "}
+          {questionNumber!}
+          /
+          {controller.config.questionsCount}
+        </h2>
+        <p className="text-disabled-text">
+          Select the correct song title
+        </p>
       </div>
+
+      <div className="mx-auto w-3/4">
+        <ProgressBar
+          duration={controller.ingameData.currentAudioState === "load"
+            ? -(ROUND_PADDING_TICKS - 0.5)
+            : controller.config.timePerQuestion - 0.5}
+          isPlaying={isPlaying}
+          positionOffset={controller.ingameData.currentAudioPosition}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {answerOptions!.map((option, index) => {
+          const isSelected = controller.ingameData.selectedAnswer === index;
+          const isCorrect = correctIndex !== undefined ? correctIndex === index : null;
+
+          let state: AnswerState = "pending";
+          if (isCorrect !== null && isCorrect) {
+            state = "correct";
+          } else if (isCorrect !== null && !isCorrect && isSelected) {
+            state = "incorrect";
+          } else if (isSelected) {
+            state = "selected";
+          }
+
+          return (
+            <AnswerOption
+              key={index}
+              option={option}
+              index={index}
+              state={state}
+              onSelect={handleAnswerSelect}
+              playerAnswers={controller.playerMessages}
+            />
+          );
+        })}
+      </div>
+    </div>
   );
 }

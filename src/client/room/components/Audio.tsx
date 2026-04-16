@@ -1,9 +1,9 @@
-import React, { useCallback, useRef, useEffect } from 'react';
-import { useControllerContext, useRoomControllerListener } from '../RoomController';
-import {useCookies} from "react-cookie";
 import type ICookieProps from "../../../types/ICookieProps";
-import type {ServerMessage} from "../../../types/MessageTypes";
-import {ROUND_PADDING_TICKS} from "../../../ConfigConstants";
+import type { ServerMessage } from "../../../types/MessageTypes";
+import { useCallback, useEffect, useRef } from "react";
+import { useCookies } from "react-cookie";
+import { ROUND_PADDING_TICKS } from "../../../ConfigConstants";
+import { useControllerContext, useRoomControllerListener } from "../RoomController";
 
 /**
  * Audio component that handles audio playback and controls.
@@ -16,12 +16,19 @@ export function Audio() {
   const countdownRunningBufferRef = useRef<AudioBuffer | null>(null);
   const countdownDoneBufferRef = useRef<AudioBuffer | null>(null);
   const controller = useControllerContext();
-  const [cookies, setCookie] = useCookies<"audioVolume"|"audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
+  const [cookies, setCookie] = useCookies<"audioVolume" | "audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  if (cookies.audioVolume === undefined) setCookie('audioVolume', 0.2);
+  if (cookies.audioVolume === undefined)
+    setCookie("audioVolume", 0.2);
 
+  /**
+   * Initializes the Web Audio API context for sound effects.
+   * Creates and caches a single AudioContext instance with a gain node.
+   * @returns The AudioContext instance
+   */
   const initAudioContext = useCallback(() => {
-    if (audioContextRef.current) return audioContextRef.current;
+    if (audioContextRef.current)
+      return audioContextRef.current;
 
     const ctx = new AudioContext();
     audioContextRef.current = ctx;
@@ -33,6 +40,11 @@ export function Audio() {
     return ctx;
   }, []);
 
+  /**
+   * Loads an audio file and decodes it into an AudioBuffer.
+   * @param url - URL of the audio file to load
+   * @returns The decoded AudioBuffer or null if loading fails
+   */
   const loadAudioBuffer = useCallback(async (url: string): Promise<AudioBuffer | null> => {
     const ctx = initAudioContext();
     try {
@@ -47,16 +59,17 @@ export function Audio() {
 
   useEffect(() => {
     initAudioContext();
-    loadAudioBuffer('/sounds/countdown_running_1.mp3').then(buffer => {
+    loadAudioBuffer("/sounds/countdown_running_1.mp3").then((buffer) => {
       countdownRunningBufferRef.current = buffer;
     });
-    loadAudioBuffer('/sounds/countdown_done_1.mp3').then(buffer => {
+    loadAudioBuffer("/sounds/countdown_done_1.mp3").then((buffer) => {
       countdownDoneBufferRef.current = buffer;
     });
   }, [initAudioContext, loadAudioBuffer]);
 
   const playBuffer = useCallback((buffer: AudioBuffer | null) => {
-    if (!buffer || !audioContextRef.current || !gainNodeRef.current) return;
+    if (!buffer || !audioContextRef.current || !gainNodeRef.current)
+      return;
 
     const ctx = audioContextRef.current;
     const source = ctx.createBufferSource();
@@ -70,7 +83,8 @@ export function Audio() {
   }, [cookies.audioMuted, cookies.audioVolume]);
 
   const fadeOut = useCallback((duration: number = 1000) => {
-    if (!audioRef.current) return;
+    if (!audioRef.current)
+      return;
 
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
@@ -98,7 +112,8 @@ export function Audio() {
 
   const fadeIn = useCallback((duration: number = 1000) => {
     console.debug("[Audio] fadeIn");
-    if (!audioRef.current) return;
+    if (!audioRef.current)
+      return;
 
     if (fadeIntervalRef.current) {
       clearInterval(fadeIntervalRef.current);
@@ -126,7 +141,7 @@ export function Audio() {
     }, stepDuration);
   }, [cookies.audioMuted, cookies.audioVolume]);
 
-  useRoomControllerListener(controller, useCallback((msg: ServerMessage|null) => {
+  useRoomControllerListener(controller, useCallback((msg: ServerMessage | null) => {
     if (!audioRef.current) {
       return false;
     }
@@ -137,8 +152,9 @@ export function Audio() {
       const setStartPosAndPlay = () => {
         let pos = controller.ingameData.currentAudioPosition;
 
-        const startPosition = controller.config.audioStartPosition === 3 || controller.config.gameMode === "player_picks" ? controller.ingameData.rndStartPos :
-            controller.config.audioStartPosition;
+        const startPosition = controller.config.audioStartPosition === 3 || controller.config.gameMode === "player_picks"
+          ? controller.ingameData.rndStartPos
+          : controller.config.audioStartPosition;
         const audioPlayTime = controller.config.timePerQuestion + ROUND_PADDING_TICKS;
         switch (startPosition) {
           case 0:
@@ -156,7 +172,7 @@ export function Audio() {
 
         audio.currentTime = pos;
 
-        audio.play().catch(e => {
+        audio.play().catch((e) => {
           console.error("[Audio] Failed to start playback:", e);
         });
         console.debug("[Audio] playing");
@@ -165,13 +181,15 @@ export function Audio() {
       };
 
       switch (msg.action) {
-        case "load":
+        case "load": {
           console.debug("[Audio] load");
           const currentAudioURL = msg.audioURL;
           // avoid resetting src if it is already correct
-          if (audio.src !== currentAudioURL) audio.src = currentAudioURL;
+          if (audio.src !== currentAudioURL)
+            audio.src = currentAudioURL;
           audio.load();
           break;
+        }
         case "play":
           console.debug("[Audio] play");
           audio.volume = 0;
@@ -209,9 +227,12 @@ export function Audio() {
   }, [cookies.audioMuted, cookies.audioVolume]);
 
   const getVolumeIcon = () => {
-    if (cookies.audioMuted) return 'volume_off';
-    if (cookies.audioVolume === 0) return "volume_mute";
-    if (cookies.audioVolume! <= 0.5) return "volume_down";
+    if (cookies.audioMuted)
+      return "volume_off";
+    if (cookies.audioVolume === 0)
+      return "volume_mute";
+    if (cookies.audioVolume! <= 0.5)
+      return "volume_down";
     return "volume_up";
   };
 
@@ -223,7 +244,7 @@ export function Audio() {
         <button
           type="button"
           onClick={() => setCookie("audioMuted", !cookies.audioMuted)}
-          className="flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-secondary rounded"
           aria-label={cookies.audioMuted ? "Unmute" : "Mute"}
         >
           <span className="material-icons text-default" aria-hidden="true">
@@ -236,7 +257,7 @@ export function Audio() {
           max="1"
           step="0.01"
           value={cookies.audioVolume}
-          onChange={e => setCookie("audioVolume", parseFloat(e.target.value))}
+          onChange={e => setCookie("audioVolume", Number.parseFloat(e.target.value))}
           className="w-25 align-middle"
           aria-label="Volume"
         />

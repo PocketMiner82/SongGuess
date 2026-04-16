@@ -1,23 +1,20 @@
-import {createRoot} from "react-dom/client";
-import usePartySocket from "partysocket/react";
-import z, {uuidv4} from "zod";
-import {CookiesProvider, useCookies} from "react-cookie";
 import type ICookieProps from "../types/ICookieProps";
-import {ServerMessageSchema} from "../schemas/MessageSchemas";
-import type {ServerMessage} from "../types/MessageTypes";
-import type {LogEntry, LoggerStorage} from "../types/LoggerStorageTypes";
-import React, {useEffect, useMemo, useState, useRef, useCallback} from "react";
-import {TopBar} from "./components/TopBar";
-import {Button} from "./components/Button";
-import type {TransferHostMessage} from "../types/MessageTypes";
-import {ToastError, showToastError} from "./components/ToastError";
-
+import type { LogEntry, LoggerStorage } from "../types/LoggerStorageTypes";
+import type { ServerMessage, TransferHostMessage } from "../types/MessageTypes";
+import usePartySocket from "partysocket/react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CookiesProvider, useCookies } from "react-cookie";
+import { createRoot } from "react-dom/client";
+import z, { uuidv4 } from "zod";
+import { ServerMessageSchema } from "../schemas/MessageSchemas";
+import { Button } from "./components/Button";
+import { showToastError, ToastError } from "./components/ToastError";
+import { TopBar } from "./components/TopBar";
 
 /**
  * The PartyKit host URL for WebSocket connections.
  */
 declare const PARTYKIT_HOST: string;
-
 
 interface AuthData {
   username: string;
@@ -31,14 +28,14 @@ interface LogFilters {
   debug: boolean;
 }
 
-function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
+function AuthForm({ onAuth }: { onAuth: (auth: AuthData) => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (username && password) {
-      onAuth({username, password});
+      onAuth({ username, password });
     }
   };
 
@@ -51,11 +48,12 @@ function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
             <h2 className="text-2xl font-bold text-default mb-6 text-center">Admin Login</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
+                autoFocus={true}
                 autoComplete="username"
                 type="text"
                 placeholder="Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
                 required
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-default-bg text-default focus:outline-none focus:ring-2 focus:ring-secondary"
               />
@@ -63,12 +61,12 @@ function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-default-bg text-default focus:outline-none focus:ring-2 focus:ring-secondary"
               />
-              <Button onClick={() => document.querySelector('form')?.requestSubmit()} className="w-full">
+              <Button onClick={() => document.querySelector("form")?.requestSubmit()} className="w-full">
                 Connect
               </Button>
             </form>
@@ -83,11 +81,12 @@ function AuthForm({onAuth}: {onAuth: (auth: AuthData) => void}) {
  * Input component for admins to transfer host to any player.
  * Handles validation and confirmation.
  */
-function TransferHostInput({onTransferHost}: { onTransferHost: (username: string) => void }) {
+function TransferHostInput({ onTransferHost }: { onTransferHost: (username: string) => void }) {
   const [targetUsername, setTargetUsername] = useState("");
 
   const handleTransfer = () => {
-    if (!targetUsername.trim()) return;
+    if (!targetUsername.trim())
+      return;
 
     onTransferHost(targetUsername.trim());
   };
@@ -100,7 +99,7 @@ function TransferHostInput({onTransferHost}: { onTransferHost: (username: string
           type="text"
           placeholder="Enter username to transfer host"
           value={targetUsername}
-          onChange={(e) => setTargetUsername(e.target.value)}
+          onChange={e => setTargetUsername(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && targetUsername.trim()) {
               handleTransfer();
@@ -120,7 +119,7 @@ function TransferHostInput({onTransferHost}: { onTransferHost: (username: string
   );
 }
 
-function LogViewer({logs, filters, onFilterChange}: {
+function LogViewer({ logs, filters, onFilterChange }: {
   logs: LoggerStorage;
   filters: LogFilters;
   onFilterChange: (filters: LogFilters) => void;
@@ -143,12 +142,12 @@ function LogViewer({logs, filters, onFilterChange}: {
   };
 
   const filteredLogs = useMemo(() => {
-    const allEntries: Array<{level: keyof LogFilters; entry: LogEntry}> = [];
+    const allEntries: Array<{ level: keyof LogFilters; entry: LogEntry }> = [];
 
     Object.entries(logs).forEach(([level, entries]) => {
       if (filters[level as keyof LogFilters]) {
-        entries.forEach(entry => {
-          allEntries.push({level: level as keyof LogFilters, entry});
+        entries.forEach((entry: LogEntry) => {
+          allEntries.push({ level: level as keyof LogFilters, entry });
         });
       }
     });
@@ -157,7 +156,7 @@ function LogViewer({logs, filters, onFilterChange}: {
   }, [logs, filters]);
 
   const handleFilterToggle = (level: keyof LogFilters) => {
-    onFilterChange({...filters, [level]: !filters[level]});
+    onFilterChange({ ...filters, [level]: !filters[level] });
   };
 
   const scrollToBottom = useCallback(() => {
@@ -168,7 +167,7 @@ function LogViewer({logs, filters, onFilterChange}: {
 
   const handleScroll = useCallback(() => {
     if (logContainerRef.current) {
-      const {scrollTop, scrollHeight, clientHeight} = logContainerRef.current;
+      const { scrollTop, scrollHeight, clientHeight } = logContainerRef.current;
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
       setIsUserScrolled(!isAtBottom);
     }
@@ -198,22 +197,26 @@ function LogViewer({logs, filters, onFilterChange}: {
           ))}
         </div>
       </div>
-      <div 
+      <div
         ref={logContainerRef}
         onScroll={handleScroll}
         className="flex-1 overflow-auto mt-2"
       >
-        {filteredLogs.map(({level, entry}, index) => (
+        {filteredLogs.map(({ level, entry }, index) => (
           <div key={index} className={`mb-0.5 ${getLogColor(level)}`}>
             <span className="text-gray-500">
-              [{formatTimestamp(entry.timestamp)}]
+              [
+              {formatTimestamp(entry.timestamp)}
+              ]
             </span>
             <span className="font-bold ml-2 mr-2">
-              [{level.toUpperCase()}]
+              [
+              {level.toUpperCase()}
+              ]
             </span>
             <span className="text-sm text-default whitespace-pre-wrap">
-              {React.createElement(React.Fragment, {}, ...entry.msg.split("[...]").flatMap((part, i) => 
-                i === 0 ? [part] : [<span key={i} className="text-gray-500">[...]</span>, part]
+              {React.createElement(React.Fragment, {}, ...entry.msg.split("[...]").flatMap((part, i) =>
+                i === 0 ? [part] : [<span key={i} className="text-gray-500">[...]</span>, part],
               ))}
             </span>
           </div>
@@ -223,29 +226,29 @@ function LogViewer({logs, filters, onFilterChange}: {
   );
 }
 
-function AuthenticatedApp({auth}: { auth: AuthData }) {
-  const [logs, setLogs] = useState<LoggerStorage>({info: [], warn: [], error: [], debug: []});
-  const [filters, setFilters] = useState<LogFilters>({info: true, warn: true, error: true, debug: false});
-  const [connectionStatus, setConnectionStatus] = useState<string|null>("Connecting...");
+function AuthenticatedApp({ auth }: { auth: AuthData }) {
+  const [logs, setLogs] = useState<LoggerStorage>({ info: [], warn: [], error: [], debug: [] });
+  const [filters, setFilters] = useState<LogFilters>({ info: true, warn: true, error: true, debug: false });
+  const [connectionStatus, setConnectionStatus] = useState<string | null>("Connecting...");
 
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
-  const [cookies, setCookie] = useCookies<"userID"|"userName", ICookieProps>(["userID", "userName"]);
+  const [cookies, setCookie] = useCookies<"userID" | "userName", ICookieProps>(["userID", "userName"]);
 
   const generateAuthQuery = (authData: AuthData): string => {
     return btoa(`${authData.username}:${authData.password}`);
   };
 
-  let id = `admin_${cookies.userID ? cookies.userID : uuidv4()}`;
+  const id = `admin_${cookies.userID ? cookies.userID : uuidv4()}`;
 
   const socketRef = usePartySocket({
     host: PARTYKIT_HOST,
     room: roomID,
     maxRetries: 50,
-    id: id,
+    id,
     onOpen: () => {
       setConnectionStatus(null);
     },
-    onClose: e => {
+    onClose: (e) => {
       if (e.code === 4403) {
         setConnectionStatus(e.reason);
       } else {
@@ -264,13 +267,13 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
           return;
         }
 
-        let msg: ServerMessage = result.data;
+        const msg: ServerMessage = result.data;
 
         switch (msg.type) {
           case "add_log_message":
             setLogs(prev => ({
               ...prev,
-              [msg.level]: [...prev[msg.level as keyof LoggerStorage], msg.entry]
+              [msg.level]: [...prev[msg.level as keyof LoggerStorage], msg.entry],
             }));
             break;
           case "update_log_messages":
@@ -289,7 +292,7 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
       }
     },
     // Use query parameter for authentication
-    query: {auth: generateAuthQuery(auth)}
+    query: { auth: generateAuthQuery(auth) },
   });
 
   // Function to send transfer host message
@@ -297,7 +300,7 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
     if (socketRef && socketRef.readyState === WebSocket.OPEN) {
       const message: TransferHostMessage = {
         type: "transfer_host",
-        playerName: username.trim()
+        playerName: username.trim(),
       };
       socketRef.send(JSON.stringify(message));
     }
@@ -310,22 +313,22 @@ function AuthenticatedApp({auth}: { auth: AuthData }) {
   }, [cookies.userID, id, setCookie]);
 
   return (
-      <div>
-        {connectionStatus && (
-            <div className="fixed bottom-0 left-0 right-0 bg-error text-white text-center py-2 z-5000" aria-live="polite">
-              {connectionStatus}
-            </div>
-        )}
-        <div className="flex flex-col h-screen">
-          <TopBar />
-
-          <div className="flex-1 overflow-auto p-4">
-            <TransferHostInput onTransferHost={sendTransferHost} />
-            <LogViewer logs={logs} filters={filters} onFilterChange={setFilters} />
-          </div>
-          <ToastError />
+    <div>
+      {connectionStatus && (
+        <div className="fixed bottom-0 left-0 right-0 bg-error text-white text-center py-2 z-5000" aria-live="polite">
+          {connectionStatus}
         </div>
+      )}
+      <div className="flex flex-col h-screen">
+        <TopBar />
+
+        <div className="flex-1 overflow-auto p-4">
+          <TransferHostInput onTransferHost={sendTransferHost} />
+          <LogViewer logs={logs} filters={filters} onFilterChange={setFilters} />
+        </div>
+        <ToastError />
       </div>
+    </div>
   );
 }
 
@@ -340,11 +343,12 @@ function App() {
 }
 
 createRoot(document.getElementById("app")!).render(
-    <CookiesProvider defaultSetOptions={{
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: "lax"
-    }}>
-      <App />
-    </CookiesProvider>
+  <CookiesProvider defaultSetOptions={{
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  }}
+  >
+    <App />
+  </CookiesProvider>,
 );

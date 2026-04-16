@@ -1,15 +1,15 @@
-import type {ClientMessage} from "../../types/MessageTypes";
-import type {IEventListener} from "../listener/IEventListener";
-import type {ValidRoom} from "../ValidRoom";
-import {BaseConfig} from "../../BaseConfig";
-import _ from "lodash";
-import {ROUND_PADDING_TICKS, ROUND_PICKED_SONG_TICK} from "../../ConfigConstants";
+import type { ClientMessage } from "../../types/MessageTypes";
+import type { IEventListener } from "../listener/IEventListener";
 import type Player from "../Player";
-import {MultipleChoiceGame} from "../game/multipleChoice/MultipleChoiceGame";
-import {PlayerPicksGame} from "../game/playerPicks/PlayerPicksGame";
+import type { ValidRoom } from "../ValidRoom";
+import _ from "lodash";
+import { BaseConfig } from "../../BaseConfig";
+import { ROUND_PADDING_TICKS, ROUND_PICKED_SONG_TICK } from "../../ConfigConstants";
+import { MultipleChoiceGame } from "../game/multipleChoice/MultipleChoiceGame";
+import { PlayerPicksGame } from "../game/playerPicks/PlayerPicksGame";
 
 
-export default class ServerConfig extends BaseConfig implements IEventListener{
+export default class ServerConfig extends BaseConfig implements IEventListener {
   constructor(private readonly room: ValidRoom) {
     super();
     room.listener.registerEvents(this);
@@ -21,7 +21,7 @@ export default class ServerConfig extends BaseConfig implements IEventListener{
         return true;
       }
 
-      let oldSongs = this.room.lobby.songs.slice();
+      const oldSongs = this.room.lobby.songs.slice();
 
       if (this.gameMode !== msg.gameMode) {
         this.room.game.destroy();

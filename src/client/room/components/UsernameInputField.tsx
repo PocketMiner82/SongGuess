@@ -1,8 +1,7 @@
-import {usernameRegex} from "../../../schemas/ValidationRegexes";
-import {useCallback, useState} from "react";
-import {useControllerContext, useRoomControllerListener} from "../RoomController";
-import {Button} from "../../components/Button";
-
+import { useCallback, useState } from "react";
+import { usernameRegex } from "../../../schemas/ValidationRegexes";
+import { Button } from "../../components/Button";
+import { useControllerContext, useRoomControllerListener } from "../RoomController";
 
 /**
  * Input field component for editing and submitting a username.
@@ -14,7 +13,7 @@ import {Button} from "../../components/Button";
  * @param showButton - If true, displays a "Join Game" button alongside the input field
  * @constructor
  */
-export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (editedName: string) => void, requireEnter?: boolean, showButton?: boolean}) {
+export function UsernameInputField({ onEnd, requireEnter, showButton }: { onEnd: (editedName: string) => void; requireEnter?: boolean; showButton?: boolean }) {
   const controller = useControllerContext();
   const [editedName, setEditedName] = useState(controller.username ?? "");
 
@@ -32,24 +31,29 @@ export function UsernameInputField({onEnd, requireEnter, showButton}: {onEnd: (e
   }, [editedName, onEnd]);
 
   return (
-      <div className="w-full">
-        <label htmlFor="username-input" className="sr-only">Username</label>
-        <input
-          id="username-input"
-          type="text"
-          value={editedName}
-          onChange={(e) => setEditedName(e.target.value)}
-          onBlur={() => !requireEnter && handleNameUpdate()}
-          onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
-          autoComplete="username"
-          maxLength={16}
-          className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
-                ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}/>
-        {showButton ?
+    <div className="w-full">
+      <label htmlFor="username-input" className="sr-only">Username</label>
+      <input
+        id="username-input"
+        type="text"
+        value={editedName}
+        onChange={e => setEditedName(e.target.value)}
+        onBlur={() => !requireEnter && handleNameUpdate()}
+        onKeyDown={e => e.key === "Enter" && handleNameUpdate()}
+        autoComplete="username"
+        spellCheck={false}
+        autoFocus={true}
+        maxLength={16}
+        className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
+                ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}
+      />
+      {showButton
+        ? (
             <Button className="mt-4 w-full" onClick={handleNameUpdate}>
               Join Game
             </Button>
-             : undefined}
-      </div>
+          )
+        : undefined}
+    </div>
   );
 }

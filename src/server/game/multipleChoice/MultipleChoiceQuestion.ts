@@ -1,14 +1,14 @@
-import type {AnswerMessage, QuestionMessage, Song} from "../../../types/MessageTypes";
-import Question, {InitError} from "../Question";
-import _ from "lodash";
+import type { AnswerMessage, QuestionMessage, Song } from "../../../types/MessageTypes";
 import type ServerConfig from "../../config/ServerConfig";
+import _ from "lodash";
+import Question, { InitError } from "../Question";
+
 
 export default class MultipleChoiceQuestion extends Question {
   /**
    * The list of songs for this question (1 correct answer + 3 distractors).
    */
   answers: Song[] = [];
-
 
   /**
    * Constructs a mulitple choice question asking which is the correct song.
@@ -38,19 +38,19 @@ export default class MultipleChoiceQuestion extends Question {
     if (this.config.distractionsPreferSameArtist) {
       // filters for songs that share at least one artist with the current track
       distractions = possibleDistractions.filter(s =>
-          this.song!.artist.split(" & ")
-              .some(a => s.artist.split(" & ").indexOf(a) !== -1));
+        this.song!.artist.split(" & ")
+          .some(a => s.artist.split(" & ").includes(a)));
 
       // add all other distractions as fallback if there are not enough distractions available by the same artist
       distractions.push(..._.difference(possibleDistractions, distractions));
     }
 
     for (let i = 0; i < 3; i++) {
-      let distraction = distractions[i];
+      const distraction = distractions[i];
 
       if (!distraction) {
-        throw new InitError("Cannot find enough distractions with different name. " +
-            "Please add more songs with unique names to the playlist!");
+        throw new InitError("Cannot find enough distractions with different name. "
+          + "Please add more songs with unique names to the playlist!");
       }
 
       this.answers.push(distraction);
@@ -75,13 +75,13 @@ export default class MultipleChoiceQuestion extends Question {
   }
 
   getQuestionMessage(): QuestionMessage {
-    let q = super.getQuestionMessage();
+    const q = super.getQuestionMessage();
     q.answerOptions = this.getSongNames();
     return q;
   }
 
   getAnswerMessage(): AnswerMessage {
-    let a = super.getAnswerMessage();
+    const a = super.getAnswerMessage();
     a.answerOptions = this.getSongNames();
     a.correctIndex = this.getCorrectAnswer();
     return a;

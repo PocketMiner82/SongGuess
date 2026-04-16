@@ -1,6 +1,5 @@
 import z from "zod";
-import {PlaylistSchema, SongSchema, UsernameSchema} from "./SharedSchemas";
-
+import { PlaylistSchema, SongSchema, UsernameSchema } from "./SharedSchemas";
 
 /**
  * Schema for messages requesting to return to the lobby from the game.
@@ -11,9 +10,8 @@ export const TransferHostMessageSchema = z.object({
   /**
    * The name of the player that should get host.
    */
-  playerName: z.string()
+  playerName: z.string(),
 });
-
 
 /**
  * Schema for messages requesting to return to the lobby from the game.
@@ -24,9 +22,8 @@ export const ReturnToMessageSchema = z.object({
   /**
    * Where to send the player to.
    */
-  where: z.literal(["lobby", "results"])
+  where: z.literal(["lobby", "results"]),
 });
-
 
 /**
  * Schema for messages containing the player's selected song in the choose step of a PlayerPicksGame.
@@ -43,9 +40,8 @@ export const PlayerPickSongMessageSchema = z.object({
    * The selected start pos for the song.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  startPos: z.number().min(0).max(2)
+  startPos: z.number().min(0).max(2),
 });
-
 
 /**
  * Schema for messages containing the player's selected answer index during a question in a MultipleChoiceGame.
@@ -63,17 +59,15 @@ export const SelectAnswerMessageSchema = z.object({
    * Provided only for PlayerPicksGame.
    * The string of the song name the player guessed.
    */
-  answer: z.string().optional()
+  answer: z.string().optional(),
 });
-
 
 /**
  * Schema for messages requesting to start a new game.
  */
 export const StartGameMessageSchema = z.object({
-  type: z.literal("start_game").default("start_game")
+  type: z.literal("start_game").default("start_game"),
 });
-
 
 /**
  * Schema for messages requesting to add a new playlist to the game.
@@ -84,9 +78,8 @@ export const AddPlaylistsMessageSchema = z.object({
   /**
    * The new playlist to add.
    */
-  playlists: z.array(PlaylistSchema)
+  playlists: z.array(PlaylistSchema),
 });
-
 
 /**
  * Schema for messages requesting to remove a playlist from the game.
@@ -97,9 +90,8 @@ export const RemovePlaylistMessageSchema = z.object({
   /**
    * The playlist index to remove.
    */
-  index: z.nullable(z.int().nonnegative())
+  index: z.nullable(z.int().nonnegative()),
 });
-
 
 /**
  * Schema for messages requesting to change a player's username.
@@ -110,5 +102,5 @@ export const ChangeUsernameMessageSchema = z.object({
   /**
    * The new username.
    */
-  username: UsernameSchema
+  username: UsernameSchema,
 });

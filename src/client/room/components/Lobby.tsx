@@ -1,15 +1,15 @@
-import React, {useState, useMemo, useRef, useEffect, type ReactNode} from "react";
+import type { ReactNode } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { COLORS } from "../../../ConfigConstants";
+import { downloadFile, formatLocalDateTime, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
 import { Button } from "../../components/Button";
-import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
-import {PlayerCard} from "./PlayerCard";
-import {COLORS} from "../../../ConfigConstants";
-import {PlaylistCard} from "../../components/PlaylistCard";
-import {showConfirm} from "../../modal/ConfirmDialog";
-import {showToastError} from "../../components/ToastError";
-import {downloadFile, formatLocalDateTime, importPlaylistFile, validatePlaylistsFile} from "../../../Utils";
-import {Modal} from "../../modal/Modal";
-import {SearchMusicDialog} from "../../modal/SearchMusicDialog";
-
+import { PlaylistCard } from "../../components/PlaylistCard";
+import { showToastError } from "../../components/ToastError";
+import { showConfirm } from "../../modal/ConfirmDialog";
+import { Modal } from "../../modal/Modal";
+import { SearchMusicDialog } from "../../modal/SearchMusicDialog";
+import { useControllerContext, useRoomControllerMessageTypeListener } from "../RoomController";
+import { PlayerCard } from "./PlayerCard";
 
 /**
  * Displays all players in the room as a grid. Shows empty slots
@@ -24,7 +24,8 @@ function PlayerList() {
 
   useEffect(() => {
     const grid = gridRef.current;
-    if (!grid) return;
+    if (!grid)
+      return;
 
     const updateColumns = () => {
       const style = window.getComputedStyle(grid);
@@ -45,35 +46,40 @@ function PlayerList() {
     const rows = Math.ceil(controller.playerMessages.length / columns);
     const filledSlots = rows * columns;
     const emptySlots = Math.max(0, Math.min(COLORS.length, filledSlots) - controller.playerMessages.length);
-    return [...controller.playerMessages, ...Array(emptySlots).fill(null)];
+    return [...controller.playerMessages, ...Array.from({ length: emptySlots }).fill(null)] as unknown as typeof controller.playerMessages[number][];
   }, [controller.playerMessages, columns]);
 
   return (
     <div className="mb-8">
       <h3 className="text-xl font-bold mb-3">Players</h3>
-      <ul 
+      <ul
         ref={gridRef}
         className="grid grid-cols-1 lg:max-h-none lg:grid-cols-2 2xl:grid-cols-4 gap-4 max-h-[33vh] overflow-auto"
       >
         {slots.map((player, idx) => (
           <PlayerCard
             key={player?.username || `empty-${idx}`}
-            player={player}>
-            {controller.isHost && player?.username && player.username !== controller.username ? (
-                <Button
+            player={player}
+          >
+            {controller.isHost && player?.username && player.username !== controller.username
+              ? (
+                  <Button
                     onClick={async () => {
                       const isConfirmed = await showConfirm(
-                          "Transfer Host",
-                          `Do you really want to transfer host to '${player.username}'?`
+                        "Transfer Host",
+                        `Do you really want to transfer host to '${player.username}'?`,
                       );
-                      if (!isConfirmed) return;
+                      if (!isConfirmed)
+                        return;
 
                       controller.transferHost(player.username);
                     }}
-                    aria-label="Transfer host">
-                  <span className="material-symbols-outlined text-2xl" aria-hidden="true">crown</span>
-                </Button>
-            ) : undefined}
+                    aria-label="Transfer host"
+                  >
+                    <span className="material-symbols-outlined text-2xl" aria-hidden="true">crown</span>
+                  </Button>
+                )
+              : undefined}
           </PlayerCard>
         ))}
       </ul>
@@ -119,36 +125,44 @@ function PlaylistsList() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-xl font-bold">Playlists - {
-          `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.config.advancedSongFiltering ? " (filtered)" : ""}`
-        }</h3>
+        <h3 className="text-xl font-bold">
+          Playlists -
+          {
+            `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.config.advancedSongFiltering ? " (filtered)" : ""}`
+          }
+        </h3>
         <DownloadPlaylists />
       </div>
       <ul className="space-y-4 overflow-auto flex-1">
-        {controller.playlists.length === 0 ? (
-          <PlaylistCard title="No playlists added yet." />
-        ) : (
-            controller.playlists.map((pl, idx) => (
-            <PlaylistCard
-                key={idx}
-                title={pl.name}
-                subtitle={pl.subtitle}
-                coverURL={pl.cover}
-                hrefURL={pl.hrefURL}>
-              {
-                controller.isHost ?
-                    <Button
-                        type="button"
-                        onClick={() => controller.removePlaylist(idx)}
-                        aria-label="Delete playlist"
-                    >
-                      <span className="material-symbols-outlined" aria-hidden="true">delete</span>
-                    </Button>
-                    : undefined
-              }
-            </PlaylistCard>
-          ))
-        )}
+        {controller.playlists.length === 0
+          ? (
+              <PlaylistCard title="No playlists added yet." />
+            )
+          : (
+              controller.playlists.map((pl, idx) => (
+                <PlaylistCard
+                  key={idx}
+                  title={pl.name}
+                  subtitle={pl.subtitle}
+                  coverURL={pl.cover}
+                  hrefURL={pl.hrefURL}
+                >
+                  {
+                    controller.isHost
+                      ? (
+                          <Button
+                            type="button"
+                            onClick={() => controller.removePlaylist(idx)}
+                            aria-label="Delete playlist"
+                          >
+                            <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+                          </Button>
+                        )
+                      : undefined
+                  }
+                </PlaylistCard>
+              ))
+            )}
       </ul>
     </div>
   );
@@ -163,10 +177,11 @@ function AddPlaylistButton() {
   return (
     <Button
       onClick={() => Modal.open(SearchMusicDialog, {
-        onPlaylistSelected: async url => {
+        onPlaylistSelected: async (url) => {
           console.debug("Selected Playlist:", url);
           return await controller.tryAddPlaylists(url);
-        }
+        },
+        id: "LobbySearchMusicDialog",
       })}
       className="w-full"
     >
@@ -197,10 +212,10 @@ function ImportPlaylists() {
       }
 
       controller.importPlaylistsFromFile(playlistsFile);
-    } catch (error) {
+    } catch {
       showToastError("Failed to read file.");
     }
-    
+
     // Reset file input
     event.target.value = "";
   };
@@ -236,8 +251,8 @@ function ClearPlaylists() {
 
   const handleClearPlaylists = async () => {
     const isConfirmed = await showConfirm(
-        "Clear Playlists",
-        "Are you sure you want to clear all playlists?"
+      "Clear Playlists",
+      "Are you sure you want to clear all playlists?",
     );
     if (isConfirmed) {
       controller.removePlaylist(null);
@@ -287,9 +302,9 @@ function CopyLink() {
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(setCopied, 2000, false);
     } catch (err) {
-      console.error('Failed to copy link:', err);
+      console.error("Failed to copy link:", err);
       showToastError("Failed to copy link.");
     }
   };
@@ -313,6 +328,7 @@ function CopyLink() {
  * Features left-aligned label and right-aligned toggle switch.
  */
 function SettingsToggle({ value, onToggle, children }: { value: boolean; onToggle: (value: boolean) => void; children: ReactNode }) {
+  const label = children?.toString() || "this setting";
   return (
     <div className="flex items-center justify-between">
       <span>
@@ -321,14 +337,14 @@ function SettingsToggle({ value, onToggle, children }: { value: boolean; onToggl
       <button
         type="button"
         onClick={() => onToggle(!value)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          value ? 'bg-secondary' : 'bg-gray-300'
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
+          value ? "bg-secondary" : "bg-gray-300"
         }`}
-        aria-label={value ? "Disable" : "Enable"}
+        aria-label={`${value ? "Disable" : "Enable"} ${label}`}
       >
         <span
           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-            value ? 'translate-x-6' : 'translate-x-1'
+            value ? "translate-x-6" : "translate-x-1"
           }`}
         />
       </button>
@@ -340,32 +356,33 @@ function SettingsToggle({ value, onToggle, children }: { value: boolean; onToggl
  * Number input component for settings with validation.
  * Features left-aligned label and right-aligned number input.
  */
-function SettingsNumberInput({ value, onChange, min, max, children }: { 
-  value: number; 
-  onChange: (value: number) => void; 
-  min: number; 
-  max: number; 
-  children: ReactNode 
+function SettingsNumberInput({ value, onChange, min, max, children }: {
+  value: number;
+  onChange: (value: number) => void;
+  min: number;
+  max: number;
+  children: ReactNode;
 }) {
   const [inputValue, setInputValue] = useState(value.toString());
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    
-    const numValue = parseInt(newValue, 10);
-    if (!isNaN(numValue) && numValue >= min && numValue <= max) {
+
+    const numValue = Number.parseInt(newValue, 10);
+    if (!Number.isNaN(numValue) && numValue >= min && numValue <= max) {
       onChange(numValue);
     }
   };
 
   const handleBlur = () => {
-    const numValue = parseInt(inputValue, 10);
-    if (isNaN(numValue) || numValue < min || numValue > max) {
+    const numValue = Number.parseInt(inputValue, 10);
+    if (Number.isNaN(numValue) || numValue < min || numValue > max) {
       setInputValue(value.toString());
     }
   };
 
+  const label = children?.toString() || "value";
   return (
     <div className="flex items-center justify-between">
       <span>
@@ -378,6 +395,7 @@ function SettingsNumberInput({ value, onChange, min, max, children }: {
         value={inputValue}
         onChange={handleChange}
         onBlur={handleBlur}
+        aria-label={label}
         className="w-11 px-2 text-center border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0"
       />
     </div>
@@ -388,12 +406,13 @@ function SettingsNumberInput({ value, onChange, min, max, children }: {
  * Dropdown select component for settings with predefined options.
  * Features left-aligned label and right-aligned dropdown.
  */
-function SettingsDropdown({ value, onChange, options, children }: { 
-  value: number; 
-  onChange: (value: number) => void; 
-  options: { value: number; label: string }[]; 
-  children: ReactNode 
+function SettingsDropdown({ value, onChange, options, children }: {
+  value: number;
+  onChange: (value: number) => void;
+  options: { value: number; label: string }[];
+  children: ReactNode;
 }) {
+  const label = children?.toString() || "option";
   return (
     <div className="flex items-center justify-between">
       <span>
@@ -401,8 +420,9 @@ function SettingsDropdown({ value, onChange, options, children }: {
       </span>
       <select
         value={value}
-        onChange={e => onChange(parseInt(e.target.value, 10))}
-        className="px-2 py-1 border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0 bg-transparent"
+        onChange={e => onChange(Number.parseInt(e.target.value, 10))}
+        aria-label={label}
+        className="px-2 py-1 border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0 focus-visible:ring-2 focus-visible:ring-secondary bg-transparent"
       >
         {options.map(option => (
           <option key={option.value} value={option.value}>
@@ -416,7 +436,16 @@ function SettingsDropdown({ value, onChange, options, children }: {
 
 function GameModeSelector() {
   const controller = useControllerContext();
-  
+
+  const handleKeyDown = (e: React.KeyboardEvent, currentMode: string) => {
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      const newMode = currentMode === "multiple_choice" ? "player_picks" : "multiple_choice";
+      controller.config.gameMode = newMode as "multiple_choice" | "player_picks";
+      controller.sendConfig();
+    }
+  };
+
   return (
     <div className="mb-4">
       <div className="flex border-b border-gray-600" role="tablist">
@@ -424,11 +453,13 @@ function GameModeSelector() {
           type="button"
           role="tab"
           aria-selected={controller.config.gameMode === "multiple_choice"}
+          tabIndex={controller.config.gameMode === "multiple_choice" ? 0 : -1}
           onClick={() => {
             controller.config.gameMode = "multiple_choice";
             controller.sendConfig();
           }}
-          className={`flex-1 py-2 px-4 text-center transition-colors ${
+          onKeyDown={e => handleKeyDown(e, controller.config.gameMode)}
+          className={`flex-1 py-2 px-4 text-center transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
             controller.config.gameMode === "multiple_choice"
               ? "border-b-2 border-secondary text-secondary"
               : "text-disabled-text hover:text-default"
@@ -440,11 +471,13 @@ function GameModeSelector() {
           type="button"
           role="tab"
           aria-selected={controller.config.gameMode === "player_picks"}
+          tabIndex={controller.config.gameMode === "player_picks" ? 0 : -1}
           onClick={() => {
             controller.config.gameMode = "player_picks";
             controller.sendConfig();
           }}
-          className={`flex-1 py-2 px-4 text-center transition-colors ${
+          onKeyDown={e => handleKeyDown(e, controller.config.gameMode)}
+          className={`flex-1 py-2 px-4 text-center transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
             controller.config.gameMode === "player_picks"
               ? "border-b-2 border-secondary text-secondary"
               : "text-disabled-text hover:text-default"
@@ -468,40 +501,43 @@ function Settings() {
 
       <div className="grid gap-4">
         {controller.config.gameMode === "multiple_choice" && (
-            <>
-              <AddPlaylistButton />
+          <>
+            <AddPlaylistButton />
 
-              <div className="grid grid-cols-2 gap-4">
-                <ClearPlaylists />
-                <ImportPlaylists />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <ClearPlaylists />
+              <ImportPlaylists />
+            </div>
 
-              <div className="border-t border-disabled-bg my-1"></div>
+            <div className="border-t border-disabled-bg my-1"></div>
 
-              <SettingsToggle value={controller.config.advancedSongFiltering}
-                              onToggle={v => {
-                                controller.config.advancedSongFiltering = v;
-                                controller.sendConfig();
-                              }}
-              >
-                Perform advanced song filtering
-              </SettingsToggle>
+            <SettingsToggle
+              value={controller.config.advancedSongFiltering}
+              onToggle={(v) => {
+                controller.config.advancedSongFiltering = v;
+                controller.sendConfig();
+              }}
+            >
+              Perform advanced song filtering
+            </SettingsToggle>
 
-              <SettingsToggle value={controller.config.distractionsPreferSameArtist}
-                              onToggle={v => {
-                                controller.config.distractionsPreferSameArtist = v;
-                                controller.sendConfig();
-                              }}
-              >
-                Distractions: Prefer songs by same artist
-              </SettingsToggle>
+            <SettingsToggle
+              value={controller.config.distractionsPreferSameArtist}
+              onToggle={(v) => {
+                controller.config.distractionsPreferSameArtist = v;
+                controller.sendConfig();
+              }}
+            >
+              Distractions: Prefer songs by same artist
+            </SettingsToggle>
 
-              <div className="border-t border-disabled-bg my-1"></div>
-            </>
+            <div className="border-t border-disabled-bg my-1"></div>
+          </>
         )}
 
-        <SettingsToggle value={controller.config.endWhenAnswered}
-          onToggle={v => {
+        <SettingsToggle
+          value={controller.config.endWhenAnswered}
+          onToggle={(v) => {
             controller.config.endWhenAnswered = v;
             controller.sendConfig();
           }}
@@ -511,7 +547,7 @@ function Settings() {
 
         <SettingsNumberInput
           value={controller.config.questionsCount}
-          onChange={v => {
+          onChange={(v) => {
             controller.config.questionsCount = v;
             controller.sendConfig();
           }}
@@ -522,20 +558,20 @@ function Settings() {
         </SettingsNumberInput>
 
         <SettingsNumberInput
-            value={controller.config.timePerQuestion}
-            onChange={v => {
-              controller.config.timePerQuestion = v;
-              controller.sendConfig();
-            }}
-            min={5}
-            max={25}
+          value={controller.config.timePerQuestion}
+          onChange={(v) => {
+            controller.config.timePerQuestion = v;
+            controller.sendConfig();
+          }}
+          min={5}
+          max={25}
         >
           Time per question (5-25s)
         </SettingsNumberInput>
 
         <SettingsDropdown
           value={controller.config.audioStartPosition}
-          onChange={v => {
+          onChange={(v) => {
             controller.config.audioStartPosition = v;
             controller.sendConfig();
           }}
@@ -543,7 +579,7 @@ function Settings() {
             { value: 0, label: "Start of audio" },
             { value: 1, label: "Close to middle" },
             { value: 2, label: "Close to end" },
-            { value: 3, label: "Randomize above" }
+            { value: 3, label: "Randomize above" },
           ]}
         >
           Audio start position
@@ -569,7 +605,8 @@ export function Lobby() {
   useRoomControllerMessageTypeListener(controller, "update");
   useRoomControllerMessageTypeListener(controller, "update_playlists");
 
-  if (controller.state !== "lobby") return null;
+  if (controller.state !== "lobby")
+    return null;
 
   return (
     <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">

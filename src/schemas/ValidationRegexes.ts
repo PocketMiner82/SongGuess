@@ -1,7 +1,8 @@
 /**
  * Regex of the allowed username characters + length restriction
  */
-export const usernameRegex = /^(?! )(?!.* $)[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<>_ -]{1,16}$/;
+// eslint-disable-next-line regexp/no-contradiction-with-assertion
+export const usernameRegex = /^(?! )(?!.* $)[\wäöüÄÖÜßẞ!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<> -]{1,16}$/;
 
 /**
  * Regular expression to validate that a URL starts with the apple music domain.
@@ -21,12 +22,12 @@ export const appleMusicCoverRegex = /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/
 /**
  * Regular expression to validate Apple Music artist URLs.
  */
-export const artistRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/artist\/[^/]+\/(?<id>\d+)(\?.*)?;?)$/
+export const artistRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/artist\/[^/]+\/(?<id>\d+)(\?.*)?;?)$/;
 /**
  * Regular expression to validate Apple Music album URLs.
  */
-export const albumRegex =  /^(https?:\/\/music\.apple\.com\/[^/]+\/album\/[^/]+\/(?<id>\d+)(\?(?:[^&]*&)?i=(?<trackId>\d+))?(\?[^;]*)?;?)$/
+export const albumRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/album\/[^/]+\/(?<id>\d+)(\?(?:[^&]*&)?i=(?<trackId>\d+))?(\?[^;]*)?;?)$/;
 /**
  * Regular expression to validate Apple Music song URLs.
  */
-export const songRegex =   /^(https?:\/\/music\.apple\.com\/[^/]+\/(?<song>song)\/[^/]+\/(?<id>\d+)(\?.*)?;?)$/
+export const songRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/(?<song>song)\/[^/]+\/(?<id>\d+)(\?.*)?;?)$/;

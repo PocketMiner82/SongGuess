@@ -1,5 +1,6 @@
-import type {RoomConfigMessage} from "./types/MessageTypes";
-import {RoomConfigMessageSchema} from "./schemas/SharedSchemas";
+import type { RoomConfigMessage } from "./types/MessageTypes";
+import { RoomConfigMessageSchema } from "./schemas/SharedSchemas";
+
 
 export class BaseConfig implements RoomConfigMessage {
   public type: RoomConfigMessage["type"] = "room_config";
@@ -18,9 +19,9 @@ export class BaseConfig implements RoomConfigMessage {
 
   public audioStartPosition: number = 3;
 
-
   constructor(msg?: RoomConfigMessage) {
-    if (msg) this.applyMessage(msg);
+    if (msg)
+      this.applyMessage(msg);
   }
 
   /**

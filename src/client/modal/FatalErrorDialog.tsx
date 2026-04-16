@@ -1,6 +1,7 @@
 import { Button } from "../components/Button";
 import { ModalContent } from "./ModalContent";
 
+
 interface FatalErrorDialogProps {
   error: string;
 }

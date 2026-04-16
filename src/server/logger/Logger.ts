@@ -1,7 +1,9 @@
+import type { LoggerStorage } from "../../types/LoggerStorageTypes";
+import type { AddLogMessage } from "../../types/MessageTypes";
 import type Server from "../Server";
-import {DefaultLoggerStorage, type LoggerStorage} from "../../types/LoggerStorageTypes";
 import * as util from "node:util";
-import type {AddLogMessage} from "../../types/MessageTypes";
+import { DefaultLoggerStorage } from "../../types/LoggerStorageTypes";
+
 
 export default class Logger {
   /**
@@ -11,7 +13,6 @@ export default class Logger {
 
   // track last write operation
   private writeQueue: Promise<void> = Promise.resolve();
-
 
   /**
    * Creates a new Logger instance.
@@ -50,8 +51,9 @@ export default class Logger {
    * Formats an object into a string representation for logging.
    */
   private formatLogEntry(obj: any): string {
-    return typeof obj === "string" ? obj :
-        util.inspect(obj, { showHidden: false, depth: null, colors: false });
+    return typeof obj === "string"
+      ? obj
+      : util.inspect(obj, { showHidden: false, depth: null, colors: false });
   }
 
   /**
@@ -75,25 +77,30 @@ export default class Logger {
    */
   private storeAndLogMessage(message: string, level: AddLogMessage["level"]): void {
     message = this.formatLogEntry(message);
-    console[level](`${this.LOG_PREFIX} ${message}`);
+    if (level === "warn")
+      console.warn(`${this.LOG_PREFIX} ${message}`);
+    else if (level === "error")
+      console.error(`${this.LOG_PREFIX} ${message}`);
+    else
+      console.log(`${this.LOG_PREFIX} ${message}`);
 
     if (level === "debug")
       message = this.truncateMessage(message);
 
     this.server.safeBroadcast({
       type: "add_log_message",
-      level: level,
+      level,
       entry: {
         msg: message,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       },
     }, "admin");
 
     this.writeQueue = this.writeQueue.then(async () => {
-      let loggerStorage = await this.getLogMessages();
+      const loggerStorage = await this.getLogMessages();
       loggerStorage[level].push({
         msg: message,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       // limit log size to 50 messages (200 for debug)
@@ -102,7 +109,7 @@ export default class Logger {
       }
 
       await this.server.partyRoom.storage.put("logger", loggerStorage);
-    }).catch(err => {
+    }).catch((err) => {
       console.error("Failed to save log to storage:", err);
     });
   }

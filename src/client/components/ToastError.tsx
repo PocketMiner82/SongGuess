@@ -1,11 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 
-type ToastMessage = {
+
+interface ToastMessage {
   id: string;
   message: string;
-};
+}
 
-function ToastErrorMessage({ message, id, onRemove }: { message: string; id: string; onRemove: (id: string) => void }) {
+const ToastErrorMessage = memo(({ message, id, onRemove }: { message: string; id: string; onRemove: (id: string) => void }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onRemove(id);
@@ -17,27 +18,39 @@ function ToastErrorMessage({ message, id, onRemove }: { message: string; id: str
   return (
     <div className="bg-card-bg rounded-lg shadow-lg mb-2 min-w-80 max-w-96 border-l-4 border-error relative overflow-hidden">
       <div className="flex items-center p-3">
-        <span className="material-icons text-error mr-2 text-sm">error</span>
+        <span className="material-icons text-error mr-2 text-sm" aria-hidden="true">error</span>
         <p className="text-default text-sm flex-1 whitespace-pre-line leading-none wrap-anywhere">{message}</p>
         <button
           type="button"
           onClick={() => onRemove(id)}
-          className="ml-2 text-disabled-text hover:text-default transition-colors flex items-center justify-center"
+          className="ml-2 text-disabled-text hover:text-default transition-colors flex items-center justify-center focus-visible:ring-2 focus-visible:ring-secondary rounded"
           aria-label="Dismiss error"
         >
-          <span className="material-icons text-sm leading-none">close</span>
+          <span className="material-icons text-sm leading-none" aria-hidden="true">close</span>
         </button>
       </div>
-      <div className="h-1 bg-gray-500 animate-[progress-bar_5s_linear_forwards]" />
+      <div className="h-1 bg-gray-500 @starting:opacity-0 animate-[progress-bar_5s_linear_forwards]" />
+      <style>
+        {`
+        @media (prefers-reduced-motion: reduce) {
+          .animate-\\[progress-bar_5s_linear_forwards\\] {
+            animation: none;
+            background-color: transparent;
+          }
+        }
+      `}
+      </style>
     </div>
   );
-}
+});
 
 let toasts: ToastMessage[] = [];
 const listeners: Set<() => void> = new Set();
 
 function notifyListeners() {
-  listeners.forEach(listener => listener());
+  for (const listener of listeners) {
+    listener();
+  }
 }
 
 export function showToastError(message: string) {
@@ -62,7 +75,8 @@ export function ToastError() {
     notifyListeners();
   }, []);
 
-  if (toasts.length === 0) return null;
+  if (toasts.length === 0)
+    return null;
 
   return (
     <div className="fixed top-4 right-4 z-55 flex flex-col items-end" role="region" aria-label="Notifications" aria-live="polite">
