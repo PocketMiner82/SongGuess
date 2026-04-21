@@ -246,6 +246,7 @@ export function SearchMusicComponent({
                 subtitle={getResultSubtitle(item)}
                 coverURL={getResultCover(item)}
                 hrefURL={getResultHref(item)}
+                previewURL={item.type === "song" ? item.data.previewUrl : undefined}
               >
                 <Button
                   onClick={() => handleSelectResult(item, idx)}
