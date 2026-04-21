@@ -13,7 +13,7 @@ import { useCookies } from "react-cookie";
  * @param coverURL URL for the cover image or null
  * @param hrefURL URL to open in new tab when clicking the title.
  * @param children What to show at the right part of the card (e.g. a button)
- * @param previewUrl The preview url for this playlist, used to show audio player preview.
+ * @param previewURL The preview url for this playlist, used to show audio player preview.
  */
 export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, previewURL }: {
   title: string;
