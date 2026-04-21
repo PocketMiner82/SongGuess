@@ -1,3 +1,10 @@
+# [2.14.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.13...2.14.0-dev.14) (2026-04-21)
+
+
+### Features
+
+* **ProgressBar:** made fully controlled by server + improve styling of site ([b3f7f3e](https://github.com/PocketMiner82/SongGuess/commit/b3f7f3e7cc4d0a0dffd18b9a415e881a17ecc40f))
+
 # [2.14.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.12...2.14.0-dev.13) (2026-04-16)
 
 
