@@ -150,7 +150,7 @@ export function Audio() {
     // perform requested action
     if (msg?.type === "audio_control") {
       const setStartPosAndPlay = () => {
-        let pos = controller.ingameData.currentAudioPosition;
+        let pos = controller.ingameData.progressbarOffset;
 
         const startPosition = controller.config.audioStartPosition === 3 || controller.config.gameMode === "player_picks"
           ? controller.ingameData.rndStartPos
@@ -212,7 +212,7 @@ export function Audio() {
     }
 
     return false;
-  }, [controller.config.audioStartPosition, controller.config.gameMode, controller.config.timePerQuestion, controller.ingameData.currentAudioPosition, controller.ingameData.rndStartPos, fadeIn, fadeOut, playBuffer]));
+  }, [controller.config.audioStartPosition, controller.config.gameMode, controller.config.timePerQuestion, controller.ingameData.progressbarOffset, controller.ingameData.rndStartPos, fadeIn, fadeOut, playBuffer]));
 
   useEffect(() => {
     const volume = cookies.audioMuted ? 0 : (cookies.audioVolume ?? 0.2);

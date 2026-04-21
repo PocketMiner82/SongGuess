@@ -1,6 +1,7 @@
 import type {
   AudioControlMessage,
   ClientMessage,
+  ProgressbarUpdateMessage,
   SelectAnswerMessage,
   ServerMessage,
   Song,
@@ -11,6 +12,8 @@ import type Player from "../Player";
 import type { ValidRoom } from "../ValidRoom";
 import type Question from "./Question";
 import {
+  PLAYER_PICK_TIMEOUT,
+  ROUND_ANSWERING_TICK,
   ROUND_PADDING_TICKS,
   ROUND_PICKED_SONG_TICK,
   ROUND_POINTS_PER_QUESTION,
@@ -27,9 +30,9 @@ export default abstract class Game implements IEventListener {
   isRunning = false;
 
   /**
-   * The current tick count within the ongoing round.
+   * The current round tick (in seconds).
    */
-  roundTicks: number = -1;
+  roundTick: number = -1;
 
   /**
    * The timestamp when the current round started.
@@ -121,13 +124,53 @@ export default abstract class Game implements IEventListener {
       }
     }
 
+    msgs.push(this.getProgressBarUpdateMessage());
+
     return msgs;
+  }
+
+  /**
+   * Generates a progress bar update message based on the current game phase.
+   * @returns ProgressbarUpdateMessage with duration, startAt, and elapsed time for the progress bar.
+   */
+  getProgressBarUpdateMessage(): ProgressbarUpdateMessage {
+    let duration: number;
+    let offset: number;
+
+    switch (this.gamePhase) {
+      case GamePhase.PICKING:
+        duration = PLAYER_PICK_TIMEOUT;
+        offset = this.roundTick - ROUND_START_TICK;
+        break;
+      case GamePhase.QUESTION:
+        duration = -ROUND_PADDING_TICKS;
+        offset = this.roundTick - ROUND_PICKED_SONG_TICK;
+        break;
+      case GamePhase.ANSWERING:
+        duration = this.room.config.timePerQuestion;
+        offset = this.roundTick - ROUND_ANSWERING_TICK;
+        break;
+      case GamePhase.ANSWER:
+      case GamePhase.PAUSE_MUSIC:
+        duration = 0;
+        offset = this.roundTick - this.room.config.getRoundShowAnswerTick();
+        break;
+    }
+
+    // be a bit conservative due to network latency
+    duration = Math.sign(duration) * Math.max(0, Math.abs(duration) - 0.5);
+
+    return {
+      duration,
+      offset,
+      type: "progressbar_update",
+    };
   }
 
   onMessage(player: Player, msg: ClientMessage): boolean {
     switch (msg.type) {
       case "select_answer":
-        if (this.roundTicks > this.room.config.getRoundShowAnswerTick() || this.roundTicks < ROUND_PADDING_TICKS + ROUND_PICKED_SONG_TICK) {
+        if (this.roundTick > this.room.config.getRoundShowAnswerTick() || this.roundTick < ROUND_ANSWERING_TICK) {
           player.sendUpdateMessage();
           player.sendConfirmationOrError(msg, "Can only accept answers during questioning phase.");
           return true;
@@ -182,8 +225,8 @@ export default abstract class Game implements IEventListener {
     if (!this.isRunning)
       return;
 
-    if (this.roundTicks >= this.room.config.getRoundStartNextTick()) {
-      this.roundTicks = -1;
+    if (this.roundTick >= this.room.config.getRoundStartNextTick()) {
+      this.roundTick = -1;
       this.currentQuestionIndex++;
       for (const player of this.room.activePlayers) {
         player.resetAnswerData();
@@ -197,7 +240,7 @@ export default abstract class Game implements IEventListener {
 
     let gamePhaseChange = false;
     let runAgain = false;
-    switch (++this.roundTicks) {
+    switch (++this.roundTick) {
       // allow picking question
       case ROUND_START_TICK:
         gamePhaseChange = true;
@@ -205,14 +248,14 @@ export default abstract class Game implements IEventListener {
         // skip to ROUND_PICKED_SONG_TICK if question add was instant
         runAgain = this.tryGetNextQuestion();
         if (runAgain) {
-          this.roundTicks = ROUND_PICKED_SONG_TICK - 1;
+          this.roundTick = ROUND_PICKED_SONG_TICK - 1;
         }
         break;
 
       // show question of current round
       case ROUND_PICKED_SONG_TICK:
         if (!this.currentQuestion?.song) {
-          this.roundTicks = this.room.config.getRoundStartNextTick();
+          this.roundTick = this.room.config.getRoundStartNextTick();
           break;
         }
 
@@ -222,7 +265,7 @@ export default abstract class Game implements IEventListener {
         break;
 
       // start music playback
-      case ROUND_PADDING_TICKS + ROUND_PICKED_SONG_TICK:
+      case ROUND_ANSWERING_TICK:
         gamePhaseChange = true;
         this.gamePhase = GamePhase.ANSWERING;
         this.roundStartTime = Date.now();
@@ -319,7 +362,7 @@ export default abstract class Game implements IEventListener {
 
       // show answers if everyone voted
       if (everyoneVoted) {
-        this.roundTicks = this.room.config.getRoundShowAnswerTick() - 1;
+        this.roundTick = this.room.config.getRoundShowAnswerTick() - 1;
       }
     }
   }
@@ -348,14 +391,12 @@ export default abstract class Game implements IEventListener {
       msg = {
         type: "audio_control",
         action: "load",
-        position: this.roundTicks - ROUND_PICKED_SONG_TICK,
         audioURL: audioURL!,
       };
     } else {
       msg = {
         type: "audio_control",
         action,
-        position: Math.max(0, this.roundTicks - ROUND_PADDING_TICKS - ROUND_PICKED_SONG_TICK),
       };
     }
 
@@ -433,7 +474,7 @@ export default abstract class Game implements IEventListener {
 
     this.room.server.logger.info("Resetting game to lobby state...");
 
-    this.roundTicks = -1;
+    this.roundTick = -1;
     this.currentQuestionIndex = 0;
     this.room.state = "lobby";
 

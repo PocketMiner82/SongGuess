@@ -152,15 +152,20 @@ class IngameData {
   currentAudioState: AudioControlMessage["action"] | null = null;
 
   /**
-   * The length of the current audio.
-   */
-  currentAudioPosition: number = 0;
-
-  /**
    * The random start position index (0-2) for this question
    * @see RoomConfigMessageSchema.audioStartPosition
    */
   rndStartPos: number = 0;
+
+  /**
+   * The duration where the progress bar should start.
+   */
+  progressbarDuration: number = 0;
+
+  /**
+   * The offset position for the progress bar.
+   */
+  progressbarOffset: number = 0;
 }
 
 /**
@@ -527,7 +532,10 @@ export class RoomController {
         break;
       case "audio_control":
         this.ingameData.currentAudioState = msg.action;
-        this.ingameData.currentAudioPosition = msg.position;
+        break;
+      case "progressbar_update":
+        this.ingameData.progressbarOffset = msg.offset;
+        this.ingameData.progressbarDuration = msg.duration;
         break;
     }
 

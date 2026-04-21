@@ -1,19 +1,16 @@
 import random from "lodash/random";
 import * as React from "react";
 import { useCallback, useEffect, useState } from "react";
-import { ROUND_PADDING_TICKS } from "../../../../ConfigConstants";
 import { getPlaylistByURL } from "../../../../Utils";
 import { Button } from "../../../components/Button";
 import { PlaylistCard } from "../../../components/PlaylistCard";
-import { Modal } from "../../../modal/Modal";
-import { SearchMusicDialog } from "../../../modal/SearchMusicDialog";
+import { SearchMusicComponent } from "../../../components/SearchMusicComponent";
 import {
   useControllerContext,
   useRoomControllerListener,
   useRoomControllerMessageTypeListener,
 } from "../../RoomController";
 import { PlayerAvatar } from "../PlayerAvatar";
-import { ProgressBar } from "./ProgressBar";
 
 
 type AnswerPhase = "loading" | "answering" | "answered";
@@ -49,29 +46,10 @@ function PlayerPickingDisplay() {
   const pickerPlayer = pickerID ? controller.players.get(pickerID) : null;
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">
-          {isMyTurn ? "Your turn to pick a song!" : `${pickerPlayer?.username || "Player"} is picking a song`}
-        </h2>
-        <p className="text-disabled-text">
-          {isMyTurn ? "Select a song for others to guess" : "Wait for the picker to select a song"}
-        </p>
-      </div>
-
+    <div className="space-y-6 w-full">
       {isMyTurn && canPick && (
-        <div className="flex justify-center">
-          <Button onClick={() => {
-            Modal.open(SearchMusicDialog, {
-              onlyAcceptSongs: true,
-              onPlaylistSelected: handlePickSong,
-              id: `PlayerPicksSearchMusicDialog${Date.now()}`,
-            });
-          }}
-          >
-            <span className="material-symbols-outlined mr-2">music_note</span>
-            Pick a Song
-          </Button>
+        <div className="flex justify-center max-h-[calc(100vh-20rem)]">
+          <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
         </div>
       )}
 
@@ -84,8 +62,18 @@ function PlayerPickingDisplay() {
   );
 }
 
-function AnswerInput() {
+export function PlayerPicksQuestionDisplay() {
   const controller = useControllerContext();
+  const subtitle = controller.config.gameMode === "multiple_choice"
+    ? "Select the correct song title"
+    : "Type the song title you hear";
+
+  const isPickingPhase = controller.ingameData.currentQuestion?.pickerId != null;
+  const isMyTurn = controller.userID === controller.ingameData.currentQuestion?.pickerId;
+  const pickingMessage = isPickingPhase
+    ? (isMyTurn ? "Select a song for others to guess" : "Wait for the picker to select a song")
+    : subtitle;
+
   const [phase, setPhase] = useState<AnswerPhase>("loading");
   const [answer, setAnswer] = useState("");
 
@@ -125,83 +113,50 @@ function AnswerInput() {
     setPhase("answered");
   }, [phase, answer, controller]);
 
-  if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
-    return (
-      <>
-        <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
-        <div className="text-2xl">Loading question…</div>
-      </>
-    );
-  }
-
-  const isPickingPhase = controller.ingameData.currentQuestion?.pickerId != null;
-  const questionNumber = controller.ingameData.currentQuestion?.number || controller.ingameData.currentAnswer?.number;
-
-  if (isPickingPhase) {
-    return <PlayerPickingDisplay />;
-  }
-
   const correctSong = controller.ingameData.currentAnswer?.correctSong;
   const canAnswer = phase === "answering";
   const hasAnswered = phase === "answered";
 
   return (
     <div className="space-y-6 w-full lg:w-4xl xl:w-5xl">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">
-          Question
-          {" "}
-          {questionNumber!}
-          /
-          {controller.config.questionsCount}
-        </h2>
-        <p className="text-disabled-text">
-          Type the song title you hear
-        </p>
-      </div>
+      <h3 className="text-lg text-center font-bold">
+        {pickingMessage}
+      </h3>
+      {isPickingPhase && <PlayerPickingDisplay />}
 
-      <div className="mx-auto w-3/4">
-        <ProgressBar
-          duration={controller.ingameData.currentAudioState === "load"
-            ? -(ROUND_PADDING_TICKS - 0.5)
-            : controller.config.timePerQuestion - 0.5}
-          startAt={controller.ingameData.currentAudioPosition}
-        />
-      </div>
+      {!isPickingPhase && (
+        <>
+          <form onSubmit={handleSubmit} className="mt-8 w-full">
+            <div className="flex gap-2 justify-center">
+              <input
+                type="text"
+                value={answer}
+                onChange={e => setAnswer(e.target.value)}
+                placeholder="Enter song name…"
+                disabled={!canAnswer}
+                className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
+              />
+              <Button disabled={!canAnswer || !answer.trim()}>
+                Submit
+              </Button>
+            </div>
+            {hasAnswered && (
+              <p className="text-center text-disabled-text mt-2">Answer submitted!</p>
+            )}
+          </form>
 
-      <form onSubmit={handleSubmit} className="mt-8 w-full">
-        <div className="flex gap-2 justify-center">
-          <input
-            type="text"
-            value={answer}
-            onChange={e => setAnswer(e.target.value)}
-            placeholder="Enter song name…"
-            disabled={!canAnswer}
-            className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
-          />
-          <Button disabled={!canAnswer || !answer.trim()}>
-            Submit
-          </Button>
-        </div>
-        {hasAnswered && (
-          <p className="text-center text-disabled-text mt-2">Answer submitted!</p>
-        )}
-      </form>
-
-      {correctSong && (
-        <div className="mt-4">
-          <PlaylistCard
-            title={correctSong.name}
-            subtitle={correctSong.artist}
-            coverURL={correctSong.cover}
-            hrefURL={correctSong.hrefURL}
-          />
-        </div>
+          {correctSong && (
+            <div className="mt-4">
+              <PlaylistCard
+                title={correctSong.name}
+                subtitle={correctSong.artist}
+                coverURL={correctSong.cover}
+                hrefURL={correctSong.hrefURL}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
-}
-
-export function PlayerPicksQuestionDisplay() {
-  return <AnswerInput />;
 }

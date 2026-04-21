@@ -1,6 +1,5 @@
 import type { PlayerMessage } from "../../../../types/MessageTypes";
 import { memo, useCallback, useEffect, useState } from "react";
-import { ROUND_PADDING_TICKS } from "../../../../ConfigConstants";
 import { Button } from "../../../components/Button";
 import {
   useControllerContext,
@@ -8,7 +7,6 @@ import {
   useRoomControllerMessageTypeListener,
 } from "../../RoomController";
 import { PlayerAvatar } from "../PlayerAvatar";
-import { ProgressBar } from "./ProgressBar";
 
 
 type AnswerState = "pending" | "selected" | "correct" | "incorrect" | "disabled";
@@ -59,12 +57,11 @@ const AnswerOption = memo(({
         onClick={() => onSelect(index)}
         disabled={state !== "pending"}
         variant="plain"
-        className={`w-full min-w-75 min-h-15 xl:w-100 xl:h-25 text-center justify-start transition-colors ${getAnswerButtonClass(state)}`}
+        className={`w-full h-auto py-5 lg:w-100 lg:min-h-25 text-center justify-start transition-colors ${getAnswerButtonClass(state)}`}
       >
         {option}
       </Button>
 
-      {/* Show player avatars during answer phase */}
       {showPlayers && playersForThisAnswer.length > 0 && (
         <div className="absolute -top-2 -right-2 flex">
           {playersForThisAnswer.map((player, playerIndex) => (
@@ -128,43 +125,14 @@ export function MultipleChoiceQuestionDisplay() {
     controller.selectAnswer(answerIndex);
   }, [canAnswer, controller]);
 
-  if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
-    return (
-      <>
-        <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">progress_activity</div>
-        <div className="text-2xl">Loading question…</div>
-      </>
-    );
-  }
-
   const answerOptions = controller.ingameData.currentAnswer?.answerOptions || controller.ingameData.currentQuestion?.answerOptions;
   const correctIndex = controller.ingameData.currentAnswer?.correctIndex;
-  const questionNumber = controller.ingameData.currentQuestion?.number || controller.ingameData.currentAnswer?.number;
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">
-          Question
-          {" "}
-          {questionNumber!}
-          /
-          {controller.config.questionsCount}
-        </h2>
-        <p className="text-disabled-text">
-          Select the correct song title
-        </p>
-      </div>
-
-      <div className="mx-auto w-3/4">
-        <ProgressBar
-          duration={controller.ingameData.currentAudioState === "load"
-            ? -(ROUND_PADDING_TICKS - 0.5)
-            : controller.config.timePerQuestion - 0.5}
-          startAt={controller.ingameData.currentAudioPosition}
-        />
-      </div>
-
+    <div className="space-y-6 text-center">
+      <h3 className="text-lg font-bold">
+        Select the correct song title
+      </h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => {
           const isSelected = controller.ingameData.selectedAnswer === index;

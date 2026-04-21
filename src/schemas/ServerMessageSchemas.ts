@@ -73,7 +73,7 @@ export const ProgressbarUpdateMessageSchema = z.object({
   /**
    * The number of seconds to offset the progress bar start point.
    */
-  startAt: z.number(),
+  offset: z.number(),
 
   /**
    * The duration of the progressbar.
@@ -154,11 +154,6 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
     action: z.literal("load"),
 
     /**
-     * The elapsed time in seconds from the start of the load request.
-     */
-    position: z.number().nonnegative(),
-
-    /**
      * URL to load music from.
      * @see {@link SongSchema.shape.audioURL}
      */
@@ -172,11 +167,6 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
      * - "pause": Pauses playback of the music.
      */
     action: z.literal(["play", "pause"]),
-
-    /**
-     * The elapsed time in seconds from the start of the audio track.
-     */
-    position: z.number().nonnegative(),
   }),
 
 ]);

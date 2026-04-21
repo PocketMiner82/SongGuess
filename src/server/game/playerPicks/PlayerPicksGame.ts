@@ -56,7 +56,7 @@ export class PlayerPicksGame extends Game {
       // song was selected, continue to picked phase
       this.currentQuestion!.song = msg.song;
       this.currentQuestion!.startPos = msg.startPos;
-      this.roundTicks = ROUND_PICKED_SONG_TICK - 1;
+      this.roundTick = ROUND_PICKED_SONG_TICK - 1;
       return true;
     }
 

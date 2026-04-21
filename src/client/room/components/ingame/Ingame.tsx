@@ -3,6 +3,7 @@ import { useControllerContext, useRoomControllerMessageTypeListener } from "../.
 import { ResultsPlayerList } from "../ResultsPlayerList";
 import { MultipleChoiceQuestionDisplay } from "./MultipleChoiceQuestionDisplay";
 import { PlayerPicksQuestionDisplay } from "./PlayerPicksQuestionDisplay";
+import { QuestionHeader } from "./QuestionHeader";
 
 
 function AnswerResults() {
@@ -34,10 +35,10 @@ function AnswerResults() {
     return null;
 
   return (
-    <div className="space-y-6 xl:max-w-3/4 mx-auto p-4 min-h-full mt-8">
-      <h2 className="text-2xl font-bold mb-2">
+    <div className="space-y-6 xl:max-w-3/4 mx-auto p-4 min-h-full mt-8 text-center">
+      <h3 className="text-lg font-bold">
         Player Answers
-      </h2>
+      </h3>
       <ResultsPlayerList rankedPlayers={rankedPlayers} showField="points" showField2="answerSpeed" showRankingNumbers={false} />
     </div>
   );
@@ -54,15 +55,29 @@ export function Ingame() {
   if (controller.state !== "ingame")
     return null;
 
+  if (!controller.ingameData.currentQuestion && !controller.ingameData.currentAnswer) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-full">
+        <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">
+          progress_activity
+        </div>
+        <div className="text-2xl">Loading question…</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="lg:max-w-3/4 mx-auto h-full flex items-center justify-center p-4">
-      <div className="m-auto text-center max-w-full w-full lg:w-auto">
-        {
-          controller.config.gameMode === "multiple_choice"
-            ? <MultipleChoiceQuestionDisplay />
-            : <PlayerPicksQuestionDisplay />
-        }
-        <AnswerResults />
+    <div className="flex flex-col items-center h-full">
+      <QuestionHeader />
+      <div className="flex-1 mx-auto w-full flex justify-center p-4">
+        <div className="m-auto w-full lg:w-auto">
+          {
+            controller.config.gameMode === "multiple_choice"
+              ? <MultipleChoiceQuestionDisplay />
+              : <PlayerPicksQuestionDisplay />
+          }
+          <AnswerResults />
+        </div>
       </div>
     </div>
   );

@@ -1,69 +1,81 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
 
-/**
- * Progress bar component that shows time remaining for the current question.
- */
-export const ProgressBar = memo(({
-  duration,
-  startAt = 0,
-}: {
-  duration: number;
-  startAt?: number;
-}) => {
-  const [progress, setProgress] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+function useProgressLogic(duration: number, offset: number) {
+  const [progress, setProgress] = useState(() => {
+    if (duration === 0)
+      return 0;
+    const absoluteDuration = Math.abs(duration);
+    const percentage = (offset / absoluteDuration) * 100;
+    return duration < 0 ? percentage : 100 - percentage;
+  });
+
+  const requestRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+
+  const isReversed = duration < 0;
+  const absoluteDuration = Math.abs(duration);
 
   useEffect(() => {
-    if (duration) {
-      let reversed = false;
-      let durationToUse = duration;
-      if (duration < 0) {
-        reversed = true;
-        durationToUse = -duration;
-      }
+    if (!absoluteDuration)
+      return;
 
-      // Calculate initial progress based on position offset
-      const offsetProgress = (startAt / durationToUse) * 100;
-      const initialProgress = reversed ? offsetProgress : (100 - offsetProgress);
-      setProgress(Math.max(0, Math.min(100, initialProgress)));
+    const offsetMs = offset * 1000;
+    startTimeRef.current = performance.now() - offsetMs;
 
-      // Update progress every 100ms for smooth animation
-      const intervalTime = 100;
-      const change = (100 / durationToUse) * (intervalTime / 1000);
+    const animate = (time: number) => {
+      if (startTimeRef.current === null)
+        return;
 
-      intervalRef.current = setInterval(() => {
-        setProgress((prev) => {
-          if (reversed) {
-            const newProgress = prev + change;
-            return newProgress >= 100 ? 100 : newProgress;
-          } else {
-            const newProgress = prev - change;
-            return newProgress <= 0 ? 0 : newProgress;
-          }
-        });
-      }, intervalTime);
-    } else {
-      // Clear interval when not playing
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      setProgress(0);
-    }
+      const elapsed = time - startTimeRef.current;
+      const linearProgress = Math.min(elapsed / (absoluteDuration * 1000), 1);
+      const percentage = linearProgress * 100;
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      const finalValue = isReversed ? percentage : 100 - percentage;
+
+      setProgress(Math.max(0, Math.min(100, finalValue)));
+
+      if (linearProgress < 1) {
+        requestRef.current = requestAnimationFrame(animate);
       }
     };
-  }, [duration, startAt]);
+
+    requestRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, [absoluteDuration, offset, isReversed]);
+
+  return absoluteDuration === 0 ? 0 : progress;
+}
+
+/**
+ * Server-controlled progress bar.
+ * @constructor
+ */
+export function ProgressBar() {
+  const controller = useControllerContext();
+  useRoomControllerMessageTypeListener(controller, "progressbar_update");
+
+  const { progressbarDuration: duration, progressbarOffset: offset } = controller.ingameData;
+  const progress = useProgressLogic(duration, offset);
 
   return (
-    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+    <div
+      className="w-full h-2 bg-gray-200 rounded-full overflow-hidden"
+      role="progressbar"
+      aria-valuenow={progress}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
       <div
-        className="h-full bg-blue-500 transition-all duration-100 ease-linear"
+        className="h-full bg-blue-500 transition-none"
         style={{ width: `${progress}%` }}
       />
     </div>
   );
-});
+}
