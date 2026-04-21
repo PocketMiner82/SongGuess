@@ -1,3 +1,15 @@
+# [2.14.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.14...2.14.0-dev.15) (2026-04-21)
+
+
+### Bug Fixes
+
+* don't allow picker to guess + fix progressbar not updating when values same ([c13e921](https://github.com/PocketMiner82/SongGuess/commit/c13e92182316b5de1d7df2eb293115d60808caff))
+
+
+### Features
+
+* add audio preview to song picker ([eff4923](https://github.com/PocketMiner82/SongGuess/commit/eff49238a2b5d341bf98f24f65f99c35031dcbf5))
+
 # [2.14.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.13...2.14.0-dev.14) (2026-04-21)
 
 
