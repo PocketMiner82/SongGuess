@@ -32,6 +32,7 @@ export function ChooseUsernameDialog({ onComplete }: ChooseUsernameContentProps)
     <div className="bg-card-bg rounded-lg p-6 max-w-md mx-4 shadow-xl w-full">
       <h2 className="text-xl font-bold text-default mb-6">
         Room
+        {" "}
         {controller.roomID}
       </h2>
       <p className="text-default mb-2">Please choose your username:</p>

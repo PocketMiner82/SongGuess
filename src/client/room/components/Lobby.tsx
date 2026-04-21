@@ -130,7 +130,7 @@ function PlaylistsList() {
         <h3 className="text-xl font-bold">
           Playlists -
           {
-            `${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.config.advancedSongFiltering ? " (filtered)" : ""}`
+            ` ${controller.filteredSongsCount} song${controller.filteredSongsCount !== 1 ? "s" : ""} ${controller.config.advancedSongFiltering ? " (filtered)" : ""}`
           }
         </h3>
         <DownloadPlaylists />
