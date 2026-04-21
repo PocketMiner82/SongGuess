@@ -1,3 +1,10 @@
+# [2.14.0-dev.16](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.15...2.14.0-dev.16) (2026-04-21)
+
+
+### Bug Fixes
+
+* add missing spaces in HTML ([746e1c2](https://github.com/PocketMiner82/SongGuess/commit/746e1c206404abaf7431db1972b7bc8025d0e52d))
+
 # [2.14.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.14...2.14.0-dev.15) (2026-04-21)
 
 
