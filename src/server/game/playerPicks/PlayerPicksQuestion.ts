@@ -4,13 +4,16 @@ import Question from "../Question";
 
 
 export default class PlayerPicksQuestion extends Question {
-  constructor(num: number, config: ServerConfig, public pickerId: string | null, song?: Song) {
+  isPickingPhase = true;
+
+  constructor(num: number, config: ServerConfig, public pickerId: string, song?: Song) {
     super(num, config, song);
   }
 
   getQuestionMessage(): QuestionMessage {
     const q = super.getQuestionMessage();
     q.pickerId = this.pickerId;
+    q.isPickingPhase = this.isPickingPhase;
     return q;
   }
 

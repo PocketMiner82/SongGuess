@@ -48,8 +48,12 @@ export class MultipleChoiceGame extends Game {
   }
 
   selectAnswer(player: Player, msg: SelectAnswerMessage) {
-    super.selectAnswer(player, msg);
-    player.answerData!.answerIndex = msg.answerIndex;
+    const ret = super.selectAnswer(player, msg);
+
+    if (ret)
+      player.answerData!.answerIndex = msg.answerIndex;
+
+    return ret;
   }
 
   calculatePoints() {

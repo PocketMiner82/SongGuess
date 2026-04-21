@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
 
 
-function useProgressLogic(duration: number, offset: number) {
+function useProgressLogic(duration: number, offset: number, triggerReset: number) {
   const [progress, setProgress] = useState(() => {
     if (duration === 0)
       return 0;
@@ -48,7 +48,7 @@ function useProgressLogic(duration: number, offset: number) {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [absoluteDuration, offset, isReversed]);
+  }, [absoluteDuration, offset, isReversed, triggerReset]);
 
   return absoluteDuration === 0 ? 0 : progress;
 }
@@ -59,10 +59,14 @@ function useProgressLogic(duration: number, offset: number) {
  */
 export function ProgressBar() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "progressbar_update");
+  const [resetCounter, setResetCounter] = useState(0);
+
+  useRoomControllerMessageTypeListener(controller, "progressbar_update", () => {
+    setResetCounter(c => c + 1);
+  });
 
   const { progressbarDuration: duration, progressbarOffset: offset } = controller.ingameData;
-  const progress = useProgressLogic(duration, offset);
+  const progress = useProgressLogic(duration, offset, resetCounter);
 
   return (
     <div

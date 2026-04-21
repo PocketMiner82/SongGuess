@@ -100,9 +100,14 @@ export const QuestionMessageSchema = z.object({
 
   /**
    * Provided only for PlayerPicksGame.
-   * The user id currently selecting an answer or null if the selection finished.
+   * The user id selecting an answer this round.
    */
-  pickerId: z.nullish(z.string()),
+  pickerId: z.optional(z.string()),
+
+  /**
+   * Whether it is currently song-picking phase.
+   */
+  isPickingPhase: z.optional(z.boolean()),
 
   /**
    * The random/user-defined audio start position index (0-2) for this question.

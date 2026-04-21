@@ -188,8 +188,8 @@ export default abstract class Game implements IEventListener {
           return true;
         }
 
-        this.selectAnswer(player, msg);
-        player.sendConfirmationOrError(msg);
+        if (this.selectAnswer(player, msg))
+          player.sendConfirmationOrError(msg);
         return true;
       case "start_game":
         if (!this.room.performChecks(player, msg, "host", "not_ingame", "not_contdown", "min_song_count")) {
@@ -343,7 +343,7 @@ export default abstract class Game implements IEventListener {
    * @param player the player that selected an answer.
    * @param _msg the {@link SelectAnswerMessage} containing the selected answer.
    */
-  public selectAnswer(player: Player, _msg: SelectAnswerMessage) {
+  public selectAnswer(player: Player, _msg: SelectAnswerMessage): boolean {
     const currentTime = Date.now();
     player.answerData = {
       answerSpeed: currentTime - this.roundStartTime,
@@ -365,6 +365,8 @@ export default abstract class Game implements IEventListener {
         this.roundTick = this.room.config.getRoundShowAnswerTick() - 1;
       }
     }
+
+    return true;
   }
 
   /**

@@ -65,15 +65,23 @@ export class PlayerPicksGame extends Game {
 
   onGamePhaseChanged() {
     if (this.gamePhase === GamePhase.QUESTION) {
-      (this.currentQuestion! as PlayerPicksQuestion).pickerId = null;
+      (this.currentQuestion! as PlayerPicksQuestion).isPickingPhase = false;
     }
 
     super.onGamePhaseChanged();
   }
 
   selectAnswer(player: Player, msg: SelectAnswerMessage) {
-    super.selectAnswer(player, msg);
-    player.answerData!.answer = msg.answer!;
+    const ret = super.selectAnswer(player, msg);
+    if (player === this.picker) {
+      player.sendConfirmationOrError(msg, "The picker is not allowed to guess.");
+      return false;
+    }
+
+    if (ret)
+      player.answerData!.answer = msg.answer!;
+
+    return ret;
   }
 
   calculatePoints() {

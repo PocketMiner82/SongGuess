@@ -123,11 +123,16 @@ export function useRoomControllerListener(controller: RoomController, cb: Listen
  * A wrapper around {@link useRoomControllerListener} that forces a React update when the specified message is received.
  * @param controller The RoomController instance to listen to.
  * @param msgType The {@link ServerMessage["type"]} to listen for.
+ * @param onMessage Optional callback invoked when the message is received.
  */
-export function useRoomControllerMessageTypeListener(controller: RoomController, msgType: ServerMessage["type"] | null) {
+export function useRoomControllerMessageTypeListener(controller: RoomController, msgType: ServerMessage["type"] | null, onMessage?: () => void) {
   useRoomControllerListener(controller, useCallback((msg) => {
-    return (msg?.type ?? null) === msgType;
-  }, [msgType]));
+    const matches = (msg?.type ?? null) === msgType;
+    if (matches && onMessage) {
+      onMessage();
+    }
+    return matches;
+  }, [msgType, onMessage]));
 }
 
 class IngameData {

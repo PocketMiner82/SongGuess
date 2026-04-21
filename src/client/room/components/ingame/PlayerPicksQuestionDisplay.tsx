@@ -17,22 +17,11 @@ type AnswerPhase = "loading" | "answering" | "answered";
 
 function PlayerPickingDisplay() {
   const controller = useControllerContext();
-  const [canPick, setCanPick] = useState(false);
-
   useRoomControllerMessageTypeListener(controller, "question");
   useRoomControllerMessageTypeListener(controller, "audio_control");
 
   const pickerID = controller.ingameData.currentQuestion?.pickerId;
   const isMyTurn = controller.userID === pickerID;
-
-  useEffect(() => {
-    const question = controller.ingameData.currentQuestion;
-    if (question?.pickerId && isMyTurn) {
-      setCanPick(true);
-    } else {
-      setCanPick(false);
-    }
-  }, [controller.ingameData.currentQuestion, isMyTurn]);
 
   const handlePickSong = useCallback(async (url: string) => {
     const playlist = await getPlaylistByURL(url);
@@ -47,7 +36,7 @@ function PlayerPickingDisplay() {
 
   return (
     <div className="space-y-6 w-full">
-      {isMyTurn && canPick && (
+      {isMyTurn && (
         <div className="flex justify-center max-h-[calc(100vh-20rem)]">
           <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
         </div>
@@ -64,15 +53,11 @@ function PlayerPickingDisplay() {
 
 export function PlayerPicksQuestionDisplay() {
   const controller = useControllerContext();
-  const subtitle = controller.config.gameMode === "multiple_choice"
-    ? "Select the correct song title"
-    : "Type the song title you hear";
-
-  const isPickingPhase = controller.ingameData.currentQuestion?.pickerId != null;
+  const isPickingPhase = controller.ingameData.currentQuestion?.isPickingPhase;
   const isMyTurn = controller.userID === controller.ingameData.currentQuestion?.pickerId;
   const pickingMessage = isPickingPhase
     ? (isMyTurn ? "Select a song for others to guess" : "Wait for the picker to select a song")
-    : subtitle;
+    : (isMyTurn ? "You are the picker" : "Type the song title you hear");
 
   const [phase, setPhase] = useState<AnswerPhase>("loading");
   const [answer, setAnswer] = useState("");
@@ -126,24 +111,32 @@ export function PlayerPicksQuestionDisplay() {
 
       {!isPickingPhase && (
         <>
-          <form onSubmit={handleSubmit} className="mt-8 w-full">
-            <div className="flex gap-2 justify-center">
-              <input
-                type="text"
-                value={answer}
-                onChange={e => setAnswer(e.target.value)}
-                placeholder="Enter song name…"
-                disabled={!canAnswer}
-                className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
-              />
-              <Button disabled={!canAnswer || !answer.trim()}>
-                Submit
-              </Button>
-            </div>
-            {hasAnswered && (
-              <p className="text-center text-disabled-text mt-2">Answer submitted!</p>
-            )}
-          </form>
+          { isMyTurn
+            ? (
+                <div className="text-disabled-text text-center">
+                  Please wait for the other players to guess!
+                </div>
+              )
+            : (
+                <form onSubmit={handleSubmit} className="mt-8 w-full">
+                  <div className="flex gap-2 justify-center">
+                    <input
+                      type="text"
+                      value={answer}
+                      onChange={e => setAnswer(e.target.value)}
+                      placeholder="Enter song name…"
+                      disabled={!canAnswer}
+                      className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
+                    />
+                    <Button disabled={!canAnswer || !answer.trim()}>
+                      Submit
+                    </Button>
+                  </div>
+                  {hasAnswered && (
+                    <p className="text-center text-disabled-text mt-2">Answer submitted!</p>
+                  )}
+                </form>
+              )}
 
           {correctSong && (
             <div className="mt-4">
