@@ -1,5 +1,4 @@
 import type { SearchMusicComponentProps } from "../components/SearchMusicComponent";
-import { useModalWindow } from "react-modal-global";
 import { SearchMusicComponent } from "../components/SearchMusicComponent";
 import { ModalContent } from "./ModalContent";
 
@@ -11,18 +10,15 @@ import { ModalContent } from "./ModalContent";
 export function SearchMusicDialog({
   onlyAcceptSongs = false,
   onPlaylistSelected,
+  onSuccess,
 }: SearchMusicComponentProps) {
-  const modal = useModalWindow();
-
   return (
     <ModalContent title={onlyAcceptSongs ? "Search Songs" : "Search Apple Music"} maxWidth="full">
       <div className="max-h-[70vh]">
         <SearchMusicComponent
           onlyAcceptSongs={onlyAcceptSongs}
           onPlaylistSelected={onPlaylistSelected}
-          onSuccess={() => {
-            modal.close();
-          }}
+          onSuccess={onSuccess}
         />
       </div>
     </ModalContent>

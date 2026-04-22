@@ -1,6 +1,6 @@
 import random from "lodash/random";
 import * as React from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { getPlaylistByURL } from "../../../../Utils";
 import { Button } from "../../../components/Button";
 import { PlaylistCard } from "../../../components/PlaylistCard";
@@ -79,16 +79,14 @@ export function PlayerPicksQuestionDisplay() {
     return false;
   }, []));
 
-  useEffect(() => {
-    if (controller.ingameData.currentAudioState === "play") {
-      const canAnswer = controller.ingameData.currentAnswer === null && phase !== "answered";
-      setPhase(canAnswer ? "answering" : phase);
-    } else if (controller.ingameData.currentAudioState === "load") {
-      setPhase("loading");
-    } else {
-      setPhase("loading");
-    }
-  }, [controller.ingameData.currentAudioState, controller.ingameData.currentAnswer, phase]);
+  if (controller.ingameData.currentAudioState === "play") {
+    const canAnswer = controller.ingameData.currentAnswer === null && phase !== "answered";
+    setPhase(canAnswer ? "answering" : phase);
+  } else if (controller.ingameData.currentAudioState === "load") {
+    setPhase("loading");
+  } else {
+    setPhase("loading");
+  }
 
   const handleSubmit = useCallback((e: React.SubmitEvent) => {
     e.preventDefault();

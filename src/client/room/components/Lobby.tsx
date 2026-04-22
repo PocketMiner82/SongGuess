@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { COLORS } from "../../../ConfigConstants";
 import { downloadFile, formatLocalDateTime, importPlaylistFile, validatePlaylistsFile } from "../../../Utils";
 import { Button } from "../../components/Button";
 import { PlaylistCard } from "../../components/PlaylistCard";
-import { showToastError } from "../../components/ToastError";
-import { showConfirm } from "../../modal/ConfirmDialog";
+import { showConfirm } from "../../modal/DialogOpeners";
 import { Modal } from "../../modal/Modal";
 import { SearchMusicDialog } from "../../modal/SearchMusicDialog";
 import { useControllerContext, useRoomControllerMessageTypeListener } from "../RoomController";
@@ -35,7 +35,7 @@ function PlayerList() {
       setColumns(count);
     };
 
-    updateColumns();
+    queueMicrotask(updateColumns);
 
     const resizeObserver = new ResizeObserver(updateColumns);
     resizeObserver.observe(grid);
@@ -203,19 +203,19 @@ function ImportPlaylists() {
     try {
       const data = await importPlaylistFile(event);
       if (!data) {
-        showToastError("Failed to read file.");
+        toast.error("Failed to read file.");
         return;
       }
 
       const playlistsFile = validatePlaylistsFile(data);
       if (!playlistsFile) {
-        showToastError("Failed to import playlists. Please check the file format.");
+        toast.error("Failed to import playlists. Please check the file format.");
         return;
       }
 
       controller.importPlaylistsFromFile(playlistsFile);
     } catch {
-      showToastError("Failed to read file.");
+      toast.error("Failed to read file.");
     }
 
     // Reset file input
@@ -307,7 +307,7 @@ function CopyLink() {
       setTimeout(setCopied, 2000, false);
     } catch (err) {
       console.error("Failed to copy link:", err);
-      showToastError("Failed to copy link.");
+      toast.error("Failed to copy link.");
     }
   };
 

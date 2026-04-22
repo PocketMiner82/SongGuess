@@ -6,10 +6,11 @@ import * as React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CookiesProvider, useCookies } from "react-cookie";
 import { createRoot } from "react-dom/client";
+import { toast } from "react-toastify";
 import z, { uuidv4 } from "zod";
 import { ServerMessageSchema } from "../schemas/MessageSchemas";
 import { Button } from "./components/Button";
-import { showToastError, ToastError } from "./components/ToastError";
+import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
 
 /**
@@ -63,6 +64,7 @@ function AuthForm({ onAuth }: { onAuth: (auth: AuthData) => void }) {
                 placeholder="Password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && document.querySelector("form")?.requestSubmit()}
                 required
                 autoComplete="current-password"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-default-bg text-default focus:outline-none focus:ring-2 focus:ring-secondary"
@@ -283,7 +285,7 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
           case "confirmation":
             if (msg.error) {
               console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
-              showToastError(msg.error);
+              toast.error(msg.error);
             }
             break;
         }
@@ -327,7 +329,6 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
           <TransferHostInput onTransferHost={sendTransferHost} />
           <LogViewer logs={logs} filters={filters} onFilterChange={setFilters} />
         </div>
-        <ToastError />
       </div>
     </div>
   );
@@ -351,5 +352,6 @@ createRoot(document.getElementById("app")!).render(
   }}
   >
     <App />
+    <ToastDisplay />
   </CookiesProvider>,
 );

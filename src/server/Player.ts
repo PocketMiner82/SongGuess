@@ -43,8 +43,14 @@ export default class Player implements PlayerMessage, IEventListener {
    */
   isOnline: boolean = false;
 
+  /**
+   * Whether this player is an admin
+   */
+  isAdmin: boolean;
+
   constructor(readonly room: ValidRoom, public conn: Party.Connection) {
     room.listener.registerEvents(this);
+    this.isAdmin = this.room.server.hasTag(conn, "admin");
   }
 
   /**
@@ -150,7 +156,7 @@ export default class Player implements PlayerMessage, IEventListener {
    */
   public safeSend(msg: ServerMessage, log: boolean = true) {
     // silently ignore if not online
-    if (this.isOnline) {
+    if (this.isOnline || this.isAdmin) {
       this.room.server.safeSend(this.conn, msg, log);
     }
   }

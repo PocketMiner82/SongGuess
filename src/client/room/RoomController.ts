@@ -23,13 +23,13 @@ import type {
 import PartySocket from "partysocket";
 import * as React from "react";
 import { createContext, use, useCallback, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
 import { version } from "../../../package.json";
 import { BaseConfig } from "../../BaseConfig";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { getPlaylistByURL } from "../../Utils";
-import { showToastError } from "../components/ToastError";
 import { FatalErrorDialog } from "../modal/FatalErrorDialog";
 import { Modal } from "../modal/Modal";
 
@@ -474,7 +474,7 @@ export class RoomController {
       case "confirmation":
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
-          showToastError(msg.error);
+          toast.error(msg.error);
         }
 
         if (msg.sourceMessage.type === "select_answer") {
@@ -694,7 +694,7 @@ export class RoomController {
     const playlist = await getPlaylistByURL(url);
 
     if (!playlist) {
-      showToastError(`Failed to get playlist: ${url}`);
+      toast.error(`Failed to get playlist: ${url}`);
       return false;
     }
 

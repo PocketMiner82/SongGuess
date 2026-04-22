@@ -3,12 +3,13 @@ import { useState } from "react";
 import { CookieConsent } from "react-cookie-consent";
 import { createRoot } from "react-dom/client";
 import { ModalContainer } from "react-modal-global";
+import { toast } from "react-toastify";
 import { fetchPostCreateRoom } from "../RoomHTTPHelper";
 import { downloadFile, formatLocalDateTime, importPlaylistFile, refreshPlaylists, validatePlaylistsFile } from "../Utils";
 import { Button } from "./components/Button";
-import { showToastError, ToastError } from "./components/ToastError";
+import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
-import { showConfirm } from "./modal/ConfirmDialog";
+import { showConfirm } from "./modal/DialogOpeners";
 import { Modal } from "./modal/Modal";
 
 /**
@@ -27,12 +28,12 @@ export function App() {
     const resp = await fetchPostCreateRoom("/parties/api/createRoom");
 
     if (!resp) {
-      showToastError("Unknown server error");
+      toast.error("Unknown server error");
       return;
     }
 
     if (resp.error !== "") {
-      showToastError(resp.error);
+      toast.error(resp.error);
       return;
     }
 
@@ -60,13 +61,13 @@ export function App() {
         // Import and validate the playlist file
         const data = await importPlaylistFile(event);
         if (!data) {
-          showToastError("Failed to read file.");
+          toast.error("Failed to read file.");
           return;
         }
 
         const playlistsFile = validatePlaylistsFile(data);
         if (!playlistsFile) {
-          showToastError("Invalid playlist file format.");
+          toast.error("Invalid playlist file format.");
           return;
         }
 
@@ -114,7 +115,7 @@ export function App() {
         }, 3000);
       } catch (error) {
         console.error("Error refreshing playlists:", error);
-        showToastError("Failed to refresh playlists. Please try again.");
+        toast.error("Failed to refresh playlists. Please try again.");
         setRefreshProgress("");
       }
     };
@@ -174,7 +175,7 @@ export function App() {
         </div>
       </div>
 
-      <ToastError />
+      <ToastDisplay />
 
       <ModalContainer controller={Modal} />
     </div>

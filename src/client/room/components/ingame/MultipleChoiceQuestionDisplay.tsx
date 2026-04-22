@@ -1,5 +1,5 @@
 import type { PlayerMessage } from "../../../../types/MessageTypes";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { Button } from "../../../components/Button";
 import {
   useControllerContext,
@@ -106,17 +106,15 @@ export function MultipleChoiceQuestionDisplay() {
     return false;
   }, []));
 
-  useEffect(() => {
-    if (controller.ingameData.currentAudioState === "play") {
-      // allow answering when music starts
-      setCanAnswer(controller.ingameData.currentAnswer === null && controller.ingameData.selectedAnswer === null);
-    } else if (controller.ingameData.currentAudioState === "load") {
-      setCanAnswer(false);
-    } else {
-      // pause or null state
-      setCanAnswer(false);
-    }
-  }, [controller.ingameData.currentAudioState, controller.ingameData.currentAnswer, controller.ingameData.selectedAnswer]);
+  if (controller.ingameData.currentAudioState === "play") {
+    // allow answering when music starts
+    setCanAnswer(controller.ingameData.currentAnswer === null && controller.ingameData.selectedAnswer === null);
+  } else if (controller.ingameData.currentAudioState === "load") {
+    setCanAnswer(false);
+  } else {
+    // pause or null state
+    setCanAnswer(false);
+  }
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {

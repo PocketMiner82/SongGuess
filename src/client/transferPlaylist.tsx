@@ -4,6 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import { CookieConsent } from "react-cookie-consent";
 import { createRoot } from "react-dom/client";
+import { toast } from "react-toastify";
 import {
   downloadFile,
   fetchSongByISRC,
@@ -12,7 +13,7 @@ import {
   safeSearch,
 } from "../Utils";
 import { Button } from "./components/Button";
-import { showToastError, ToastError } from "./components/ToastError";
+import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
 
 
@@ -113,7 +114,7 @@ function ImportCSV() {
       });
 
       if (!records || records.length === 0) {
-        showToastError("CSV file is empty or invalid.");
+        toast.error("CSV file is empty or invalid.");
         return;
       }
 
@@ -206,7 +207,7 @@ function ImportCSV() {
       }
 
       if (playlists.length === 0) {
-        showToastError("No songs were found. Please check your CSV file format.");
+        toast.error("No songs were found. Please check your CSV file format.");
         return;
       }
 
@@ -229,13 +230,13 @@ function ImportCSV() {
 
       if (notFoundSongs.length > 0) {
         const notFoundList = notFoundSongs.join("\n• ");
-        showToastError(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
+        toast.error(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
       }
 
       setProgress(successMessage);
     } catch (error) {
       console.error("Error importing CSV:", error);
-      showToastError("Failed to import CSV file. Please check the file format and try again.");
+      toast.error("Failed to import CSV file. Please check the file format and try again.");
       setProgress("");
     }
 
@@ -381,7 +382,7 @@ export function App() {
         </div>
       </main>
 
-      <ToastError />
+      <ToastDisplay />
     </div>
   );
 }

@@ -27,6 +27,7 @@
     "react-cookie-consent": "^10.0.1",
     "react-dom": "^19.2.5",
     "react-modal-global": "^2.3.7",
+    "react-toastify": "^11.1.0",
     "tailwindcss": "^4.2.2",
     "unique-username-generator": "^1.5.1",
     "uuid": "^13.0.0",

@@ -6,10 +6,10 @@ import { CookieConsent } from "react-cookie-consent";
 import { createRoot } from "react-dom/client";
 import { ModalContainer } from "react-modal-global";
 import { Button } from "./components/Button";
-import { ToastError } from "./components/ToastError";
+import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
 import { ChooseUsernameDialog } from "./modal/ChooseUsernameDialog";
-import { showConfirm } from "./modal/ConfirmDialog";
+import { showConfirm } from "./modal/DialogOpeners";
 import { Modal } from "./modal/Modal";
 import { Audio } from "./room/components/Audio";
 import { BottomBar } from "./room/components/BottomBar";
@@ -165,7 +165,7 @@ export function App() {
   return (
     <RoomContext value={controller}>
       <Room />
-      <ToastError />
+      <ToastDisplay />
       <ModalContainer controller={Modal} />
     </RoomContext>
   );

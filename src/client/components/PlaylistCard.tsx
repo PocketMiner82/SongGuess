@@ -41,7 +41,7 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
       audioRef.current.pause();
     } else {
       audioRef.current.currentTime = 0;
-      audioRef.current.play();
+      audioRef.current.play().then();
     }
     setIsPlaying(!isPlaying);
   };
