@@ -1,3 +1,10 @@
+# [2.14.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.16...2.14.0-dev.17) (2026-04-22)
+
+
+### Features
+
+* switch to react-toastify for toast system ([6af0cf9](https://github.com/PocketMiner82/SongGuess/commit/6af0cf9448e08d7cbb01e47e8b4459b670d2adbf))
+
 # [2.14.0-dev.16](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.15...2.14.0-dev.16) (2026-04-21)
 
 
