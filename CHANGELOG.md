@@ -1,3 +1,10 @@
+# [2.14.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.17...2.14.0-dev.18) (2026-04-22)
+
+
+### Bug Fixes
+
+* endless loop when rendering question displays ([82e154c](https://github.com/PocketMiner82/SongGuess/commit/82e154cf6c9b8d967a6d240bc2c99440eda64692))
+
 # [2.14.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.16...2.14.0-dev.17) (2026-04-22)
 
 
