@@ -167,10 +167,10 @@ class RoundData {
   currentAudioState: AudioControlMessage["action"] | null = null;
 
   /**
-   * The random start position index (0-2) for this question
+   * The random/user-defined audio start position index (0-2) for the question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  rndStartPos: number = 0;
+  audioStartPos: number = 0;
 
   /**
    * The duration where the progress bar should start.
@@ -538,7 +538,7 @@ export class RoomController {
         this.roundData = new RoundData();
 
         this.roundData.currentQuestion = msg;
-        this.roundData.rndStartPos = msg.startPos;
+        this.roundData.audioStartPos = msg.startPos;
         this.roundData.pickerId = msg.pickerId;
         break;
       case "answer":

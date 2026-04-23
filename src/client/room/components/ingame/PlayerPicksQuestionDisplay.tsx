@@ -41,19 +41,21 @@ function PlayerPickingDisplay() {
     <div className="space-y-6 w-full">
       {isMyTurn && (
         <div className="max-h-[calc(100vh-40rem)]">
-          <SettingsDropdown
-            value={audioStartPos}
-            onChange={(v) => {
-              setAudioStartPos(v);
-            }}
-            options={[
-              { value: 0, label: "Start of audio" },
-              { value: 1, label: "Close to middle" },
-              { value: 2, label: "Close to end" },
-            ]}
-          >
-            Audio start position for this round
-          </SettingsDropdown>
+          {controller.config.audioStartPosition === 3 && (
+            <SettingsDropdown
+              value={audioStartPos}
+              onChange={(v) => {
+                setAudioStartPos(v);
+              }}
+              options={[
+                { value: 0, label: "Start of audio" },
+                { value: 1, label: "Close to middle" },
+                { value: 2, label: "Close to end" },
+              ]}
+            >
+              Audio start position for this round
+            </SettingsDropdown>
+          )}
 
           <div className="mt-2 flex justify-center">
             <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
