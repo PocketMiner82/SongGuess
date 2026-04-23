@@ -1,3 +1,10 @@
+# [2.14.0-dev.21](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.20...2.14.0-dev.21) (2026-04-23)
+
+
+### Bug Fixes
+
+* **convertToAlnum:** return original string if sanitized is empty ([b4f29d8](https://github.com/PocketMiner82/SongGuess/commit/b4f29d81147c5ceffea589bbeaa263df52dde811))
+
 # [2.14.0-dev.20](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.19...2.14.0-dev.20) (2026-04-23)
 
 
