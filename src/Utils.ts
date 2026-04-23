@@ -2,6 +2,7 @@ import type { Entities, Lookup, Media, Options, PlainObject, Response, ResultMus
 import type * as React from "react";
 import type { Playlist, PlaylistsFile, Song } from "./types/MessageTypes";
 import { lookup } from "itunes-store-api";
+import _ from "lodash";
 import z from "zod";
 import { PlaylistsFileSchema } from "./schemas/SharedSchemas";
 import { albumRegex, artistRegex, songRegex } from "./schemas/ValidationRegexes";
@@ -41,12 +42,12 @@ export function formatLocalDateTime(date: Date): string {
 }
 
 /**
- * Normalizes a song title by converting it to lowercase and optionally
- * stripping parenthetical metadata and non-alphanumeric characters.
+ * Normalizes a song title by converting it to lowercase and stripping non-alphanumeric
+ * characters and optionally parenthetical metadata.
  *
  * @param name - The original song title to be processed.
- * @param removeParens - A boolean flag; when true, removes trailing
- * bracketed or parenthesized content and non-standard characters.
+ * @param removeParens - If true, removes trailing content in `()` or `[]` (e.g., " (feat. Artist)").
+ * @see convertToAlnum
  * @returns The processed and normalized string.
  */
 export function normalizeSongName(name: string, removeParens: boolean): string {
@@ -55,11 +56,35 @@ export function normalizeSongName(name: string, removeParens: boolean): string {
   if (removeParens) {
     // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
     normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
-    normalizedName = normalizedName.replace(/[^\p{L}\p{N} ]/gu, "");
-    normalizedName = normalizedName.replace(/ +/g, " ");
   }
 
-  return normalizedName;
+  return convertToAlnum(normalizedName);
+}
+
+/**
+ * Sanitizes a string for comparison by removing accents and stripping special characters.
+ * @remarks
+ * 1. **Deburrs**: Converts Latin-1 Supplement and Latin Extended-A characters to basic
+ * Latin letters (e.g., "Mötley" -> "Motley").
+ * 2. **Unicode Filter**: Retains all international letters (\p{L}) and numbers (\p{N})
+ * from any script (Chinese, Japanese, Cyrillic, etc.) while removing punctuation
+ * and symbols (e.g., "!", "#", "-").
+ * 3. **Whitespace**: Collapses multiple spaces into one and trims the result.
+ *
+ * @example
+ * // returns "motley crue"
+ * convertToAlnum("Mötley Crüe!");
+ * @example
+ * // returns "夜驱 yoru ni kakeru"
+ * convertToAlnum("夜驱 (Yoru ni Kakeru)");
+ * @param input - The raw string to be cleaned.
+ * @returns A sanitized version of the string suitable for fuzzy matching.
+ */
+export function convertToAlnum(input: string): string {
+  return _.deburr(input)
+    .replace(/[^\p{L}\p{N} ]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**

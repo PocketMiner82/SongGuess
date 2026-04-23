@@ -13,7 +13,7 @@ export class BaseConfig implements RoomConfigMessage {
 
   public questionsCount: number = 10;
 
-  public timePerQuestion: number = 15;
+  public timePerQuestion: number = 25;
 
   public distractionsPreferSameArtist: boolean = true;
 

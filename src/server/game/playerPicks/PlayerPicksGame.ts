@@ -84,24 +84,72 @@ export class PlayerPicksGame extends Game {
     return ret;
   }
 
+  /**
+   * Core scoring logic that calculates points based on string similarity.
+   * @remarks
+   * Uses Levenshtein distance to determine how close the player's answer is to the source.
+   * A minimum similarity of 40% is required to score. Points are scaled linearly
+   * from 40% (0 points) to 100% (max points).
+   * @param correctAnswer - The normalized ground-truth string.
+   * @param playerAnswer - The normalized player-submitted string.
+   * @returns A score ranging from 0 to half of {@link ROUND_POINTS_PER_QUESTION}.
+   */
+  private getPointsByDistance(correctAnswer: string, playerAnswer: string) {
+    if (!correctAnswer) {
+      return 0;
+    }
+
+    const levenshteinDist = distance(playerAnswer, correctAnswer);
+    const similarity = 1 - (levenshteinDist / correctAnswer.length);
+
+    // answer must be at least 40% correct to be counted
+    if (similarity >= 0.4) {
+      // scale 0-500 points linear with 40% - 100% similarity; will be at max half the points
+      return ((similarity - 0.4) / 0.6) * (ROUND_POINTS_PER_QUESTION / 2);
+    }
+    return 0;
+  }
+
+  /**
+   * Calculates points based on the similarity of the "base" song title,
+   * effectively ignoring any parenthetical metadata like "(feat. Artist)" or "[Live]".
+   * @param player - The player object containing the submitted answer data.
+   * @see this.getPointsByDistance
+   * @returns A score between 0 and 50% of the maximum round points.
+   */
+  private getPointsWithoutParens(player: Player) {
+    // check for partial correctness (ignoring parens at end)
+    const playerAnswer = normalizeSongName(player.answerData!.answer ?? "", true);
+    const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
+
+    return this.getPointsByDistance(correctAnswer, playerAnswer);
+  }
+
+  /**
+   * Calculates points based on the similarity of the full song title,
+   * including all parenthetical metadata and extra descriptors.
+   * @param player - The player object containing the submitted answer data.
+   * @see this.getPointsByDistance
+   * @returns A score between 0 and 50% of the maximum round points.
+   */
+  private getPointsWithParens(player: Player) {
+    const playerAnswer = normalizeSongName(player.answerData!.answer ?? "", false);
+    const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, false);
+
+    return this.getPointsByDistance(correctAnswer, playerAnswer);
+  }
+
   calculatePoints() {
     for (const player of this.room.activePlayers) {
-      // if the player typed the song name perfectly (ignoring case)
-      if (player.answerData && normalizeSongName(player.answerData.answer ?? "", false)
-        === normalizeSongName(this.currentQuestion!.song!.name, false)) {
-        // this gives the max points, so there is a bonus added of half the max points
-        player.answerData.roundPoints = ROUND_POINTS_PER_QUESTION;
-      } else if (player.answerData) {
-        // check for partial correctness (ignoring parens)
-        const playerAnswer = normalizeSongName(player.answerData.answer ?? "", true);
-        const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
-        const levenshteinDist = distance(playerAnswer, correctAnswer);
-        const similarity = 1 - (levenshteinDist / correctAnswer.length);
+      if (player.answerData) {
+        const withParens = this.getPointsWithParens(player);
+        const withoutParens = this.getPointsWithoutParens(player);
 
-        // answer must be at least 40% correct to be counted
-        if (similarity >= 0.4) {
-          // scale 0-500 points linear with 75% - 100% similarity; will be at max half the points
-          player.answerData.roundPoints = ((similarity - 0.4) / 0.6) * (ROUND_POINTS_PER_QUESTION / 2);
+        if (withoutParens >= withParens) {
+          player.answerData.roundPoints = withoutParens;
+        } else {
+          // including stuff from parens gives even more points
+          player.answerData.roundPoints = withParens * 2;
         }
       }
 

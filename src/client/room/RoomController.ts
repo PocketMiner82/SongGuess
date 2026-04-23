@@ -516,6 +516,11 @@ export class RoomController {
         this.isHost = msg.isHost;
         this.state = msg.state;
 
+        // also reset cached round data when changing to other screens than ingame
+        if (this.state !== "ingame") {
+          this.roundData = new RoundData();
+        }
+
         // reset cached songs
         if (this.state !== "results") {
           this.playedSongs = [];
@@ -529,7 +534,7 @@ export class RoomController {
         this.filteredSongsCount = msg.filteredSongsCount;
         break;
       case "question":
-        // reset cached round data
+        // new round started, reset cached round data
         this.roundData = new RoundData();
 
         this.roundData.currentQuestion = msg;

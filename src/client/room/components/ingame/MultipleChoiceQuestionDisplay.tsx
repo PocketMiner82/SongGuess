@@ -49,8 +49,6 @@ const AnswerOption = memo(({
         .sort((a, b) => (a.answerData?.answerTimestamp || 0) - (b.answerData?.answerTimestamp || 0))
     : [];
 
-  const showPlayers = state === "correct" || state === "incorrect";
-
   return (
     <div className="relative">
       <Button
@@ -62,7 +60,7 @@ const AnswerOption = memo(({
         {option}
       </Button>
 
-      {showPlayers && playersForThisAnswer.length > 0 && (
+      {playersForThisAnswer.length > 0 && (
         <div className="absolute -top-2 -right-2 flex">
           {playersForThisAnswer.map((player, playerIndex) => (
             <div
@@ -92,6 +90,7 @@ export function MultipleChoiceQuestionDisplay() {
   useRoomControllerMessageTypeListener(controller, "audio_control");
   useRoomControllerMessageTypeListener(controller, "question");
   useRoomControllerMessageTypeListener(controller, "answer");
+  useRoomControllerMessageTypeListener(controller, "update");
 
   useRoomControllerListener(controller, useCallback((msg) => {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer";
