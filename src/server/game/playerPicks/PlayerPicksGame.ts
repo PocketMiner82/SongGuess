@@ -112,14 +112,14 @@ export class PlayerPicksGame extends Game {
 
   /**
    * Calculates points based on the similarity of the "base" song title,
-   * effectively ignoring any parenthetical metadata like "(feat. Artist)" or "[Live]".
+   * effectively ignoring any parenthetical metadata of the solution like "(feat. Artist)" or "[Live]".
    * @param player - The player object containing the submitted answer data.
    * @see this.getPointsByDistance
    * @returns A score between 0 and 50% of the maximum round points.
    */
   private getPointsWithoutParens(player: Player) {
     // check for partial correctness (ignoring parens at end)
-    const playerAnswer = normalizeSongName(player.answerData!.answer ?? "", true);
+    const playerAnswer = normalizeSongName(player.answerData!.answer ?? "", false);
     const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
 
     return this.getPointsByDistance(correctAnswer, playerAnswer);
