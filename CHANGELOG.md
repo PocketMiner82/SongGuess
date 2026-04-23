@@ -1,3 +1,10 @@
+# [2.14.0-dev.23](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.22...2.14.0-dev.23) (2026-04-23)
+
+
+### Bug Fixes
+
+* **SettingsDropdown:** improve styling on chromium browsers ([eaae7a4](https://github.com/PocketMiner82/SongGuess/commit/eaae7a45440d186d47c6c422ac30dc931aec3f86))
+
 # [2.14.0-dev.22](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.21...2.14.0-dev.22) (2026-04-23)
 
 
