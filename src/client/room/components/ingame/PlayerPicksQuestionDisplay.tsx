@@ -1,5 +1,4 @@
 import random from "lodash/random";
-import * as React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { getPlaylistByURL } from "../../../../Utils";
 import { Button } from "../../../components/Button";
@@ -13,14 +12,12 @@ import {
 import { PlayerAvatar } from "../PlayerAvatar";
 
 
-type AnswerPhase = "loading" | "answering" | "answered";
-
 function PlayerPickingDisplay() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "question");
   useRoomControllerMessageTypeListener(controller, "audio_control");
 
-  const pickerID = controller.ingameData.currentQuestion?.pickerId;
+  const pickerID = controller.roundData.currentQuestion?.pickerId;
   const isMyTurn = controller.userID === pickerID;
 
   const handlePickSong = useCallback(async (url: string) => {
@@ -51,105 +48,115 @@ function PlayerPickingDisplay() {
   );
 }
 
-export function PlayerPicksQuestionDisplay() {
+function AnswerInput() {
   const controller = useControllerContext();
-  const isPickingPhase = controller.ingameData.currentQuestion?.isPickingPhase;
-  const isMyTurn = controller.userID === controller.ingameData.currentQuestion?.pickerId;
-  const pickingMessage = isPickingPhase
-    ? (isMyTurn ? "Select a song for others to guess" : "Wait for the picker to select a song")
-    : (isMyTurn ? "You are the picker" : "Type the song title you hear");
+  const [answer, setAnswer] = useState(controller.roundData.selectedAnswer ?? "");
+  const [inputDisabled, setInputDisabled] = useState(false);
 
-  const [phase, setPhase] = useState<AnswerPhase>("loading");
-  const [answer, setAnswer] = useState("");
+  const isMyTurn = controller.userID === controller.roundData.pickerId;
+  const correctSong = controller.roundData.currentAnswer?.correctSong;
+  const canAnswer = controller.roundData.currentAnswer === null;
 
-  useRoomControllerMessageTypeListener(controller, "audio_control");
+  const handleSelect = useCallback(() => {
+    if (!canAnswer || !answer.trim() || controller.roundData.currentAudioState !== "play" || answer === controller.roundData.selectedAnswer) {
+      return;
+    }
+
+    controller.selectAnswerText(answer.trim());
+  }, [answer, canAnswer, controller]);
+
+  useRoomControllerMessageTypeListener(controller, "audio_control", handleSelect);
+  useRoomControllerMessageTypeListener(controller, "question");
+  useRoomControllerMessageTypeListener(controller, "answer");
 
   useRoomControllerListener(controller, useCallback((msg) => {
-    if (msg?.type === "question") {
-      setPhase("answering");
-      setAnswer("");
-      return true;
-    } else if (msg?.type === "answer") {
-      setPhase("loading");
-      return true;
-    } else if (msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer") {
-      setPhase("answered");
-      return true;
-    }
-    return false;
+    return msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer";
   }, []));
 
   useEffect(() => {
-    if (controller.ingameData.currentAudioState === "play") {
-      const canAnswer = controller.ingameData.currentAnswer === null && phase !== "answered";
-      setPhase(canAnswer ? "answering" : phase);
-    } else if (controller.ingameData.currentAudioState === "load") {
-      setPhase("loading");
-    } else {
-      setPhase("loading");
+    if (answer) {
+      handleSelect();
     }
-  }, [controller.ingameData.currentAnswer, controller.ingameData.currentAudioState, phase]);
+  }, [answer, handleSelect]);
 
-  const handleSubmit = useCallback((e: React.SubmitEvent) => {
-    e.preventDefault();
-    if (phase !== "answering" || !answer.trim())
-      return;
-    controller.selectAnswerText(answer.trim());
-    setPhase("answered");
-  }, [phase, answer, controller]);
+  return (
+    <>
+      { isMyTurn
+        ? (
+            <div className="text-disabled-text text-center">
+              Please wait for the other players to guess!
+            </div>
+          )
+        : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSelect();
+                setInputDisabled(true);
+              }}
+              className="mt-8 w-full"
+            >
+              <div className="flex gap-2 justify-center">
+                <input
+                  type="text"
+                  value={answer}
+                  onChange={e => setAnswer(e.target.value)}
+                  placeholder="Enter song name…"
+                  disabled={inputDisabled || !canAnswer}
+                  className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
+                  autoFocus
+                />
+                <Button disabled={inputDisabled || !canAnswer || !answer.trim() || controller.roundData.currentAudioState !== "play"} type="submit">
+                  Submit
+                </Button>
+              </div>
+              {inputDisabled && (
+                <div className="text-center text-disabled-text mt-2">
+                  <p>Answer submitted!</p>
+                  <p
+                    className="text-primary underline hover:cursor-pointer"
+                    onClick={() => setInputDisabled(false)}
+                  >
+                    Edit answer
+                  </p>
+                </div>
+              )}
+            </form>
+          )}
 
-  const correctSong = controller.ingameData.currentAnswer?.correctSong;
-  const canAnswer = phase === "answering";
-  const hasAnswered = phase === "answered";
+      {correctSong && (
+        <div className="mt-4">
+          <PlaylistCard
+            title={correctSong.name}
+            subtitle={correctSong.artist}
+            coverURL={correctSong.cover}
+            hrefURL={correctSong.hrefURL}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+export function PlayerPicksQuestionDisplay() {
+  const controller = useControllerContext();
+  useRoomControllerMessageTypeListener(controller, "question");
+
+  const isPickingPhase = controller.roundData.currentQuestion?.isPickingPhase;
+  const isMyTurn = controller.userID === controller.roundData.pickerId;
+
+  const pickingMessage = isPickingPhase
+    ? (isMyTurn ? "Select a song for others to guess" : "Wait for the picker to select a song")
+    : (isMyTurn ? "You are the picker" : "Type the song title you hear");
 
   return (
     <div className="space-y-6 w-full lg:w-4xl xl:w-5xl">
       <h3 className="text-lg text-center font-bold">
         {pickingMessage}
       </h3>
-      {isPickingPhase && <PlayerPickingDisplay />}
-
-      {!isPickingPhase && (
-        <>
-          { isMyTurn
-            ? (
-                <div className="text-disabled-text text-center">
-                  Please wait for the other players to guess!
-                </div>
-              )
-            : (
-                <form onSubmit={handleSubmit} className="mt-8 w-full">
-                  <div className="flex gap-2 justify-center">
-                    <input
-                      type="text"
-                      value={answer}
-                      onChange={e => setAnswer(e.target.value)}
-                      placeholder="Enter song name…"
-                      disabled={!canAnswer}
-                      className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
-                    />
-                    <Button disabled={!canAnswer || !answer.trim()}>
-                      Submit
-                    </Button>
-                  </div>
-                  {hasAnswered && (
-                    <p className="text-center text-disabled-text mt-2">Answer submitted!</p>
-                  )}
-                </form>
-              )}
-
-          {correctSong && (
-            <div className="mt-4">
-              <PlaylistCard
-                title={correctSong.name}
-                subtitle={correctSong.artist}
-                coverURL={correctSong.cover}
-                hrefURL={correctSong.hrefURL}
-              />
-            </div>
-          )}
-        </>
-      )}
+      {isPickingPhase
+        ? <PlayerPickingDisplay />
+        : <AnswerInput />}
     </div>
   );
 }

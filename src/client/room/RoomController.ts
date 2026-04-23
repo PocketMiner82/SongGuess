@@ -135,11 +135,16 @@ export function useRoomControllerMessageTypeListener(controller: RoomController,
   }, [msgType, onMessage]));
 }
 
-class IngameData {
+class RoundData {
   /**
    * The current question being asked to players.
    */
   currentQuestion: QuestionMessage | null = null;
+
+  /**
+   * The id of the current picker.
+   */
+  pickerId?: string;
 
   /**
    * The current answer information revealed after question ends.
@@ -147,9 +152,14 @@ class IngameData {
   currentAnswer: AnswerMessage | null = null;
 
   /**
-   * The currently selected answer.
+   * The currently selected answer index.
    */
-  selectedAnswer?: number | null = null;
+  selectedAnswerIndex?: number;
+
+  /**
+   * The currently selected answer string.
+   */
+  selectedAnswer?: string;
 
   /**
    * The current state of the audio playback
@@ -266,7 +276,7 @@ export class RoomController {
   /**
    * The currently cached ingame data
    */
-  ingameData: IngameData = new IngameData();
+  roundData: RoundData = new RoundData();
 
   /**
    * The list of songs played in the last round.
@@ -329,7 +339,7 @@ export class RoomController {
    * @param spectator whether the player wants to spectate the game.
    */
   public reconnect(newUsername?: string, spectator: boolean = false) {
-    this.ingameData = new IngameData();
+    this.roundData = new RoundData();
     this.reconnecting = true;
 
     this.socket.updateProperties({
@@ -478,7 +488,8 @@ export class RoomController {
         }
 
         if (msg.sourceMessage.type === "select_answer") {
-          this.ingameData.selectedAnswer = msg.sourceMessage.answerIndex;
+          this.roundData.selectedAnswerIndex = msg.sourceMessage.answerIndex;
+          this.roundData.selectedAnswer = msg.sourceMessage.answer;
         }
         break;
       case "update":
@@ -505,11 +516,6 @@ export class RoomController {
         this.isHost = msg.isHost;
         this.state = msg.state;
 
-        // reset cached ingame data
-        if (this.state !== "ingame") {
-          this.ingameData = new IngameData();
-        }
-
         // reset cached songs
         if (this.state !== "results") {
           this.playedSongs = [];
@@ -523,24 +529,26 @@ export class RoomController {
         this.filteredSongsCount = msg.filteredSongsCount;
         break;
       case "question":
-        this.ingameData.currentQuestion = msg;
-        this.ingameData.rndStartPos = msg.startPos;
-        this.ingameData.currentAnswer = null;
-        this.ingameData.selectedAnswer = null;
+        // reset cached round data
+        this.roundData = new RoundData();
+
+        this.roundData.currentQuestion = msg;
+        this.roundData.rndStartPos = msg.startPos;
+        this.roundData.pickerId = msg.pickerId;
         break;
       case "answer":
-        this.ingameData.currentAnswer = msg;
-        this.ingameData.currentQuestion = null;
+        this.roundData.currentAnswer = msg;
+        this.roundData.currentQuestion = null;
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;
         break;
       case "audio_control":
-        this.ingameData.currentAudioState = msg.action;
+        this.roundData.currentAudioState = msg.action;
         break;
       case "progressbar_update":
-        this.ingameData.progressbarOffset = msg.offset;
-        this.ingameData.progressbarDuration = msg.duration;
+        this.roundData.progressbarOffset = msg.offset;
+        this.roundData.progressbarDuration = msg.duration;
         break;
     }
 

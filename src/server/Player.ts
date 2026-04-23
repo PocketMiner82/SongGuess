@@ -113,10 +113,11 @@ export default class Player implements PlayerMessage, IEventListener {
       .forEach(msg => this.safeSend(msg));
 
     // send client's answer if client selected one previously
-    if (this.answerData?.answerIndex !== undefined) {
+    if (this.answerData?.answerIndex !== undefined || this.answerData?.answer !== undefined) {
       this.sendConfirmationOrError({
         type: "select_answer",
         answerIndex: this.answerData.answerIndex,
+        answer: this.answerData.answer,
       } satisfies SelectAnswerMessage);
     }
 

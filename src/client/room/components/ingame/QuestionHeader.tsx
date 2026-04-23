@@ -10,8 +10,8 @@ import { ProgressBar } from "./ProgressBar";
 export function QuestionHeader() {
   const controller = useControllerContext();
 
-  const questionNumber = (controller.ingameData.currentQuestion?.number
-    || controller.ingameData.currentAnswer?.number) ?? 0;
+  const questionNumber = (controller.roundData.currentQuestion?.number
+    || controller.roundData.currentAnswer?.number) ?? 0;
 
   return (
     <>

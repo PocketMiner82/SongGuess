@@ -7,7 +7,7 @@ function CloseButton({ closeToast }: CloseButtonProps) {
     <button
       type="button"
       onClick={() => closeToast("close")}
-      className="ml-3 text-disabled-text hover:text-secondary transition-colors flex items-center justify-center rounded hover:cursor-pointer"
+      className="ml-auto px-1 text-disabled-text hover:text-secondary transition-colors flex justify-right rounded hover:cursor-pointer"
       aria-label="Dismiss toast"
     >
       <span className="material-icons text-sm leading-none" aria-hidden="true">close</span>

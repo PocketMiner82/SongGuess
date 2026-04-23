@@ -69,7 +69,7 @@ function AuthForm({ onAuth }: { onAuth: (auth: AuthData) => void }) {
                 autoComplete="current-password"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-default-bg text-default focus:outline-none focus:ring-2 focus:ring-secondary"
               />
-              <Button onClick={() => document.querySelector("form")?.requestSubmit()} className="w-full">
+              <Button type="submit" className="w-full">
                 Connect
               </Button>
             </form>

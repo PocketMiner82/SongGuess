@@ -1,5 +1,5 @@
 import type { PlayerMessage } from "../../../../types/MessageTypes";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback } from "react";
 import { Button } from "../../../components/Button";
 import {
   useControllerContext,
@@ -88,35 +88,16 @@ const AnswerOption = memo(({
  */
 export function MultipleChoiceQuestionDisplay() {
   const controller = useControllerContext();
-  const [canAnswer, setCanAnswer] = useState(false);
+
   useRoomControllerMessageTypeListener(controller, "audio_control");
+  useRoomControllerMessageTypeListener(controller, "question");
+  useRoomControllerMessageTypeListener(controller, "answer");
 
   useRoomControllerListener(controller, useCallback((msg) => {
-    if (msg?.type === "question") {
-      // reset selection
-      return true;
-    } else if (msg?.type === "answer") {
-      // answering no longer allowed when server publishes correct answer
-      setCanAnswer(false);
-      return true;
-    } else if (msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer") {
-      setCanAnswer(false);
-      return true;
-    }
-    return false;
+    return msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer";
   }, []));
 
-  useEffect(() => {
-    if (controller.ingameData.currentAudioState === "play") {
-      // allow answering when music starts
-      setCanAnswer(controller.ingameData.currentAnswer === null && controller.ingameData.selectedAnswer === null);
-    } else if (controller.ingameData.currentAudioState === "load") {
-      setCanAnswer(false);
-    } else {
-      // pause or null state
-      setCanAnswer(false);
-    }
-  }, [controller.ingameData.currentAnswer, controller.ingameData.currentAudioState, controller.ingameData.selectedAnswer]);
+  const canAnswer = controller.roundData.currentAnswer === null && controller.roundData.selectedAnswerIndex === undefined;
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -125,8 +106,8 @@ export function MultipleChoiceQuestionDisplay() {
     controller.selectAnswer(answerIndex);
   }, [canAnswer, controller]);
 
-  const answerOptions = controller.ingameData.currentAnswer?.answerOptions || controller.ingameData.currentQuestion?.answerOptions;
-  const correctIndex = controller.ingameData.currentAnswer?.correctIndex;
+  const answerOptions = controller.roundData.currentAnswer?.answerOptions || controller.roundData.currentQuestion?.answerOptions;
+  const correctIndex = controller.roundData.currentAnswer?.correctIndex;
 
   return (
     <div className="space-y-6 text-center">
@@ -135,7 +116,7 @@ export function MultipleChoiceQuestionDisplay() {
       </h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => {
-          const isSelected = controller.ingameData.selectedAnswer === index;
+          const isSelected = controller.roundData.selectedAnswerIndex === index;
           const isCorrect = correctIndex !== undefined ? correctIndex === index : null;
 
           let state: AnswerState = "pending";
@@ -145,7 +126,7 @@ export function MultipleChoiceQuestionDisplay() {
             state = "incorrect";
           } else if (isSelected) {
             state = "selected";
-          } else if (controller.ingameData.currentAudioState === "load" || controller.ingameData.currentAnswer || controller.ingameData.selectedAnswer !== null) {
+          } else if (controller.roundData.currentAudioState === "load" || controller.roundData.currentAnswer || controller.roundData.selectedAnswerIndex !== undefined) {
             state = "disabled";
           }
 

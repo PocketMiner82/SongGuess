@@ -533,19 +533,19 @@ function Settings() {
               Distractions: Prefer songs by same artist
             </SettingsToggle>
 
+            <SettingsToggle
+              value={controller.config.endWhenAnswered}
+              onToggle={(v) => {
+                controller.config.endWhenAnswered = v;
+                controller.sendConfig();
+              }}
+            >
+              End round when all players answered
+            </SettingsToggle>
+
             <div className="border-t border-disabled-bg my-1"></div>
           </>
         )}
-
-        <SettingsToggle
-          value={controller.config.endWhenAnswered}
-          onToggle={(v) => {
-            controller.config.endWhenAnswered = v;
-            controller.sendConfig();
-          }}
-        >
-          End round when all players answered
-        </SettingsToggle>
 
         <SettingsNumberInput
           value={controller.config.questionsCount}

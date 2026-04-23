@@ -50,8 +50,24 @@ export class MultipleChoiceGame extends Game {
   selectAnswer(player: Player, msg: SelectAnswerMessage) {
     const ret = super.selectAnswer(player, msg);
 
-    if (ret)
+    if (ret) {
       player.answerData!.answerIndex = msg.answerIndex;
+
+      if (this.room.config.endWhenAnswered) {
+        let everyoneVoted = true;
+        for (const player of this.room.activePlayers) {
+          if (player.answerData === undefined) {
+            everyoneVoted = false;
+            break;
+          }
+        }
+
+        // show answers if everyone voted
+        if (everyoneVoted) {
+          this.roundTick = this.room.config.getRoundShowAnswerTick() - 1;
+        }
+      }
+    }
 
     return ret;
   }

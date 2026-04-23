@@ -20,6 +20,7 @@ import {
   ROUND_START_TICK,
 } from "../../ConfigConstants";
 import GamePhase from "./GamePhase";
+import { MultipleChoiceGame } from "./multipleChoice/MultipleChoiceGame";
 import { InitError } from "./Question";
 
 
@@ -174,7 +175,7 @@ export default abstract class Game implements IEventListener {
           player.sendUpdateMessage();
           player.sendConfirmationOrError(msg, "Can only accept answers during questioning phase.");
           return true;
-        } else if (player.answerData !== undefined) {
+        } else if (player.answerData !== undefined && this instanceof MultipleChoiceGame) {
           player.sendUpdateMessage();
           player.sendConfirmationOrError(msg, "You already selected an answer.");
           return true;
@@ -350,21 +351,6 @@ export default abstract class Game implements IEventListener {
       answerTimestamp: currentTime,
       questionIndex: this.currentQuestionIndex,
     };
-
-    if (this.room.config.endWhenAnswered) {
-      let everyoneVoted = true;
-      for (const player of this.room.activePlayers) {
-        if (player.answerData === undefined) {
-          everyoneVoted = false;
-          break;
-        }
-      }
-
-      // show answers if everyone voted
-      if (everyoneVoted) {
-        this.roundTick = this.room.config.getRoundShowAnswerTick() - 1;
-      }
-    }
 
     return true;
   }
