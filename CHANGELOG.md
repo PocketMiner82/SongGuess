@@ -1,3 +1,11 @@
+# [2.14.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.18...2.14.0-dev.19) (2026-04-23)
+
+
+### Features
+
+* **PlayerPicksQuestionDisplay:** add settings dropdown to change audio start position of track ([11d99ef](https://github.com/PocketMiner82/SongGuess/commit/11d99efe3d748c437267b2fd55a26e2ca1222ce8))
+* **PlayerPicksQuestionDisplay:** allow editing answer after submission ([5ccdb95](https://github.com/PocketMiner82/SongGuess/commit/5ccdb958a72958b87edd40647633a16a5464100b))
+
 # [2.14.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.17...2.14.0-dev.18) (2026-04-22)
 
 
