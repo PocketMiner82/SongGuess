@@ -23,7 +23,7 @@ export function SettingsDropdown({ value, onChange, options, children }: {
         className="px-2 py-1 border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0 focus-visible:ring-2 focus-visible:ring-secondary bg-transparent"
       >
         {options.map(option => (
-          <option key={option.value} value={option.value}>
+          <option key={option.value} value={option.value} className="text-default bg-card-bg">
             {option.label}
           </option>
         ))}
