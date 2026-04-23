@@ -1,3 +1,10 @@
+# [2.14.0-dev.22](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.21...2.14.0-dev.22) (2026-04-23)
+
+
+### Bug Fixes
+
+* **Audio:** only allow player to choose start pos when configured ([9df530d](https://github.com/PocketMiner82/SongGuess/commit/9df530d2de1991594ae11b55786636bf51cfc81e))
+
 # [2.14.0-dev.21](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.20...2.14.0-dev.21) (2026-04-23)
 
 
