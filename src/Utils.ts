@@ -78,13 +78,16 @@ export function normalizeSongName(name: string, removeParens: boolean): string {
  * // returns "夜驱 yoru ni kakeru"
  * convertToAlnum("夜驱 (Yoru ni Kakeru)");
  * @param input - The raw string to be cleaned.
- * @returns A sanitized version of the string suitable for fuzzy matching.
+ * @returns A sanitized version of the string suitable for fuzzy matching, or the original (trimmed) string if the
+ * sanitized string is empty.
  */
 export function convertToAlnum(input: string): string {
-  return _.deburr(input)
+  const deburred = _.deburr(input)
     .replace(/[^\p{L}\p{N} ]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
+
+  return deburred.length === 0 ? input.trim() : deburred;
 }
 
 /**
