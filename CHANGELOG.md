@@ -1,3 +1,10 @@
+# [2.14.0-dev.20](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.19...2.14.0-dev.20) (2026-04-23)
+
+
+### Features
+
+* **game:** improve answer matching with metadata and show players on all states ([fd668d5](https://github.com/PocketMiner82/SongGuess/commit/fd668d51af66d0c66cfbfe00989cb661424f736d))
+
 # [2.14.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.18...2.14.0-dev.19) (2026-04-23)
 
 
