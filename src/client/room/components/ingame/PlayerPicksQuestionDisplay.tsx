@@ -10,10 +10,16 @@ import {
   useRoomControllerMessageTypeListener,
 } from "../../RoomController";
 import { PlayerAvatar } from "../PlayerAvatar";
+import { SettingsDropdown } from "../settings/SettingsDropdown";
 
 
 function PlayerPickingDisplay() {
   const controller = useControllerContext();
+  const [audioStartPos, setAudioStartPos] = useState(() => {
+    return controller.config.audioStartPosition === 3
+      ? random(0, 2)
+      : controller.config.audioStartPosition;
+  });
   useRoomControllerMessageTypeListener(controller, "question");
   useRoomControllerMessageTypeListener(controller, "audio_control");
 
@@ -23,19 +29,35 @@ function PlayerPickingDisplay() {
   const handlePickSong = useCallback(async (url: string) => {
     const playlist = await getPlaylistByURL(url);
     if (playlist && playlist.songs && playlist.songs.length > 0) {
-      controller.pickSong(playlist.songs[0], controller.config.audioStartPosition === 3 ? random(0, 2) : controller.config.audioStartPosition);
+      controller.pickSong(playlist.songs[0], audioStartPos);
       return true;
     }
     return false;
-  }, [controller]);
+  }, [audioStartPos, controller]);
 
   const pickerPlayer = pickerID ? controller.players.get(pickerID) : null;
 
   return (
     <div className="space-y-6 w-full">
       {isMyTurn && (
-        <div className="flex justify-center max-h-[calc(100vh-20rem)]">
-          <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
+        <div className="max-h-[calc(100vh-40rem)]">
+          <SettingsDropdown
+            value={audioStartPos}
+            onChange={(v) => {
+              setAudioStartPos(v);
+            }}
+            options={[
+              { value: 0, label: "Start of audio" },
+              { value: 1, label: "Close to middle" },
+              { value: 2, label: "Close to end" },
+            ]}
+          >
+            Audio start position for this round
+          </SettingsDropdown>
+
+          <div className="mt-2 flex justify-center">
+            <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
+          </div>
         </div>
       )}
 

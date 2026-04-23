@@ -11,6 +11,7 @@ import { Modal } from "../../modal/Modal";
 import { SearchMusicDialog } from "../../modal/SearchMusicDialog";
 import { useControllerContext, useRoomControllerMessageTypeListener } from "../RoomController";
 import { PlayerCard } from "./PlayerCard";
+import { SettingsDropdown } from "./settings/SettingsDropdown";
 
 /**
  * Displays all players in the room as a grid. Shows empty slots
@@ -400,38 +401,6 @@ function SettingsNumberInput({ value, onChange, min, max, children }: {
         aria-label={label}
         className="w-11 px-2 text-center border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0"
       />
-    </div>
-  );
-}
-
-/**
- * Dropdown select component for settings with predefined options.
- * Features left-aligned label and right-aligned dropdown.
- */
-function SettingsDropdown({ value, onChange, options, children }: {
-  value: number;
-  onChange: (value: number) => void;
-  options: { value: number; label: string }[];
-  children: ReactNode;
-}) {
-  const label = children?.toString() || "option";
-  return (
-    <div className="flex items-center justify-between">
-      <span>
-        {children}
-      </span>
-      <select
-        value={value}
-        onChange={e => onChange(Number.parseInt(e.target.value, 10))}
-        aria-label={label}
-        className="px-2 py-1 border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0 focus-visible:ring-2 focus-visible:ring-secondary bg-transparent"
-      >
-        {options.map(option => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }
