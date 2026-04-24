@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { PlayerAnswerData, PlayerMessage } from "../../../types/MessageTypes";
 import { useMemo } from "react";
 import { PlayerMessageSchema } from "../../../schemas/ServerMessageSchemas";
@@ -8,8 +9,21 @@ type PossibleFields = Exclude<(keyof PlayerAnswerData | keyof PlayerMessage), "a
 
 const playerMessageFieldNames = Object.keys(PlayerMessageSchema.shape);
 
-function getShowField(player: PlayerMessage, showField: PossibleFields): string | number | undefined {
+function getShowField(player: PlayerMessage, showField: PossibleFields): ReactNode | undefined {
   if (playerMessageFieldNames.includes(showField)) {
+    // also show amount of points player got in the round if available
+    if (showField === "points" && player.answerData?.roundPoints) {
+      const { roundPoints } = player.answerData;
+      return (
+        <>
+          <span>{player.points}</span>
+          <span className={`min-w-14 text-right ${roundPoints > 0 ? "text-success" : "text-error"}`}>
+            {roundPoints >= 0 ? "+" : ""}
+            {roundPoints}
+          </span>
+        </>
+      );
+    }
     return player[showField as Exclude<keyof PlayerMessage, "answerData">];
   } else if (player.answerData) {
     if (showField === "answerSpeed" && (player.answerData.roundPoints ?? 0) > 0) {

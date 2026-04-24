@@ -18,7 +18,7 @@ export const PlayerCard = memo(({
   useRoomControllerMessageTypeListener(controller, "update");
 
   return (
-    <li className="flex items-center gap-4 p-3 bg-card-bg rounded-lg">
+    <div className="flex flex-1 basis-sm items-center gap-4 p-3 bg-card-bg rounded-lg">
       <PlayerAvatar size={48} player={player} />
       {player
         ? (
@@ -55,7 +55,7 @@ export const PlayerCard = memo(({
                       {children !== undefined
                         && (
                           <span
-                            className="text-lg font-medium ml-3 mr-3"
+                            className="flex text-lg font-medium ml-3 mr-3"
                           >
                             {children}
                           </span>
@@ -67,6 +67,6 @@ export const PlayerCard = memo(({
         : (
             <span className="text-lg text-disabled-text">Empty slot</span>
           )}
-    </li>
+    </div>
   );
 });

@@ -350,6 +350,7 @@ export default abstract class Game implements IEventListener {
       answerSpeed: currentTime - this.roundStartTime,
       answerTimestamp: currentTime,
       questionIndex: this.currentQuestionIndex,
+      roundPoints: 0,
     };
 
     return true;

@@ -24,7 +24,7 @@ export const PlayerAnswerDataSchema = z.object({
   /**
    * The points the player got this round.
    */
-  roundPoints: z.optional(z.number()),
+  roundPoints: z.number(),
 
   /**
    * Can be provided only for MultipleChoiceGame.

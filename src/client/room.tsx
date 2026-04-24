@@ -14,7 +14,7 @@ import { Modal } from "./modal/Modal";
 import { Audio } from "./room/components/Audio";
 import { BottomBar } from "./room/components/BottomBar";
 import { Ingame } from "./room/components/ingame/Ingame";
-import { Lobby } from "./room/components/Lobby";
+import { Lobby } from "./room/components/lobby/Lobby";
 import { Results } from "./room/components/Results";
 import {
   RoomContext,
