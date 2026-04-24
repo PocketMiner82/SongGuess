@@ -1,3 +1,10 @@
+# [2.14.0-dev.24](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.23...2.14.0-dev.24) (2026-04-24)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** dont remove parens content of player answers ([9ec80d0](https://github.com/PocketMiner82/SongGuess/commit/9ec80d09132018dd4dc90ee8515c323274d15022))
+
 # [2.14.0-dev.23](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.22...2.14.0-dev.23) (2026-04-23)
 
 
