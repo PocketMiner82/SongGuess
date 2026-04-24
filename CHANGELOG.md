@@ -1,3 +1,10 @@
+# [2.14.0-dev.25](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.24...2.14.0-dev.25) (2026-04-24)
+
+
+### Features
+
+* **ResultsPlayerList:** show roundPoints if available + split Lobby components in multiple files ([ebe0fb4](https://github.com/PocketMiner82/SongGuess/commit/ebe0fb435021c23b3bbdef326baa6fbc5ab69d8d))
+
 # [2.14.0-dev.24](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.23...2.14.0-dev.24) (2026-04-24)
 
 
