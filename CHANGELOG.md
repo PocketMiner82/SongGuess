@@ -1,3 +1,10 @@
+# [2.14.0-dev.26](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.25...2.14.0-dev.26) (2026-04-25)
+
+
+### Features
+
+* **ResultsPlayerList:** show answer of players in player picks game ([7ae6552](https://github.com/PocketMiner82/SongGuess/commit/7ae6552153547b5164c5ba1d154d911475fddcfb))
+
 # [2.14.0-dev.25](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.24...2.14.0-dev.25) (2026-04-24)
 
 
