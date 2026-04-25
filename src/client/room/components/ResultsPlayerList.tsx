@@ -29,6 +29,9 @@ function getShowField(player: PlayerMessage, showField: PossibleFields): ReactNo
     if (showField === "answerSpeed" && (player.answerData.roundPoints ?? 0) > 0) {
       return `${(player.answerData.answerSpeed / 1000).toFixed(3)} s`;
     } else if (showField !== "answerSpeed") {
+      if (showField === "answer") {
+        return `"${player.answerData.answer}"`;
+      }
       return player.answerData[showField as keyof PlayerAnswerData];
     }
   }
@@ -36,8 +39,8 @@ function getShowField(player: PlayerMessage, showField: PossibleFields): ReactNo
   return undefined;
 }
 
-export function ResultsPlayerList({ rankedPlayers, showField, showField2, showRankingNumbers = true }:
-{ rankedPlayers: PlayerMessage[]; showField: PossibleFields; showField2?: PossibleFields; showRankingNumbers?: boolean }) {
+export function ResultsPlayerList({ rankedPlayers, showField, showField2, showField3, showRankingNumbers = true }:
+{ rankedPlayers: PlayerMessage[]; showField: PossibleFields; showField2?: PossibleFields; showField3?: PossibleFields; showRankingNumbers?: boolean }) {
   const filteredPlayers = useMemo(() =>
     rankedPlayers.filter(p => getShowField(p, showField) !== undefined), [rankedPlayers, showField]);
 
@@ -60,17 +63,25 @@ export function ResultsPlayerList({ rankedPlayers, showField, showField2, showRa
             </div>
           )}
 
-          <div className="flex-1 flex items-center gap-y-4">
-            <div className="flex-1">
-              <PlayerCard player={player}>
-                {getShowField(player, showField)}
-              </PlayerCard>
-            </div>
-            { showField2 && getShowField(player, showField2) && (
-              <div className="flex text-lg justify-end font-medium min-w-24">
-                <div className="text-center w-full">
-                  {getShowField(player, showField2)}
+          <div className="flex-1 flex flex-col bg-card-hover-bg rounded-lg">
+            <div className="flex items-center w-full">
+              <div className="flex-1">
+                <PlayerCard player={player}>
+                  {getShowField(player, showField)}
+                </PlayerCard>
+              </div>
+              { showField2 && getShowField(player, showField2) && (
+                <div className="flex text-lg justify-end font-medium min-w-24">
+                  <div className="text-center w-full">
+                    {getShowField(player, showField2)}
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {showField3 && getShowField(player, showField3) && (
+              <div className="font-medium text-left p-3 text-sm text-disabled-text">
+                {getShowField(player, showField3)}
               </div>
             )}
           </div>

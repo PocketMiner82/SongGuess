@@ -39,7 +39,13 @@ function AnswerResults() {
       <h3 className="text-lg font-bold">
         Player Answers
       </h3>
-      <ResultsPlayerList rankedPlayers={rankedPlayers} showField="points" showField2="answerSpeed" showRankingNumbers={false} />
+      <ResultsPlayerList
+        rankedPlayers={rankedPlayers}
+        showField="points"
+        showField2="answerSpeed"
+        showField3={controller.config.gameMode !== "multiple_choice" ? "answer" : undefined}
+        showRankingNumbers={false}
+      />
     </div>
   );
 }
