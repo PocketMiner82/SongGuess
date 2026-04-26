@@ -1,3 +1,10 @@
+# [2.14.0-dev.28](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.27...2.14.0-dev.28) (2026-04-26)
+
+
+### Features
+
+* add SoundCloud support (only for songs) ([14a91b6](https://github.com/PocketMiner82/SongGuess/commit/14a91b6cf7252a91f2aa4c5253434490c6c14ac7))
+
 # [2.14.0-dev.27](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.26...2.14.0-dev.27) (2026-04-26)
 
 
