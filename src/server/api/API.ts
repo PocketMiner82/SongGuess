@@ -40,7 +40,7 @@ export default class API implements Party.Server {
       if (this.room.id === "createRoom") {
         return await this.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
       // handle playlist info request
-      } else if (this.room.id === "/playlistInfo") {
+      } else if (this.room.id === "playlistInfo") {
         // fetch playlist info
         const playlistURL = url.searchParams.get("url");
         if (!playlistURL) {
@@ -49,7 +49,7 @@ export default class API implements Party.Server {
 
         return Response.json(await this.getPlaylistInfo(playlistURL));
       // handle isrc to song convert request
-      } else if (this.room.id === "/songByISRC") {
+      } else if (this.room.id === "songByISRC") {
         const isrc = url.searchParams.get("isrc");
         if (!isrc) {
           return new Response("Missing isrc parameter.", { status: 400 });
@@ -103,7 +103,6 @@ export default class API implements Party.Server {
 
   private async searchSoundCloud(query: string): Promise<Song[]> {
     const tracks: SoundcloudTrack[] = await this.soundCloud.fetchGetJson("/tracks", { q: query });
-    console.log(tracks);
 
     return tracks.map(col => ({
       name: col.title,

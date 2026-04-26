@@ -96,7 +96,7 @@ export function SearchMusicComponent({
 
     setSearchStatus("loading");
 
-    if (!playlist.songs) {
+    if (playlist.songs.length === 0) {
       // assume playlist is Apple Music album/artist if songs entry is empty.
       const fetchedPlaylist = await getPlaylistByURL(hrefURL);
 

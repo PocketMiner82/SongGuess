@@ -191,7 +191,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
       } else if (!onlySongs && result.wrapperType === "collection" && "collectionType" in result && (result as any).collectionType === "Album") {
         items.push({
           name: result.collectionName,
-          subtitle: "Album | 50 songs",
+          subtitle: "Album | max. 50 songs",
           hrefURL: result.collectionViewUrl,
           cover: fixedCoverSize(result.artworkUrl100),
           songs: [],
@@ -199,7 +199,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
       } else if (!onlySongs && result.wrapperType === "artist") {
         items.push({
           name: result.artistName,
-          subtitle: "Artist | 50 songs",
+          subtitle: "Artist | max. 50 songs",
           hrefURL: result.artistLinkUrl,
           cover: null,
           songs: [],
