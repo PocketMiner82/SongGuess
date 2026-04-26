@@ -1,13 +1,16 @@
 import type { SongsEndpointTypes } from "@syncfm/applemusic-api";
 import type { AxiosInstance } from "axios";
 import type * as Party from "partykit/server";
+import type { SoundcloudTrack } from "soundcloud.ts";
 import type { CreateRoomResponse } from "../../types/APIResponseTypes";
 import type { Playlist, Song } from "../../types/MessageTypes";
+import type { SoundCloudStreams } from "./SoundCloudAPI";
 import { AppleMusicConfig, AuthType, getAuthenticatedAxios, Region } from "@syncfm/applemusic-api";
 import { fetchGetRoom, fetchPostRoom } from "../../RoomHTTPHelper";
 import { albumRegex, appleMusicPreviewRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { DefaultPlaylist } from "../../types/MessageTypes";
 import { fixedCoverSize } from "../../Utils";
+import { SoundCloudAPI } from "./SoundCloudAPI";
 
 /**
  * Handles API requests to the /parties/api/{endpoint} endpoints.
@@ -18,6 +21,12 @@ export default class API implements Party.Server {
    */
   axiosClient: AxiosInstance | null = null;
 
+  /**
+   * Client used for communication with SoundCloud API.
+   */
+  soundCloud: SoundCloudAPI = new SoundCloudAPI(this.room.env.SOUNDCLOUD_CLIENT_ID as string, this.room.env.SOUNDCLOUD_CLIENT_SECRET as string);
+
+
   constructor(readonly room: Party.Room) { }
 
   /**
@@ -26,25 +35,43 @@ export default class API implements Party.Server {
   async onRequest(req: Party.Request): Promise<Response> {
     const url: URL = new URL(req.url);
 
-    // handle room creation
-    if (url.pathname.endsWith("/createRoom")) {
-      return await this.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
+    if (url.pathname.endsWith(this.room.id)) {
+      // handle room creation
+      if (this.room.id === "createRoom") {
+        return await this.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
       // handle playlist info request
-    } else if (url.pathname.endsWith("/playlistInfo")) {
-      // fetch playlist info
-      const playlistURL = url.searchParams.get("url");
-      if (!playlistURL) {
-        return new Response("Missing url parameter.", { status: 400 });
-      }
+      } else if (this.room.id === "/playlistInfo") {
+        // fetch playlist info
+        const playlistURL = url.searchParams.get("url");
+        if (!playlistURL) {
+          return new Response("Missing url parameter.", { status: 400 });
+        }
 
-      return Response.json(await this.getPlaylistInfo(playlistURL));
-    } else if (url.pathname.endsWith("/songByISRC")) {
-      const isrc = url.searchParams.get("isrc");
-      if (!isrc) {
-        return new Response("Missing isrc parameter.", { status: 400 });
-      }
+        return Response.json(await this.getPlaylistInfo(playlistURL));
+      // handle isrc to song convert request
+      } else if (this.room.id === "/songByISRC") {
+        const isrc = url.searchParams.get("isrc");
+        if (!isrc) {
+          return new Response("Missing isrc parameter.", { status: 400 });
+        }
 
-      return this.songByISRC(isrc);
+        return this.songByISRC(isrc);
+      // handle search soundcloud for tracks request
+      } else if (this.room.id === "searchSoundCloud") {
+        const query = url.searchParams.get("q");
+        if (!query) {
+          return new Response("Missing q (query) parameter.", { status: 400 });
+        }
+
+        return Response.json(await this.searchSoundCloud(query));
+      } else if (this.room.id === "fetchSoundCloudAudio") {
+        const urn = url.searchParams.get("urn");
+        if (!urn) {
+          return new Response("Missing urn parameter.", { status: 400 });
+        }
+
+        return this.fetchSoundCloudAudio(urn);
+      }
     }
 
     // redirect to main page, if on another one
@@ -52,7 +79,39 @@ export default class API implements Party.Server {
       + "Supported enpoints:\n"
       + "/parties/api/createRoom\n"
       + "/parties/api/playlistInfo?url={Apple Music URL}\n"
-      + "/parties/api/songByISRC?isrc={International Standard Recording Code}", { status: 400 });
+      + "/parties/api/songByISRC?isrc={International Standard Recording Code}\n"
+      + "/parties/api/searchSoundCloud?q={search term}\n"
+      + "/parties/api/fetchSoundCloudAudio?urn={SoundCloud track URN}", { status: 400 });
+  }
+
+  private async fetchSoundCloudAudio(urn: string): Promise<Response> {
+    const streams: SoundCloudStreams = await this.soundCloud.fetchGetJson(`/tracks/${urn}/streams`);
+
+    // if (streams.hls_aac_160_url) {
+    //   return await this.soundCloud.fetchGet(streams.hls_aac_160_url);
+    // } else if (streams.hls_mp3_128_url) {
+    //   return await this.soundCloud.fetchGet(streams.hls_mp3_128_url);
+    // } else
+    if (streams.http_mp3_128_url) {
+      return await this.soundCloud.fetchGet(streams.http_mp3_128_url);
+    } else if (streams.preview_mp3_128_url) {
+      return await this.soundCloud.fetchGet(streams.preview_mp3_128_url);
+    }
+
+    return new Response("Couldn't find stream url.", { status: 500 });
+  }
+
+  private async searchSoundCloud(query: string): Promise<Song[]> {
+    const tracks: SoundcloudTrack[] = await this.soundCloud.fetchGetJson("/tracks", { q: query });
+    console.log(tracks);
+
+    return tracks.map(col => ({
+      name: col.title,
+      hrefURL: col.permalink_url,
+      cover: col.artwork_url,
+      audioURL: `/parties/api/fetchSoundCloudAudio?urn=${encodeURIComponent(col.urn)}`,
+      artist: col.user.username,
+    } satisfies Song));
   }
 
   /**
