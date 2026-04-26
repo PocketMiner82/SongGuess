@@ -153,7 +153,7 @@ export class PlayerPicksGame extends Game {
         }
       }
 
-      if (player.answerData?.roundPoints !== undefined) {
+      if (player.answerData?.roundPoints) {
         // other half of points depends on time the player needed to answer
         player.answerData!.roundPoints += this.getTimePoints(player);
 
