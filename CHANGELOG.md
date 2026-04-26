@@ -1,3 +1,10 @@
+# [2.14.0-dev.30](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.29...2.14.0-dev.30) (2026-04-26)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** don't give time points when guessed wrongly ([6456cad](https://github.com/PocketMiner82/SongGuess/commit/6456cadbc3972c2059a9e40646c07a05eedf1ad5))
+
 # [2.14.0-dev.29](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.28...2.14.0-dev.29) (2026-04-26)
 
 
