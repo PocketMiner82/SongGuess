@@ -1,3 +1,10 @@
+# [2.14.0-dev.29](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.28...2.14.0-dev.29) (2026-04-26)
+
+
+### Bug Fixes
+
+* corrected wrong api endpoint names + playlist.songs.length check ([9e2b0ec](https://github.com/PocketMiner82/SongGuess/commit/9e2b0ecdf9ac4483795044b1f1bbe867727de5d1))
+
 # [2.14.0-dev.28](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.27...2.14.0-dev.28) (2026-04-26)
 
 
