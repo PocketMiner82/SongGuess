@@ -1,6 +1,6 @@
+import type { Playlist } from "../../../../types/MessageTypes";
 import random from "lodash/random";
 import { useCallback, useEffect, useState } from "react";
-import { getPlaylistByURL } from "../../../../Utils";
 import { Button } from "../../../components/Button";
 import { PlaylistCard } from "../../../components/PlaylistCard";
 import { SearchMusicComponent } from "../../../components/SearchMusicComponent";
@@ -26,12 +26,12 @@ function PlayerPickingDisplay() {
   const pickerID = controller.roundData.currentQuestion?.pickerId;
   const isMyTurn = controller.userID === pickerID;
 
-  const handlePickSong = useCallback(async (url: string) => {
-    const playlist = await getPlaylistByURL(url);
-    if (playlist && playlist.songs && playlist.songs.length > 0) {
+  const handlePickSong = useCallback(async (playlist: Playlist) => {
+    if (playlist.songs.length > 0) {
       controller.pickSong(playlist.songs[0], audioStartPos);
       return true;
     }
+
     return false;
   }, [audioStartPos, controller]);
 

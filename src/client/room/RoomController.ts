@@ -29,7 +29,6 @@ import z from "zod";
 import { version } from "../../../package.json";
 import { BaseConfig } from "../../BaseConfig";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
-import { getPlaylistByURL } from "../../Utils";
 import { FatalErrorDialog } from "../modal/FatalErrorDialog";
 import { Modal } from "../modal/Modal";
 
@@ -679,41 +678,6 @@ export class RoomController {
     };
 
     this.socket.send(JSON.stringify(req));
-  }
-
-  /**
-   * Attempts to add multiple playlists from a given list (newline-separated) of Apple Music URLs.
-   * @see tryAddPlaylist
-   * @returns true, if all playlists were requested to be added without errors.
-   */
-  public async tryAddPlaylists(url: string): Promise<boolean> {
-    const urls: string[] = url.split(";");
-
-    const results: boolean[] = await Promise.all(
-      urls.map(u => this.tryAddPlaylist(u)),
-    );
-
-    return results.every(result => result);
-  }
-
-  /**
-   * Attempts to add a playlist from the given Apple Music URL.
-   * If the URL is valid and songs are found, it sends an update to the server.
-   *
-   * @param url The Apple Music URL of the artist, song or album.
-   * @returns true if the playlist was requested to be added, false otherwise.
-   */
-  public async tryAddPlaylist(url: string): Promise<boolean> {
-    const playlist = await getPlaylistByURL(url);
-
-    if (!playlist) {
-      toast.error(`Failed to get playlist: ${url}`);
-      return false;
-    }
-
-    this.addPlaylists(playlist);
-
-    return true;
   }
 
   /**

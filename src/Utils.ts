@@ -157,6 +157,79 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
 }
 
 /**
+ * Searches Apple Music and SoundCloud for a given query. Only calls each API once;
+ * filling in songs for Artist/Album required e.g. with {@link getPlaylistByURL}
+ * @param query the query to search for
+ * @param onlySongs whether to only search for songs
+ * @returns an array of Apple Music playlists interleaved with SoundCloud tracks, starting with an Apple Music playlist
+ */
+export async function performSearch(query: string, onlySongs: boolean): Promise<Playlist[]> {
+  let items: Playlist[] = [];
+  try {
+    const results = await safeSearch(query, {
+      media: "music",
+      // @ts-expect-error - third-party type mismatch
+      entity: "song,musicArtist,album",
+      limit: 50,
+    });
+
+    for (const result of results) {
+      if ("kind" in result && result.kind === "song" && result.wrapperType === "track") {
+        items.push({
+          name: result.trackName,
+          subtitle: "Song",
+          hrefURL: result.trackViewUrl,
+          cover: fixedCoverSize(result.artworkUrl100),
+          songs: [{
+            name: result.trackName,
+            artist: result.artistName,
+            hrefURL: result.trackViewUrl,
+            cover: fixedCoverSize(result.artworkUrl100),
+            audioURL: result.previewUrl,
+          }],
+        });
+      } else if (!onlySongs && result.wrapperType === "collection" && "collectionType" in result && (result as any).collectionType === "Album") {
+        items.push({
+          name: result.collectionName,
+          subtitle: "Album | 50 songs",
+          hrefURL: result.collectionViewUrl,
+          cover: fixedCoverSize(result.artworkUrl100),
+          songs: [],
+        });
+      } else if (!onlySongs && result.wrapperType === "artist") {
+        items.push({
+          name: result.artistName,
+          subtitle: "Artist | 50 songs",
+          hrefURL: result.artistLinkUrl,
+          cover: null,
+          songs: [],
+        });
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    const resp = await fetch(`/parties/api/searchSoundCloud?q=${encodeURIComponent(query)}`);
+    const results: Song[] = await resp.json();
+    const playlists: Playlist[] = results.map(song => ({
+      name: song.name,
+      subtitle: "SoundCloud Song",
+      hrefURL: song.hrefURL,
+      cover: song.cover,
+      songs: [song],
+    } satisfies Playlist));
+
+    items = _.flatten(_.zip(items, playlists)).filter(element => element !== undefined);
+  } catch {
+    // ignore
+  }
+
+  return items;
+}
+
+/**
  * Replaces the cover of a {@link Song} with a larger version.
  * @param url The url to search and replace the dimensions in
  * @returns the replaced url or null if the provided param is not a string

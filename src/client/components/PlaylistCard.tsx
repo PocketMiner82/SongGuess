@@ -112,7 +112,7 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
 
         {previewURL && (
           <>
-            <audio ref={audioRef} src={previewURL} preload="metadata">
+            <audio ref={audioRef} src={previewURL} preload="none">
               <track kind="captions" label="No captions available" default />
             </audio>
           </>

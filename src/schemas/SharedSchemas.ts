@@ -1,5 +1,13 @@
 import z from "zod";
-import { appleMusicCoverRegex, appleMusicPreviewRegex, appleMusicRegex, usernameRegex } from "./ValidationRegexes";
+import {
+  appleMusicCoverRegex,
+  appleMusicPreviewRegex,
+  appleMusicRegex,
+  soundCloudCoverRegex,
+  soundCloudRegex,
+  soundCloudSongRegex,
+  usernameRegex,
+} from "./ValidationRegexes";
 
 /**
  * The zod schema for the username.
@@ -20,18 +28,18 @@ export const SongSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.url({ pattern: appleMusicRegex }),
+  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
 
   /**
    * Cover URL of the song.
    */
-  cover: z.nullable(z.url({ pattern: appleMusicCoverRegex })),
+  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
 
   /**
    * A URL to the audio file of the song.
-   * Currently only audio previews from Apple Music are allowed.
+   * Currently only audio previews from Apple Music and SoundCloud are allowed.
    */
-  audioURL: z.url({ pattern: appleMusicPreviewRegex }),
+  audioURL: z.union([z.url({ pattern: appleMusicPreviewRegex }), z.stringFormat("SoundCloudSong", soundCloudSongRegex)]),
 });
 
 export const PlaylistSchema = z.object({
@@ -48,12 +56,12 @@ export const PlaylistSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.url({ pattern: appleMusicRegex }),
+  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
 
   /**
    * Cover URL of the playlist.
    */
-  cover: z.nullable(z.url({ pattern: appleMusicCoverRegex })),
+  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
 
   /**
    * A list of song names and music urls

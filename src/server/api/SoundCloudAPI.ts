@@ -1,18 +1,24 @@
+import type * as Party from "partykit/server";
+
+
 export class SoundCloudAPI {
+  constructor(readonly room: Party.Room, private client_id: string, private client_secret: string) {}
+
   // the access token string
-  private accessToken?: string;
+  private async getAccessToken(): Promise<string | undefined> {
+    return await this.room.storage.get<string>("accessToken");
+  }
+
+  private async getRefreshToken(): Promise<string | undefined> {
+    return await this.room.storage.get<string>("refreshToken");
+  }
+
   // the absolute expiration timestamp in milliseconds
-  private expiresAt?: number;
+  private async getExpiresAt(): Promise<number | undefined> {
+    return await this.room.storage.get<number>("expiresAt");
+  }
 
-  constructor(private client_id: string, private client_secret: string) {}
-
-  private async getValidToken(): Promise<string> {
-    const currentTime = Date.now();
-    // Return cached token if it exists and has not reached the expiration threshold
-    if (this.accessToken && this.expiresAt && currentTime < this.expiresAt) {
-      return this.accessToken;
-    }
-
+  private async clientCredentialsAuth(): Promise<string> {
     // Encode credentials for Basic Authentication
     const credentials = btoa(`${this.client_id}:${this.client_secret}`);
 
@@ -30,16 +36,78 @@ export class SoundCloudAPI {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to authenticate with SoundCloud: ${response.statusText}`);
+      throw new Error(`Failed to authenticate with SoundCloud:\n${await response.text()}`);
     }
 
-    const data = await response.json() as { access_token: string; expires_in: number };
+    const data = await response.json() as {
+      access_token: string;
+      expires_in: number;
+      refresh_token: string;
+    };
 
-    this.accessToken = data.access_token;
-    // Calculate expiration with a 60-second safety buffer to account for network latency
-    this.expiresAt = Date.now() + (data.expires_in * 1000) - 60000;
+    await Promise.all([
+      this.room.storage.put("accessToken", data.access_token),
+      // Calculate expiration with a 60-second safety buffer to account for network latency
+      this.room.storage.put("expiresAt", Date.now() + (data.expires_in * 1000) - 60000),
+    ]);
 
-    return this.accessToken;
+    return data.access_token;
+  }
+
+  private async refreshToken(refreshToken: string): Promise<string> {
+    const response = await fetch("https://secure.soundcloud.com/oauth/token", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json; charset=utf-8",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        client_id: this.client_id,
+        client_secret: this.client_secret,
+        refresh_token: refreshToken,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`SoundCloud OAuth token refresh operation failed:\n${await response.text()}`);
+    }
+
+    const data = await response.json() as {
+      access_token: string;
+      refresh_token: string;
+      expires_in: number;
+    };
+
+    await Promise.all([
+      this.room.storage.put("accessToken", data.access_token),
+      this.room.storage.put("refreshToken", data.refresh_token),
+      this.room.storage.put("expiresAt", Date.now() + (data.expires_in * 1000) - 60000),
+    ]);
+
+    return data.access_token;
+  }
+
+  private async getValidToken(): Promise<string> {
+    const currentTime = Date.now();
+    const accessToken = await this.getAccessToken();
+    const expiresAt = await this.getExpiresAt();
+
+    // Return cached token if it exists and has not reached the expiration threshold
+    if (accessToken && expiresAt && currentTime < expiresAt) {
+      return accessToken;
+    }
+
+    const refreshToken = await this.getRefreshToken();
+
+    if (refreshToken) {
+      // token expired, try refreshing first
+      try {
+        return this.refreshToken(refreshToken);
+      } catch { }
+    }
+
+    return this.clientCredentialsAuth();
   }
 
   async fetchGetJson(uri: string, params?: ConstructorParameters<typeof URLSearchParams>[0]): Promise<any> {

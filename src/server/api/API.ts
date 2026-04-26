@@ -24,7 +24,7 @@ export default class API implements Party.Server {
   /**
    * Client used for communication with SoundCloud API.
    */
-  soundCloud: SoundCloudAPI = new SoundCloudAPI(this.room.env.SOUNDCLOUD_CLIENT_ID as string, this.room.env.SOUNDCLOUD_CLIENT_SECRET as string);
+  soundCloud: SoundCloudAPI = new SoundCloudAPI(this.room, this.room.env.SOUNDCLOUD_CLIENT_ID as string, this.room.env.SOUNDCLOUD_CLIENT_SECRET as string);
 
 
   constructor(readonly room: Party.Room) { }

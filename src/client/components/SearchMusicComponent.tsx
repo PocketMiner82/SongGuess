@@ -1,7 +1,7 @@
-import type { ResultAlbum, ResultMusicArtist, ResultMusicTrack } from "itunes-store-api";
+import type { Playlist } from "../../types/MessageTypes";
 import { useState } from "react";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
-import { fixedCoverSize, safeSearch } from "../../Utils";
+import { getPlaylistByURL, performSearch } from "../../Utils";
 import { Button } from "./Button";
 import { PlaylistCard } from "./PlaylistCard";
 
@@ -10,13 +10,20 @@ import { PlaylistCard } from "./PlaylistCard";
  */
 type SearchStatus = "idle" | "loading" | "error" | "success";
 
-/**
- * Represents a single search result item from Apple Music.
- */
-type SearchResultItem
-  = | { type: "song"; data: ResultMusicTrack }
-    | { type: "album"; data: ResultAlbum }
-    | { type: "artist"; data: ResultMusicArtist };
+
+function StatusIcon({ searchStatus }: { searchStatus: SearchStatus }) {
+  switch (searchStatus) {
+    case "loading":
+      return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
+    case "error":
+      return <span className="material-symbols-outlined text-error">error</span>;
+    case "success":
+      return <span className="material-symbols-outlined text-success">check_circle</span>;
+    case "idle":
+      return undefined;
+  }
+}
+
 
 /**
  * Props for the SearchMusicDialog component.
@@ -24,7 +31,7 @@ type SearchResultItem
 export interface SearchMusicComponentProps {
   onlyAcceptSongs?: boolean;
   // should return true when the playlist add was sent successfully
-  onPlaylistSelected: (url: string) => Promise<boolean>;
+  onPlaylistSelected: (playlist: Playlist) => Promise<boolean>;
   onSuccess?: () => void;
 }
 
@@ -40,7 +47,7 @@ export function SearchMusicComponent({
 }: SearchMusicComponentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
-  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
+  const [searchResults, setSearchResults] = useState<Playlist[]>([]);
   const [addedIndices, setAddedIndices] = useState<Set<number>>(() => new Set());
 
   const isValidURL = (onlyAcceptSongs
@@ -51,144 +58,68 @@ export function SearchMusicComponent({
   );
 
   const handleSearch = async () => {
-    if (!searchQuery.trim() || searchStatus === "loading")
-      return;
-
     const query = searchQuery.trim();
+
+    if (!query || searchStatus === "loading") {
+      return;
+    }
 
     if (onlyAcceptSongs ? songRegex.test(query) : (artistRegex.test(query) || albumRegex.test(query) || songRegex.test(query))) {
       setSearchStatus("loading");
-      try {
-        onPlaylistSelected(query).then((successful) => {
-          if (successful) {
-            setSearchStatus("success");
-            onSuccess?.();
-          } else {
-            setSearchStatus("error");
-          }
-        });
-      } catch {
+      const playlist = await getPlaylistByURL(query);
+
+      if (!playlist) {
         setSearchStatus("error");
+        return;
       }
-      return;
-    }
 
-    setSearchStatus("loading");
-    const items: SearchResultItem[] = [];
-
-    try {
-      const results = await safeSearch(query, {
-        media: "music",
-        // @ts-expect-error - third-party type mismatch
-        entity: "song,musicArtist,album",
-        limit: 50,
-      });
-      for (const result of results) {
-        if ("kind" in result && result.kind === "song" && result.wrapperType === "track") {
-          items.push({ type: "song", data: result as ResultMusicTrack });
-        } else if (result.wrapperType === "collection" && "collectionType" in result && (result as any).collectionType === "Album") {
-          if (onlyAcceptSongs)
-            continue;
-          items.push({ type: "album", data: result as ResultAlbum });
-        } else if (result.wrapperType === "artist") {
-          if (onlyAcceptSongs)
-            continue;
-          items.push({ type: "artist", data: result as ResultMusicArtist });
-        }
-      }
-    } catch {
-      // ignore
-    }
-
-    setSearchResults(items);
-    setAddedIndices(new Set());
-    setSearchStatus(items.length === 0 ? "error" : "idle");
-  };
-
-  const getResultHref = (item: SearchResultItem): string | undefined => {
-    switch (item.type) {
-      case "song":
-        return item.data.trackViewUrl;
-      case "album":
-        return item.data.collectionViewUrl;
-      case "artist":
-        return item.data.artistLinkUrl;
-    }
-  };
-
-  const handleSelectResult = async (item: SearchResultItem, index: number) => {
-    const hrefURL = getResultHref(item);
-    if (!hrefURL) {
-      setSearchStatus("error");
-      return;
-    }
-
-    if (!artistRegex.test(hrefURL) && !albumRegex.test(hrefURL) && !songRegex.test(hrefURL)) {
-      setSearchStatus("error");
-      return;
-    }
-
-    setSearchStatus("loading");
-
-    setAddedIndices(prev => new Set([...prev, index]));
-
-    onPlaylistSelected(hrefURL).then((successful) => {
-      if (successful) {
+      if (await onPlaylistSelected(playlist)) {
         setSearchStatus("success");
         onSuccess?.();
       } else {
         setSearchStatus("error");
-        setAddedIndices((prev) => {
-          const next = new Set(prev);
-          next.delete(index);
-          return next;
-        });
       }
-    });
-  };
-
-  const getResultTitle = (item: SearchResultItem): string => {
-    switch (item.type) {
-      case "song":
-        return item.data.trackName;
-      case "album":
-        return item.data.collectionName;
-      case "artist":
-        return item.data.artistName;
+      return;
     }
+
+    setSearchStatus("loading");
+
+    const items = await performSearch(query, onlyAcceptSongs);
+    setSearchResults(items);
+
+    setAddedIndices(new Set());
+    setSearchStatus(items.length === 0 ? "error" : "idle");
   };
 
-  const getResultSubtitle = (item: SearchResultItem): string | undefined => {
-    switch (item.type) {
-      case "song":
-        return `Song by ${item.data.artistName}`;
-      case "album":
-        return `Album by ${item.data.artistName}`;
-      case "artist":
-        return undefined;
+  const handleSelectResult = async (playlist: Playlist, index: number) => {
+    const hrefURL = playlist.hrefURL;
+
+    setSearchStatus("loading");
+
+    if (!playlist.songs) {
+      // assume playlist is Apple Music album/artist if songs entry is empty.
+      const fetchedPlaylist = await getPlaylistByURL(hrefURL);
+
+      if (!fetchedPlaylist) {
+        setSearchStatus("error");
+        return;
+      }
+
+      playlist = fetchedPlaylist;
     }
-  };
 
-  const getResultCover = (item: SearchResultItem): string | null => {
-    switch (item.type) {
-      case "song":
-      case "album":
-        return fixedCoverSize(item.data.artworkUrl100);
-      case "artist":
-        return null;
-    }
-  };
+    setAddedIndices(prev => new Set([...prev, index]));
 
-  const getStatusIcon = () => {
-    switch (searchStatus) {
-      case "loading":
-        return <span className="material-symbols-outlined animate-spin text-gray-500">progress_activity</span>;
-      case "error":
-        return <span className="material-symbols-outlined text-error">error</span>;
-      case "success":
-        return <span className="material-symbols-outlined text-success">check_circle</span>;
-      case "idle":
-        return null;
+    if (await onPlaylistSelected(playlist)) {
+      setSearchStatus("success");
+      onSuccess?.();
+    } else {
+      setSearchStatus("error");
+      setAddedIndices((prev) => {
+        const next = new Set(prev);
+        next.delete(index);
+        return next;
+      });
     }
   };
 
@@ -222,7 +153,7 @@ export function SearchMusicComponent({
             }}
           />
           <div className="absolute right-2 bottom-2 flex items-center">
-            {getStatusIcon()}
+            <StatusIcon searchStatus={searchStatus} />
           </div>
         </div>
         <Button
@@ -239,17 +170,17 @@ export function SearchMusicComponent({
       {searchResults.length > 0 && (
         <div className="mt-4 overflow-y-auto flex-1 -mx-2 px-2">
           <ul className="space-y-2">
-            {searchResults.map((item, idx) => (
+            {searchResults.map((playlist, idx) => (
               <PlaylistCard
                 key={idx}
-                title={getResultTitle(item)}
-                subtitle={getResultSubtitle(item)}
-                coverURL={getResultCover(item)}
-                hrefURL={getResultHref(item)}
-                previewURL={item.type === "song" ? item.data.previewUrl : undefined}
+                title={playlist.name}
+                subtitle={playlist.subtitle}
+                coverURL={playlist.cover}
+                hrefURL={playlist.hrefURL}
+                previewURL={playlist.songs.length === 1 ? playlist.songs[0].audioURL : undefined}
               >
                 <Button
-                  onClick={() => handleSelectResult(item, idx)}
+                  onClick={() => handleSelectResult(playlist, idx)}
                   disabled={searchStatus === "loading" || addedIndices.has(idx)}
                   className="min-w-20"
                 >

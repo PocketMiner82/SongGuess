@@ -12,9 +12,14 @@ export function AddPlaylistButton() {
   return (
     <Button
       onClick={() => Modal.open(SearchMusicDialog, {
-        onPlaylistSelected: async (url) => {
-          console.debug("Selected Playlist:", url);
-          return await controller.tryAddPlaylists(url);
+        onPlaylistSelected: async (playlist) => {
+          if (playlist.songs.length > 0) {
+            console.debug("Selected Playlist:", playlist);
+            controller.addPlaylists(playlist);
+            return true;
+          }
+
+          return false;
         },
         id: "LobbySearchMusicDialog",
       })}
