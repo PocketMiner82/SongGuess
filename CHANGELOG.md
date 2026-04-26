@@ -1,3 +1,10 @@
+# [2.14.0-dev.27](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.26...2.14.0-dev.27) (2026-04-26)
+
+
+### Features
+
+* **API:** add endpoints for soundcloud song support ([baf508d](https://github.com/PocketMiner82/SongGuess/commit/baf508d36baa85f0386499d5e27a18c16af318e7))
+
 # [2.14.0-dev.26](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.25...2.14.0-dev.26) (2026-04-25)
 
 
