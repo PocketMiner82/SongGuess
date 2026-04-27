@@ -1,3 +1,10 @@
+# [2.14.0-dev.31](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.30...2.14.0-dev.31) (2026-04-27)
+
+
+### Bug Fixes
+
+* **SoundCloudAPI:** store refresh token correctly + fix soundCloudSongRegex ([595bb52](https://github.com/PocketMiner82/SongGuess/commit/595bb5225789cfc2e2dba5f8d19c85ab22b332b1))
+
 # [2.14.0-dev.30](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.29...2.14.0-dev.30) (2026-04-26)
 
 
