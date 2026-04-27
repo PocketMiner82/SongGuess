@@ -49,6 +49,7 @@ export class SoundCloudAPI {
       this.room.storage.put("accessToken", data.access_token),
       // Calculate expiration with a 60-second safety buffer to account for network latency
       this.room.storage.put("expiresAt", Date.now() + (data.expires_in * 1000) - 60000),
+      this.room.storage.put("refreshToken", data.refresh_token),
     ]);
 
     return data.access_token;

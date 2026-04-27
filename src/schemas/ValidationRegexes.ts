@@ -14,7 +14,7 @@ export const soundCloudRegex = /^https:\/\/soundcloud\.com\//;
  * Regular expression to validate a preview/song audio URL.
  */
 export const appleMusicPreviewRegex = /^https:\/\/audio-ssl\.itunes\.apple\.com\/itunes-assets\/AudioPreview.*\.m4a$/;
-export const soundCloudSongRegex = /^\/parties\/api\/fetchSoundCloudAudio\?urn=soundcloud:tracks:[a-zA-Z0-9]+$/;
+export const soundCloudSongRegex = /^\/parties\/api\/fetchSoundCloudAudio\?urn=soundcloud%3Atracks%3A[a-zA-Z0-9]+$/;
 
 /**
  * Regular expression to validate cover/image urls.
