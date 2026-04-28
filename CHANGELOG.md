@@ -1,3 +1,10 @@
+# [2.14.0-dev.33](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.32...2.14.0-dev.33) (2026-04-28)
+
+
+### Bug Fixes
+
+* **SearchMusicDialog:** improve styling + show artist name for songs/albums ([d020b58](https://github.com/PocketMiner82/SongGuess/commit/d020b58ac49d2428571c4c8bb90e57d788c3bd07))
+
 # [2.14.0-dev.32](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.31...2.14.0-dev.32) (2026-04-28)
 
 
