@@ -57,7 +57,7 @@ function PlayerPickingDisplay() {
             </SettingsDropdown>
           )}
 
-          <div className="mt-2 flex justify-center">
+          <div className="mt-2 flex justify-center max-h-[calc(100vh-21rem)] min-h-0">
             <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
           </div>
         </div>

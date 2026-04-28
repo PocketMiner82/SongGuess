@@ -46,7 +46,7 @@ export function ModalContent({ title, iconName, iconColor = "text-default", chil
   }, [modal]);
 
   return (
-    <div className={`bg-card-bg rounded-lg p-6 shadow-xl ${maxWidthClasses[maxWidth]} mx-4 w-full relative max-h-[85vh] overflow-y-auto overscroll-contain`}>
+    <div className={`bg-card-bg rounded-lg p-6 shadow-xl ${maxWidthClasses[maxWidth]} mx-4 w-full relative`}>
       {modal.params.closable && (
         <button
           type="button"
@@ -67,7 +67,10 @@ export function ModalContent({ title, iconName, iconColor = "text-default", chil
           )}
         </div>
       )}
-      {children}
+
+      <div className="min-h-0 max-h-[calc(100vh-15rem)] flex flex-col">
+        {children}
+      </div>
     </div>
   );
 }

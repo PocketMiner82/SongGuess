@@ -14,13 +14,11 @@ export function SearchMusicDialog({
 }: SearchMusicComponentProps) {
   return (
     <ModalContent title={onlyAcceptSongs ? "Search Songs" : "Search Apple Music"} maxWidth="full">
-      <div className="max-h-[70vh]">
-        <SearchMusicComponent
-          onlyAcceptSongs={onlyAcceptSongs}
-          onPlaylistSelected={onPlaylistSelected}
-          onSuccess={onSuccess}
-        />
-      </div>
+      <SearchMusicComponent
+        onlyAcceptSongs={onlyAcceptSongs}
+        onPlaylistSelected={onPlaylistSelected}
+        onSuccess={onSuccess}
+      />
     </ModalContent>
   );
 }

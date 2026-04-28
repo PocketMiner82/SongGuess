@@ -177,7 +177,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
       if ("kind" in result && result.kind === "song" && result.wrapperType === "track") {
         items.push({
           name: result.trackName,
-          subtitle: "Song",
+          subtitle: `Song by ${result.artistName} (Apple Music)`,
           hrefURL: result.trackViewUrl,
           cover: fixedCoverSize(result.artworkUrl100),
           songs: [{
@@ -191,7 +191,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
       } else if (!onlySongs && result.wrapperType === "collection" && "collectionType" in result && (result as any).collectionType === "Album") {
         items.push({
           name: result.collectionName,
-          subtitle: "Album | max. 50 songs",
+          subtitle: `Album by ${result.artistName} | ${Math.min(result.trackCount, 50)} song(s)`,
           hrefURL: result.collectionViewUrl,
           cover: fixedCoverSize(result.artworkUrl100),
           songs: [],
@@ -215,7 +215,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
     const results: Song[] = await resp.json();
     const playlists: Playlist[] = results.map(song => ({
       name: song.name,
-      subtitle: "SoundCloud Song",
+      subtitle: `Song by ${song.artist} (SoundCloud)`,
       hrefURL: song.hrefURL,
       cover: song.cover,
       songs: [song],
