@@ -1,3 +1,10 @@
+# [2.14.0-dev.32](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.31...2.14.0-dev.32) (2026-04-28)
+
+
+### Bug Fixes
+
+* add server side caching for soundcloud + fix styling of playlistcard and questionheader ([9cb49a8](https://github.com/PocketMiner82/SongGuess/commit/9cb49a862a51e1d72b0659b2f4d0cf848d52dfa2))
+
 # [2.14.0-dev.31](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.30...2.14.0-dev.31) (2026-04-27)
 
 
