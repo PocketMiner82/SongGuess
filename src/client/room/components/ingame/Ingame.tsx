@@ -3,7 +3,6 @@ import { useControllerContext, useRoomControllerMessageTypeListener } from "../.
 import { ResultsPlayerList } from "../ResultsPlayerList";
 import { MultipleChoiceQuestionDisplay } from "./MultipleChoiceQuestionDisplay";
 import { PlayerPicksQuestionDisplay } from "./PlayerPicksQuestionDisplay";
-import { QuestionHeader } from "./QuestionHeader";
 
 
 function AnswerResults() {
@@ -74,7 +73,6 @@ export function Ingame() {
 
   return (
     <div className="flex flex-col items-center h-full">
-      <QuestionHeader />
       <div className="flex-1 mx-auto w-full flex justify-center p-4">
         <div className="m-auto w-full lg:w-auto">
           {

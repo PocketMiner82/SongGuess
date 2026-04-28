@@ -40,7 +40,7 @@ function PlayerPickingDisplay() {
   return (
     <div className="space-y-6 w-full">
       {isMyTurn && (
-        <div className="max-h-[calc(100vh-40rem)]">
+        <div>
           {controller.config.audioStartPosition === 3 && (
             <SettingsDropdown
               value={audioStartPos}

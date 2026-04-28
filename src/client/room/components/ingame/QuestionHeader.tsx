@@ -11,11 +11,17 @@ export function QuestionHeader() {
   const controller = useControllerContext();
 
   const questionNumber = (controller.roundData.currentQuestion?.number
-    || controller.roundData.currentAnswer?.number) ?? 0;
+    || controller.roundData.currentAnswer?.number);
+
+  if (questionNumber === undefined || controller.state !== "ingame") {
+    return null;
+  }
 
   return (
     <>
-      <div className="flex flex-col items-center gap-3 p-3 px-6 bg-default-bg border-b border-gray-300 dark:border-gray-700 mx-auto w-full lg:w-1/3 lg:border-l lg:border-r lg:rounded-b-2xl">
+      <div className="flex flex-col items-center gap-3 p-3 px-6 bg-default-bg border-b border-gray-300
+      dark:border-gray-700 mx-auto w-full lg:w-1/3 lg:border-l lg:border-r lg:rounded-b-2xl mb-2"
+      >
         <h2 className="text-xl font-bold whitespace-nowrap">
           Question
           {" "}

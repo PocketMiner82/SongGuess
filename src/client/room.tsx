@@ -14,6 +14,7 @@ import { Modal } from "./modal/Modal";
 import { Audio } from "./room/components/Audio";
 import { BottomBar } from "./room/components/BottomBar";
 import { Ingame } from "./room/components/ingame/Ingame";
+import { QuestionHeader } from "./room/components/ingame/QuestionHeader";
 import { Lobby } from "./room/components/lobby/Lobby";
 import { Results } from "./room/components/Results";
 import {
@@ -104,6 +105,8 @@ function Room() {
           </Button>
         )}
       </TopBar>
+
+      <QuestionHeader />
 
       {
         !hasJoined

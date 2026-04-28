@@ -139,6 +139,10 @@ export class SoundCloudAPI {
         Authorization: `OAuth ${token}`,
         Accept: "application/json; charset=utf-8",
       },
+      cf: {
+        cacheTtl: 1800,
+        cacheEverything: true,
+      },
     });
   }
 }

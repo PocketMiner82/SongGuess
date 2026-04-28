@@ -63,8 +63,12 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
     <li className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
       {coverURL
         ? (
-            <div className="relative max-w-25 max-h-25 lg:max-w-30 lg:max-h-30 2xl:max-w-40 2xl:max-h-40">
-              <img src={coverURL} alt="Album Cover" className="object-cover rounded-xl w-full h-full" />
+            <div className="relative aspect-square flex-none w-25 lg:w-30 2xl:w-40">
+              <img
+                src={coverURL}
+                alt="Album Cover"
+                className="h-full w-full object-cover rounded-xl"
+              />
               {previewURL && (
                 <button
                   type="button"
