@@ -5,12 +5,14 @@ import type {
 import type Player from "../../Player";
 import type Question from "../Question";
 import _ from "lodash";
-import { ROUND_POINTS_PER_QUESTION } from "../../../ConfigConstants";
+import { POINTS_PER_QUESTION } from "../../../shared/ConfigConstants";
 import Game from "../Game";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
 
 
 export class MultipleChoiceGame extends Game {
+  hasPickingPhase: boolean = false;
+
   /**
    * The list of questions for the current game.
    */
@@ -25,26 +27,25 @@ export class MultipleChoiceGame extends Game {
   /**
    * Creates a random question for the next round.
    */
-  protected getNextQuestion(): Question {
+  protected getNextQuestions(): Question[] {
     if (this.remainingSongs.length === 0) {
       this.remainingSongs = _.shuffle(this.room.lobby.songs);
     }
 
     const q = new MultipleChoiceQuestion(
-      this.currentQuestionIndex + 1,
       this.remainingSongs.pop()!,
-      this.room.config,
       this.room.lobby.songs,
+      this.room.config.distractionsPreferSameArtist,
     );
 
-    let output = `Generated MultipleChoiceQuestion ${q.num}:`;
+    let output = `Generated MultipleChoiceQuestion ${this.questions.length}:`;
     output += `  Solution: ${q.song!.name} by ${q.song!.artist}\n`;
     output += "  All answers: ";
     output += q.answers.map(q => `${q.name} by ${q.artist}`).join("; ");
     output += "\n";
     this.room.server.logger.info(output);
 
-    return q;
+    return [q];
   }
 
   selectAnswer(player: Player, msg: SelectAnswerMessage) {
@@ -64,7 +65,7 @@ export class MultipleChoiceGame extends Game {
 
         // show answers if everyone voted
         if (everyoneVoted) {
-          this.roundTick = this.room.config.getRoundShowAnswerTick() - 1;
+          this.questionTick = this.room.config.getQuestionShowAnswerTick() - 1;
         }
       }
     }
@@ -74,14 +75,14 @@ export class MultipleChoiceGame extends Game {
 
   calculatePoints() {
     for (const player of this.room.activePlayers) {
-      if (player.answerData?.answerIndex === (this.currentQuestion! as MultipleChoiceQuestion).getCorrectAnswer()) {
+      if (player.answerData?.answerIndex === (this.currentQuestion as MultipleChoiceQuestion).getCorrectAnswer()) {
         // half the points for correct answer
-        player.answerData.roundPoints = ROUND_POINTS_PER_QUESTION / 2;
+        player.answerData.questionPoints = POINTS_PER_QUESTION / 2;
         // remaining points depend on speed of answer
-        player.answerData.roundPoints += this.getTimePoints(player);
+        player.answerData.questionPoints += this.getTimePoints(player);
 
-        player.answerData.roundPoints = Math.round(player.answerData.roundPoints);
-        player.points += player.answerData.roundPoints;
+        player.answerData.questionPoints = Math.round(player.answerData.questionPoints);
+        player.points += player.answerData.questionPoints;
       }
     }
   }

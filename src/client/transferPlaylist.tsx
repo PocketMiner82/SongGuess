@@ -11,7 +11,7 @@ import {
   formatLocalDateTime,
   getFirstSong,
   safeSearch,
-} from "../Utils";
+} from "../shared/Utils";
 import { Button } from "./components/Button";
 import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";

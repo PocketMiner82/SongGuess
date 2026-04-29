@@ -1,68 +1,7 @@
 import z from "zod";
+import GamePhase from "../shared/game/GamePhase";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./SharedSchemas";
 
-
-/**
- * Schema for the possible answer a player gave to a question.
- */
-export const PlayerAnswerDataSchema = z.object({
-  /**
-   * The last question the player answered for.
-   */
-  questionIndex: z.number(),
-
-  /**
-   * The absolute time in ms where the player answered a round question.
-   */
-  answerTimestamp: z.number(),
-
-  /**
-   * The relative time in ms a player took to answer a round question.
-   */
-  answerSpeed: z.number(),
-
-  /**
-   * The points the player got this round.
-   */
-  roundPoints: z.number(),
-
-  /**
-   * Can be provided only for MultipleChoiceGame.
-   * The index of the question the player selected.
-   */
-  answerIndex: z.optional(z.int().min(0).max(3)),
-
-  /**
-   * Can be provided only for PlayerPicks.
-   * The answer the player selected.
-   */
-  answer: z.optional(z.string()),
-});
-
-/**
- * Schema containing information about a player.
- */
-export const PlayerMessageSchema = z.object({
-  /**
-   * The player's username
-   */
-  username: UsernameSchema,
-
-  /**
-   * The player's color
-   */
-  color: z.string(),
-
-  /**
-   * How many points the player had in the last round.
-   */
-  points: z.number(),
-
-  /**
-   * The current answer of this player.
-   */
-  answerData: z.optional(PlayerAnswerDataSchema),
-});
 
 /**
  * Updates and starts the progressbar on the client.
@@ -82,68 +21,75 @@ export const ProgressbarUpdateMessageSchema = z.object({
 });
 
 /**
- * Schema for messages containing a song guessing question.
+ * Schema representing a question.
  */
-export const QuestionMessageSchema = z.object({
-  type: z.literal("question").default("question"),
-
+const QuestionMessageSchema = z.object({
   /**
-   * The question number, starting from one.
-   */
-  number: z.int().min(1),
-
-  /**
-   * Provided only for MultipleChoiceGame.
-   * The current 4 question answer options.
-   */
-  answerOptions: z.optional(z.array(z.string()).length(4)),
-
-  /**
-   * Provided only for PlayerPicksGame.
-   * The user id selecting an answer this round.
-   */
-  pickerId: z.optional(z.string()),
-
-  /**
-   * Whether it is currently song-picking phase.
-   */
-  isPickingPhase: z.optional(z.boolean()),
-
-  /**
-   * The random/user-defined audio start position index (0-2) for this question.
+   * The random/user-defined audio start position index (0-2) for the current question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
   startPos: z.number().min(0).max(2),
 });
 
-/**
- * Schema for messages containing the answer to a question and player responses.
- */
-export const AnswerMessageSchema = z.object({
-  type: z.literal("answer").default("answer"),
+export const MultipleChoiceQuestionMessageSchema = QuestionMessageSchema.extend({
+  questionType: z.literal("multiple_choice"),
 
   /**
-   * The question number, starting from one.
-   */
-  number: z.int().min(1),
-
-  /**
-   * Provided only for MultipleChoiceGame.
    * The current 4 question answer options.
    */
-  answerOptions: z.optional(z.array(z.string()).length(4)),
+  answerOptions: z.array(z.string()).length(4),
 
   /**
-   * Provided only for MultipleChoiceGame.
-   * The index of the correct answer.
+   * The index of the correct answer, if answer is shown.
    */
-  correctIndex: z.optional(z.int().min(0).max(3)),
+  correctAnswerIndex: z.optional(z.int().min(0).max(3)),
+});
+
+export const PlayerPicksQuestionMessageSchema = QuestionMessageSchema.extend({
+  questionType: z.literal("player_picks"),
 
   /**
-   * Provided only for PlayerPicksGame.
-   * The correct song that was requested this round.
+   * The current question number in this round, starting from 1.
    */
-  correctSong: z.optional(SongSchema),
+  questionCurrent: z.int().min(1),
+
+  /**
+   * The amount of questions in this round.
+   */
+  questionCount: z.int(),
+
+  /**
+   * The correct song that was requested this round, if answer is shown.
+   */
+  correctAnswer: z.optional(SongSchema),
+
+  /**
+   * The picker uuid for this message
+   */
+  pickerId: z.string(),
+});
+
+/**
+ * Schema for messages containing information about the current round.
+ */
+export const RoundMessageSchema = z.object({
+  type: z.literal("round").default("round"),
+
+  /**
+   * The current game phase.
+   * @see GamePhase
+   */
+  gamePhase: z.enum(GamePhase),
+
+  /**
+   * The round number, starting from one.
+   */
+  roundCurrent: z.int().min(1),
+
+  question: z.optional(z.union([
+    MultipleChoiceQuestionMessageSchema,
+    PlayerPicksQuestionMessageSchema,
+  ])),
 });
 
 /**
@@ -173,8 +119,39 @@ export const AudioControlMessageSchema = z.discriminatedUnion("action", [
      */
     action: z.literal(["play", "pause"]),
   }),
-
 ]);
+
+/**
+ * Schema for the possible answer a player gave to a question.
+ */
+export const PlayerAnswerDataSchema = z.object({
+  /**
+   * The absolute time in ms where the player answered a round question.
+   */
+  answerTimestamp: z.number(),
+
+  /**
+   * The relative time in ms a player took to answer a round question.
+   */
+  answerSpeed: z.number(),
+
+  /**
+   * The points the player got for the current question.
+   */
+  questionPoints: z.number(),
+
+  /**
+   * Provided only for MultipleChoiceGame.
+   * The index of the question the player selected.
+   */
+  answerIndex: z.optional(z.int().min(0).max(3)),
+
+  /**
+   * Provided only for PlayerPicksGame.
+   * The answer the player selected.
+   */
+  answer: z.optional(z.string()),
+});
 
 /**
  * Schema for messages containing the current countdown value.
@@ -225,6 +202,31 @@ export const GameStateSchema = z.literal([
 ]);
 
 /**
+ * Schema containing information about a player.
+ */
+export const PlayerMessageSchema = z.object({
+  /**
+   * The player's username
+   */
+  username: UsernameSchema,
+
+  /**
+   * The player's color
+   */
+  color: z.string(),
+
+  /**
+   * How many points the player had in the last round.
+   */
+  points: z.number(),
+
+  /**
+   * The current answer of this player.
+   */
+  answerData: z.optional(PlayerAnswerDataSchema),
+});
+
+/**
  * Schema for messages containing the current room state update.
  */
 export const UpdateMessageSchema = z.object({
@@ -241,7 +243,7 @@ export const UpdateMessageSchema = z.object({
   state: GameStateSchema,
 
   /**
-   * A map of all active (online, non-spectating) players. Key is connection ID.
+   * A map of all active (online, non-spectating) players. Key is server generated uuid, NOT connection id.
    */
   players: z.record(z.string(), PlayerMessageSchema),
 

@@ -27,8 +27,8 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
 import { version } from "../../../package.json";
-import { BaseConfig } from "../../BaseConfig";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
+import { BaseConfig } from "../../shared/BaseConfig";
 import { FatalErrorDialog } from "../modal/FatalErrorDialog";
 import { Modal } from "../modal/Modal";
 

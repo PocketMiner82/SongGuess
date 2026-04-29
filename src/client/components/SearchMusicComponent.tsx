@@ -1,7 +1,7 @@
 import type { Playlist } from "../../types/MessageTypes";
 import { useState } from "react";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
-import { getPlaylistByURL, performSearch } from "../../Utils";
+import { getPlaylistByURL, performSearch } from "../../shared/Utils";
 import { Button } from "./Button";
 import { PlaylistCard } from "./PlaylistCard";
 

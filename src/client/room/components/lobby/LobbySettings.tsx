@@ -66,9 +66,9 @@ export function Settings() {
         )}
 
         <SettingsNumberInput
-          value={controller.config.questionsCount}
+          value={controller.config.roundsCount}
           onChange={(v) => {
-            controller.config.questionsCount = v;
+            controller.config.roundsCount = v;
             controller.sendConfig();
           }}
           min={1}

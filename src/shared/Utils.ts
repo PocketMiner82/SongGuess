@@ -1,12 +1,12 @@
 import type { Entities, Lookup, Media, Options, PlainObject, Response, ResultMusicTrack, Results } from "itunes-store-api";
 import type * as React from "react";
-import type { Playlist, PlaylistsFile, Song } from "./types/MessageTypes";
+import type { Playlist, PlaylistsFile, Song } from "../types/MessageTypes";
 import { lookup } from "itunes-store-api";
 import _ from "lodash";
 import z from "zod";
-import { PlaylistsFileSchema } from "./schemas/SharedSchemas";
-import { albumRegex, artistRegex, songRegex } from "./schemas/ValidationRegexes";
-import { DefaultPlaylist } from "./types/MessageTypes";
+import { PlaylistsFileSchema } from "../schemas/SharedSchemas";
+import { albumRegex, artistRegex, songRegex } from "../schemas/ValidationRegexes";
+import { DefaultPlaylist } from "../types/MessageTypes";
 
 
 /**

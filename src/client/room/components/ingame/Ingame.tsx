@@ -22,9 +22,9 @@ function AnswerResults() {
         return 0;
       })
       .sort((a, b) => {
-        if (a.answerData?.roundPoints && !b.answerData?.roundPoints)
+        if (a.answerData?.questionPoints && !b.answerData?.questionPoints)
           return -1;
-        if (!a.answerData?.roundPoints && b.answerData?.roundPoints)
+        if (!a.answerData?.questionPoints && b.answerData?.questionPoints)
           return 1;
         return 0;
       });

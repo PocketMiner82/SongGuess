@@ -1,5 +1,8 @@
-import type { AnswerMessage, QuestionMessage, Song } from "../../types/MessageTypes";
-import type ServerConfig from "../config/ServerConfig";
+import type GamePhase from "../../shared/game/GamePhase";
+import type {
+  QuestionMessage,
+  Song,
+} from "../../types/MessageTypes";
 import _ from "lodash";
 
 
@@ -10,39 +13,19 @@ export default abstract class Question {
    */
   startPos: number = _.random(0, 2);
 
+
   /**
    * Constructs a question asking which is the correct song.
    *
-   * @param num the question number.
-   * @param config The room's config
    * @param song The correct song for this question.
    */
-  protected constructor(readonly num: number, readonly config: ServerConfig, public song?: Song) { }
+  protected constructor(readonly song: Song) { }
 
   /**
-   * Creates a question message for sending to clients.
-   *
-   * @returns The question message.
+   * Returns the round message for the current phase.
+   * @param gamePhase the current game phase
    */
-  getQuestionMessage(): QuestionMessage {
-    return {
-      type: "question",
-      number: this.num,
-      startPos: this.startPos,
-    };
-  }
-
-  /**
-   * Creates an answer message for sending to clients.
-   *
-   * @returns The answer message.
-   */
-  getAnswerMessage(): AnswerMessage {
-    return {
-      type: "answer",
-      number: this.num,
-    };
-  }
+  abstract getQuestionMessage(gamePhase: GamePhase): QuestionMessage;
 }
 
 /**

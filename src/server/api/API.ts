@@ -6,10 +6,10 @@ import type { CreateRoomResponse } from "../../types/APIResponseTypes";
 import type { Playlist, Song } from "../../types/MessageTypes";
 import type { SoundCloudStreams } from "./SoundCloudAPI";
 import { AppleMusicConfig, AuthType, getAuthenticatedAxios, Region } from "@syncfm/applemusic-api";
-import { fetchGetRoom, fetchPostRoom } from "../../RoomHTTPHelper";
 import { albumRegex, appleMusicPreviewRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
+import { fixedCoverSize } from "../../shared/Utils";
 import { DefaultPlaylist } from "../../types/MessageTypes";
-import { fixedCoverSize } from "../../Utils";
+import { fetchGetRoom, fetchPostRoom } from "./HTTPHelpers";
 import { SoundCloudAPI } from "./SoundCloudAPI";
 
 /**

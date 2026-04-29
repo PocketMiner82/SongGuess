@@ -4,7 +4,7 @@ import type { ServerMessage } from "../types/MessageTypes";
 import { clearInterval, clearTimeout } from "node:timers";
 import {
   ROOM_CLEANUP_TIMEOUT,
-} from "../ConfigConstants";
+} from "../shared/ConfigConstants";
 import Logger from "./logger/Logger";
 import { ValidRoom } from "./ValidRoom";
 

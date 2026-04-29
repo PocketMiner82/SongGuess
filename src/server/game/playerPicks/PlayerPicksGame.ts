@@ -2,43 +2,46 @@ import type { ClientMessage, SelectAnswerMessage } from "../../../types/MessageT
 import type Player from "../../Player";
 import type Question from "../Question";
 import { distance } from "fastest-levenshtein";
-import { ROUND_PICKED_SONG_TICK, ROUND_POINTS_PER_QUESTION } from "../../../ConfigConstants";
-import { normalizeSongName } from "../../../Utils";
+import { POINTS_PER_QUESTION, QUESTION_PICKED_SONG_TICK } from "../../../shared/ConfigConstants";
+import GamePhase from "../../../shared/game/GamePhase";
+import { normalizeSongName } from "../../../shared/Utils";
 import Game from "../Game";
-import GamePhase from "../GamePhase";
 import PlayerPicksQuestion from "./PlayerPicksQuestion";
 
 
 export class PlayerPicksGame extends Game {
+  hasPickingPhase: boolean = true;
+
   /**
    * The list of questions for the current game.
    */
   questions: PlayerPicksQuestion[] = [];
 
   /**
-   * The current index of the player selecting a song pointing to an online player.
+   * List of the questions selected by players during picking phase.
    */
-  pickerIndex: number = 0;
+  nextQuestions: PlayerPicksQuestion[] = [];
 
   /**
-   * The player currently selecting a song.
+   * List of all players still needing to pick a song.
    */
-  picker: Player | null = null;
+  get remainingPickers(): Player[] {
+    return this.room.activePlayers.filter(player =>
+      this.nextQuestions.every(q =>
+        q.pickerId !== player.uuid));
+  }
 
-  protected getNextQuestion(): Question {
-    if (this.pickerIndex >= this.room.activePlayers.length) {
-      this.pickerIndex = 0;
+  protected getNextQuestions(): Question[] {
+    // penality of max points per round for players that did not pick a song
+    for (const player of this.remainingPickers) {
+      player.points -= 1000;
     }
-    this.picker = this.room.activePlayers[this.pickerIndex++];
 
-    const q = new PlayerPicksQuestion(
-      this.currentQuestionIndex + 1,
-      this.room.config,
-      this.picker.conn.id,
-    );
+    for (const q of this.nextQuestions) {
+      q.questionCount = this.nextQuestions.length;
+    }
 
-    this.room.server.logger.info(`Created PlayerPicksQuestion ${q.num}`);
-    return q;
+    return this.nextQuestions;
   }
 
   onMessage(player: Player, msg: ClientMessage): boolean {
@@ -48,15 +51,21 @@ export class PlayerPicksGame extends Game {
       if (this.gamePhase !== GamePhase.PICKING) {
         player.sendConfirmationOrError(msg, "Can only pick songs during picking phase.");
         return true;
-      } else if (this.picker !== player) {
-        player.sendConfirmationOrError(msg, "It is not your turn to pick a song.");
-        return true;
       }
 
-      // song was selected, continue to picked phase
-      this.currentQuestion!.song = msg.song;
-      this.currentQuestion!.startPos = msg.startPos;
-      this.roundTick = ROUND_PICKED_SONG_TICK - 1;
+      const newQuestion = new PlayerPicksQuestion(
+        this.currentQuestionIndex + 1,
+        player.uuid,
+        msg.song,
+      );
+      newQuestion.startPos = msg.startPos;
+
+      this.nextQuestions.push(newQuestion);
+
+      // if every player has picked a song, continue to picked phase
+      if (this.remainingPickers.length === 0) {
+        this.questionTick = QUESTION_PICKED_SONG_TICK - 1;
+      }
       return true;
     }
 
@@ -64,8 +73,8 @@ export class PlayerPicksGame extends Game {
   }
 
   onGamePhaseChanged() {
-    if (this.gamePhase === GamePhase.QUESTION) {
-      (this.currentQuestion! as PlayerPicksQuestion).isPickingPhase = false;
+    if (this.gamePhase === GamePhase.PICKING) {
+      this.nextQuestions = [];
     }
 
     super.onGamePhaseChanged();
@@ -73,13 +82,14 @@ export class PlayerPicksGame extends Game {
 
   selectAnswer(player: Player, msg: SelectAnswerMessage) {
     const ret = super.selectAnswer(player, msg);
-    if (player === this.picker) {
-      player.sendConfirmationOrError(msg, "The picker is not allowed to guess.");
+    if (player.uuid === (this.currentQuestion as PlayerPicksQuestion).pickerId) {
+      player.sendConfirmationOrError(msg, "The picker of a question is not allowed to guess.");
       return false;
     }
 
-    if (ret)
+    if (ret) {
       player.answerData!.answer = msg.answer!;
+    }
 
     return ret;
   }
@@ -92,7 +102,7 @@ export class PlayerPicksGame extends Game {
    * from 40% (0 points) to 100% (max points).
    * @param correctAnswer - The normalized ground-truth string.
    * @param playerAnswer - The normalized player-submitted string.
-   * @returns A score ranging from 0 to half of {@link ROUND_POINTS_PER_QUESTION}.
+   * @returns A score ranging from 0 to half of {@link POINTS_PER_QUESTION}.
    */
   private getPointsByDistance(correctAnswer: string, playerAnswer: string) {
     if (!correctAnswer) {
@@ -105,7 +115,7 @@ export class PlayerPicksGame extends Game {
     // answer must be at least 40% correct to be counted
     if (similarity >= 0.4) {
       // scale 0-500 points linear with 40% - 100% similarity; will be at max half the points
-      return ((similarity - 0.4) / 0.6) * (ROUND_POINTS_PER_QUESTION / 2);
+      return ((similarity - 0.4) / 0.6) * (POINTS_PER_QUESTION / 2);
     }
     return 0;
   }
@@ -146,19 +156,19 @@ export class PlayerPicksGame extends Game {
         const withoutParens = this.getPointsWithoutParens(player);
 
         if (withoutParens >= withParens) {
-          player.answerData.roundPoints = withoutParens;
+          player.answerData.questionPoints = withoutParens;
         } else {
           // including stuff from parens gives even more points
-          player.answerData.roundPoints = withParens * 2;
+          player.answerData.questionPoints = withParens * 2;
         }
       }
 
-      if (player.answerData?.roundPoints) {
+      if (player.answerData?.questionPoints) {
         // other half of points depends on time the player needed to answer
-        player.answerData!.roundPoints += this.getTimePoints(player);
+        player.answerData!.questionPoints += this.getTimePoints(player);
 
-        player.answerData!.roundPoints = Math.round(player.answerData!.roundPoints);
-        player.points += player.answerData!.roundPoints;
+        player.answerData!.questionPoints = Math.round(player.answerData!.questionPoints);
+        player.points += player.answerData!.questionPoints;
       }
     }
   }

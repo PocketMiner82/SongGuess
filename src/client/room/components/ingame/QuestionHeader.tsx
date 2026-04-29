@@ -27,7 +27,7 @@ export function QuestionHeader() {
           {" "}
           {questionNumber}
           /
-          {controller.config.questionsCount}
+          {controller.config.roundsCount}
         </h2>
         <div className="w-full">
           <ProgressBar />

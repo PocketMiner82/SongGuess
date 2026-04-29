@@ -7,9 +7,10 @@ import type {
 } from "../types/MessageTypes";
 import type Game from "./game/Game";
 import type Server from "./Server";
+import { v4 } from "uuid";
 import z from "zod";
-import { COLORS, ROOM_HOST_TRANSFER_TIMEOUT } from "../ConfigConstants";
 import { ClientMessageSchema, OtherMessageSchema } from "../schemas/MessageSchemas";
+import { COLORS, ROOM_HOST_TRANSFER_TIMEOUT } from "../shared/ConfigConstants";
 import ServerConfig from "./config/ServerConfig";
 import { MultipleChoiceGame } from "./game/multipleChoice/MultipleChoiceGame";
 import Listener from "./listener/Listener";
@@ -220,7 +221,8 @@ export class ValidRoom implements Party.Server {
   public getOrCreatePlayer(conn: Party.Connection): Player {
     let player = this.players.get(conn.id);
     if (!player) {
-      player = new Player(this, conn);
+      const uuid = v4();
+      player = new Player(this, conn, uuid);
       this.players.set(conn.id, player);
     } else {
       player.conn = conn;
@@ -289,8 +291,8 @@ export class ValidRoom implements Party.Server {
           break;
 
         case "min_song_count":
-          if (this.lobby.songs.length < this.config.questionsCount && this.config.gameMode === "multiple_choice") {
-            possibleErrorFunc(`Required at least ${this.config.questionsCount} songs. Selected: ${this.lobby.songs.length}`);
+          if (this.lobby.songs.length < this.config.roundsCount && this.config.gameMode === "multiple_choice") {
+            possibleErrorFunc(`Required at least ${this.config.roundsCount} songs. Selected: ${this.lobby.songs.length}`);
             successful = false;
           }
           break;

@@ -16,7 +16,20 @@ import type {
   SourceMessageSchema,
 } from "../schemas/MessageSchemas";
 import type { AddLogMessageSchema, UpdateLogMessagesSchema } from "../schemas/ServerAdminMessageSchemas";
-import type { AnswerMessageSchema, AudioControlMessageSchema, CountdownMessageSchema, GameStateSchema, PlayerAnswerDataSchema, PlayerMessageSchema, ProgressbarUpdateMessageSchema, QuestionMessageSchema, UpdateMessageSchema, UpdatePlayedSongsMessageSchema, UpdatePlaylistsMessageSchema } from "../schemas/ServerMessageSchemas";
+import type {
+  AudioControlMessageSchema,
+  CountdownMessageSchema,
+  GameStateSchema,
+  MultipleChoiceQuestionMessageSchema,
+  PlayerAnswerDataSchema,
+  PlayerMessageSchema,
+  PlayerPicksQuestionMessageSchema,
+  ProgressbarUpdateMessageSchema,
+  RoundMessageSchema,
+  UpdateMessageSchema,
+  UpdatePlayedSongsMessageSchema,
+  UpdatePlaylistsMessageSchema,
+} from "../schemas/ServerMessageSchemas";
 import type {
   PingMessageSchema,
   PlaylistSchema,
@@ -104,13 +117,21 @@ export type PlayerMessage = z.infer<typeof PlayerMessageSchema>;
  */
 export type PlayerAnswerData = z.infer<typeof PlayerAnswerDataSchema>;
 /**
- * Message containing a question for players to answer.
+ * Base of the other question messages.
  */
-export type QuestionMessage = z.infer<typeof QuestionMessageSchema>;
+export type QuestionMessage = MultipleChoiceQuestionMessage | PlayerPicksQuestionMessage;
 /**
- * Message sent when the correct answer is revealed.
+ * Message containing multiple choice question information.
  */
-export type AnswerMessage = z.infer<typeof AnswerMessageSchema>;
+export type MultipleChoiceQuestionMessage = z.infer<typeof MultipleChoiceQuestionMessageSchema>;
+/**
+ * Message containing player picks question information.
+ */
+export type PlayerPicksQuestionMessage = z.infer<typeof PlayerPicksQuestionMessageSchema>;
+/**
+ * Message containing round information.
+ */
+export type RoundMessage = z.infer<typeof RoundMessageSchema>;
 /**
  * Message to control audio playback (load/play/pause).
  */

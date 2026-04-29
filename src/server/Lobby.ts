@@ -9,7 +9,7 @@ import type {
 import type { IEventListener } from "./listener/IEventListener";
 import type Player from "./Player";
 import type { ValidRoom } from "./ValidRoom";
-import { normalizeSongName } from "../Utils";
+import { normalizeSongName } from "../shared/Utils";
 import { MultipleChoiceGame } from "./game/multipleChoice/MultipleChoiceGame";
 
 

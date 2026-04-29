@@ -11,11 +11,10 @@ import {
 } from "./ClientMessageSchemas";
 import { AddLogMessageSchema, UpdateLogMessagesSchema } from "./ServerAdminMessageSchemas";
 import {
-  AnswerMessageSchema,
   AudioControlMessageSchema,
   CountdownMessageSchema,
   ProgressbarUpdateMessageSchema,
-  QuestionMessageSchema,
+  RoundMessageSchema,
   UpdateMessageSchema,
   UpdatePlayedSongsMessageSchema,
   UpdatePlaylistsMessageSchema,
@@ -41,8 +40,7 @@ const _ServerMessageSchema = z.discriminatedUnion("type", [
   RoomConfigMessageSchema,
   CountdownMessageSchema,
   AudioControlMessageSchema,
-  QuestionMessageSchema,
-  AnswerMessageSchema,
+  RoundMessageSchema,
   UpdatePlayedSongsMessageSchema,
   AddLogMessageSchema,
   UpdateLogMessagesSchema,

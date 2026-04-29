@@ -1,5 +1,5 @@
-import type { RoomConfigMessage } from "./types/MessageTypes";
-import { RoomConfigMessageSchema } from "./schemas/SharedSchemas";
+import type { RoomConfigMessage } from "../types/MessageTypes";
+import { RoomConfigMessageSchema } from "../schemas/SharedSchemas";
 
 
 export class BaseConfig implements RoomConfigMessage {
@@ -11,7 +11,7 @@ export class BaseConfig implements RoomConfigMessage {
 
   public endWhenAnswered: boolean = false;
 
-  public questionsCount: number = 10;
+  public roundsCount: number = 10;
 
   public timePerQuestion: number = 25;
 

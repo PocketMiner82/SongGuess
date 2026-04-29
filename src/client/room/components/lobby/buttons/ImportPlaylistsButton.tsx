@@ -1,6 +1,6 @@
 import * as React from "react";
 import { toast } from "react-toastify";
-import { importPlaylistFile, validatePlaylistsFile } from "../../../../../Utils";
+import { importPlaylistFile, validatePlaylistsFile } from "../../../../../shared/Utils";
 import { Button } from "../../../../components/Button";
 import { useControllerContext } from "../../../RoomController";
 

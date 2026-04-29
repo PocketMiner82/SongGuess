@@ -2,6 +2,8 @@ import type {
   AudioControlMessage,
   ClientMessage,
   ProgressbarUpdateMessage,
+  QuestionMessage,
+  RoundMessage,
   SelectAnswerMessage,
   ServerMessage,
   Song,
@@ -13,13 +15,13 @@ import type { ValidRoom } from "../ValidRoom";
 import type Question from "./Question";
 import {
   PLAYER_PICK_TIMEOUT,
-  ROUND_ANSWERING_TICK,
+  POINTS_PER_QUESTION,
+  QUESTION_ANSWERING_TICK,
+  QUESTION_PICKED_SONG_TICK,
+  QUESTION_START_TICK,
   ROUND_PADDING_TICKS,
-  ROUND_PICKED_SONG_TICK,
-  ROUND_POINTS_PER_QUESTION,
-  ROUND_START_TICK,
-} from "../../ConfigConstants";
-import GamePhase from "./GamePhase";
+} from "../../shared/ConfigConstants";
+import GamePhase from "../../shared/game/GamePhase";
 import { MultipleChoiceGame } from "./multipleChoice/MultipleChoiceGame";
 import { InitError } from "./Question";
 
@@ -31,14 +33,14 @@ export default abstract class Game implements IEventListener {
   isRunning = false;
 
   /**
-   * The current round tick (in seconds).
+   * The current question round tick (in seconds).
    */
-  roundTick: number = -1;
+  questionTick: number = -1;
 
   /**
-   * The timestamp when the current round started.
+   * The timestamp when the current question started.
    */
-  roundStartTime: number = -1;
+  questionStartTime: number = -1;
 
   /**
    * The current game phase
@@ -46,9 +48,14 @@ export default abstract class Game implements IEventListener {
   gamePhase: GamePhase = GamePhase.PICKING;
 
   /**
-   * The index of the current question. Zero-based.
+   * The index of the current question. Zero-based. -1 if no question started yet.
    */
-  currentQuestionIndex: number = 0;
+  currentQuestionIndex: number = -1;
+
+  /**
+   * Current round number, starting at 1. Is 0 if no round started yet.
+   */
+  roundCurrent: number = 0;
 
   /**
    * The current question.
@@ -62,6 +69,11 @@ export default abstract class Game implements IEventListener {
    */
   abstract questions: Question[];
 
+  /**
+   * Whether the game has a picking phase.
+   */
+  abstract hasPickingPhase: boolean;
+
   constructor(readonly room: ValidRoom) {
     room.listener.registerEvents(this);
   }
@@ -74,57 +86,69 @@ export default abstract class Game implements IEventListener {
   }
 
   /**
-   * Should calculate the points for this round for all players that selected the correct answer.
+   * Should calculate the points for this question for all players that selected the correct answer.
    */
   abstract calculatePoints(): void;
 
   protected getTimePoints(player: Player): number {
-    const factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData!.answerTimestamp - this.roundStartTime)))
+    const factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData!.answerTimestamp - this.questionStartTime)))
       / (this.room.config.timePerQuestion * 1000);
-    return (ROUND_POINTS_PER_QUESTION / 2) * factor;
+    return (POINTS_PER_QUESTION / 2) * factor;
+  }
+
+  /**
+   * Returns the round message for the current phase.
+   * @param questionMsg optional question message to attach to the round message
+   */
+  private getRoundMessage(questionMsg?: QuestionMessage): RoundMessage {
+    return {
+      type: "round",
+      gamePhase: this.gamePhase,
+      roundCurrent: this.roundCurrent,
+      question: questionMsg,
+    };
   }
 
   /**
    * Should return an array of all required {@link ServerMessage}s so clients know about the current game state.
-   * @param sendPrevious whether to include all messages for the round. Useful when client joins.
+   * @param sendPrevious whether to include all messages for the question. Useful when client joins.
    */
   public getGameMessages(sendPrevious?: boolean): ServerMessage[] {
     const msgs: ServerMessage[] = [];
-    const q = this.currentQuestion!;
+    const q = this.currentQuestion;
 
     // nothing to send if game is not running
     if (!this.isRunning) {
       return msgs;
     }
 
-    // directly return pause message if this is the end of the round and next round starts shortly...
+    // directly return pause message if this is the end of the question and next question starts shortly...
     if (this.gamePhase === GamePhase.PAUSE_MUSIC) {
       msgs.push(this.getAudioControlMessage("pause"));
       return msgs;
     }
 
-    // also append all previous messages if requested
-    for (let i = sendPrevious ? 0 : this.gamePhase; i <= this.gamePhase; i++) {
-      switch (i) {
-        case GamePhase.PICKING:
-          msgs.push(q.getQuestionMessage());
-          break;
+    // always send the current round message
+    msgs.push(this.getRoundMessage(q?.getQuestionMessage(this.gamePhase)));
 
-        case GamePhase.QUESTION:
-          // load audio of song to guess
-          msgs.push(this.getAudioControlMessage("load", q.song!.audioURL));
-          break;
+    if (q) {
+      // also append previous audio control messages if requested
+      for (let i = sendPrevious ? 0 : this.gamePhase; i <= this.gamePhase; i++) {
+        switch (i) {
+          case GamePhase.QUESTION:
+            // ask to load audio of song to guess
+            msgs.push(this.getAudioControlMessage("load", q.song!.audioURL));
+            break;
 
-        case GamePhase.ANSWERING:
-          msgs.push(this.getAudioControlMessage("play"));
-          break;
-
-        case GamePhase.ANSWER:
-          msgs.push(q.getAnswerMessage());
-          break;
+          case GamePhase.ANSWERING:
+            // ask to play already loaded song
+            msgs.push(this.getAudioControlMessage("play"));
+            break;
+        }
       }
     }
 
+    // also always send the progressbar message
     msgs.push(this.getProgressBarUpdateMessage());
 
     return msgs;
@@ -141,20 +165,20 @@ export default abstract class Game implements IEventListener {
     switch (this.gamePhase) {
       case GamePhase.PICKING:
         duration = PLAYER_PICK_TIMEOUT;
-        offset = this.roundTick - ROUND_START_TICK;
+        offset = this.questionTick - QUESTION_START_TICK;
         break;
       case GamePhase.QUESTION:
         duration = -ROUND_PADDING_TICKS;
-        offset = this.roundTick - ROUND_PICKED_SONG_TICK;
+        offset = this.questionTick - QUESTION_PICKED_SONG_TICK;
         break;
       case GamePhase.ANSWERING:
         duration = this.room.config.timePerQuestion;
-        offset = this.roundTick - ROUND_ANSWERING_TICK;
+        offset = this.questionTick - QUESTION_ANSWERING_TICK;
         break;
       case GamePhase.ANSWER:
       case GamePhase.PAUSE_MUSIC:
         duration = 0;
-        offset = this.roundTick - this.room.config.getRoundShowAnswerTick();
+        offset = this.questionTick - this.room.config.getQuestionShowAnswerTick();
         break;
     }
 
@@ -171,7 +195,7 @@ export default abstract class Game implements IEventListener {
   onMessage(player: Player, msg: ClientMessage): boolean {
     switch (msg.type) {
       case "select_answer":
-        if (this.roundTick > this.room.config.getRoundShowAnswerTick() || this.roundTick < ROUND_ANSWERING_TICK) {
+        if (this.questionTick > this.room.config.getQuestionShowAnswerTick() || this.questionTick < QUESTION_ANSWERING_TICK) {
           player.sendUpdateMessage();
           player.sendConfirmationOrError(msg, "Can only accept answers during questioning phase.");
           return true;
@@ -226,37 +250,51 @@ export default abstract class Game implements IEventListener {
     if (!this.isRunning)
       return;
 
-    if (this.roundTick >= this.room.config.getRoundStartNextTick()) {
-      this.roundTick = -1;
-      this.currentQuestionIndex++;
-      for (const player of this.room.activePlayers) {
+    let firstRunAfterPickingPhase = false;
+
+    if (this.questionTick >= this.room.config.getQuestionStartNextTick()) {
+      this.questionTick = -1;
+
+      // next round starts when there is no picking phase or no question available
+      if (!this.hasPickingPhase || !this.questions[this.currentQuestionIndex + 1]) {
+        this.roundCurrent++;
+      }
+
+      // skip to QUESTION_PICKED_SONG_TICK if this is not the start of a picking phase.
+      if (!this.hasPickingPhase || this.questions[this.currentQuestionIndex + 1]) {
+        this.questionTick = QUESTION_PICKED_SONG_TICK - 1;
+        this.currentQuestionIndex++;
+        firstRunAfterPickingPhase = true;
+      }
+
+      // reset answer data of all players when a new round starts
+      for (const [_, player] of this.room.players) {
         player.resetAnswerData();
       }
     }
 
-    if (this.currentQuestionIndex >= this.room.config.questionsCount) {
+    if (this.roundCurrent > this.room.config.roundsCount) {
       this.endGame();
       return;
     }
 
     let gamePhaseChange = false;
-    let runAgain = false;
-    switch (++this.roundTick) {
+    switch (++this.questionTick) {
       // allow picking question
-      case ROUND_START_TICK:
+      case QUESTION_START_TICK:
         gamePhaseChange = true;
         this.gamePhase = GamePhase.PICKING;
-        // skip to ROUND_PICKED_SONG_TICK if question add was instant
-        runAgain = this.tryGetNextQuestion();
-        if (runAgain) {
-          this.roundTick = ROUND_PICKED_SONG_TICK - 1;
-        }
         break;
 
-      // show question of current round
-      case ROUND_PICKED_SONG_TICK:
-        if (!this.currentQuestion?.song) {
-          this.roundTick = this.room.config.getRoundStartNextTick();
+      // show current question
+      case QUESTION_PICKED_SONG_TICK:
+        if (firstRunAfterPickingPhase) {
+          this.tryAddNextQuestions();
+        }
+
+        // start new round if no one added a question in the picking phase
+        if (!this.currentQuestion) {
+          this.questionTick = this.room.config.getQuestionStartNextTick();
           break;
         }
 
@@ -266,14 +304,14 @@ export default abstract class Game implements IEventListener {
         break;
 
       // start music playback
-      case ROUND_ANSWERING_TICK:
+      case QUESTION_ANSWERING_TICK:
         gamePhaseChange = true;
         this.gamePhase = GamePhase.ANSWERING;
-        this.roundStartTime = Date.now();
+        this.questionStartTime = Date.now();
         break;
 
-      // show results of current round
-      case this.room.config.getRoundShowAnswerTick():
+      // show results of current question
+      case this.room.config.getQuestionShowAnswerTick():
         gamePhaseChange = true;
         this.gamePhase = GamePhase.ANSWER;
         this.calculatePoints();
@@ -282,7 +320,7 @@ export default abstract class Game implements IEventListener {
         break;
 
       // pause music to allow fade out
-      case this.room.config.getRoundPauseMusicTick():
+      case this.room.config.getQuestionPauseMusicTick():
         gamePhaseChange = true;
         this.gamePhase = GamePhase.PAUSE_MUSIC;
         break;
@@ -293,11 +331,6 @@ export default abstract class Game implements IEventListener {
       this.getGameMessages(this.gamePhase === GamePhase.QUESTION && this.room.config.gameMode === "player_picks")
         .forEach(msg => this.room.server.safeBroadcast(msg));
     }
-
-    // this allows directly jumping to the next tick interval, allowing to skip ticks
-    if (runAgain) {
-      this.onTick();
-    }
   }
 
   /**
@@ -306,36 +339,30 @@ export default abstract class Game implements IEventListener {
   public onGamePhaseChanged() { }
 
   /**
-   * Provides the next question that should be added to the list.
+   * Provides the next questions that should be added to the list for the current round.
    */
-  protected abstract getNextQuestion(): Question;
+  protected abstract getNextQuestions(): Question[];
 
   /**
-   * Tries to get the next question.
+   * Tries to add the next questions.
+   * Ends the game if an error happend while adding questions.
    * @private
    * @see getNextQuestion
-   * @returns true if the question add was instant
    */
-  private tryGetNextQuestion() {
+  private tryAddNextQuestions() {
     try {
-      const nextQuestion = this.getNextQuestion();
-      this.questions.push(nextQuestion);
-
-      if (nextQuestion.song) {
-        return true;
-      }
+      this.questions.push(...this.getNextQuestions());
     } catch (e) {
       if (e instanceof InitError) {
         this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({ type: "other" }, e.message));
         this.room.server.logger.warn(e);
       } else {
-        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({ type: "other" }, "Unknown error while getting next question."));
+        this.room.onlinePlayers.forEach((player: Player) => player.sendConfirmationOrError({ type: "other" }, "Unable to get next questions."));
         this.room.server.logger.error(e);
       }
 
       this.endGame();
     }
-    return false;
   }
 
   /**
@@ -347,10 +374,9 @@ export default abstract class Game implements IEventListener {
   public selectAnswer(player: Player, _msg: SelectAnswerMessage): boolean {
     const currentTime = Date.now();
     player.answerData = {
-      answerSpeed: currentTime - this.roundStartTime,
+      answerSpeed: currentTime - this.questionStartTime,
       answerTimestamp: currentTime,
-      questionIndex: this.currentQuestionIndex,
-      roundPoints: 0,
+      questionPoints: 0,
     };
 
     return true;
@@ -441,7 +467,7 @@ export default abstract class Game implements IEventListener {
   }
 
   /**
-   * Constructs a played songs update message with the songs played in the last round.
+   * Constructs a played songs update message with the songs played in the game.
    *
    * @returns a JSON string of the constructed {@link UpdatePlayedSongsMessage}
    */
@@ -463,12 +489,12 @@ export default abstract class Game implements IEventListener {
 
     this.room.server.logger.info("Resetting game to lobby state...");
 
-    this.roundTick = -1;
+    this.questionTick = -1;
     this.currentQuestionIndex = 0;
     this.room.state = "lobby";
 
     // reset points of all players
-    for (const player of this.room.activePlayers) {
+    for (const [_, player] of this.room.players) {
       player.resetAnswerData(true);
     }
   }

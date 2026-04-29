@@ -13,10 +13,10 @@ import type { IEventListener } from "./listener/IEventListener";
 import type { ValidRoom } from "./ValidRoom";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
 import { version } from "../../package.json";
-import { ROOM_INACTIVITY_KICK_TIMEOUT } from "../ConfigConstants";
 import { PlayerMessageSchema } from "../schemas/ServerMessageSchemas";
 import { usernameRegex } from "../schemas/ValidationRegexes";
-import GamePhase from "./game/GamePhase";
+import { ROOM_INACTIVITY_KICK_TIMEOUT } from "../shared/ConfigConstants";
+import GamePhase from "../shared/game/GamePhase";
 
 
 export default class Player implements PlayerMessage, IEventListener {
@@ -48,7 +48,7 @@ export default class Player implements PlayerMessage, IEventListener {
    */
   isAdmin: boolean;
 
-  constructor(readonly room: ValidRoom, public conn: Party.Connection) {
+  constructor(readonly room: ValidRoom, public conn: Party.Connection, readonly uuid: string) {
     room.listener.registerEvents(this);
     this.isAdmin = this.room.server.hasTag(conn, "admin");
   }
@@ -89,12 +89,6 @@ export default class Player implements PlayerMessage, IEventListener {
         style: "titleCase",
         length: 16,
       });
-    }
-
-    // clear cached answer when we're already at the next question
-    if (this.answerData?.questionIndex !== this.room.game.currentQuestionIndex || this.room.state !== "ingame") {
-      // reset points only if in lobby
-      this.resetAnswerData(this.room.state === "lobby");
     }
 
     // send the current playlist to the connection

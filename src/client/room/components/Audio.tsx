@@ -2,7 +2,7 @@ import type ICookieProps from "../../../types/ICookieProps";
 import type { ServerMessage } from "../../../types/MessageTypes";
 import { useCallback, useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
-import { ROUND_PADDING_TICKS } from "../../../ConfigConstants";
+import { ROUND_PADDING_TICKS } from "../../../shared/ConfigConstants";
 import { useControllerContext, useRoomControllerListener } from "../RoomController";
 
 /**

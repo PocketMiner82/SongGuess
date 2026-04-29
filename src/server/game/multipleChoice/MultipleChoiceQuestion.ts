@@ -1,6 +1,6 @@
-import type { AnswerMessage, QuestionMessage, Song } from "../../../types/MessageTypes";
-import type ServerConfig from "../../config/ServerConfig";
+import type { MultipleChoiceQuestionMessage, Song } from "../../../types/MessageTypes";
 import _ from "lodash";
+import GamePhase from "../../../shared/game/GamePhase";
 import Question, { InitError } from "../Question";
 
 
@@ -13,13 +13,13 @@ export default class MultipleChoiceQuestion extends Question {
   /**
    * Constructs a mulitple choice question asking which is the correct song.
    *
-   * @param num the question number.
+   * @param roundCurrent the current round number.
    * @param song The correct song for this question.
-   * @param config The room's config
    * @param possibleDistractions all possible songs that could be used for distractions
+   * @param distractionsPreferSameArtist whether to prefer searching for distractions by the same artist as the searched song
    */
-  constructor(num: number, song: Song, config: ServerConfig, possibleDistractions: Song[]) {
-    super(num, config, song);
+  constructor(song: Song, possibleDistractions: Song[], readonly distractionsPreferSameArtist: boolean) {
+    super(song);
     this.answers.push(song);
     this.generateDistractions(possibleDistractions);
   }
@@ -35,7 +35,7 @@ export default class MultipleChoiceQuestion extends Question {
       s.audioURL !== this.song!.audioURL && s.name !== this.song!.name));
     let distractions = possibleDistractions;
 
-    if (this.config.distractionsPreferSameArtist) {
+    if (this.distractionsPreferSameArtist) {
       // filters for songs that share at least one artist with the current track
       distractions = possibleDistractions.filter(s =>
         this.song!.artist.split(" & ")
@@ -74,16 +74,12 @@ export default class MultipleChoiceQuestion extends Question {
     return this.answers.indexOf(this.song!);
   }
 
-  getQuestionMessage(): QuestionMessage {
-    const q = super.getQuestionMessage();
-    q.answerOptions = this.getSongNames();
-    return q;
-  }
-
-  getAnswerMessage(): AnswerMessage {
-    const a = super.getAnswerMessage();
-    a.answerOptions = this.getSongNames();
-    a.correctIndex = this.getCorrectAnswer();
-    return a;
+  getQuestionMessage(gamePhase: GamePhase): MultipleChoiceQuestionMessage {
+    return {
+      questionType: "multiple_choice",
+      answerOptions: this.getSongNames(),
+      correctAnswerIndex: gamePhase === GamePhase.ANSWER ? this.getCorrectAnswer() : undefined,
+      startPos: this.startPos,
+    };
   }
 }

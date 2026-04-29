@@ -105,9 +105,9 @@ export const RoomConfigMessageSchema = z.object({
   endWhenAnswered: z.boolean(),
 
   /**
-   * The amount of questions to ask per round.
+   * The amount of rounds to play.
    */
-  questionsCount: z.number().min(1).max(30),
+  roundsCount: z.number().min(1).max(30),
 
   /**
    * The time per question in each round.

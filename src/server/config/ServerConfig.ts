@@ -3,8 +3,8 @@ import type { IEventListener } from "../listener/IEventListener";
 import type Player from "../Player";
 import type { ValidRoom } from "../ValidRoom";
 import _ from "lodash";
-import { BaseConfig } from "../../BaseConfig";
-import { ROUND_PADDING_TICKS, ROUND_PICKED_SONG_TICK } from "../../ConfigConstants";
+import { BaseConfig } from "../../shared/BaseConfig";
+import { QUESTION_PICKED_SONG_TICK, ROUND_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { MultipleChoiceGame } from "../game/multipleChoice/MultipleChoiceGame";
 import { PlayerPicksGame } from "../game/playerPicks/PlayerPicksGame";
 
@@ -52,21 +52,21 @@ export default class ServerConfig extends BaseConfig implements IEventListener {
   /**
    * The tick count when the answer gets revealed.
    */
-  getRoundShowAnswerTick() {
-    return ROUND_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS;
+  getQuestionShowAnswerTick() {
+    return QUESTION_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS;
   }
 
   /**
    * The tick count when the music fades out.
    */
-  getRoundPauseMusicTick() {
-    return ROUND_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2 - 1;
+  getQuestionPauseMusicTick() {
+    return QUESTION_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2 - 1;
   }
 
   /**
    * The tick count when a new round shall be started.
    */
-  getRoundStartNextTick() {
-    return ROUND_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2;
+  getQuestionStartNextTick() {
+    return QUESTION_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2;
   }
 }
