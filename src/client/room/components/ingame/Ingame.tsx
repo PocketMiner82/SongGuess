@@ -11,7 +11,7 @@ function AnswerResults() {
   useRoomControllerMessageTypeListener(controller, "round_state");
 
   const rankedPlayers = useMemo(() => {
-    if (controller.roundData.roundMsg?.gamePhase !== GamePhase.ANSWER)
+    if (controller.questionData.roundMsg?.gamePhase !== GamePhase.ANSWER)
       return [];
 
     return [...controller.playerMessages]
@@ -28,7 +28,7 @@ function AnswerResults() {
           return 1;
         return 0;
       });
-  }, [controller.playerMessages, controller.roundData.roundMsg?.gamePhase]);
+  }, [controller.playerMessages, controller.questionData.roundMsg?.gamePhase]);
 
   if (rankedPlayers.length === 0)
     return null;
@@ -60,7 +60,7 @@ export function Ingame() {
   if (controller.state !== "ingame")
     return null;
 
-  if (!controller.roundData.roundMsg) {
+  if (!controller.questionData.roundMsg) {
     return (
       <div className="flex flex-col items-center justify-center min-h-full">
         <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">

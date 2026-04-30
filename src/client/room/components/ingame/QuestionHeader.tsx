@@ -11,9 +11,9 @@ export function QuestionHeader() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "round_state");
 
-  const roundNumber = controller.roundData.roundMsg?.roundCurrent;
-  const questionString = controller.roundData.roundMsg?.question?.questionType === "player_picks"
-    ? `${controller.roundData.roundMsg.question.questionCurrent}/${controller.roundData.roundMsg.question.questionCount}`
+  const roundNumber = controller.questionData.roundMsg?.roundCurrent;
+  const questionString = controller.questionData.roundMsg?.question?.questionType === "player_picks"
+    ? `${controller.questionData.roundMsg.question.questionCurrent}/${controller.questionData.roundMsg.question.questionCount}`
     : undefined;
 
   if (roundNumber === undefined || controller.state !== "ingame") {

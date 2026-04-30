@@ -112,8 +112,9 @@ export default abstract class Game implements IEventListener {
   /**
    * Should return an array of all required {@link ServerMessage}s so clients know about the current game state.
    * @param sendPrevious whether to include all messages for the question. Useful when client joins.
+   * @param _player an optional player that requested the game messages
    */
-  public getGameMessages(sendPrevious?: boolean): ServerMessage[] {
+  public getGameMessages(sendPrevious?: boolean, _player?: Player): ServerMessage[] {
     const msgs: ServerMessage[] = [];
 
     // nothing to send if game is not running
@@ -273,7 +274,7 @@ export default abstract class Game implements IEventListener {
           this.roundCurrent++;
         }
 
-        if (this.roundCurrent >= this.room.config.roundsCount) {
+        if (this.roundCurrent > this.room.config.roundsCount) {
           this.endGame();
           return;
         }

@@ -96,8 +96,8 @@ export function MultipleChoiceQuestionDisplay() {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer";
   }, []));
 
-  const canAnswer = controller.roundData.roundMsg?.gamePhase === GamePhase.ANSWERING
-    && controller.roundData.selectedAnswerIndex === undefined;
+  const canAnswer = controller.questionData.roundMsg?.gamePhase === GamePhase.ANSWERING
+    && controller.questionData.selectedAnswerIndex === undefined;
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -108,9 +108,9 @@ export function MultipleChoiceQuestionDisplay() {
 
   let answerOptions: string[] | undefined;
   let correctIndex: number | undefined;
-  if (controller.roundData.roundMsg?.question?.questionType === "multiple_choice") {
-    answerOptions = controller.roundData.roundMsg.question.answerOptions;
-    correctIndex = controller.roundData.roundMsg.question.correctAnswerIndex;
+  if (controller.questionData.roundMsg?.question?.questionType === "multiple_choice") {
+    answerOptions = controller.questionData.roundMsg.question.answerOptions;
+    correctIndex = controller.questionData.roundMsg.question.correctAnswerIndex;
   }
 
   return (
@@ -120,7 +120,7 @@ export function MultipleChoiceQuestionDisplay() {
       </h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {answerOptions!.map((option, index) => {
-          const isSelected = controller.roundData.selectedAnswerIndex === index;
+          const isSelected = controller.questionData.selectedAnswerIndex === index;
           const isCorrect = correctIndex !== undefined ? correctIndex === index : null;
 
           let state: AnswerState = "pending";
@@ -130,7 +130,7 @@ export function MultipleChoiceQuestionDisplay() {
             state = "incorrect";
           } else if (isSelected) {
             state = "selected";
-          } else if (controller.roundData.roundMsg?.gamePhase !== GamePhase.ANSWERING || controller.roundData.selectedAnswerIndex !== undefined) {
+          } else if (controller.questionData.roundMsg?.gamePhase !== GamePhase.ANSWERING || controller.questionData.selectedAnswerIndex !== undefined) {
             state = "disabled";
           }
 

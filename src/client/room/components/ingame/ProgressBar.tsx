@@ -65,7 +65,7 @@ export function ProgressBar() {
     setResetCounter(c => c + 1);
   });
 
-  const { progressbarDuration: duration, progressbarOffset: offset } = controller.roundData;
+  const { progressbarDuration: duration, progressbarOffset: offset } = controller.questionData;
   const progress = useProgressLogic(duration, offset, resetCounter);
 
   return (

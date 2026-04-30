@@ -150,10 +150,10 @@ export function Audio() {
     // perform requested action
     if (msg?.type === "audio_control") {
       const setStartPosAndPlay = () => {
-        let pos = controller.roundData.progressbarOffset;
+        let pos = controller.questionData.progressbarOffset;
 
         const startPosition = controller.config.audioStartPosition === 3
-          ? controller.roundData.audioStartPos
+          ? controller.questionData.audioStartPos
           : controller.config.audioStartPosition;
         const audioPlayTime = controller.config.timePerQuestion + ROUND_PADDING_TICKS;
         switch (startPosition) {
@@ -212,7 +212,7 @@ export function Audio() {
     }
 
     return false;
-  }, [controller.config.audioStartPosition, controller.config.timePerQuestion, controller.roundData.progressbarOffset, controller.roundData.audioStartPos, fadeIn, fadeOut, playBuffer]));
+  }, [controller.config.audioStartPosition, controller.config.timePerQuestion, controller.questionData.progressbarOffset, controller.questionData.audioStartPos, fadeIn, fadeOut, playBuffer]));
 
   useEffect(() => {
     const volume = cookies.audioMuted ? 0 : (cookies.audioVolume ?? 0.2);

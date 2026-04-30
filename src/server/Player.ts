@@ -110,7 +110,7 @@ export default class Player implements PlayerMessage, IEventListener {
     this.safeSend(this.room.config.toConfigMessage());
 
     // inform client about current round state
-    this.room.game.getGameMessages(true)
+    this.room.game.getGameMessages(true, this)
       .forEach(msg => this.safeSend(msg));
 
     // send client's answer if client selected one previously

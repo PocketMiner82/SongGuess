@@ -21,50 +21,73 @@ function PlayerPickingDisplay() {
       : controller.config.audioStartPosition;
   });
   useRoomControllerMessageTypeListener(controller, "audio_control");
+  useRoomControllerListener(controller, useCallback((msg) => {
+    return msg?.type === "confirmation" && msg.sourceMessage.type === "player_pick_song";
+  }, []));
+
+  const pickedSong = controller.questionData.pickedSong;
 
   const handlePickSong = useCallback(async (playlist: Playlist) => {
     // TODO: maybe check here if the song can actually be downloaded?
-    if (playlist.songs.length > 0) {
+    if (playlist.songs.length > 0 && !pickedSong) {
       controller.pickSong(playlist.songs[0], audioStartPos);
       return true;
     }
 
     return false;
-  }, [audioStartPos, controller]);
+  }, [audioStartPos, controller, pickedSong]);
 
   return (
     <div className="space-y-6 w-full">
-      <div>
-        {controller.config.audioStartPosition === 3 && (
-          <SettingsDropdown
-            value={audioStartPos}
-            onChange={(v) => {
-              setAudioStartPos(v);
-            }}
-            options={[
-              { value: 0, label: "Start of audio" },
-              { value: 1, label: "Close to middle" },
-              { value: 2, label: "Close to end" },
-            ]}
-          >
-            Audio start position for this round
-          </SettingsDropdown>
-        )}
+      { !pickedSong
+        ? (
+            <div>
+              {controller.config.audioStartPosition === 3 && (
+                <SettingsDropdown
+                  value={audioStartPos}
+                  onChange={(v) => {
+                    setAudioStartPos(v);
+                  }}
+                  options={[
+                    { value: 0, label: "Start of audio" },
+                    { value: 1, label: "Close to middle" },
+                    { value: 2, label: "Close to end" },
+                  ]}
+                >
+                  Audio start position for this round
+                </SettingsDropdown>
+              )}
 
-        <div className="mt-2 flex justify-center max-h-[calc(100vh-21rem)] min-h-0">
-          <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
-        </div>
-      </div>
+              <div className="mt-2 flex justify-center max-h-[calc(100vh-21rem)] min-h-0">
+                <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
+              </div>
+            </div>
+          )
+        : (
+            <>
+              <div className="text-disabled-text text-center mb-2">
+                <p>Song submitted!</p>
+                <p>Waiting for other players to pick...</p>
+              </div>
+              <PlaylistCard
+                title={pickedSong.name}
+                subtitle={pickedSong.artist}
+                coverURL={pickedSong.cover}
+                hrefURL={pickedSong.hrefURL}
+              />
+            </>
+
+          )}
     </div>
   );
 }
 
 function AnswerInput() {
   const controller = useControllerContext();
-  const [answer, setAnswer] = useState(controller.roundData.selectedAnswer ?? "");
+  const [answer, setAnswer] = useState(controller.questionData.selectedAnswer ?? "");
   const [inputDisabled, setInputDisabled] = useState(false);
 
-  const roundMsg = controller.roundData.roundMsg;
+  const roundMsg = controller.questionData.roundMsg;
   const correctSong = roundMsg?.question?.questionType === "player_picks"
     ? roundMsg?.question?.correctAnswer
     : undefined;
@@ -74,7 +97,7 @@ function AnswerInput() {
     : false;
 
   const handleSelect = useCallback(() => {
-    if (!canAnswer || !answer.trim() || answer === controller.roundData.selectedAnswer || isMyQuestion) {
+    if (!canAnswer || !answer.trim() || answer === controller.questionData.selectedAnswer || isMyQuestion) {
       return;
     }
 
@@ -116,11 +139,11 @@ function AnswerInput() {
                   value={answer}
                   onChange={e => setAnswer(e.target.value)}
                   placeholder="Enter song name…"
-                  disabled={inputDisabled || !canAnswer}
+                  disabled={inputDisabled}
                   className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
                   autoFocus
                 />
-                <Button disabled={inputDisabled || !canAnswer || !answer.trim() || controller.roundData.currentAudioState !== "play"} type="submit">
+                <Button disabled={inputDisabled || !answer.trim() || !canAnswer} type="submit">
                   Submit
                 </Button>
               </div>
@@ -156,7 +179,7 @@ export function PlayerPicksQuestionDisplay() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "round_state");
 
-  const roundMsg = controller.roundData.roundMsg;
+  const roundMsg = controller.questionData.roundMsg;
   const isPickingPhase = roundMsg?.gamePhase === GamePhase.PICKING;
   const isMyQuestion = roundMsg?.question?.questionType === "player_picks"
     ? controller.uuid === roundMsg?.question?.pickerId

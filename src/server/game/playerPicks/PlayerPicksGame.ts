@@ -1,4 +1,4 @@
-import type { ClientMessage, SelectAnswerMessage } from "../../../types/MessageTypes";
+import type { ClientMessage, ConfirmationMessage, SelectAnswerMessage, ServerMessage } from "../../../types/MessageTypes";
 import type Player from "../../Player";
 import type Question from "../Question";
 import { distance } from "fastest-levenshtein";
@@ -18,30 +18,51 @@ export class PlayerPicksGame extends Game {
   questions: PlayerPicksQuestion[] = [];
 
   /**
-   * List of the questions selected by players during picking phase.
+   * Map of the questions selected by players during picking phase. Key is player uuid.
    */
-  nextQuestions: PlayerPicksQuestion[] = [];
+  nextQuestions: Map<string, PlayerPicksQuestion> = new Map();
 
   /**
    * List of all players still needing to pick a song.
    */
   get remainingPickers(): Player[] {
     return this.room.activePlayers.filter(player =>
-      this.nextQuestions.every(q =>
+      Array.from(this.nextQuestions.values()).every(q =>
         q.pickerId !== player.uuid));
   }
 
+  getGameMessages(sendPrevious?: boolean, player?: Player): ServerMessage[] {
+    const msgs = super.getGameMessages(sendPrevious);
+
+    // add the picked song to the game messages - if exists
+    if (player && this.nextQuestions.has(player.uuid) && this.gamePhase === GamePhase.PICKING) {
+      msgs.push({
+        type: "confirmation",
+        sourceMessage: {
+          type: "player_pick_song",
+          song: this.nextQuestions.get(player.uuid)!.song,
+          startPos: this.nextQuestions.get(player.uuid)!.startPos,
+        },
+      } satisfies ConfirmationMessage);
+    }
+
+    return msgs;
+  }
+
+
   protected getNextQuestions(): Question[] {
-    // penality of max points per round for players that did not pick a song
+    // penality of max points per question for players that did not pick a song
     for (const player of this.remainingPickers) {
-      player.points -= 1000;
+      player.points -= POINTS_PER_QUESTION;
     }
 
-    for (const q of this.nextQuestions) {
-      q.questionCount = this.nextQuestions.length;
+    const nextQ: PlayerPicksQuestion[] = Array.from(this.nextQuestions.values());
+
+    for (const q of nextQ) {
+      q.questionCount = this.nextQuestions.size;
     }
 
-    return this.nextQuestions;
+    return nextQ;
   }
 
   onMessage(player: Player, msg: ClientMessage): boolean {
@@ -51,21 +72,26 @@ export class PlayerPicksGame extends Game {
       if (this.gamePhase !== GamePhase.PICKING) {
         player.sendConfirmationOrError(msg, "Can only pick songs during picking phase.");
         return true;
+      } else if (this.nextQuestions.has(player.uuid)) {
+        player.sendConfirmationOrError(msg, "You cannot change your picked song.");
+        return true;
       }
 
       const newQuestion = new PlayerPicksQuestion(
-        this.nextQuestions.length + 1,
+        this.nextQuestions.size + 1,
         player.uuid,
         msg.song,
       );
       newQuestion.startPos = msg.startPos;
 
-      this.nextQuestions.push(newQuestion);
+      this.nextQuestions.set(player.uuid, newQuestion);
 
       // if every player has picked a song, continue to picked phase
       if (this.remainingPickers.length === 0) {
         this.questionTick = QUESTION_PICKED_SONG_TICK;
       }
+
+      player.sendConfirmationOrError(msg);
       return true;
     }
 
@@ -74,7 +100,7 @@ export class PlayerPicksGame extends Game {
 
   onGamePhaseChanged() {
     if (this.gamePhase === GamePhase.PICKING) {
-      this.nextQuestions = [];
+      this.nextQuestions = new Map();
     }
 
     super.onGamePhaseChanged();

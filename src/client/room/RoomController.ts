@@ -135,7 +135,7 @@ export function useRoomControllerMessageTypeListener(controller: RoomController,
   }, [msgType, onMessage]));
 }
 
-class RoundData {
+class QuestionData {
   /**
    * The round message, containing most important info
    */
@@ -171,6 +171,11 @@ class RoundData {
    * The offset position for the progress bar.
    */
   progressbarOffset: number = 0;
+
+  /**
+   * Whether the player has already picked a song this round.
+   */
+  pickedSong: Song | null = null;
 }
 
 /**
@@ -288,7 +293,7 @@ export class RoomController {
   /**
    * The currently cached ingame data
    */
-  roundData: RoundData = new RoundData();
+  questionData: QuestionData = new QuestionData();
 
   /**
    * The list of songs played in the last round.
@@ -351,7 +356,7 @@ export class RoomController {
    * @param spectator whether the player wants to spectate the game.
    */
   public reconnect(newUsername?: string, spectator: boolean = false) {
-    this.roundData = new RoundData();
+    this.questionData = new QuestionData();
     this.reconnecting = true;
 
     this.socket.updateProperties({
@@ -500,8 +505,12 @@ export class RoomController {
         }
 
         if (msg.sourceMessage.type === "select_answer") {
-          this.roundData.selectedAnswerIndex = msg.sourceMessage.answerIndex;
-          this.roundData.selectedAnswer = msg.sourceMessage.answer;
+          this.questionData.selectedAnswerIndex = msg.sourceMessage.answerIndex;
+          this.questionData.selectedAnswer = msg.sourceMessage.answer;
+        }
+
+        if (msg.sourceMessage.type === "player_pick_song") {
+          this.questionData.pickedSong = msg.sourceMessage.song;
         }
         break;
       case "room_state":
@@ -529,7 +538,7 @@ export class RoomController {
 
         // also reset cached round data when changing to other screens than ingame
         if (this.state !== "ingame") {
-          this.roundData = new RoundData();
+          this.questionData = new QuestionData();
         }
 
         // reset cached songs
@@ -546,20 +555,20 @@ export class RoomController {
         break;
       case "round_state":
         if (msg.gamePhase === GamePhase.QUESTION) {
-          this.roundData = new RoundData();
-          this.roundData.audioStartPos = msg.question!.startPos;
+          this.questionData = new QuestionData();
+          this.questionData.audioStartPos = msg.question!.startPos;
         }
-        this.roundData.roundMsg = msg;
+        this.questionData.roundMsg = msg;
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;
         break;
       case "audio_control":
-        this.roundData.currentAudioState = msg.action;
+        this.questionData.currentAudioState = msg.action;
         break;
       case "progressbar_update":
-        this.roundData.progressbarOffset = msg.offset;
-        this.roundData.progressbarDuration = msg.duration;
+        this.questionData.progressbarOffset = msg.offset;
+        this.questionData.progressbarDuration = msg.duration;
         break;
     }
 
