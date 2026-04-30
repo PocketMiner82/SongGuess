@@ -1,3 +1,10 @@
+# [2.14.0-dev.35](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.34...2.14.0-dev.35) (2026-04-30)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** set pick timeout to 120s ([7424e8b](https://github.com/PocketMiner82/SongGuess/commit/7424e8bb27f069be6bcd074284b15a4e3d0dee08))
+
 # [2.14.0-dev.34](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.33...2.14.0-dev.34) (2026-04-30)
 
 
