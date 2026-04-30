@@ -21,7 +21,7 @@ export const ROOM_INACTIVITY_KICK_TIMEOUT = 15;
 /**
  * The amount of time a player has to pick a song
  */
-export const PLAYER_PICK_TIMEOUT = 60;
+export const PLAYER_PICK_TIMEOUT = 120;
 
 /**
  * The tick count when a new round starts.
