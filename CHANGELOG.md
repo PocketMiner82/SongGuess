@@ -1,3 +1,15 @@
+# [2.14.0-dev.34](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.33...2.14.0-dev.34) (2026-04-30)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** don't allow picking multiple songs ([f92025f](https://github.com/PocketMiner82/SongGuess/commit/f92025fe771312740a65b76275ebaeaaa820489f))
+
+
+### Features
+
+* **PlayerPicksGame:** picking is now at start of round. ([fea8f7d](https://github.com/PocketMiner82/SongGuess/commit/fea8f7d8caa73d1d3fba77dc5b49b7aa0bbca6df))
+
 # [2.14.0-dev.33](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.32...2.14.0-dev.33) (2026-04-28)
 
 
