@@ -2,10 +2,10 @@ import { CookieConsent } from "react-cookie-consent";
 import { createRoot } from "react-dom/client";
 import { ModalContainer } from "react-modal-global";
 import { toast } from "react-toastify";
-import { fetchPostCreateRoom } from "./HTTPHelpers";
 import { Button } from "./components/Button";
 import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
+import { fetchPostCreateRoom } from "./HTTPHelpers";
 import { Modal } from "./modal/Modal";
 
 

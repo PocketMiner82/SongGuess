@@ -13,7 +13,6 @@ export default class MultipleChoiceQuestion extends Question {
   /**
    * Constructs a mulitple choice question asking which is the correct song.
    *
-   * @param roundCurrent the current round number.
    * @param song The correct song for this question.
    * @param possibleDistractions all possible songs that could be used for distractions
    * @param distractionsPreferSameArtist whether to prefer searching for distractions by the same artist as the searched song

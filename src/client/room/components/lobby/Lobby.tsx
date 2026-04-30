@@ -10,7 +10,7 @@ import { PlaylistsList } from "./PlaylistsList";
  */
 export function Lobby() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "room_state");
   useRoomControllerMessageTypeListener(controller, "update_playlists");
 
   if (controller.state !== "lobby")

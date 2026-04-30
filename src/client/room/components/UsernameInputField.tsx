@@ -18,11 +18,11 @@ export function UsernameInputField({ onEnd, requireEnter, showButton }: { onEnd:
   const [editedName, setEditedName] = useState(controller.username ?? "");
 
   useRoomControllerListener(controller, useCallback((msg) => {
-    if (msg?.type === "update" && msg.username !== editedName) {
-      setEditedName(msg.username);
+    if (msg?.type === "room_state" && controller.username !== undefined && controller.username !== editedName) {
+      setEditedName(controller.username);
     }
     return false;
-  }, [editedName]));
+  }, [controller.username, editedName]));
 
   const handleNameUpdate = useCallback(() => {
     if (editedName && usernameRegex.test(editedName)) {

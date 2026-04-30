@@ -9,7 +9,7 @@ import { DownloadPlaylistsButton } from "./buttons/DownloadPlaylistsButton";
  */
 export function PlaylistsList() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "room_state");
   useRoomControllerMessageTypeListener(controller, "update_playlists");
   useRoomControllerMessageTypeListener(controller, "room_config");
 

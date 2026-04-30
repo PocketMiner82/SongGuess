@@ -1,4 +1,4 @@
-import { useControllerContext } from "../../RoomController";
+import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
 import { ProgressBar } from "./ProgressBar";
 
 /**
@@ -9,11 +9,14 @@ import { ProgressBar } from "./ProgressBar";
  */
 export function QuestionHeader() {
   const controller = useControllerContext();
+  useRoomControllerMessageTypeListener(controller, "round_state");
 
-  const questionNumber = (controller.roundData.currentQuestion?.number
-    || controller.roundData.currentAnswer?.number);
+  const roundNumber = controller.roundData.roundMsg?.roundCurrent;
+  const questionString = controller.roundData.roundMsg?.question?.questionType === "player_picks"
+    ? `${controller.roundData.roundMsg.question.questionCurrent}/${controller.roundData.roundMsg.question.questionCount}`
+    : undefined;
 
-  if (questionNumber === undefined || controller.state !== "ingame") {
+  if (roundNumber === undefined || controller.state !== "ingame") {
     return null;
   }
 
@@ -23,12 +26,21 @@ export function QuestionHeader() {
       dark:border-gray-700 mx-auto w-full lg:w-1/3 lg:border-l lg:border-r lg:rounded-b-2xl mb-2"
       >
         <h2 className="text-xl font-bold whitespace-nowrap">
-          Question
+          Round
           {" "}
-          {questionNumber}
+          {roundNumber}
           /
           {controller.config.roundsCount}
         </h2>
+        {questionString
+          ? (
+              <h3 className="text-lg whitespace-nowrap">
+                Question
+                {" "}
+                {questionString}
+              </h3>
+            )
+          : undefined}
         <div className="w-full">
           <ProgressBar />
         </div>

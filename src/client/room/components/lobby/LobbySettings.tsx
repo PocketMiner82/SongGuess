@@ -74,7 +74,7 @@ export function Settings() {
           min={1}
           max={30}
         >
-          Questions per round (1-30)
+          Number of rounds (1-30)
         </SettingsNumberInput>
 
         <SettingsNumberInput

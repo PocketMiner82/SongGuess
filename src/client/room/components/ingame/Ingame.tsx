@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import GamePhase from "../../../../shared/game/GamePhase";
 import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
 import { ResultsPlayerList } from "../ResultsPlayerList";
 import { MultipleChoiceQuestionDisplay } from "./MultipleChoiceQuestionDisplay";
@@ -7,11 +8,10 @@ import { PlayerPicksQuestionDisplay } from "./PlayerPicksQuestionDisplay";
 
 function AnswerResults() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "answer");
-  useRoomControllerMessageTypeListener(controller, "question");
+  useRoomControllerMessageTypeListener(controller, "round_state");
 
   const rankedPlayers = useMemo(() => {
-    if (!controller.roundData.currentAnswer)
+    if (controller.roundData.roundMsg?.gamePhase !== GamePhase.ANSWER)
       return [];
 
     return [...controller.playerMessages]
@@ -28,7 +28,7 @@ function AnswerResults() {
           return 1;
         return 0;
       });
-  }, [controller.playerMessages, controller.roundData.currentAnswer]);
+  }, [controller.playerMessages, controller.roundData.roundMsg?.gamePhase]);
 
   if (rankedPlayers.length === 0)
     return null;
@@ -55,18 +55,18 @@ function AnswerResults() {
  */
 export function Ingame() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "room_state");
 
   if (controller.state !== "ingame")
     return null;
 
-  if (!controller.roundData.currentQuestion && !controller.roundData.currentAnswer) {
+  if (!controller.roundData.roundMsg) {
     return (
       <div className="flex flex-col items-center justify-center min-h-full">
         <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">
           progress_activity
         </div>
-        <div className="text-2xl">Loading question…</div>
+        <div className="text-2xl">Loading game…</div>
       </div>
     );
   }

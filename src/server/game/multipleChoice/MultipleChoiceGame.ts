@@ -65,7 +65,7 @@ export class MultipleChoiceGame extends Game {
 
         // show answers if everyone voted
         if (everyoneVoted) {
-          this.questionTick = this.room.config.getQuestionShowAnswerTick() - 1;
+          this.questionTick = this.room.config.getQuestionShowAnswerTick();
         }
       }
     }

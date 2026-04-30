@@ -25,8 +25,8 @@ import type {
   PlayerMessageSchema,
   PlayerPicksQuestionMessageSchema,
   ProgressbarUpdateMessageSchema,
-  RoundMessageSchema,
-  UpdateMessageSchema,
+  RoomStateMessage,
+  RoundStateMessageSchema,
   UpdatePlayedSongsMessageSchema,
   UpdatePlaylistsMessageSchema,
 } from "../schemas/ServerMessageSchemas";
@@ -131,7 +131,7 @@ export type PlayerPicksQuestionMessage = z.infer<typeof PlayerPicksQuestionMessa
 /**
  * Message containing round information.
  */
-export type RoundMessage = z.infer<typeof RoundMessageSchema>;
+export type RoundStateMessage = z.infer<typeof RoundStateMessageSchema>;
 /**
  * Message to control audio playback (load/play/pause).
  */
@@ -155,7 +155,7 @@ export type GameState = z.infer<typeof GameStateSchema>;
 /**
  * Generic update message for game state changes.
  */
-export type UpdateMessage = z.infer<typeof UpdateMessageSchema>;
+export type RoomState = z.infer<typeof RoomStateMessage>;
 /**
  * Message to return to a previous game phase.
  */

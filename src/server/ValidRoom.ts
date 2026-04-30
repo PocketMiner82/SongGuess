@@ -122,7 +122,7 @@ export class ValidRoom implements Party.Server {
     }
 
     // send the first update to the connection (and inform all other connections about the new player)
-    this.broadcastUpdateMessage();
+    this.broadcastRoomStateMessage();
   }
 
   onMessage(message: string, conn: Party.Connection) {
@@ -204,7 +204,7 @@ export class ValidRoom implements Party.Server {
     }
 
     // inform all clients about changes, including possible host transfer
-    this.broadcastUpdateMessage();
+    this.broadcastRoomStateMessage();
   }
 
   /**
@@ -247,7 +247,7 @@ export class ValidRoom implements Party.Server {
   public performChecks(player: Player | null, msg: SourceMessage, ...checks: ("host" | "lobby" | "not_lobby" | "not_contdown" | "not_ingame" | "min_song_count")[]): boolean {
     const possibleErrorFunc = player
       ? (error: string) => {
-          player.sendUpdateMessage();
+          player.sendRoomStateMessage();
           player.sendConfirmationOrError(msg, error);
         }
       : () => {};
@@ -301,7 +301,7 @@ export class ValidRoom implements Party.Server {
 
     // always send update when not successful
     if (!successful && player) {
-      player.sendUpdateMessage();
+      player.sendRoomStateMessage();
     }
 
     return successful;
@@ -340,7 +340,7 @@ export class ValidRoom implements Party.Server {
     this.server.logger.info(`Host transferred to ${this.hostID}`);
 
     if (newHost && sendUpdate) {
-      this.broadcastUpdateMessage();
+      this.broadcastRoomStateMessage();
     }
   }
 
@@ -354,14 +354,14 @@ export class ValidRoom implements Party.Server {
   }
 
   /**
-   * Retrieves all valid player states from connected and active clients.
+   * Retrieves all valid player states from connected clients.
    *
    * @returns An array of valid PlayerMessage objects from all connected players.
    */
-  public getActivePlayerMessages(): Record<string, PlayerMessage> {
+  public getOnlinePlayerMessages(): Record<string, PlayerMessage> {
     return Object.fromEntries(
-      this.activePlayers.map(player => [
-        player.conn.id,
+      this.onlinePlayers.map(player => [
+        player.uuid,
         player.toPlayerMessage(),
       ]),
     );
@@ -378,13 +378,13 @@ export class ValidRoom implements Party.Server {
   }
 
   /**
-   * Broadcast an update to all connected clients.
+   * Broadcast a room state update to all connected clients.
    *
-   * @see {@link sendUpdateMessage}
+   * @see sendRoomStateMessage
    */
-  public broadcastUpdateMessage() {
+  public broadcastRoomStateMessage() {
     for (const player of this.onlinePlayers) {
-      player.sendUpdateMessage();
+      player.sendRoomStateMessage();
     }
   }
 

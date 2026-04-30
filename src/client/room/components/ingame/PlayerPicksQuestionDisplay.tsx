@@ -1,6 +1,7 @@
 import type { Playlist } from "../../../../types/MessageTypes";
 import random from "lodash/random";
 import { useCallback, useEffect, useState } from "react";
+import GamePhase from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
 import { PlaylistCard } from "../../../components/PlaylistCard";
 import { SearchMusicComponent } from "../../../components/SearchMusicComponent";
@@ -9,7 +10,6 @@ import {
   useRoomControllerListener,
   useRoomControllerMessageTypeListener,
 } from "../../RoomController";
-import { PlayerAvatar } from "../PlayerAvatar";
 import { SettingsDropdown } from "../settings/SettingsDropdown";
 
 
@@ -20,13 +20,10 @@ function PlayerPickingDisplay() {
       ? random(0, 2)
       : controller.config.audioStartPosition;
   });
-  useRoomControllerMessageTypeListener(controller, "question");
   useRoomControllerMessageTypeListener(controller, "audio_control");
 
-  const pickerID = controller.roundData.currentQuestion?.pickerId;
-  const isMyTurn = controller.userID === pickerID;
-
   const handlePickSong = useCallback(async (playlist: Playlist) => {
+    // TODO: maybe check here if the song can actually be downloaded?
     if (playlist.songs.length > 0) {
       controller.pickSong(playlist.songs[0], audioStartPos);
       return true;
@@ -35,39 +32,29 @@ function PlayerPickingDisplay() {
     return false;
   }, [audioStartPos, controller]);
 
-  const pickerPlayer = pickerID ? controller.players.get(pickerID) : null;
-
   return (
     <div className="space-y-6 w-full">
-      {isMyTurn && (
-        <div>
-          {controller.config.audioStartPosition === 3 && (
-            <SettingsDropdown
-              value={audioStartPos}
-              onChange={(v) => {
-                setAudioStartPos(v);
-              }}
-              options={[
-                { value: 0, label: "Start of audio" },
-                { value: 1, label: "Close to middle" },
-                { value: 2, label: "Close to end" },
-              ]}
-            >
-              Audio start position for this round
-            </SettingsDropdown>
-          )}
+      <div>
+        {controller.config.audioStartPosition === 3 && (
+          <SettingsDropdown
+            value={audioStartPos}
+            onChange={(v) => {
+              setAudioStartPos(v);
+            }}
+            options={[
+              { value: 0, label: "Start of audio" },
+              { value: 1, label: "Close to middle" },
+              { value: 2, label: "Close to end" },
+            ]}
+          >
+            Audio start position for this round
+          </SettingsDropdown>
+        )}
 
-          <div className="mt-2 flex justify-center max-h-[calc(100vh-21rem)] min-h-0">
-            <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
-          </div>
+        <div className="mt-2 flex justify-center max-h-[calc(100vh-21rem)] min-h-0">
+          <SearchMusicComponent onlyAcceptSongs={true} onPlaylistSelected={handlePickSong} />
         </div>
-      )}
-
-      {!isMyTurn && pickerPlayer && (
-        <div className="flex justify-center">
-          <PlayerAvatar size={64} player={pickerPlayer} />
-        </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -77,21 +64,24 @@ function AnswerInput() {
   const [answer, setAnswer] = useState(controller.roundData.selectedAnswer ?? "");
   const [inputDisabled, setInputDisabled] = useState(false);
 
-  const isMyTurn = controller.userID === controller.roundData.pickerId;
-  const correctSong = controller.roundData.currentAnswer?.correctSong;
-  const canAnswer = controller.roundData.currentAnswer === null;
+  const roundMsg = controller.roundData.roundMsg;
+  const correctSong = roundMsg?.question?.questionType === "player_picks"
+    ? roundMsg?.question?.correctAnswer
+    : undefined;
+  const canAnswer = roundMsg?.gamePhase === GamePhase.ANSWERING;
+  const isMyQuestion = roundMsg?.question?.questionType === "player_picks"
+    ? controller.uuid === roundMsg?.question?.pickerId
+    : false;
 
   const handleSelect = useCallback(() => {
-    if (!canAnswer || !answer.trim() || controller.roundData.currentAudioState !== "play" || answer === controller.roundData.selectedAnswer) {
+    if (!canAnswer || !answer.trim() || answer === controller.roundData.selectedAnswer || isMyQuestion) {
       return;
     }
 
     controller.selectAnswerText(answer.trim());
-  }, [answer, canAnswer, controller]);
+  }, [answer, canAnswer, controller, isMyQuestion]);
 
-  useRoomControllerMessageTypeListener(controller, "audio_control", handleSelect);
-  useRoomControllerMessageTypeListener(controller, "question");
-  useRoomControllerMessageTypeListener(controller, "answer");
+  useRoomControllerMessageTypeListener(controller, "round_state", handleSelect);
 
   useRoomControllerListener(controller, useCallback((msg) => {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer";
@@ -105,7 +95,7 @@ function AnswerInput() {
 
   return (
     <>
-      { isMyTurn
+      { isMyQuestion
         ? (
             <div className="text-disabled-text text-center">
               Please wait for the other players to guess!
@@ -164,14 +154,17 @@ function AnswerInput() {
 
 export function PlayerPicksQuestionDisplay() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "question");
+  useRoomControllerMessageTypeListener(controller, "round_state");
 
-  const isPickingPhase = controller.roundData.currentQuestion?.isPickingPhase;
-  const isMyTurn = controller.userID === controller.roundData.pickerId;
+  const roundMsg = controller.roundData.roundMsg;
+  const isPickingPhase = roundMsg?.gamePhase === GamePhase.PICKING;
+  const isMyQuestion = roundMsg?.question?.questionType === "player_picks"
+    ? controller.uuid === roundMsg?.question?.pickerId
+    : false;
 
   const pickingMessage = isPickingPhase
-    ? (isMyTurn ? "Select a song for others to guess" : "Wait for the picker to select a song")
-    : (isMyTurn ? "You are the picker" : "Type the song title you hear");
+    ? "Select a song for others to guess"
+    : (isMyQuestion ? "This is your question" : "Type the song title you hear");
 
   return (
     <div className="space-y-6 w-full lg:w-4xl xl:w-5xl">

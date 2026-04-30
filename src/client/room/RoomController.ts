@@ -2,7 +2,6 @@ import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import type { CookieGetter, CookieSetter } from "../../types/CookieFunctionTypes";
 import type {
   AddPlaylistsMessage,
-  AnswerMessage,
   AudioControlMessage,
   ChangeUsernameMessage,
   GameState,
@@ -11,9 +10,10 @@ import type {
   PlayerPicksSongMessage,
   Playlist,
   PlaylistsFile,
-  QuestionMessage,
   RemovePlaylistMessage,
   ReturnToMessage,
+  RoomState,
+  RoundStateMessage,
   SelectAnswerMessage,
   ServerMessage,
   Song,
@@ -29,6 +29,7 @@ import z from "zod";
 import { version } from "../../../package.json";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { BaseConfig } from "../../shared/BaseConfig";
+import GamePhase from "../../shared/game/GamePhase";
 import { FatalErrorDialog } from "../modal/FatalErrorDialog";
 import { Modal } from "../modal/Modal";
 
@@ -136,19 +137,9 @@ export function useRoomControllerMessageTypeListener(controller: RoomController,
 
 class RoundData {
   /**
-   * The current question being asked to players.
+   * The round message, containing most important info
    */
-  currentQuestion: QuestionMessage | null = null;
-
-  /**
-   * The id of the current picker.
-   */
-  pickerId?: string;
-
-  /**
-   * The current answer information revealed after question ends.
-   */
-  currentAnswer: AnswerMessage | null = null;
+  roundMsg?: RoundStateMessage;
 
   /**
    * The currently selected answer index.
@@ -208,24 +199,44 @@ export class RoomController {
    */
   private stateChangeEventListeners: ListenerCallback[] = [];
 
+  private roomState?: RoomState;
+
   /**
    * The current list of players in the room.
    */
-  players: Map<string, PlayerMessage> = new Map();
+  get players(): Map<string, PlayerMessage> {
+    return this.roomState?.players
+      ? new Map<string, PlayerMessage>(Object.entries(this.roomState.players))
+      : new Map();
+  };
 
+  /**
+   * The current list of just player messages of this room.
+   */
   get playerMessages(): PlayerMessage[] {
-    return Array.from(this.players.values());
+    return Array.from(this.players.values()).filter(p => !p.isSpectator);
+  }
+
+  /**
+   * The server-assigned uuid of this player.
+   */
+  get uuid(): string {
+    return this.roomState?.uuid ?? "";
   }
 
   /**
    * The current username of the player.
    */
-  username?: string;
+  get username(): string | undefined {
+    return this.players.get(this.uuid)?.username;
+  };
 
   /**
    * Whether the current player is the host of the room.
    */
-  isHost: boolean = false;
+  get isHost(): boolean {
+    return this.players.get(this.uuid)?.isHost ?? false;
+  };
 
   /**
    * The current list of playlists selected for the game.
@@ -235,7 +246,9 @@ export class RoomController {
   /**
    * The current game state.
    */
-  state: GameState = "lobby";
+  get state(): GameState {
+    return this.roomState?.state ?? "lobby";
+  };
 
   /**
    * The amount of filtered songs
@@ -491,7 +504,7 @@ export class RoomController {
           this.roundData.selectedAnswer = msg.sourceMessage.answer;
         }
         break;
-      case "update":
+      case "room_state":
         // force hard reload when version is outdated
         if (msg.version !== version) {
           this.socket.close();
@@ -509,11 +522,10 @@ export class RoomController {
           return;
         }
 
-        this.username = msg.username;
-        this.setCookies("userName", msg.username);
-        this.players = new Map<string, PlayerMessage>(Object.entries(msg.players));
-        this.isHost = msg.isHost;
-        this.state = msg.state;
+        this.roomState = msg;
+        if (this.username) {
+          this.setCookies("userName", this.username);
+        }
 
         // also reset cached round data when changing to other screens than ingame
         if (this.state !== "ingame") {
@@ -532,17 +544,12 @@ export class RoomController {
         this.playlists = msg.playlists ?? this.playlists;
         this.filteredSongsCount = msg.filteredSongsCount;
         break;
-      case "question":
-        // new round started, reset cached round data
-        this.roundData = new RoundData();
-
-        this.roundData.currentQuestion = msg;
-        this.roundData.audioStartPos = msg.startPos;
-        this.roundData.pickerId = msg.pickerId;
-        break;
-      case "answer":
-        this.roundData.currentAnswer = msg;
-        this.roundData.currentQuestion = null;
+      case "round_state":
+        if (msg.gamePhase === GamePhase.QUESTION) {
+          this.roundData = new RoundData();
+          this.roundData.audioStartPos = msg.question!.startPos;
+        }
+        this.roundData.roundMsg = msg;
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;

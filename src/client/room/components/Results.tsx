@@ -47,7 +47,7 @@ function PlayedSongsList() {
  */
 export function Results() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "room_state");
 
   // sort by descending score
   const rankedPlayers = useMemo(() =>

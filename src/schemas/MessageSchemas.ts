@@ -14,8 +14,8 @@ import {
   AudioControlMessageSchema,
   CountdownMessageSchema,
   ProgressbarUpdateMessageSchema,
-  RoundMessageSchema,
-  UpdateMessageSchema,
+  RoomStateMessage,
+  RoundStateMessageSchema,
   UpdatePlayedSongsMessageSchema,
   UpdatePlaylistsMessageSchema,
 } from "./ServerMessageSchemas";
@@ -35,12 +35,12 @@ const _ClientMessageSchema = z.discriminatedUnion("type", [
 ]);
 
 const _ServerMessageSchema = z.discriminatedUnion("type", [
-  UpdateMessageSchema,
+  RoomStateMessage,
   UpdatePlaylistsMessageSchema,
   RoomConfigMessageSchema,
   CountdownMessageSchema,
   AudioControlMessageSchema,
-  RoundMessageSchema,
+  RoundStateMessageSchema,
   UpdatePlayedSongsMessageSchema,
   AddLogMessageSchema,
   UpdateLogMessagesSchema,

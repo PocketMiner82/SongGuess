@@ -54,7 +54,7 @@ export class PlayerPicksGame extends Game {
       }
 
       const newQuestion = new PlayerPicksQuestion(
-        this.currentQuestionIndex + 1,
+        this.nextQuestions.length + 1,
         player.uuid,
         msg.song,
       );
@@ -64,7 +64,7 @@ export class PlayerPicksGame extends Game {
 
       // if every player has picked a song, continue to picked phase
       if (this.remainingPickers.length === 0) {
-        this.questionTick = QUESTION_PICKED_SONG_TICK - 1;
+        this.questionTick = QUESTION_PICKED_SONG_TICK;
       }
       return true;
     }

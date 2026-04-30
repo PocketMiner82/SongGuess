@@ -48,6 +48,13 @@ export default class Player implements PlayerMessage, IEventListener {
    */
   isAdmin: boolean;
 
+  /**
+   * Whether this player is host.
+   */
+  get isHost(): boolean {
+    return this.room.host === this;
+  }
+
   constructor(readonly room: ValidRoom, public conn: Party.Connection, readonly uuid: string) {
     room.listener.registerEvents(this);
     this.isAdmin = this.room.server.hasTag(conn, "admin");
@@ -175,15 +182,13 @@ export default class Player implements PlayerMessage, IEventListener {
   /**
    * Constructs and sends an update message with the current room/connection states to the player.
    */
-  public sendUpdateMessage() {
+  public sendRoomStateMessage() {
     this.safeSend({
-      type: "update",
+      type: "room_state",
       version,
       state: this.room.state,
-      players: this.room.getActivePlayerMessages(),
-      username: this.username,
-      color: this.color,
-      isHost: this === this.room.host,
+      players: this.room.getOnlinePlayerMessages(),
+      uuid: this.uuid,
     });
   }
 
@@ -205,10 +210,10 @@ export default class Player implements PlayerMessage, IEventListener {
   public handleUsernameChangeRequest(msg: ChangeUsernameMessage) {
     if (this.changeUsername(msg.username)) {
       // inform all players about the username change + send confirmation to the user
-      this.room.broadcastUpdateMessage();
+      this.room.broadcastRoomStateMessage();
       this.sendConfirmationOrError(msg);
     } else {
-      this.sendUpdateMessage();
+      this.sendRoomStateMessage();
       this.sendConfirmationOrError(msg, "Username is already taken.");
     }
   }

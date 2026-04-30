@@ -15,7 +15,7 @@ export const PlayerCard = memo(({
 }) => {
   const controller = useControllerContext();
   const [isEditing, setIsEditing] = useState(false);
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "room_state");
 
   return (
     <div className="flex flex-1 basis-sm items-center gap-4 p-3 bg-card-bg rounded-lg">

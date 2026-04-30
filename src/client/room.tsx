@@ -79,7 +79,7 @@ function Room() {
   const controller = useControllerContext();
   const [hasJoined, setHasJoined] = useState(false);
 
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "room_state");
   useRoomControllerMessageTypeListener(controller, "pong");
 
   return (

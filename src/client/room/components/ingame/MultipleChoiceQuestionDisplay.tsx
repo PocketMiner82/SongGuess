@@ -1,5 +1,6 @@
 import type { PlayerMessage } from "../../../../types/MessageTypes";
 import { memo, useCallback } from "react";
+import GamePhase from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
 import {
   useControllerContext,
@@ -88,15 +89,15 @@ export function MultipleChoiceQuestionDisplay() {
   const controller = useControllerContext();
 
   useRoomControllerMessageTypeListener(controller, "audio_control");
-  useRoomControllerMessageTypeListener(controller, "question");
-  useRoomControllerMessageTypeListener(controller, "answer");
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "round_state");
+  useRoomControllerMessageTypeListener(controller, "room_state");
 
   useRoomControllerListener(controller, useCallback((msg) => {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer";
   }, []));
 
-  const canAnswer = controller.roundData.currentAnswer === null && controller.roundData.selectedAnswerIndex === undefined;
+  const canAnswer = controller.roundData.roundMsg?.gamePhase === GamePhase.ANSWERING
+    && controller.roundData.selectedAnswerIndex === undefined;
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -105,8 +106,12 @@ export function MultipleChoiceQuestionDisplay() {
     controller.selectAnswer(answerIndex);
   }, [canAnswer, controller]);
 
-  const answerOptions = controller.roundData.currentAnswer?.answerOptions || controller.roundData.currentQuestion?.answerOptions;
-  const correctIndex = controller.roundData.currentAnswer?.correctIndex;
+  let answerOptions: string[] | undefined;
+  let correctIndex: number | undefined;
+  if (controller.roundData.roundMsg?.question?.questionType === "multiple_choice") {
+    answerOptions = controller.roundData.roundMsg.question.answerOptions;
+    correctIndex = controller.roundData.roundMsg.question.correctAnswerIndex;
+  }
 
   return (
     <div className="space-y-6 text-center">
@@ -125,7 +130,7 @@ export function MultipleChoiceQuestionDisplay() {
             state = "incorrect";
           } else if (isSelected) {
             state = "selected";
-          } else if (controller.roundData.currentAudioState === "load" || controller.roundData.currentAnswer || controller.roundData.selectedAnswerIndex !== undefined) {
+          } else if (controller.roundData.roundMsg?.gamePhase !== GamePhase.ANSWERING || controller.roundData.selectedAnswerIndex !== undefined) {
             state = "disabled";
           }
 

@@ -9,7 +9,7 @@ import { PlayerCard } from "../PlayerCard";
  */
 export function PlayerList() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "update");
+  useRoomControllerMessageTypeListener(controller, "room_state");
 
   return (
     <div className="flex flex-wrap gap-3 mb-8">
