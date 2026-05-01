@@ -70,7 +70,26 @@ export default class API implements Party.Server {
           return new Response("Missing urn parameter.", { status: 400 });
         }
 
-        return this.fetchSoundCloudAudio(urn);
+        const cache = await caches.open("default");
+        let resp = await cache.match(url.toString());
+
+        if (!resp) {
+          const originalResponse = await this.fetchSoundCloudAudio(urn);
+          const headers = new Headers(originalResponse.headers);
+
+          headers.set("Cache-Control", "public, max-age=7200");
+          headers.delete("Age");
+          headers.delete("Set-Cookie");
+
+          resp = new Response(originalResponse.body, {
+            status: originalResponse.status,
+            statusText: originalResponse.statusText,
+            headers,
+          });
+          await cache.put(url.toString(), resp.clone());
+        }
+
+        return resp;
       }
     }
 
@@ -87,14 +106,14 @@ export default class API implements Party.Server {
   private async fetchSoundCloudAudio(urn: string): Promise<Response> {
     const streams: SoundCloudStreams = await this.soundCloud.fetchGetJson(`/tracks/${urn}/streams`);
 
-    // if (streams.hls_aac_160_url) {
-    //   return await this.soundCloud.fetchGet(streams.hls_aac_160_url);
-    // } else if (streams.hls_mp3_128_url) {
-    //   return await this.soundCloud.fetchGet(streams.hls_mp3_128_url);
-    // } else
     if (streams.http_mp3_128_url) {
-      return await this.soundCloud.fetchGet(streams.http_mp3_128_url);
-    } else if (streams.preview_mp3_128_url) {
+      const resp = await this.soundCloud.fetchGet(streams.http_mp3_128_url);
+      if (resp.ok) {
+        return resp;
+      }
+    }
+
+    if (streams.preview_mp3_128_url) {
       return await this.soundCloud.fetchGet(streams.preview_mp3_128_url);
     }
 
