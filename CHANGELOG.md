@@ -1,3 +1,10 @@
+# [2.14.0-dev.36](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.35...2.14.0-dev.36) (2026-05-01)
+
+
+### Bug Fixes
+
+* **SoundCloud:** add fallback to preview + only cache fetchSoundCloudAudio ([06f5468](https://github.com/PocketMiner82/SongGuess/commit/06f5468af4ee837944c020c327ffe87733845633))
+
 # [2.14.0-dev.35](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.34...2.14.0-dev.35) (2026-04-30)
 
 
