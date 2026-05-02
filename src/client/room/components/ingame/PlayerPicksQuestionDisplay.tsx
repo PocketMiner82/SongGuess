@@ -104,7 +104,14 @@ function AnswerInput() {
     controller.selectAnswerText(answer.trim());
   }, [answer, canAnswer, controller, isMyQuestion]);
 
-  useRoomControllerMessageTypeListener(controller, "round_state", handleSelect);
+  useRoomControllerMessageTypeListener(controller, "round_state", (msg) => {
+    handleSelect();
+
+    if (msg.gamePhase === GamePhase.QUESTION) {
+      setAnswer(controller.questionData.selectedAnswer ?? "");
+      setInputDisabled(false);
+    }
+  });
 
   useRoomControllerListener(controller, useCallback((msg) => {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "select_answer";

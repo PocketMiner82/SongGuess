@@ -42,7 +42,7 @@ declare const PARTYKIT_HOST: string;
  * A callback function that receives the RoomController instance when its state changes and returns a boolean
  * to indicate whether the update should trigger a component update, therefore also making new controller accissible.
  */
-type ListenerCallback = (msg: ServerMessage | null) => boolean;
+type ListenerCallback = (msg: ServerMessage | null) => boolean | void;
 
 /**
  * Custom React hook that provides a {@link RoomController} instance for managing
@@ -105,12 +105,12 @@ export function useRoomControllerListener(controller: RoomController, cb: Listen
   const forceUpdateComponent = React.useCallback(() => setUpdateVal(!updateVal), [updateVal]);
 
   useEffect(() => {
-    if (cb(null)) {
+    if (cb(null) ?? true) {
       forceUpdateComponent();
     }
 
     return controller.registerOnStateChangeListener((msg) => {
-      const update = cb(msg);
+      const update = cb(msg) ?? true;
       if (update) {
         forceUpdateComponent();
       }
@@ -123,16 +123,21 @@ export function useRoomControllerListener(controller: RoomController, cb: Listen
  * A wrapper around {@link useRoomControllerListener} that forces a React update when the specified message is received.
  * @param controller The RoomController instance to listen to.
  * @param msgType The {@link ServerMessage["type"]} to listen for.
- * @param onMessage Optional callback invoked when the message is received.
+ * @param cb Optional callback invoked when the message is received.
  */
-export function useRoomControllerMessageTypeListener(controller: RoomController, msgType: ServerMessage["type"] | null, onMessage?: () => void) {
+export function useRoomControllerMessageTypeListener<T extends ServerMessage["type"] | null>(
+  controller: RoomController,
+  msgType: T,
+  cb?: (msg: Extract<ServerMessage, { type: T }> | (T extends null ? null : never)) => boolean | void,
+) {
   useRoomControllerListener(controller, useCallback((msg) => {
     const matches = (msg?.type ?? null) === msgType;
-    if (matches && onMessage) {
-      onMessage();
+
+    if (matches && cb) {
+      return cb(msg);
     }
     return matches;
-  }, [msgType, onMessage]));
+  }, [msgType, cb]));
 }
 
 class QuestionData {
