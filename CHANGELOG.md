@@ -1,3 +1,10 @@
+# [2.14.0-dev.37](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.36...2.14.0-dev.37) (2026-05-02)
+
+
+### Bug Fixes
+
+* **PlayerPicksQuestionDisplay:** clear answer when new question starts ([3110315](https://github.com/PocketMiner82/SongGuess/commit/3110315b5dd99ce9ada97c87e631c18f567c1aac))
+
 # [2.14.0-dev.36](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.35...2.14.0-dev.36) (2026-05-01)
 
 
