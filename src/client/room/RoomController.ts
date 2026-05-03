@@ -134,7 +134,7 @@ export function useRoomControllerMessageTypeListener<T extends ServerMessage["ty
     const matches = (msg?.type ?? null) === msgType;
 
     if (matches && cb) {
-      return cb(msg);
+      return cb(msg as any);
     }
     return matches;
   }, [msgType, cb]));
