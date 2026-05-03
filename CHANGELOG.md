@@ -1,3 +1,15 @@
+# [3.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.38...3.0.0-dev.1) (2026-05-03)
+
+
+### chore
+
+* trigger major version bump ([94db0eb](https://github.com/PocketMiner82/SongGuess/commit/94db0eba189c73c1e824c9ae01d529b837761d86))
+
+
+### BREAKING CHANGES
+
+* removes refresh playlists functionality - didn't work for custom playlists and also does not work with new SoundCloud integration
+
 # [2.14.0-dev.38](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.37...2.14.0-dev.38) (2026-05-03)
 
 
