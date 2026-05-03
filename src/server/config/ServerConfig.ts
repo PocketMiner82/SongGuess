@@ -4,7 +4,6 @@ import type Player from "../Player";
 import type { ValidRoom } from "../ValidRoom";
 import _ from "lodash";
 import { BaseConfig } from "../../shared/BaseConfig";
-import { QUESTION_PICKED_SONG_TICK, ROUND_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { MultipleChoiceGame } from "../game/multipleChoice/MultipleChoiceGame";
 import { PlayerPicksGame } from "../game/playerPicks/PlayerPicksGame";
 
@@ -47,26 +46,5 @@ export default class ServerConfig extends BaseConfig implements IEventListener {
       return true;
     }
     return false;
-  }
-
-  /**
-   * The tick count when the answer gets revealed.
-   */
-  getQuestionShowAnswerTick() {
-    return QUESTION_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS;
-  }
-
-  /**
-   * The tick count when the music fades out.
-   */
-  getQuestionPauseMusicTick() {
-    return QUESTION_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2 - 1;
-  }
-
-  /**
-   * The tick count when a new round shall be started.
-   */
-  getQuestionStartNextTick() {
-    return QUESTION_PICKED_SONG_TICK + this.timePerQuestion + ROUND_PADDING_TICKS * 2;
   }
 }

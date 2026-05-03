@@ -2,7 +2,7 @@ import type { ClientMessage, ConfirmationMessage, SelectAnswerMessage, ServerMes
 import type Player from "../../Player";
 import type Question from "../Question";
 import { distance } from "fastest-levenshtein";
-import { POINTS_PER_QUESTION, QUESTION_PICKED_SONG_TICK } from "../../../shared/ConfigConstants";
+import { POINTS_PER_QUESTION } from "../../../shared/ConfigConstants";
 import GamePhase from "../../../shared/game/GamePhase";
 import { normalizeSongName } from "../../../shared/Utils";
 import Game from "../Game";
@@ -88,7 +88,7 @@ export class PlayerPicksGame extends Game {
 
       // if every player has picked a song, continue to picked phase
       if (this.remainingPickers.length === 0) {
-        this.questionTick = QUESTION_PICKED_SONG_TICK;
+        this.questionTick = this.room.config.getQuestionPickedSongTick();
       }
 
       player.sendConfirmationOrError(msg);

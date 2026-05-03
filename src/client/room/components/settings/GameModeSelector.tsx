@@ -15,8 +15,8 @@ export function GameModeSelector() {
   };
 
   return (
-    <div className="mb-4">
-      <div className="flex border-b border-gray-600" role="tablist">
+    <div className="mb-1">
+      <div className="flex border-b border-disabled-bg" role="tablist">
         <button
           type="button"
           role="tab"
@@ -27,7 +27,7 @@ export function GameModeSelector() {
             controller.sendConfig();
           }}
           onKeyDown={e => handleKeyDown(e, controller.config.gameMode)}
-          className={`flex-1 py-2 px-4 text-center transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
+          className={`hover:cursor-pointer flex-1 py-2 px-4 text-center transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
             controller.config.gameMode === "multiple_choice"
               ? "border-b-2 border-secondary text-secondary"
               : "text-disabled-text hover:text-default"
@@ -45,7 +45,7 @@ export function GameModeSelector() {
             controller.sendConfig();
           }}
           onKeyDown={e => handleKeyDown(e, controller.config.gameMode)}
-          className={`flex-1 py-2 px-4 text-center transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
+          className={`hover:cursor-pointer flex-1 py-2 px-4 text-center transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
             controller.config.gameMode === "player_picks"
               ? "border-b-2 border-secondary text-secondary"
               : "text-disabled-text hover:text-default"

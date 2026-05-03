@@ -42,6 +42,31 @@ body {
     }
 }
 
+@keyframes progress-bar-reversed {
+    from {
+        width: 0%;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+.progress-bar,
+.progress-bar-reversed {
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+.progress-bar {
+    animation-name: progress-bar;
+    width: 0;
+}
+
+.progress-bar-reversed {
+    animation-name: progress-bar-reversed;
+    width: 0;
+}
+
 .modal {
     @apply fixed inset-0 z-50 transition-opacity duration-250;
 }

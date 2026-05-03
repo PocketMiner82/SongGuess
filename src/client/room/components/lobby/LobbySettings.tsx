@@ -17,9 +17,10 @@ export function Settings() {
   return (
     <div>
       <h3 className="text-xl font-bold mb-3">Settings</h3>
-      <GameModeSelector />
 
       <div className="grid gap-4">
+        <GameModeSelector />
+
         {controller.config.gameMode === "multiple_choice" && (
           <>
             <AddPlaylistButton />
@@ -60,6 +61,24 @@ export function Settings() {
             >
               End round when all players answered
             </SettingsToggle>
+
+            <div className="border-t border-disabled-bg my-1"></div>
+          </>
+        )}
+
+        {controller.config.gameMode === "player_picks" && (
+          <>
+            <SettingsNumberInput
+              value={controller.config.playerPickTimeout}
+              onChange={(v) => {
+                controller.config.playerPickTimeout = v;
+                controller.sendConfig();
+              }}
+              min={30}
+              max={300}
+            >
+              Song pick timeout (30-300s)
+            </SettingsNumberInput>
 
             <div className="border-t border-disabled-bg my-1"></div>
           </>

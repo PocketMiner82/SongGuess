@@ -129,6 +129,11 @@ export const RoomConfigMessageSchema = z.object({
    * Used as default value in PlayerPicksGame, used as forced position in MultipleChoiceGame.
    */
   audioStartPosition: z.number().min(0).max(3),
+
+  /**
+   * The amount of time a player should have to pick a song.
+   */
+  playerPickTimeout: z.number().min(30).max(300),
 });
 
 export const PingMessageSchema = z.object({

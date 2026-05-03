@@ -19,29 +19,14 @@ export const ROOM_HOST_TRANSFER_TIMEOUT = 10;
 export const ROOM_INACTIVITY_KICK_TIMEOUT = 15;
 
 /**
- * The amount of time a player has to pick a song
- */
-export const PLAYER_PICK_TIMEOUT = 120;
-
-/**
  * The tick count when a new round starts.
  */
 export const QUESTION_START_TICK = 0;
 
 /**
- * The tick count when a question song was picked.
- */
-export const QUESTION_PICKED_SONG_TICK = QUESTION_START_TICK + PLAYER_PICK_TIMEOUT;
-
-/**
  * The amount of ticks before and after a question is/was displayed.
  */
 export const ROUND_PADDING_TICKS = 5;
-
-/**
- * The tick count when in answering phase.
- */
-export const QUESTION_ANSWERING_TICK = QUESTION_PICKED_SONG_TICK + ROUND_PADDING_TICKS;
 
 /**
  * The maximum amount of time music can play (in seconds).

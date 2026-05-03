@@ -14,10 +14,7 @@ import type Player from "../Player";
 import type { ValidRoom } from "../ValidRoom";
 import type Question from "./Question";
 import {
-  PLAYER_PICK_TIMEOUT,
   POINTS_PER_QUESTION,
-  QUESTION_ANSWERING_TICK,
-  QUESTION_PICKED_SONG_TICK,
   QUESTION_START_TICK,
   ROUND_PADDING_TICKS,
 } from "../../shared/ConfigConstants";
@@ -166,16 +163,16 @@ export default abstract class Game implements IEventListener {
 
     switch (this.gamePhase) {
       case GamePhase.PICKING:
-        duration = PLAYER_PICK_TIMEOUT;
+        duration = this.room.config.playerPickTimeout;
         offset = this.questionTick - QUESTION_START_TICK - 1;
         break;
       case GamePhase.QUESTION:
         duration = -ROUND_PADDING_TICKS;
-        offset = this.questionTick - QUESTION_PICKED_SONG_TICK - 1;
+        offset = this.questionTick - this.room.config.getQuestionPickedSongTick() - 1;
         break;
       case GamePhase.ANSWERING:
         duration = this.room.config.timePerQuestion;
-        offset = this.questionTick - QUESTION_ANSWERING_TICK - 1;
+        offset = this.questionTick - this.room.config.getQuestionAnsweringTick() - 1;
         break;
       case GamePhase.ANSWER:
       case GamePhase.PAUSE_MUSIC:
@@ -281,7 +278,7 @@ export default abstract class Game implements IEventListener {
 
         // skip to QUESTION_PICKED_SONG_TICK if questions don't need to be picked or a question is already available
         if (!this.hasPickingPhase || this.currentQuestion) {
-          this.questionTick = QUESTION_PICKED_SONG_TICK;
+          this.questionTick = this.room.config.getQuestionPickedSongTick();
           this.onTick();
           return;
         }
@@ -291,7 +288,7 @@ export default abstract class Game implements IEventListener {
         break;
 
       // show current question
-      case QUESTION_PICKED_SONG_TICK:
+      case this.room.config.getQuestionPickedSongTick():
         this.tryAddNextQuestions();
 
         // start new round if no one added a question in the picking phase
@@ -307,7 +304,7 @@ export default abstract class Game implements IEventListener {
         break;
 
       // start music playback
-      case QUESTION_ANSWERING_TICK:
+      case this.room.config.getQuestionAnsweringTick():
         gamePhaseChanged = true;
         this.gamePhase = GamePhase.ANSWERING;
         this.questionStartTime = Date.now();
