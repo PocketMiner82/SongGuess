@@ -1,3 +1,15 @@
+# [2.14.0-dev.38](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.37...2.14.0-dev.38) (2026-05-03)
+
+
+### Bug Fixes
+
+* **RoomController:** fix type error ([a8c6d0a](https://github.com/PocketMiner82/SongGuess/commit/a8c6d0aa3d66b573030de3202d19728848435196))
+
+
+### Features
+
+* **Config:** allow changing player pick timeout + show in UI ([7c4a1d0](https://github.com/PocketMiner82/SongGuess/commit/7c4a1d063f602761b4c0b39c06f01f5c224aeb0e))
+
 # [2.14.0-dev.37](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.36...2.14.0-dev.37) (2026-05-02)
 
 
