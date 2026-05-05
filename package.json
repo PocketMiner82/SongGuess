@@ -38,7 +38,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^8.2.0",
     "@cloudflare/workers-types": "^4.20260501.1",
-    "@eslint-react/eslint-plugin": "^3.0.0",
+    "@eslint-react/eslint-plugin": "^5.7.2",
     "@types/chroma-js": "^3.1.2",
     "@types/howler": "^2.2.12",
     "@types/lodash": "^4.17.24",
