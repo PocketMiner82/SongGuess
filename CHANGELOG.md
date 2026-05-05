@@ -1,3 +1,10 @@
+# [3.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.1...3.0.0-dev.2) (2026-05-05)
+
+
+### Features
+
+* selected audio position in player picks game is used to define preview playback start position + refactor audio system ([98cdcc0](https://github.com/PocketMiner82/SongGuess/commit/98cdcc0093d98ac0dd2ea8a65eda9bffd4a3d90f))
+
 # [3.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/2.14.0-dev.38...3.0.0-dev.1) (2026-05-03)
 
 
