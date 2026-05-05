@@ -1,17 +1,21 @@
-import {createRoot} from "react-dom/client";
-import React, {useState} from "react";
-import {CookieConsent} from "react-cookie-consent";
-import {TopBar} from "./components/TopBar";
-import {Button} from "./components/Button";
-import { ToastError } from "./components/ToastError";
+import type { Playlist, PlaylistsFile, Song } from "../types/MessageTypes";
+import Papa from "papaparse";
+import * as React from "react";
+import { useState } from "react";
+import { CookieConsent } from "react-cookie-consent";
+import { createRoot } from "react-dom/client";
+import { toast } from "react-toastify";
 import {
-  getFirstSong,
   downloadFile,
   fetchSongByISRC,
-  safeSearch, formatLocalDateTime
-} from "../Utils";
-import Papa from "papaparse";
-import type {Playlist, PlaylistsFile, Song} from "../types/MessageTypes";
+  formatLocalDateTime,
+  getFirstSong,
+  safeSearch,
+} from "../shared/Utils";
+import { Button } from "./components/Button";
+import { ToastDisplay } from "./components/ToastDisplay";
+import { TopBar } from "./components/TopBar";
+
 
 interface CSVRow {
   "Track name": string;
@@ -49,21 +53,21 @@ async function findByISRC(isrc: string): Promise<Song | null> {
  */
 async function findBySearch(term: string): Promise<Song | null> {
   try {
-      const results = await safeSearch(term, {
-        country: "de",
-        media: "music",
-        entity: "song",
-        attribute: "songTerm",
-        limit: 10
-      });
+    const results = await safeSearch(term, {
+      country: "de",
+      media: "music",
+      entity: "song",
+      attribute: "songTerm",
+      limit: 10,
+    });
 
-      const song = getFirstSong(results);
+    const song = getFirstSong(results);
 
-      if (song) {
-        return song;
-      } else {
-        console.warn(`No music track found for ${term}`);
-      }
+    if (song) {
+      return song;
+    } else {
+      console.warn(`No music track found for ${term}`);
+    }
   } catch (error) {
     console.warn(`Failed searching for ${term}:`, error);
   }
@@ -73,7 +77,7 @@ async function findBySearch(term: string): Promise<Song | null> {
 /**
  * Button component that imports playlists from a CSV file.
  */
-function ImportCSV() { 
+function ImportCSV() {
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [progress, setProgress] = useState<string>("");
 
@@ -83,7 +87,8 @@ function ImportCSV() {
    */
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file)
+      return;
 
     setStatus("loading");
     setProgress("Reading CSV file...");
@@ -95,23 +100,21 @@ function ImportCSV() {
         Papa.parse(text, {
           header: true,
           skipEmptyLines: true,
-          transformHeader: (header) => header.trim(),
-          transform: (value) => value.trim(),
+          transformHeader: header => header.trim(),
+          transform: value => value.trim(),
           complete: (results) => {
             if (results.errors.length > 0) {
-              reject(new Error(results.errors.map(e => e.message).join(', ')));
+              reject(new Error(results.errors.map(e => e.message).join(", ")));
             } else {
               resolve(results.data as CSVRow[]);
             }
           },
-          error: (error: Error) => reject(error)
+          error: (error: Error) => reject(error),
         });
       });
 
       if (!records || records.length === 0) {
-        if ((window as any).showToastError) {
-          (window as any).showToastError("CSV file is empty or invalid.");
-        }
+        toast.error("CSV file is empty or invalid.");
         return;
       }
 
@@ -119,15 +122,16 @@ function ImportCSV() {
 
       // Validate required fields and group tracks by playlist name
       const playlistMap = new Map<string, CSVRow[]>();
-      records.forEach(record => {
+      records.forEach((record) => {
         const trackName = record["Track name"];
         const artistName = record["Artist name"];
         const playlistName = record["Playlist name"];
-        const albumName = record["Album"];
-        
+        const albumName = record.Album;
+
         // Skip rows that don't have required fields
-        if (!trackName || !artistName || !playlistName || !albumName) return;
-        
+        if (!trackName || !artistName || !playlistName || !albumName)
+          return;
+
         if (!playlistMap.has(playlistName)) {
           playlistMap.set(playlistName, []);
         }
@@ -147,7 +151,7 @@ function ImportCSV() {
           name: playlistName,
           hrefURL: "https://music.apple.com/us/",
           cover: null,
-          songs: []
+          songs: [],
         };
 
         for (const track of tracks) {
@@ -156,11 +160,11 @@ function ImportCSV() {
             const pCount = processedCount;
             const recLen = records.length;
 
-            await new Promise<void>(r => {
-              let sleepEnd = Date.now() + 60000;
+            await new Promise<void>((r) => {
+              const sleepEnd = Date.now() + 60000;
 
               const update = () => {
-                let curTime = Date.now();
+                const curTime = Date.now();
                 if (sleepEnd > curTime) {
                   setProgress(`Processed ${pCount}/${recLen}. Waiting for ${
                     Math.round((sleepEnd - curTime) / 1000)
@@ -181,7 +185,7 @@ function ImportCSV() {
           requestCount++;
 
           // try finding song by isrc and then falling back to song title based search
-          let song = await findByISRC(track["ISRC"]);
+          let song = await findByISRC(track.ISRC);
           if (!song) {
             song = await findBySearch(`${track["Track name"]} ${track["Artist name"]}`);
           }
@@ -203,9 +207,7 @@ function ImportCSV() {
       }
 
       if (playlists.length === 0) {
-        if ((window as any).showToastError) {
-          (window as any).showToastError("No songs were found. Please check your CSV file format.");
-        }
+        toast.error("No songs were found. Please check your CSV file format.");
         return;
       }
 
@@ -214,7 +216,7 @@ function ImportCSV() {
       // Create PlaylistsFile
       const playlistsFile: PlaylistsFile = {
         version: "1.0",
-        playlists
+        playlists,
       };
 
       // Download the file
@@ -224,21 +226,17 @@ function ImportCSV() {
 
       setStatus("success");
       const totalSongs = playlists.reduce((sum, p) => sum + p.songs.length, 0);
-      let successMessage = `Successfully imported ${playlists.length} playlist(s) with ${totalSongs} song${totalSongs !== 1 ? "s" : ""}!`;
-      
+      const successMessage = `Successfully imported ${playlists.length} playlist(s) with ${totalSongs} song${totalSongs !== 1 ? "s" : ""}!`;
+
       if (notFoundSongs.length > 0) {
         const notFoundList = notFoundSongs.join("\n• ");
-        if ((window as any).showToastError) {
-          (window as any).showToastError(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
-        }
+        toast.error(`Songs not found (${notFoundSongs.length} total):\n• ${notFoundList}`);
       }
-      
+
       setProgress(successMessage);
     } catch (error) {
       console.error("Error importing CSV:", error);
-      if ((window as any).showToastError) {
-        (window as any).showToastError("Failed to import CSV file. Please check the file format and try again.");
-      }
+      toast.error("Failed to import CSV file. Please check the file format and try again.");
       setProgress("");
     }
 
@@ -251,7 +249,7 @@ function ImportCSV() {
       <input
         type="file"
         accept=".csv"
-        onChange={async e => {
+        onChange={async (e) => {
           window.onbeforeunload = () => true;
           await handleImport(e);
           window.onbeforeunload = () => undefined;
@@ -270,9 +268,11 @@ function ImportCSV() {
 
       {status !== "idle" && (
         <div className={`text-sm mt-2 items-center justify-center ${
-          status === "success" ? "text-success" : 
-          "text-gray-600"
-        }`}>
+          status === "success"
+            ? "text-success"
+            : "text-gray-600"
+        }`}
+        >
           {progress}
         </div>
       )}
@@ -284,107 +284,106 @@ function ImportCSV() {
  * Main application component for transferring playlists to SongGuess.
  * Renders the UI with instructions and CSV import functionality.
  */
-function App() {
-
+export function App() {
   return (
-      <div className="flex flex-col h-screen">
-        <CookieConsent location="bottom" buttonText="I understand" overlay >
-          This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
-        </CookieConsent>
+    <div className="flex flex-col h-screen">
+      <CookieConsent location="bottom" buttonText="I understand" overlay>
+        This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
+      </CookieConsent>
 
-        <TopBar />
+      <TopBar />
 
-        <ToastError />
+      <main className="flex-1 overflow-auto">
+        <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
+          <div className="space-y-6">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold mb-4">Transfer Playlists to SongGuess</h1>
+              <p className="text-disabled-text mb-8">
+                Import playlists from any music service using a CSV file
+              </p>
+            </div>
 
-        <main className="flex-1 overflow-auto">
-          <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
-            <div className="space-y-6">
+            <div className="bg-card-bg rounded-lg p-6 space-y-4">
+              <h2 className="text-xl font-bold mb-4">How to get a CSV file:</h2>
+
+              <div className="space-y-4 text-default">
+                <div className="flex items-start space-x-3">
+                  <span className="material-symbols-outlined text-secondary mt-1">looks_one</span>
+                  <div>
+                    <p className="font-semibold">Go to TuneMyMusic</p>
+                    <a
+                      href="https://www.tunemymusic.com/transfer"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      https://www.tunemymusic.com/transfer
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <span className="material-symbols-outlined text-secondary mt-1">looks_two</span>
+                  <div>
+                    <p className="font-semibold">Select your streaming provider</p>
+                    <p className="text-sm text-disabled-text">
+                      Choose the service where your playlist is currently stored (Spotify, Apple Music, YouTube Music, etc.)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <span className="material-symbols-outlined text-secondary mt-1">looks_3</span>
+                  <div>
+                    <p className="font-semibold">Select the playlists</p>
+                    <p className="text-sm text-disabled-text">
+                      Connect to your music service and select the playlist(s) you want to transfer
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <span className="material-symbols-outlined text-secondary mt-1">looks_4</span>
+                  <div>
+                    <p className="font-semibold">Export as CSV</p>
+                    <p className="text-sm text-disabled-text">
+                      When asked for the destination, choose "Export file" → "CSV" to download your playlist as a CSV file
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <span className="material-symbols-outlined text-secondary mt-1">looks_5</span>
+                  <div>
+                    <p className="font-semibold">Import to SongGuess</p>
+                    <p className="text-sm text-disabled-text">
+                      Upload the received CSV file using the "Import CSV" button below
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-disabled-bg my-6"></div>
+
               <div className="text-center">
-                <h1 className="text-3xl font-bold mb-4">Transfer Playlists to SongGuess</h1>
-                <p className="text-disabled-text mb-8">
-                  Import playlists from any music service using a CSV file
-                </p>
-              </div>
-
-              <div className="bg-card-bg rounded-lg p-6 space-y-4">
-                <h2 className="text-xl font-bold mb-4">How to get a CSV file:</h2>
-
-                <div className="space-y-4 text-default">
-                  <div className="flex items-start space-x-3">
-                    <span className="material-symbols-outlined text-secondary mt-1">looks_one</span>
-                    <div>
-                      <p className="font-semibold">Go to TuneMyMusic</p>
-                      <a 
-                        href="https://www.tunemymusic.com/transfer" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        https://www.tunemymusic.com/transfer
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <span className="material-symbols-outlined text-secondary mt-1">looks_two</span>
-                    <div>
-                      <p className="font-semibold">Select your streaming provider</p>
-                      <p className="text-sm text-disabled-text">
-                        Choose the service where your playlist is currently stored (Spotify, Apple Music, YouTube Music, etc.)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <span className="material-symbols-outlined text-secondary mt-1">looks_3</span>
-                    <div>
-                      <p className="font-semibold">Select the playlists</p>
-                      <p className="text-sm text-disabled-text">
-                        Connect to your music service and select the playlist(s) you want to transfer
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <span className="material-symbols-outlined text-secondary mt-1">looks_4</span>
-                    <div>
-                      <p className="font-semibold">Export as CSV</p>
-                      <p className="text-sm text-disabled-text">
-                        When asked for the destination, choose "Export file" → "CSV" to download your playlist as a CSV file
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <span className="material-symbols-outlined text-secondary mt-1">looks_5</span>
-                    <div>
-                      <p className="font-semibold">Import to SongGuess</p>
-                      <p className="text-sm text-disabled-text">
-                        Upload the received CSV file using the "Import CSV" button below
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-disabled-bg my-6"></div>
-
-                <div className="text-center">
-                  <ImportCSV />
-                </div>
-              </div>
-
-              <div className="bg-card-bg rounded-lg p-4">
-                <h3 className="font-semibold mb-2">Notes:</h3>
-                <ul className="text-sm text-disabled-text space-y-1">
-                  <li>• The CSV file should contain information about song title and artist</li>
-                  <li>• Make sure the CSV is properly formatted with the correct headers</li>
-                  <li>• Large playlists may take some time to process especially due to rate limiting of the iTunes Search API</li>
-                </ul>
+                <ImportCSV />
               </div>
             </div>
+
+            <div className="bg-card-bg rounded-lg p-4">
+              <h3 className="font-semibold mb-2">Notes:</h3>
+              <ul className="text-sm text-disabled-text space-y-1">
+                <li>• The CSV file should contain information about song title and artist</li>
+                <li>• Make sure the CSV is properly formatted with the correct headers</li>
+                <li>• Large playlists may take some time to process especially due to rate limiting of the iTunes Search API</li>
+              </ul>
+            </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
+
+      <ToastDisplay />
+    </div>
   );
 }
 

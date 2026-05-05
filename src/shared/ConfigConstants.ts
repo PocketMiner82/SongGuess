@@ -19,9 +19,9 @@ export const ROOM_HOST_TRANSFER_TIMEOUT = 10;
 export const ROOM_INACTIVITY_KICK_TIMEOUT = 15;
 
 /**
- * The tick count when a round starts.
+ * The tick count when a new round starts.
  */
-export const ROUND_START_TICK = 0;
+export const QUESTION_START_TICK = 0;
 
 /**
  * The amount of ticks before and after a question is/was displayed.
@@ -37,9 +37,4 @@ export const ROUND_MAX_MUSIC_PLAY_TIME = 30;
  * How many points a player can get per question.
  * Half of the points are for a correct answer, the other half is for the speed of the answer if correct.
  */
-export const ROUND_POINTS_PER_QUESTION = 1000;
-
-/**
- * The amount of ticks per second.
- */
-export const TICKS_PER_SECOND = 1;
+export const POINTS_PER_QUESTION = 1000;

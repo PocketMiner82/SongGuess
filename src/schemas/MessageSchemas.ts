@@ -1,19 +1,25 @@
 import z from "zod";
 import {
-  ChangeUsernameMessageSchema, AddPlaylistsMessageSchema, RemovePlaylistMessageSchema, StartGameMessageSchema,
-  SelectAnswerMessageSchema, ReturnToMessageSchema, TransferHostMessageSchema
+  AddPlaylistsMessageSchema,
+  ChangeUsernameMessageSchema,
+  PlayerPickSongMessageSchema,
+  RemovePlaylistMessageSchema,
+  ReturnToMessageSchema,
+  SelectAnswerMessageSchema,
+  StartGameMessageSchema,
+  TransferHostMessageSchema,
 } from "./ClientMessageSchemas";
+import { AddLogMessageSchema, UpdateLogMessagesSchema } from "./ServerAdminMessageSchemas";
 import {
-  UpdateMessageSchema,
-  UpdatePlaylistsMessageSchema,
-  CountdownMessageSchema,
   AudioControlMessageSchema,
-  AnswerMessageSchema,
-  QuestionMessageSchema,
-  UpdatePlayedSongsMessageSchema
+  CountdownMessageSchema,
+  ProgressbarUpdateMessageSchema,
+  RoomStateMessage,
+  RoundStateMessageSchema,
+  UpdatePlayedSongsMessageSchema,
+  UpdatePlaylistsMessageSchema,
 } from "./ServerMessageSchemas";
-import {PingMessageSchema, PongMessageSchema, RoomConfigMessageSchema} from "./SharedSchemas";
-import {AddLogMessageSchema, UpdateLogMessagesSchema} from "./ServerAdminMessageSchemas";
+import { PingMessageSchema, PongMessageSchema, RoomConfigMessageSchema } from "./SharedSchemas";
 
 
 const _ClientMessageSchema = z.discriminatedUnion("type", [
@@ -24,30 +30,29 @@ const _ClientMessageSchema = z.discriminatedUnion("type", [
   StartGameMessageSchema,
   SelectAnswerMessageSchema,
   ReturnToMessageSchema,
-  TransferHostMessageSchema
+  TransferHostMessageSchema,
+  PlayerPickSongMessageSchema,
 ]);
 
 const _ServerMessageSchema = z.discriminatedUnion("type", [
-  UpdateMessageSchema,
+  RoomStateMessage,
   UpdatePlaylistsMessageSchema,
   RoomConfigMessageSchema,
   CountdownMessageSchema,
   AudioControlMessageSchema,
-  QuestionMessageSchema,
-  AnswerMessageSchema,
+  RoundStateMessageSchema,
   UpdatePlayedSongsMessageSchema,
   AddLogMessageSchema,
-  UpdateLogMessagesSchema
+  UpdateLogMessagesSchema,
+  ProgressbarUpdateMessageSchema,
 ]);
-
 
 /**
  * Schema for a fallback message type used when the message type is not recognized.
  */
 export const OtherMessageSchema = z.object({
-  type: z.literal("other").default("other")
-})
-
+  type: z.literal("other").default("other"),
+});
 
 /**
  * Schema for messages that can be either server messages, client messages, or other messages.
@@ -56,9 +61,8 @@ export const OtherMessageSchema = z.object({
 export const SourceMessageSchema = z.union([
   _ServerMessageSchema,
   _ClientMessageSchema,
-  OtherMessageSchema
+  OtherMessageSchema,
 ]);
-
 
 /**
  * Schema for confirmation messages sent in response to client actions.
@@ -74,9 +78,8 @@ export const ConfirmationMessageSchema = z.object({
   /**
    * Optional error message if the requested action could not be performed.
    */
-  error: z.optional(z.string())
+  error: z.optional(z.string()),
 });
-
 
 /**
  * A message sent from the server.
@@ -85,9 +88,8 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
   ConfirmationMessageSchema,
   PingMessageSchema,
   PongMessageSchema,
-  _ServerMessageSchema
+  _ServerMessageSchema,
 ]);
-
 
 /**
  * A message sent from a client.
@@ -96,5 +98,5 @@ export const ClientMessageSchema = z.discriminatedUnion("type", [
   ConfirmationMessageSchema,
   PingMessageSchema,
   PongMessageSchema,
-  _ClientMessageSchema
+  _ClientMessageSchema,
 ]);

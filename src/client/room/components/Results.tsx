@@ -1,9 +1,8 @@
-import React from "react";
+import { useMemo } from "react";
 import { Button } from "../../components/Button";
-import {useControllerContext, useRoomControllerMessageTypeListener} from "../RoomController";
-import {ResultsPlayerList} from "./ResultsPlayerList";
-import {PlaylistCard} from "../../components/PlaylistCard";
-
+import { PlaylistCard } from "../../components/PlaylistCard";
+import { useControllerContext, useRoomControllerMessageTypeListener } from "../RoomController";
+import { ResultsPlayerList } from "./ResultsPlayerList";
 
 /**
  * Component for displaying list of songs played during the game round.
@@ -14,22 +13,31 @@ function PlayedSongsList() {
   useRoomControllerMessageTypeListener(controller, "update_played_songs");
 
   return controller.playedSongs.length > 0 && (
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4 text-center">
-          Played Songs
-        </h3>
-        <div className="space-y-2 mx-auto">
-          {controller.playedSongs.map((song, idx) => (
-              <PlaylistCard
+    <div className="mt-8">
+      <h3 className="text-xl font-semibold mb-4 text-center">
+        Played Songs
+      </h3>
+      <div className="space-y-2 mx-auto">
+        {controller.playedSongs.map((song, idx) => (
+          song
+            ? (
+                <PlaylistCard
                   key={idx}
-                  index={idx}
                   title={song.name}
                   subtitle={song.artist}
                   coverURL={song.cover}
-                  hrefURL={song.hrefURL} />
-          ))}
-        </div>
+                  hrefURL={song.hrefURL}
+                />
+              )
+            : (
+                <PlaylistCard
+                  key={idx}
+                  title="(Skipped Round)"
+                />
+              )
+        ))}
       </div>
+    </div>
   );
 }
 
@@ -39,12 +47,14 @@ function PlayedSongsList() {
  */
 export function Results() {
   const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "update");
-
-  if (controller.state !== "results") return null;
+  useRoomControllerMessageTypeListener(controller, "room_state");
 
   // sort by descending score
-  let rankedPlayers = controller.players.sort((a, b) => b.points - a.points);
+  const rankedPlayers = useMemo(() =>
+    [...controller.playerMessages].sort((a, b) => b.points - a.points), [controller.playerMessages]);
+
+  if (controller.state !== "results")
+    return null;
 
   return (
     <div className="space-y-6 lg:max-w-3/4 2xl:max-w-1/2 mx-auto p-4 min-h-full">
@@ -58,18 +68,19 @@ export function Results() {
       </div>
 
       <ResultsPlayerList
-          rankedPlayers={rankedPlayers}
-          showField="points"/>
+        rankedPlayers={rankedPlayers}
+        showField="points"
+      />
 
       {controller.isHost && (
-          <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
-            <Button onClick={() => controller.returnTo("lobby")}>
-              Return to Lobby
-            </Button>
-            <Button onClick={() => controller.startGame()}>
-              Play Again
-            </Button>
-          </div>
+        <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mt-8 mb-16">
+          <Button type="button" onClick={() => controller.returnTo("lobby")} aria-label="Return to lobby">
+            Return to Lobby
+          </Button>
+          <Button type="button" onClick={() => controller.startGame()} aria-label="Start new game">
+            Play Again
+          </Button>
+        </div>
       )}
 
       <PlayedSongsList />

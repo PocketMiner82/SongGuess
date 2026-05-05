@@ -3,10 +3,36 @@
     <option name="myName" value="Project Default" />
     <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="JSUnusedGlobalSymbols" enabled="true" level="INFORMATION" enabled_by_default="true" editorAttributes="INFORMATION_ATTRIBUTES" />
+    <inspection_tool class="MarkdownIncorrectTableFormatting" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WEAK WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="MarkdownIncorrectlyNumberedListItem" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="MarkdownLinkDestinationWithSpaces" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="MarkdownNoTableBorders" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="MarkdownOutdatedTableOfContents" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="MarkdownUnresolvedFileReference" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="MarkdownUnresolvedHeaderReference" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="MarkdownUnresolvedLinkLabel" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
+      <scope name="Open Files" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="RegExpRedundantEscape" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SpellCheckingInspection" enabled="true" level="TYPO" enabled_by_default="true">
       <option name="processCode" value="false" />
       <option name="processLiterals" value="false" />
       <option name="processComments" value="true" />
     </inspection_tool>
+    <inspection_tool class="YAMLSchemaValidation" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
   </profile>
 </component>

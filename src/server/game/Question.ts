@@ -1,79 +1,31 @@
-import type {AnswerMessage, QuestionMessage, Song} from "../../types/MessageTypes";
-import type ServerConfig from "../config/ServerConfig";
+import type GamePhase from "../../shared/game/GamePhase";
+import type {
+  QuestionMessage,
+  Song,
+} from "../../types/MessageTypes";
 import _ from "lodash";
+
 
 export default abstract class Question {
   /**
-   * The random start position index (0-2) for this question.
+   * The random/user-defined audio start position index (0-2) for this question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  readonly rndStartPos: number = _.random(0, 2);
+  startPos: number = _.random(0, 2);
 
-  /**
-   * The list of songs for this question (1 correct answer + 3 distractors).
-   */
-  answers: Song[] = [];
 
   /**
    * Constructs a question asking which is the correct song.
-   * After all questions are added, {@link init} MUST be called.
    *
    * @param song The correct song for this question.
-   * @param config The room's config
    */
-  constructor(readonly song: Song, readonly config: ServerConfig) {
-    this.answers.push(song);
-  }
+  protected constructor(readonly song: Song) { }
 
   /**
-   * Initializes this question. MUST be called AFTER all questions are added.
-   * @param remainingSongs can contain all songs that were not yet added. Needed for {@link MultipleChoiceQuestion}s.
+   * Returns the round message for the current phase.
+   * @param gamePhase the current game phase
    */
-  abstract init(remainingSongs?: Song[]): void;
-
-  /**
-   * Should return the correct answer index.
-   */
-  abstract getCorrectAnswer(): number;
-
-  /**
-   * Extracts song names from the questions array.
-   *
-   * @returns An array of song names for the answer options.
-   */
-  getSongNames() {
-    return this.answers.map(s => s.name);
-  }
-
-  /**
-   * Creates a question message for sending to clients.
-   *
-   * @param n The question number.
-   * @returns The question message.
-   */
-  getQuestionMessage(n: number): QuestionMessage {
-    return {
-      type: "question",
-      number: n,
-      answerOptions: this.getSongNames(),
-      rndStartPos: this.rndStartPos
-    };
-  }
-
-  /**
-   * Creates an answer message for sending to clients.
-   *
-   * @param n The question number.
-   * @returns The answer message.
-   */
-  getAnswerMessage(n: number): AnswerMessage {
-    return {
-      type: "answer",
-      number: n,
-      answerOptions: this.getSongNames(),
-      correctAnswer: this.getCorrectAnswer()
-    };
-  }
+  abstract getQuestionMessage(gamePhase: GamePhase): QuestionMessage;
 }
 
 /**

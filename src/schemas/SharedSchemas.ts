@@ -1,11 +1,18 @@
 import z from "zod";
-import {appleMusicCoverRegex, appleMusicPreviewRegex, appleMusicRegex, usernameRegex} from "./ValidationRegexes";
+import {
+  appleMusicCoverRegex,
+  appleMusicPreviewRegex,
+  appleMusicRegex,
+  soundCloudCoverRegex,
+  soundCloudRegex,
+  soundCloudSongRegex,
+  usernameRegex,
+} from "./ValidationRegexes";
 
 /**
  * The zod schema for the username.
  */
 export const UsernameSchema = z.stringFormat("user", usernameRegex);
-
 
 export const SongSchema = z.object({
   /**
@@ -21,18 +28,18 @@ export const SongSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.url({pattern: appleMusicRegex}),
+  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
 
   /**
    * Cover URL of the song.
    */
-  cover: z.nullable(z.url({pattern: appleMusicCoverRegex})),
+  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
 
   /**
    * A URL to the audio file of the song.
-   * Currently only audio previews from Apple Music are allowed.
+   * Currently only audio previews from Apple Music and SoundCloud are allowed.
    */
-  audioURL: z.url({pattern: appleMusicPreviewRegex})
+  audioURL: z.union([z.url({ pattern: appleMusicPreviewRegex }), z.stringFormat("SoundCloudSong", soundCloudSongRegex)]),
 });
 
 export const PlaylistSchema = z.object({
@@ -49,19 +56,18 @@ export const PlaylistSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.url({pattern: appleMusicRegex}),
+  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
 
   /**
    * Cover URL of the playlist.
    */
-  cover: z.nullable(z.url({pattern: appleMusicCoverRegex})),
+  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
 
   /**
    * A list of song names and music urls
    */
-  songs: z.array(SongSchema)
+  songs: z.array(SongSchema),
 });
-
 
 export const PlaylistsFileSchema = z.object({
   /**
@@ -72,12 +78,20 @@ export const PlaylistsFileSchema = z.object({
   /**
    * The playlists of this export.
    */
-  playlists: z.array(PlaylistSchema)
+  playlists: z.array(PlaylistSchema),
 });
-
 
 export const RoomConfigMessageSchema = z.object({
   type: z.literal("room_config").default("room_config"),
+
+  /**
+   * The game mode being played.
+   * - multiple_choice: the server selects random songs from the provided playlist and provides a multiple choice
+   *   question with distractions.
+   * - player_picks: a player from the room picks a song for other players to guess each round. other players have to
+   *   guess the song title by typing.
+   */
+  gameMode: z.literal(["multiple_choice", "player_picks"]),
 
   /**
    * Whether to perform advanced filtering tactics when generating the songs array.
@@ -91,9 +105,9 @@ export const RoomConfigMessageSchema = z.object({
   endWhenAnswered: z.boolean(),
 
   /**
-   * The amount of questions to ask per round.
+   * The amount of rounds to play.
    */
-  questionsCount: z.number().min(1).max(30),
+  roundsCount: z.number().min(1).max(30),
 
   /**
    * The time per question in each round.
@@ -111,10 +125,16 @@ export const RoomConfigMessageSchema = z.object({
    *  - 1: close to middle of audio
    *  - 2: close to end of audio
    *  - 3: random of the above
+   *
+   * Used as default value in PlayerPicksGame, used as forced position in MultipleChoiceGame.
    */
-  audioStartPosition: z.number().min(0).max(3)
-});
+  audioStartPosition: z.number().min(0).max(3),
 
+  /**
+   * The amount of time a player should have to pick a song.
+   */
+  playerPickTimeout: z.number().min(30).max(300),
+});
 
 export const PingMessageSchema = z.object({
   type: z.literal("ping").default("ping"),
@@ -122,9 +142,8 @@ export const PingMessageSchema = z.object({
   /**
    * The sequence number the pong should respond with
    */
-  seq: z.number()
+  seq: z.number(),
 });
-
 
 export const PongMessageSchema = z.object({
   type: z.literal("pong").default("pong"),
@@ -132,5 +151,5 @@ export const PongMessageSchema = z.object({
   /**
    * The sequence number asked for in the ping packet.
    */
-  seq: z.number()
+  seq: z.number(),
 });
