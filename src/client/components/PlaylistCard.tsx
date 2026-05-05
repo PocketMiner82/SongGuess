@@ -1,101 +1,137 @@
 import type { ReactNode } from "react";
 import type ICookieProps from "../../types/ICookieProps";
-import { useEffect, useRef, useState } from "react";
+import type { AudioPlayer } from "../room/audio/AudioPlayerHook";
 import { useCookies } from "react-cookie";
+import { ROUND_PADDING_TICKS } from "../../shared/ConfigConstants";
+import { useAudioPlayer } from "../room/audio/AudioPlayerHook";
+import { useControllerContext, useRoomControllerMessageTypeListener } from "../room/RoomController";
+
+
+interface PlaylistCardProps {
+  /**
+   * The primary display name.
+   */
+  title: string;
+
+  /**
+   * Optional secondary text.
+   */
+  subtitle?: string;
+
+  /**
+   * URL for the cover image or null.
+   */
+  coverURL?: string | null;
+
+  /**
+   * URL to open in a new tab when clicking the title.
+   */
+  hrefURL?: string;
+
+  /**
+   * Whether to display the delete action.
+   */
+  showDelete?: boolean;
+
+  /**
+   * Components rendered at the right portion of the card (e.g., a button).
+   */
+  children?: ReactNode;
+
+  /**
+   * The preview URL for this playlist, utilized to render the audio player preview.
+   */
+  previewURL?: string;
+
+  /**
+   * The start position for the audio preview. See {@link RoomConfigMessageSchema.audioStartPosition} (only 0-2 here!).
+   */
+  audioStartPos?: number;
+}
+
+function StateIcon({ state }: { state: AudioPlayer["state"] }) {
+  const getIcon = () => {
+    switch (state) {
+      case "loading":
+        return <span className="material-symbols-outlined animate-spin">progress_activity</span>;
+
+      case "playing":
+        return <span className="material-icons">stop</span>;
+
+      case "not_playing":
+        return <span className="material-icons">play_arrow</span>;
+    }
+  };
+
+  return (
+    <div className="text-white flex items-center justify-center text-3xl bg-black/50 rounded-full w-10 aspect-square">
+      {getIcon()}
+    </div>
+  );
+}
+
+function stateToAriaLabel(state: AudioPlayer["state"]) {
+  switch (state) {
+    case "loading":
+      return "Loading preview...";
+    case "playing":
+      return "Stop preview";
+    case "not_playing":
+      return "Start preview";
+  }
+}
 
 /**
  * Displays a single playlist entry with cover art, title and subtitle.
  * Shows a delete button for hosts.
- *
- * @param index The playlist's position in the list
- * @param title The primary display name
- * @param subtitle Optional secondary text
- * @param coverURL URL for the cover image or null
- * @param hrefURL URL to open in new tab when clicking the title.
- * @param children What to show at the right part of the card (e.g. a button)
- * @param previewURL The preview url for this playlist, used to show audio player preview.
  */
-export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, previewURL }: {
-  title: string;
-  subtitle?: string;
-  coverURL?: string | null;
-  hrefURL?: string;
-  showDelete?: boolean;
-  children?: ReactNode;
-  previewURL?: string;
-}) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [cookies] = useCookies<"audioVolume", ICookieProps>(["audioVolume"]);
+export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, previewURL, audioStartPos }: PlaylistCardProps) {
+  const controller = useControllerContext();
+  const [cookies] = useCookies<"audioVolume" | "audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = cookies.audioVolume ?? 0.2;
-    }
-  }, [cookies.audioVolume]);
+  useRoomControllerMessageTypeListener(controller, "room_config");
+
+  const player = useAudioPlayer(
+    cookies.audioVolume ?? 0.2,
+    cookies.audioMuted ?? false,
+  );
 
   const handlePlayPause = () => {
-    if (!audioRef.current)
-      return;
-    if (isPlaying) {
-      audioRef.current.pause();
+    if (player.state === "not_playing") {
+      player.load(previewURL!);
+      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + ROUND_PADDING_TICKS);
     } else {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().then();
+      player.howler?.pause();
     }
-    setIsPlaying(!isPlaying);
   };
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    const handleEnded = () => setIsPlaying(false);
-    if (audio) {
-      audio.addEventListener("ended", handleEnded);
-    }
-    return () => {
-      if (audio) {
-        audio.removeEventListener("ended", handleEnded);
-      }
-    };
-  }, []);
 
   return (
     <li className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
-      {coverURL
-        ? (
-            <div className="relative aspect-square flex-none w-25 lg:w-30 2xl:w-40">
-              <img
-                src={coverURL}
-                alt="Album Cover"
-                className="h-full w-full object-cover rounded-xl"
-              />
-              {previewURL && (
-                <button
-                  type="button"
-                  onClick={handlePlayPause}
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl hover:bg-black/50 hover:cursor-pointer transition-colors"
-                  aria-label={isPlaying ? "Stop preview" : "Play preview"}
-                >
-                  <span className="material-icons text-white text-3xl">{isPlaying ? "stop" : "play_arrow"}</span>
-                </button>
-              )}
-            </div>
-          )
-        : (
-            <div className="relative min-w-25 min-h-25 lg:min-w-30 lg:min-h-30 2xl:min-w-40 2xl:min-h-40 rounded-xl bg-disabled-bg flex items-center justify-center">
-              <span className="text-disabled-text text-4xl">?</span>
-              {previewURL && (
-                <button
-                  type="button"
-                  onClick={handlePlayPause}
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl hover:bg-black/50 transition-colors"
-                  aria-label={isPlaying ? "Stop preview" : "Play preview"}
-                >
-                  <span className="material-icons text-white text-3xl">{isPlaying ? "stop" : "play_arrow"}</span>
-                </button>
-              )}
-            </div>
-          )}
+      <div className="relative aspect-square flex-none flex w-25 lg:w-30 2xl:w-40 items-center justify-center bg-disabled-bg rounded-xl">
+        {
+          coverURL
+            ? (
+                <img
+                  src={coverURL}
+                  alt="Album Cover"
+                  className="h-full w-full object-cover rounded-xl"
+                />
+              )
+            : (
+                <div className="rounded-xl text-disabled-text text-4xl">?</div>
+              )
+        }
+        {previewURL && (
+          <button
+            type="button"
+            onClick={handlePlayPause}
+            className="absolute inset-0 flex items-center justify-center rounded-xl hover:bg-black/50 hover:cursor-pointer transition-colors"
+            aria-label={stateToAriaLabel(player.state)}
+          >
+            <StateIcon state={player.state} />
+          </button>
+        )}
+      </div>
       <div className="w-full">
         {hrefURL
           ? (
@@ -113,14 +149,6 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
             )}
 
         {subtitle && <div className="mt-1 text-sm text-disabled-text block">{subtitle}</div>}
-
-        {previewURL && (
-          <>
-            <audio ref={audioRef} src={previewURL} preload="none">
-              <track kind="captions" label="No captions available" default />
-            </audio>
-          </>
-        )}
       </div>
       <div className="flex items-center justify-center">
         {children}

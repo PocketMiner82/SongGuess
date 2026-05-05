@@ -11,7 +11,7 @@ import { TopBar } from "./components/TopBar";
 import { ChooseUsernameDialog } from "./modal/ChooseUsernameDialog";
 import { showConfirm } from "./modal/DialogOpeners";
 import { Modal } from "./modal/Modal";
-import { Audio } from "./room/components/Audio";
+import { Audio } from "./room/audio/Audio";
 import { BottomBar } from "./room/components/BottomBar";
 import { Ingame } from "./room/components/ingame/Ingame";
 import { QuestionHeader } from "./room/components/ingame/QuestionHeader";

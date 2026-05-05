@@ -33,6 +33,10 @@ export interface SearchMusicComponentProps {
   // should return true when the playlist add was sent successfully
   onPlaylistSelected: (playlist: Playlist) => Promise<boolean>;
   onSuccess?: () => void;
+  /**
+   * The start position for the audio preview. See {@link RoomConfigMessageSchema.audioStartPosition} (only 0-2 here!).
+   */
+  audioStartPos?: number;
 }
 
 /**
@@ -44,6 +48,7 @@ export function SearchMusicComponent({
   onlyAcceptSongs = false,
   onPlaylistSelected,
   onSuccess,
+  audioStartPos,
 }: SearchMusicComponentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
@@ -178,6 +183,7 @@ export function SearchMusicComponent({
                 coverURL={playlist.cover}
                 hrefURL={playlist.hrefURL}
                 previewURL={playlist.songs.length === 1 ? playlist.songs[0].audioURL : undefined}
+                audioStartPos={audioStartPos}
               >
                 <Button
                   onClick={() => handleSelectResult(playlist, idx)}

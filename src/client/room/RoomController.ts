@@ -561,7 +561,9 @@ export class RoomController {
       case "round_state":
         if (msg.gamePhase === GamePhase.QUESTION) {
           this.questionData = new QuestionData();
-          this.questionData.audioStartPos = msg.question!.startPos;
+        }
+        if (msg.question) {
+          this.questionData.audioStartPos = msg.question.startPos;
         }
         this.questionData.roundMsg = msg;
         break;
