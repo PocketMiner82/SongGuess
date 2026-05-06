@@ -1,3 +1,10 @@
+# [3.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.2...3.0.0-dev.3) (2026-05-06)
+
+
+### Bug Fixes
+
+* **normalizeSongName:** also filter out parens not at end ([30bc6c2](https://github.com/PocketMiner82/SongGuess/commit/30bc6c206a962aedced5667f104f382894c1bd90))
+
 # [3.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.1...3.0.0-dev.2) (2026-05-05)
 
 
