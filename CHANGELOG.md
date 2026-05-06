@@ -1,3 +1,14 @@
+# [3.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.3...3.0.0-dev.4) (2026-05-06)
+
+
+### Bug Fixes
+
+* **fixedCoverSize:** set fixed size to 160px (max size of cover in components) ([b25d6bb](https://github.com/PocketMiner82/SongGuess/commit/b25d6bb092eb0f07ed7fefc641c77adec8225975))
+* **PlayerPicksGame:** don't be as forgiving to get bonus points ([1b69307](https://github.com/PocketMiner82/SongGuess/commit/1b6930759c6f62d448a22bf724341013da9e1ee4))
+* **PlayerPicksGame:** improve scoring logic by using combination of levenshtein ratio and token set ratio ([9c16b5f](https://github.com/PocketMiner82/SongGuess/commit/9c16b5fd5b3ea2c807afb990d6119652bab478b3))
+* **PlayerPicksQuestionDisplay:** disable input when answer shown ([ef28a86](https://github.com/PocketMiner82/SongGuess/commit/ef28a8652ae4f05f083e88670006ba83e937262a))
+* **PlaylistCard:** wrap playlist title anywhere ([b747147](https://github.com/PocketMiner82/SongGuess/commit/b747147968e49283b877b2b46974b07fff6a9982))
+
 # [3.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.2...3.0.0-dev.3) (2026-05-06)
 
 
