@@ -1,3 +1,10 @@
+# [3.0.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.6...3.0.0-dev.7) (2026-05-06)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** correct token_set_ratio weight calculation ([6decaa9](https://github.com/PocketMiner82/SongGuess/commit/6decaa9dd60b501752162738c4d0305b5fb8d69f))
+
 # [3.0.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.5...3.0.0-dev.6) (2026-05-06)
 
 
