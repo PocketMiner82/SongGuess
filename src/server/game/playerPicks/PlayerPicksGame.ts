@@ -2,7 +2,7 @@ import type { ClientMessage, ConfirmationMessage, SelectAnswerMessage, ServerMes
 import type Player from "../../Player";
 import type Question from "../Question";
 import { ratio, token_set_ratio } from "fuzzball";
-import { POINTS_PER_QUESTION } from "../../../shared/ConfigConstants";
+import { ANSWER_MIN_SIMILARITY, POINTS_PER_QUESTION } from "../../../shared/ConfigConstants";
 import GamePhase from "../../../shared/game/GamePhase";
 import { normalizeSongName } from "../../../shared/Utils";
 import Game from "../Game";
@@ -123,7 +123,7 @@ export class PlayerPicksGame extends Game {
   /**
    * Core scoring logic that calculates points based on string similarity.
    * @remarks
-   * A minimum similarity of 75% is required to score. Points are scaled linearly using the similarity from 75% to 100%.
+   * A minimum similarity of {@link ANSWER_MIN_SIMILARITY} is required to score. Points are scaled linearly from that point until 100%.
    * @param correctAnswer - The normalized ground-truth string.
    * @param playerAnswer - The normalized player-submitted string.
    * @param avgWithTokenSetRatio - `true`: average the levenshtein ratio with the token set ratio in the calculation.
@@ -159,9 +159,9 @@ export class PlayerPicksGame extends Game {
       similarity = rat;
     }
 
-    if (similarity >= 75) {
-      // scale up to half the points per question linearly with 75% - 100% similarity but don't be zero
-      return Math.max(1, ((similarity - 75) / 25) * (POINTS_PER_QUESTION / 2));
+    if (similarity >= ANSWER_MIN_SIMILARITY) {
+      // scale up to half the points per question linearly with the similarity range but don't be zero
+      return Math.max(1, ((similarity - ANSWER_MIN_SIMILARITY) / (100 - ANSWER_MIN_SIMILARITY)) * (POINTS_PER_QUESTION / 2));
     }
     return 0;
   }

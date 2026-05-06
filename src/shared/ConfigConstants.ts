@@ -38,3 +38,9 @@ export const ROUND_MAX_MUSIC_PLAY_TIME = 30;
  * Half of the points are for a correct answer, the other half is for the speed of the answer if correct.
  */
 export const POINTS_PER_QUESTION = 1000;
+
+/**
+ * Minimum similarity required to score in a player picks game.
+ * Points are scaled linearly from that point until 100%.
+ */
+export const ANSWER_MIN_SIMILARITY = 50;
