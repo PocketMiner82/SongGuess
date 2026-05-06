@@ -126,9 +126,13 @@ export class PlayerPicksGame extends Game {
    * A minimum similarity of 75% is required to score. Points are scaled linearly using the similarity from 75% to 100%.
    * @param correctAnswer - The normalized ground-truth string.
    * @param playerAnswer - The normalized player-submitted string.
+   * @param avgWithTokenSetRatio - `true`: average the levenshtein ratio with the token set ratio in the calculation.
+   *                               will also scale the similarity based on the length of the target string, being more
+   *                               forgiving with longer target strings.
+   *                               `false`: only use levenshtein.
    * @returns A score ranging from 0 to half of {@link POINTS_PER_QUESTION}.
    */
-  private getPointsByDistance(correctAnswer: string, playerAnswer: string) {
+  private getPointsByDistance(correctAnswer: string, playerAnswer: string, avgWithTokenSetRatio: boolean) {
     if (!correctAnswer) {
       return 0;
     }
@@ -138,21 +142,26 @@ export class PlayerPicksGame extends Game {
       full_process: false,
     });
 
-    // more forgiving
-    const tokenSetRatio = token_set_ratio(correctAnswer, playerAnswer, {
-      full_process: false,
-    });
+    let similarity: number;
+    if (avgWithTokenSetRatio) {
+      // more forgiving
+      const tokenSetRatio = token_set_ratio(correctAnswer, playerAnswer, {
+        full_process: false,
+      });
 
-    // scale the similarity based on the length of the target string.
-    // if the target string gets, very long, be more forgiving.
-    const cappedLen = Math.min(correctAnswer.length, 100);
-    const weight = cappedLen / 100;
+      // scale the similarity based on the length of the target string.
+      // if the target string gets, very long, be more forgiving.
+      const cappedLen = Math.min(correctAnswer.length, 100);
+      const weight = cappedLen / 100;
 
-    const similarity = (1 - weight) * rat + weight * tokenSetRatio;
+      similarity = (1 - weight) * rat + weight * tokenSetRatio;
+    } else {
+      similarity = rat;
+    }
 
-    if (similarity > 74) {
-      // scale up to half the points per question linearly with 75% - 100% similarity
-      return ((similarity - 74) / 26) * (POINTS_PER_QUESTION / 2);
+    if (similarity >= 75) {
+      // scale up to half the points per question linearly with 75% - 100% similarity but don't be zero
+      return Math.max(1, ((similarity - 75) / 25) * (POINTS_PER_QUESTION / 2));
     }
     return 0;
   }
@@ -160,6 +169,7 @@ export class PlayerPicksGame extends Game {
   /**
    * Calculates points based on the similarity of the "base" song title,
    * effectively ignoring any parenthetical metadata of the solution like "(feat. Artist)" or "[Live]".
+   * Gets more forgiving the longer the target string.
    * @param player - The player object containing the submitted answer data.
    * @see this.getPointsByDistance
    * @returns A score between 0 and 50% of the maximum round points.
@@ -169,7 +179,7 @@ export class PlayerPicksGame extends Game {
     const playerAnswer = normalizeSongName(player.answerData?.answer ?? "", false);
     const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
 
-    return this.getPointsByDistance(correctAnswer, playerAnswer);
+    return this.getPointsByDistance(correctAnswer, playerAnswer, true);
   }
 
   /**
@@ -183,7 +193,9 @@ export class PlayerPicksGame extends Game {
     const playerAnswer = normalizeSongName(player.answerData?.answer ?? "", false);
     const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, false);
 
-    return this.getPointsByDistance(correctAnswer, playerAnswer);
+    // do not use token set ratio for this, as points with parens should
+    // only give bonus points if player typed song title AND parens almost perfectly
+    return this.getPointsByDistance(correctAnswer, playerAnswer, false);
   }
 
   calculatePoints() {
