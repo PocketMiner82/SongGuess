@@ -197,7 +197,7 @@ export default class API implements Party.Server {
     try {
       const data = JSON.parse(json);
       const name: string = data.name ?? url;
-      const cover: string | null = data.image ?? null;
+      const cover: string | null = fixedCoverSize(data.image ?? null);
       let songs: Song[] = [];
 
       // album always provides tracks

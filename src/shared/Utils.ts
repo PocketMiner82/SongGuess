@@ -238,9 +238,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
  * @returns the replaced url or null if the provided param is not a string
  */
 export function fixedCoverSize(url: string | undefined | null): string | null {
-  return !url
-    ? null
-    : url.replace(/\/[^/][^/x]*x[^/]+bb\.([a-z]+)$/, "/486x486bb.$1");
+  return url?.replace(/\/[^/][^/x]*x[^/]+bb\.([a-z]+)$/, "/160x160bb.$1") ?? null;
 }
 
 /**
