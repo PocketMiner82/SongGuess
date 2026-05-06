@@ -46,7 +46,7 @@ export function formatLocalDateTime(date: Date): string {
  * characters and optionally parenthetical metadata.
  *
  * @param name - The original song title to be processed.
- * @param removeParens - If true, removes trailing content in `()` or `[]` (e.g., " (feat. Artist)").
+ * @param removeParens - If true, removes content in `()` or `[]` (e.g., " (feat. Artist)").
  * @see convertToAlnum
  * @returns The processed and normalized string.
  */
@@ -54,8 +54,11 @@ export function normalizeSongName(name: string, removeParens: boolean): string {
   let normalizedName = name.toLowerCase();
 
   if (removeParens) {
-    // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
-    normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
+    // removes content in parens () or [] or {}
+    normalizedName = normalizedName
+      .replace(/\(.*\)/g, "")
+      .replace(/\[.*\]/g, "")
+      .replace(/\{.*\}/g, "");
   }
 
   return convertToAlnum(normalizedName);
