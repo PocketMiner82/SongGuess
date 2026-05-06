@@ -132,7 +132,7 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
           </button>
         )}
       </div>
-      <div className="w-full">
+      <div className="w-full min-w-0">
         {hrefURL
           ? (
               <a
@@ -145,7 +145,7 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
               </a>
             )
           : (
-              <span className="text-xl font-medium wrap-break-word">{title}</span>
+              <span className="text-xl font-medium wrap-anywhere">{title}</span>
             )}
 
         {subtitle && <div className="mt-1 text-sm text-disabled-text block">{subtitle}</div>}
