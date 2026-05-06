@@ -1,3 +1,10 @@
+# [3.0.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.5...3.0.0-dev.6) (2026-05-06)
+
+
+### Bug Fixes
+
+* **PlayerPicksGame:** use ANSWER_MIN_SIMILARITY config constant ([0cbe342](https://github.com/PocketMiner82/SongGuess/commit/0cbe342637db0d8b3b0267ecf9a92ff318a7bb84))
+
 # [3.0.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.4...3.0.0-dev.5) (2026-05-06)
 
 
