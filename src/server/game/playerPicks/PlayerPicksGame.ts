@@ -1,7 +1,7 @@
 import type { ClientMessage, ConfirmationMessage, SelectAnswerMessage, ServerMessage } from "../../../types/MessageTypes";
 import type Player from "../../Player";
 import type Question from "../Question";
-import { distance } from "fastest-levenshtein";
+import { ratio, token_set_ratio } from "fuzzball";
 import { POINTS_PER_QUESTION } from "../../../shared/ConfigConstants";
 import GamePhase from "../../../shared/game/GamePhase";
 import { normalizeSongName } from "../../../shared/Utils";
@@ -123,9 +123,7 @@ export class PlayerPicksGame extends Game {
   /**
    * Core scoring logic that calculates points based on string similarity.
    * @remarks
-   * Uses Levenshtein distance to determine how close the player's answer is to the source.
-   * A minimum similarity of 40% is required to score. Points are scaled linearly
-   * from 40% (0 points) to 100% (max points).
+   * A minimum similarity of 75% is required to score. Points are scaled linearly using the similarity from 75% to 100%.
    * @param correctAnswer - The normalized ground-truth string.
    * @param playerAnswer - The normalized player-submitted string.
    * @returns A score ranging from 0 to half of {@link POINTS_PER_QUESTION}.
@@ -135,13 +133,26 @@ export class PlayerPicksGame extends Game {
       return 0;
     }
 
-    const levenshteinDist = distance(playerAnswer, correctAnswer);
-    const similarity = 1 - (levenshteinDist / correctAnswer.length);
+    // stricter
+    const rat = ratio(correctAnswer, playerAnswer, {
+      full_process: false,
+    });
 
-    // answer must be at least 40% correct to be counted
-    if (similarity >= 0.4) {
-      // scale 0-500 points linear with 40% - 100% similarity; will be at max half the points
-      return ((similarity - 0.4) / 0.6) * (POINTS_PER_QUESTION / 2);
+    // more forgiving
+    const tokenSetRatio = token_set_ratio(correctAnswer, playerAnswer, {
+      full_process: false,
+    });
+
+    // scale the similarity based on the length of the target string.
+    // if the target string gets, very long, be more forgiving.
+    const cappedLen = Math.min(correctAnswer.length, 100);
+    const weight = cappedLen / 100;
+
+    const similarity = (1 - weight) * rat + weight * tokenSetRatio;
+
+    if (similarity > 74) {
+      // scale up to half the points per question linearly with 75% - 100% similarity
+      return ((similarity - 74) / 26) * (POINTS_PER_QUESTION / 2);
     }
     return 0;
   }
@@ -155,7 +166,7 @@ export class PlayerPicksGame extends Game {
    */
   private getPointsWithoutParens(player: Player) {
     // check for partial correctness (ignoring parens at end)
-    const playerAnswer = normalizeSongName(player.answerData!.answer ?? "", false);
+    const playerAnswer = normalizeSongName(player.answerData?.answer ?? "", false);
     const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, true);
 
     return this.getPointsByDistance(correctAnswer, playerAnswer);
@@ -169,7 +180,7 @@ export class PlayerPicksGame extends Game {
    * @returns A score between 0 and 50% of the maximum round points.
    */
   private getPointsWithParens(player: Player) {
-    const playerAnswer = normalizeSongName(player.answerData!.answer ?? "", false);
+    const playerAnswer = normalizeSongName(player.answerData?.answer ?? "", false);
     const correctAnswer = normalizeSongName(this.currentQuestion!.song!.name, false);
 
     return this.getPointsByDistance(correctAnswer, playerAnswer);
