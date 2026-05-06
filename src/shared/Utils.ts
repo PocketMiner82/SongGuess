@@ -61,6 +61,8 @@ export function normalizeSongName(name: string, removeParens: boolean): string {
       .replace(/\{.*\}/g, "");
   }
 
+  normalizedName = normalizedName.replace("_", " ");
+
   return convertToAlnum(normalizedName);
 }
 
