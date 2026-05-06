@@ -11,6 +11,7 @@ export function StartGame() {
 
   return (
     <Button
+      className="flex-1 text-nowrap"
       disabled={controller.playlists.length === 0 && controller.config.gameMode === "multiple_choice"}
       onClick={() => controller.startGame()}
     >

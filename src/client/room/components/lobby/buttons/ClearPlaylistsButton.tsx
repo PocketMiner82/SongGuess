@@ -24,7 +24,7 @@ export function ClearPlaylistsButton() {
       type="button"
       onClick={handleClearPlaylists}
       disabled={controller.playlists.length === 0}
-      className="items-center flex justify-center"
+      className="items-center flex justify-center flex-1 text-nowrap"
       aria-label="Clear all playlists"
     >
       <span className="material-symbols-outlined mr-2" aria-hidden="true">delete</span>

@@ -23,7 +23,7 @@ export function AddPlaylistButton() {
         },
         id: "LobbySearchMusicDialog",
       })}
-      className="w-full"
+      className="flex-1 text-nowrap"
     >
       <span className="material-symbols-outlined mr-2">add</span>
       Add Playlist

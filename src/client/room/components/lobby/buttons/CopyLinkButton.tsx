@@ -23,6 +23,7 @@ export function CopyLinkButton() {
   return (
     <Button
       type="button"
+      className="flex-1 text-nowrap"
       onClick={handleCopyLink}
       aria-label={copied ? "Link copied" : "Copy room link"}
     >

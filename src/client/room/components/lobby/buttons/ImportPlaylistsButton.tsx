@@ -34,7 +34,7 @@ export function ImportPlaylistsButton() {
   };
 
   return (
-    <div>
+    <div className="flex-1">
       <input
         type="file"
         accept=".sgjson"
@@ -45,11 +45,11 @@ export function ImportPlaylistsButton() {
       <Button
         type="button"
         onClick={() => document.getElementById("playlist-import")?.click()}
-        className="min-w-full"
+        className="w-full text-nowrap"
         aria-label="Import playlists from file"
       >
         <span className="material-symbols-outlined mr-2" aria-hidden="true">upload</span>
-        Import
+        Import Playlist File
       </Button>
     </div>
   );

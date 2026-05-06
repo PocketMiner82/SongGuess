@@ -15,7 +15,7 @@ export function Settings() {
   useRoomControllerMessageTypeListener(controller, "room_config");
 
   return (
-    <div>
+    <div className="mb-8">
       <h3 className="text-xl font-bold mb-3">Settings</h3>
 
       <div className="grid gap-4">
@@ -23,11 +23,11 @@ export function Settings() {
 
         {controller.config.gameMode === "multiple_choice" && (
           <>
-            <AddPlaylistButton />
+            <ImportPlaylistsButton />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-wrap gap-4 w-full">
+              <AddPlaylistButton />
               <ClearPlaylistsButton />
-              <ImportPlaylistsButton />
             </div>
 
             <div className="border-t border-disabled-bg my-1"></div>
@@ -126,7 +126,7 @@ export function Settings() {
 
         <div className="border-t border-disabled-bg my-1"></div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-wrap gap-4">
           <CopyLinkButton />
           <StartGame />
         </div>
