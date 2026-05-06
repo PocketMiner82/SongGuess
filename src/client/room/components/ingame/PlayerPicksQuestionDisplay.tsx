@@ -95,18 +95,18 @@ function AnswerInput() {
   const correctSong = roundMsg?.question?.questionType === "player_picks"
     ? roundMsg?.question?.correctAnswer
     : undefined;
-  const canAnswer = roundMsg?.gamePhase === GamePhase.ANSWERING;
+  const answerInputEnabled = roundMsg?.gamePhase === GamePhase.ANSWERING || roundMsg?.gamePhase === GamePhase.QUESTION;
   const isMyQuestion = roundMsg?.question?.questionType === "player_picks"
     ? controller.uuid === roundMsg?.question?.pickerId
     : false;
 
   const handleSelect = useCallback(() => {
-    if (!canAnswer || !answer.trim() || answer === controller.questionData.selectedAnswer || isMyQuestion) {
+    if (roundMsg?.gamePhase !== GamePhase.ANSWERING || !answer.trim() || answer === controller.questionData.selectedAnswer || isMyQuestion) {
       return;
     }
 
     controller.selectAnswerText(answer.trim());
-  }, [answer, canAnswer, controller, isMyQuestion]);
+  }, [answer, controller, isMyQuestion, roundMsg?.gamePhase]);
 
   useRoomControllerMessageTypeListener(controller, "round_state", (msg) => {
     handleSelect();
@@ -150,11 +150,11 @@ function AnswerInput() {
                   value={answer}
                   onChange={e => setAnswer(e.target.value)}
                   placeholder="Enter song name…"
-                  disabled={inputDisabled}
+                  disabled={inputDisabled || !answerInputEnabled}
                   className="flex-1 max-w-md px-4 py-2 bg-card-bg border border-gray-500 rounded focus:border-secondary outline-0 disabled:opacity-50"
                   autoFocus
                 />
-                <Button disabled={inputDisabled || !answer.trim() || !canAnswer} type="submit">
+                <Button disabled={inputDisabled || !answer.trim() || !answerInputEnabled} type="submit">
                   Submit
                 </Button>
               </div>
