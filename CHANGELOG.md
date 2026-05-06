@@ -1,3 +1,10 @@
+# [3.0.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.4...3.0.0-dev.5) (2026-05-06)
+
+
+### Bug Fixes
+
+* **Lobby:** improve styling for mobile ([8248840](https://github.com/PocketMiner82/SongGuess/commit/824884026fba828fa44de0adf48645f36de8a0db))
+
 # [3.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.3...3.0.0-dev.4) (2026-05-06)
 
 
