@@ -151,7 +151,8 @@ export class PlayerPicksGame extends Game {
 
       // scale the similarity based on the length of the target string.
       // if the target string gets, very long, be more forgiving.
-      const cappedLen = Math.min(correctAnswer.length, 100);
+      const cappedLen = Math.min(correctAnswer.length, 50);
+      // only allow the token_set_ratio to influence the similarity by max 50%
       const weight = cappedLen / 100;
 
       similarity = (1 - weight) * rat + weight * tokenSetRatio;
