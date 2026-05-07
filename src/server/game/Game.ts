@@ -14,9 +14,11 @@ import type Player from "../Player";
 import type { ValidRoom } from "../ValidRoom";
 import type Question from "./Question";
 import {
-  POINTS_PER_QUESTION,
-  QUESTION_START_TICK,
-  ROUND_PADDING_TICKS,
+  QUESTION_MAX_POINTS,
+  QUESTION_PADDING_TICKS,
+  QUESTION_ROUND_PICK_PHASE_CONTINUOUS_WARNING_TICK,
+  QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK,
+  QUESTION_ROUND_START_TICK,
 } from "../../shared/ConfigConstants";
 import GamePhase from "../../shared/game/GamePhase";
 import { MultipleChoiceGame } from "./multipleChoice/MultipleChoiceGame";
@@ -42,7 +44,7 @@ export default abstract class Game implements IEventListener {
   /**
    * The current game phase
    */
-  gamePhase: GamePhase = GamePhase.PICKING;
+  gamePhase: GamePhase = GamePhase.PAUSE_MUSIC;
 
   /**
    * The index of the current question. 0 based.
@@ -90,7 +92,7 @@ export default abstract class Game implements IEventListener {
   protected getTimePoints(player: Player): number {
     const factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData!.answerTimestamp - this.questionStartTime)))
       / (this.room.config.timePerQuestion * 1000);
-    return (POINTS_PER_QUESTION / 2) * factor;
+    return (QUESTION_MAX_POINTS / 2) * factor;
   }
 
   /**
@@ -164,10 +166,10 @@ export default abstract class Game implements IEventListener {
     switch (this.gamePhase) {
       case GamePhase.PICKING:
         duration = this.room.config.playerPickTimeout;
-        offset = this.questionTick - QUESTION_START_TICK - 1;
+        offset = this.questionTick - QUESTION_ROUND_START_TICK - 1;
         break;
       case GamePhase.QUESTION:
-        duration = -ROUND_PADDING_TICKS;
+        duration = -QUESTION_PADDING_TICKS;
         offset = this.questionTick - this.room.config.getQuestionPickedSongTick() - 1;
         break;
       case GamePhase.ANSWERING:
@@ -250,13 +252,13 @@ export default abstract class Game implements IEventListener {
       return;
 
     if (this.questionTick >= this.room.config.getQuestionStartNextTick()) {
-      this.questionTick = QUESTION_START_TICK;
+      this.questionTick = QUESTION_ROUND_START_TICK;
     }
 
-    let gamePhaseChanged = false;
+    const previousGamePhase = this.gamePhase;
     switch (this.questionTick) {
       // allow picking question
-      case QUESTION_START_TICK:
+      case QUESTION_ROUND_START_TICK:
         // reset answer data of all players when a new round starts
         for (const [_, player] of this.room.players) {
           player.resetAnswerData();
@@ -283,7 +285,6 @@ export default abstract class Game implements IEventListener {
           return;
         }
 
-        gamePhaseChanged = true;
         this.gamePhase = GamePhase.PICKING;
         break;
 
@@ -293,26 +294,24 @@ export default abstract class Game implements IEventListener {
 
         // start new round if no one added a question in the picking phase
         if (!this.currentQuestion) {
-          this.questionTick = QUESTION_START_TICK;
+          this.questionTick = QUESTION_ROUND_START_TICK;
+          this.gamePhase = GamePhase.PAUSE_MUSIC;
           this.onTick();
           return;
         }
 
-        gamePhaseChanged = true;
         this.gamePhase = GamePhase.QUESTION;
         this.room.broadcastRoomStateMessage();
         break;
 
       // start music playback
       case this.room.config.getQuestionAnsweringTick():
-        gamePhaseChanged = true;
         this.gamePhase = GamePhase.ANSWERING;
         this.questionStartTime = Date.now();
         break;
 
       // show results of current question
       case this.room.config.getQuestionShowAnswerTick():
-        gamePhaseChanged = true;
         this.gamePhase = GamePhase.ANSWER;
         this.calculatePoints();
 
@@ -321,15 +320,25 @@ export default abstract class Game implements IEventListener {
 
       // pause music to allow fade out
       case this.room.config.getQuestionPauseMusicTick():
-        gamePhaseChanged = true;
         this.gamePhase = GamePhase.PAUSE_MUSIC;
         break;
     }
 
+    // play warning sounds shortly before picking phase ends
+    if (this.gamePhase === GamePhase.PICKING) {
+      const pickPhaseEndTick = this.room.config.getQuestionPickedSongTick();
+      const firstWarning = (pickPhaseEndTick - this.questionTick) === QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK;
+      const continuousWarning = (pickPhaseEndTick - this.questionTick) <= QUESTION_ROUND_PICK_PHASE_CONTINUOUS_WARNING_TICK;
+
+      if (firstWarning || continuousWarning) {
+        this.room.server.safeBroadcast(this.getAudioControlMessage("play_countdown_running"));
+      }
+    }
+
     this.questionTick++;
 
-    if (gamePhaseChanged) {
-      this.onGamePhaseChanged();
+    if (this.gamePhase !== previousGamePhase) {
+      this.onGamePhaseChanged(previousGamePhase);
       this.getGameMessages(this.gamePhase === GamePhase.QUESTION && this.room.config.gameMode === "player_picks")
         .forEach(msg => this.room.server.safeBroadcast(msg));
     }
@@ -337,8 +346,14 @@ export default abstract class Game implements IEventListener {
 
   /**
    * Called every time the game phase changed but before the game messages are sent.
+   * @param previous the game state before the update.
    */
-  public onGamePhaseChanged() { }
+  public onGamePhaseChanged(previous: GamePhase) {
+    // play final warning sound when picking phase ended
+    if (this.hasPickingPhase && previous === GamePhase.PICKING) {
+      this.room.server.safeBroadcast(this.getAudioControlMessage("play_countdown_end"));
+    }
+  }
 
   /**
    * Provides the next questions that should be added to the list for the current round.
@@ -493,7 +508,7 @@ export default abstract class Game implements IEventListener {
 
     this.room.server.logger.info("Resetting game to lobby state...");
 
-    this.questionTick = QUESTION_START_TICK;
+    this.questionTick = QUESTION_ROUND_START_TICK;
     this.currentQuestionIndex = -1;
     this.roundCurrent = 0;
     this.room.state = "lobby";

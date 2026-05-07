@@ -5,7 +5,7 @@ import type {
 import type Player from "../../Player";
 import type Question from "../Question";
 import _ from "lodash";
-import { POINTS_PER_QUESTION } from "../../../shared/ConfigConstants";
+import { QUESTION_MAX_POINTS } from "../../../shared/ConfigConstants";
 import Game from "../Game";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
 
@@ -77,7 +77,7 @@ export class MultipleChoiceGame extends Game {
     for (const player of this.room.activePlayers) {
       if (player.answerData?.answerIndex === (this.currentQuestion as MultipleChoiceQuestion).getCorrectAnswer()) {
         // half the points for correct answer
-        player.answerData.questionPoints = POINTS_PER_QUESTION / 2;
+        player.answerData.questionPoints = QUESTION_MAX_POINTS / 2;
         // remaining points depend on speed of answer
         player.answerData.questionPoints += this.getTimePoints(player);
 

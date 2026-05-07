@@ -1,6 +1,6 @@
 import type { RoomConfigMessage } from "../types/MessageTypes";
 import { RoomConfigMessageSchema } from "../schemas/SharedSchemas";
-import { QUESTION_START_TICK, ROUND_PADDING_TICKS } from "./ConfigConstants";
+import { QUESTION_PADDING_TICKS, QUESTION_ROUND_START_TICK } from "./ConfigConstants";
 
 
 export class BaseConfig implements RoomConfigMessage {
@@ -51,34 +51,34 @@ export class BaseConfig implements RoomConfigMessage {
    * The tick count when a question song was picked.
    */
   public getQuestionPickedSongTick(): number {
-    return QUESTION_START_TICK + this.playerPickTimeout;
+    return QUESTION_ROUND_START_TICK + this.playerPickTimeout;
   }
 
   /**
    * The tick count when in answering phase.
    */
   public getQuestionAnsweringTick(): number {
-    return this.getQuestionPickedSongTick() + ROUND_PADDING_TICKS;
+    return this.getQuestionPickedSongTick() + QUESTION_PADDING_TICKS;
   }
 
   /**
    * The tick count when the answer gets revealed.
    */
   public getQuestionShowAnswerTick(): number {
-    return this.getQuestionPickedSongTick() + this.timePerQuestion + ROUND_PADDING_TICKS;
+    return this.getQuestionPickedSongTick() + this.timePerQuestion + QUESTION_PADDING_TICKS;
   }
 
   /**
    * The tick count when the music fades out.
    */
   public getQuestionPauseMusicTick(): number {
-    return this.getQuestionPickedSongTick() + this.timePerQuestion + ROUND_PADDING_TICKS * 2 - 1;
+    return this.getQuestionPickedSongTick() + this.timePerQuestion + QUESTION_PADDING_TICKS * 2 - 1;
   }
 
   /**
    * The tick count when a new round shall be started.
    */
   public getQuestionStartNextTick(): number {
-    return this.getQuestionPickedSongTick() + this.timePerQuestion + ROUND_PADDING_TICKS * 2;
+    return this.getQuestionPickedSongTick() + this.timePerQuestion + QUESTION_PADDING_TICKS * 2;
   }
 }

@@ -21,26 +21,37 @@ export const ROOM_INACTIVITY_KICK_TIMEOUT = 15;
 /**
  * The tick count when a new round starts.
  */
-export const QUESTION_START_TICK = 0;
+export const QUESTION_ROUND_START_TICK = 0;
+
+/**
+ * The tick count BEFORE the pick phase ends, when the first warning sound effect gets played.
+ */
+export const QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK = 15;
+
+/**
+ * The tick count BEFORE the pick phase ends, where from now on every tick a warning sound gets played.
+ */
+export const QUESTION_ROUND_PICK_PHASE_CONTINUOUS_WARNING_TICK = 5;
+
 
 /**
  * The amount of ticks before and after a question is/was displayed.
  */
-export const ROUND_PADDING_TICKS = 5;
+export const QUESTION_PADDING_TICKS = 5;
 
 /**
  * The maximum amount of time music can play (in seconds).
  */
-export const ROUND_MAX_MUSIC_PLAY_TIME = 30;
+export const QUESTION_MAX_MUSIC_PLAY_TIME = 30;
 
 /**
  * How many points a player can get per question.
  * Half of the points are for a correct answer, the other half is for the speed of the answer if correct.
  */
-export const POINTS_PER_QUESTION = 1000;
+export const QUESTION_MAX_POINTS = 1000;
 
 /**
  * Minimum similarity required to score in a player picks game.
  * Points are scaled linearly from that point until 100%.
  */
-export const ANSWER_MIN_SIMILARITY = 50;
+export const QUESTION_ANSWER_MIN_SIMILARITY = 50;

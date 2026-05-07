@@ -20,7 +20,6 @@ function PlayerPickingDisplay() {
       ? random(0, 2)
       : controller.config.audioStartPosition;
   });
-  useRoomControllerMessageTypeListener(controller, "audio_control");
   useRoomControllerListener(controller, useCallback((msg) => {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "player_pick_song";
   }, []));

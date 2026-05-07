@@ -2,7 +2,7 @@ import type ICookieProps from "../../../types/ICookieProps";
 import type { ServerMessage } from "../../../types/MessageTypes";
 import { useCallback } from "react";
 import { useCookies } from "react-cookie";
-import { ROUND_PADDING_TICKS } from "../../../shared/ConfigConstants";
+import { QUESTION_PADDING_TICKS } from "../../../shared/ConfigConstants";
 import { useControllerContext, useRoomControllerListener } from "../RoomController";
 import { AudioControls } from "./AudioControls";
 import { useAudioPlayer } from "./AudioPlayerHook";
@@ -44,7 +44,7 @@ export function Audio() {
 
           mainPlayer.playWithPositionAndFade(
             startPosition,
-            controller.config.timePerQuestion + ROUND_PADDING_TICKS,
+            controller.config.timePerQuestion + QUESTION_PADDING_TICKS,
             controller.questionData.progressbarOffset,
           );
           break;
@@ -55,9 +55,19 @@ export function Audio() {
           mainPlayer.pauseWithFade();
           break;
       }
-    } else if (msg?.type === "countdown") {
-      const player: Howl = msg.countdown > 0 ? countdownRunningPlayer.howler : countdownDonePlayer.howler;
+    }
 
+    let player: Howl | null = null;
+
+    if ((msg?.type === "countdown" && msg.countdown > 0)
+      || (msg?.type === "audio_control" && msg.action === "play_countdown_running")) {
+      player = countdownRunningPlayer.howler;
+    } else if ((msg?.type === "countdown" && msg.countdown <= 0)
+      || (msg?.type === "audio_control" && msg.action === "play_countdown_end")) {
+      player = countdownDonePlayer.howler;
+    }
+
+    if (player) {
       player.seek(0);
       player.play();
     }

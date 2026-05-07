@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type ICookieProps from "../../types/ICookieProps";
 import type { AudioPlayer } from "../room/audio/AudioPlayerHook";
 import { useCookies } from "react-cookie";
-import { ROUND_PADDING_TICKS } from "../../shared/ConfigConstants";
+import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { useAudioPlayer } from "../room/audio/AudioPlayerHook";
 import { useControllerContext, useRoomControllerMessageTypeListener } from "../room/RoomController";
 
@@ -99,7 +99,7 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
   const handlePlayPause = () => {
     if (player.state === "not_playing") {
       player.load(previewURL!);
-      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + ROUND_PADDING_TICKS);
+      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + QUESTION_PADDING_TICKS);
     } else {
       player.howler?.pause();
     }

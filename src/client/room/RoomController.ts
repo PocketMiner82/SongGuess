@@ -2,7 +2,6 @@ import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import type { CookieGetter, CookieSetter } from "../../types/CookieFunctionTypes";
 import type {
   AddPlaylistsMessage,
-  AudioControlMessage,
   ChangeUsernameMessage,
   GameState,
   PingMessage,
@@ -155,11 +154,6 @@ class QuestionData {
    * The currently selected answer string.
    */
   selectedAnswer?: string;
-
-  /**
-   * The current state of the audio playback
-   */
-  currentAudioState: AudioControlMessage["action"] | null = null;
 
   /**
    * The random/user-defined audio start position index (0-2) for the question.
@@ -569,9 +563,6 @@ export class RoomController {
         break;
       case "update_played_songs":
         this.playedSongs = msg.songs;
-        break;
-      case "audio_control":
-        this.questionData.currentAudioState = msg.action;
         break;
       case "progressbar_update":
         this.questionData.progressbarOffset = msg.offset;

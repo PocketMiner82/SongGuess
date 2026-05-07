@@ -88,7 +88,6 @@ const AnswerOption = memo(({
 export function MultipleChoiceQuestionDisplay() {
   const controller = useControllerContext();
 
-  useRoomControllerMessageTypeListener(controller, "audio_control");
   useRoomControllerMessageTypeListener(controller, "round_state");
   useRoomControllerMessageTypeListener(controller, "room_state");
 

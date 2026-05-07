@@ -2,7 +2,7 @@ import type { ClientMessage, ConfirmationMessage, SelectAnswerMessage, ServerMes
 import type Player from "../../Player";
 import type Question from "../Question";
 import { ratio, token_set_ratio } from "fuzzball";
-import { ANSWER_MIN_SIMILARITY, POINTS_PER_QUESTION } from "../../../shared/ConfigConstants";
+import { QUESTION_ANSWER_MIN_SIMILARITY, QUESTION_MAX_POINTS } from "../../../shared/ConfigConstants";
 import GamePhase from "../../../shared/game/GamePhase";
 import { normalizeSongName } from "../../../shared/Utils";
 import Game from "../Game";
@@ -53,7 +53,7 @@ export class PlayerPicksGame extends Game {
   protected getNextQuestions(): Question[] {
     // penality of max points per question for players that did not pick a song
     for (const player of this.remainingPickers) {
-      player.points -= POINTS_PER_QUESTION;
+      player.points -= QUESTION_MAX_POINTS;
     }
 
     const nextQ: PlayerPicksQuestion[] = Array.from(this.nextQuestions.values());
@@ -98,12 +98,12 @@ export class PlayerPicksGame extends Game {
     return ret;
   }
 
-  onGamePhaseChanged() {
+  onGamePhaseChanged(previous: GamePhase) {
     if (this.gamePhase === GamePhase.PICKING) {
       this.nextQuestions = new Map();
     }
 
-    super.onGamePhaseChanged();
+    super.onGamePhaseChanged(previous);
   }
 
   selectAnswer(player: Player, msg: SelectAnswerMessage) {
@@ -123,14 +123,14 @@ export class PlayerPicksGame extends Game {
   /**
    * Core scoring logic that calculates points based on string similarity.
    * @remarks
-   * A minimum similarity of {@link ANSWER_MIN_SIMILARITY} is required to score. Points are scaled linearly from that point until 100%.
+   * A minimum similarity of {@link QUESTION_ANSWER_MIN_SIMILARITY} is required to score. Points are scaled linearly from that point until 100%.
    * @param correctAnswer - The normalized ground-truth string.
    * @param playerAnswer - The normalized player-submitted string.
    * @param avgWithTokenSetRatio - `true`: average the levenshtein ratio with the token set ratio in the calculation.
    *                               will also scale the similarity based on the length of the target string, being more
    *                               forgiving with longer target strings.
    *                               `false`: only use levenshtein.
-   * @returns A score ranging from 0 to half of {@link POINTS_PER_QUESTION}.
+   * @returns A score ranging from 0 to half of {@link QUESTION_MAX_POINTS}.
    */
   private getPointsByDistance(correctAnswer: string, playerAnswer: string, avgWithTokenSetRatio: boolean) {
     if (!correctAnswer) {
@@ -160,9 +160,9 @@ export class PlayerPicksGame extends Game {
       similarity = rat;
     }
 
-    if (similarity >= ANSWER_MIN_SIMILARITY) {
+    if (similarity >= QUESTION_ANSWER_MIN_SIMILARITY) {
       // scale up to half the points per question linearly with the similarity range but don't be zero
-      return Math.max(1, ((similarity - ANSWER_MIN_SIMILARITY) / (100 - ANSWER_MIN_SIMILARITY)) * (POINTS_PER_QUESTION / 2));
+      return Math.max(1, ((similarity - QUESTION_ANSWER_MIN_SIMILARITY) / (100 - QUESTION_ANSWER_MIN_SIMILARITY)) * (QUESTION_MAX_POINTS / 2));
     }
     return 0;
   }
