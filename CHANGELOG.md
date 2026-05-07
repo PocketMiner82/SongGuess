@@ -1,3 +1,15 @@
+# [3.0.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.7...3.0.0-dev.8) (2026-05-07)
+
+
+### Bug Fixes
+
+* **normalizeSongName:** replace underscores with spaces ([88c01d0](https://github.com/PocketMiner82/SongGuess/commit/88c01d01e68b658f327f5672010094d578cd9b7a))
+
+
+### Features
+
+* **PlayerPicksGame:** play sound effects shortly before picking phase ends ([b11a07c](https://github.com/PocketMiner82/SongGuess/commit/b11a07c5145c1820edbf979279319cb3f43f4c92))
+
 # [3.0.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.6...3.0.0-dev.7) (2026-05-06)
 
 
