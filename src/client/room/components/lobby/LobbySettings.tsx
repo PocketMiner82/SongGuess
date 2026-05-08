@@ -75,10 +75,10 @@ export function Settings() {
                 controller.config.playerPickTimeout = v;
                 controller.sendConfig();
               }}
-              min={30}
+              min={60}
               max={300}
             >
-              Song pick timeout (30-300s)
+              Song pick timeout (60-300s)
             </SettingsNumberInput>
 
             <div className="border-t border-disabled-bg my-1"></div>
