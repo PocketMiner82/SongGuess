@@ -3,13 +3,10 @@ import random from "lodash/random";
 import { useCallback, useEffect, useState } from "react";
 import GamePhase from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
-import { PlaylistCard } from "../../../components/PlaylistCard";
 import { SearchMusicComponent } from "../../../components/SearchMusicComponent";
-import {
-  useControllerContext,
-  useRoomControllerListener,
-  useRoomControllerMessageTypeListener,
-} from "../../RoomController";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
+import { PlaylistCard } from "../PlaylistCard";
 import { SettingsDropdown } from "../settings/SettingsDropdown";
 
 

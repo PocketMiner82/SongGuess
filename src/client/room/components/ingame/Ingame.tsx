@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import GamePhase from "../../../../shared/game/GamePhase";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
-import { ResultsPlayerList } from "../ResultsPlayerList";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
+import { ResultsPlayerList } from "../results/ResultsPlayerList";
 import { MultipleChoiceQuestionDisplay } from "./MultipleChoiceQuestionDisplay";
 import { PlayerPicksQuestionDisplay } from "./PlayerPicksQuestionDisplay";
 

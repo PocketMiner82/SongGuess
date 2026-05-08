@@ -1,13 +1,14 @@
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
+import { AddPlaylistButton } from "../settings/buttons/AddPlaylistButton";
+import { ClearPlaylistsButton } from "../settings/buttons/ClearPlaylistsButton";
+import { CopyLinkButton } from "../settings/buttons/CopyLinkButton";
+import { ImportPlaylistsButton } from "../settings/buttons/ImportPlaylistsButton";
+import { StartGame } from "../settings/buttons/StartGameButton";
 import { GameModeSelector } from "../settings/GameModeSelector";
 import { SettingsDropdown } from "../settings/SettingsDropdown";
 import { SettingsNumberInput } from "../settings/SettingsInput";
 import { SettingsToggle } from "../settings/SettingsToggle";
-import { AddPlaylistButton } from "./buttons/AddPlaylistButton";
-import { ClearPlaylistsButton } from "./buttons/ClearPlaylistsButton";
-import { CopyLinkButton } from "./buttons/CopyLinkButton";
-import { ImportPlaylistsButton } from "./buttons/ImportPlaylistsButton";
-import { StartGame } from "./buttons/StartGameButton";
 
 
 export function Settings() {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useModalWindow } from "react-modal-global";
-import { Button } from "../components/Button";
+import { Button } from "../Button";
 import { ModalContent } from "./ModalContent";
 
 

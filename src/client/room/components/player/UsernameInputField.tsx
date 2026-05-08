@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
-import { usernameRegex } from "../../../schemas/ValidationRegexes";
-import { Button } from "../../components/Button";
-import { useControllerContext, useRoomControllerListener } from "../RoomController";
+import { usernameRegex } from "../../../../schemas/ValidationRegexes";
+import { Button } from "../../../components/Button";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerListener } from "../../hooks/RoomControllerListenerHooks";
 
 /**
  * Input field component for editing and submitting a username.

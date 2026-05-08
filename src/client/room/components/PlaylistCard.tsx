@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import type ICookieProps from "../../types/ICookieProps";
-import type { AudioPlayer } from "../room/audio/AudioPlayerHook";
+import type ICookieProps from "../../../types/ICookieProps";
+import type { AudioPlayer } from "../hooks/AudioPlayerHook";
 import { useCookies } from "react-cookie";
-import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
-import { useAudioPlayer } from "../room/audio/AudioPlayerHook";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../room/RoomController";
+import { QUESTION_PADDING_TICKS } from "../../../shared/ConfigConstants";
+import { useAudioPlayer } from "../hooks/AudioPlayerHook";
+import { useControllerContext } from "../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../hooks/RoomControllerListenerHooks";
 
 
 interface PlaylistCardProps {

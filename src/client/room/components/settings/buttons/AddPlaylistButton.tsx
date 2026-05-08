@@ -1,7 +1,8 @@
 import { Button } from "../../../../components/Button";
+import { SearchMusicDialog } from "../../../../components/modal/SearchMusicDialog";
 import { Modal } from "../../../../modal/Modal";
-import { SearchMusicDialog } from "../../../../modal/SearchMusicDialog";
-import { useControllerContext } from "../../../RoomController";
+import { useControllerContext } from "../../../hooks/RoomControllerHooks";
+
 
 /**
  * Button component that opens the search dialog for adding playlists.

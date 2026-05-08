@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { Button } from "../../components/Button";
-import { PlaylistCard } from "../../components/PlaylistCard";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../RoomController";
+import { Button } from "../../../components/Button";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
+import { PlaylistCard } from "../PlaylistCard";
 import { ResultsPlayerList } from "./ResultsPlayerList";
 
 /**

@@ -12,16 +12,14 @@ import type {
   RemovePlaylistMessage,
   ReturnToMessage,
   RoomState,
-  RoundStateMessage,
   SelectAnswerMessage,
   ServerMessage,
   Song,
   StartGameMessage,
   TransferHostMessage,
 } from "../../types/MessageTypes";
+import type { ListenerCallback } from "./hooks/RoomControllerListenerHooks";
 import PartySocket from "partysocket";
-import * as React from "react";
-import { createContext, use, useCallback, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
@@ -29,153 +27,14 @@ import { version } from "../../../package.json";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { BaseConfig } from "../../shared/BaseConfig";
 import GamePhase from "../../shared/game/GamePhase";
-import { FatalErrorDialog } from "../modal/FatalErrorDialog";
+import { FatalErrorDialog } from "../components/modal/FatalErrorDialog";
 import { Modal } from "../modal/Modal";
+import { QuestionData } from "./QuestionData";
 
 /**
  * The PartyKit host URL for WebSocket connections.
  */
 declare const PARTYKIT_HOST: string;
-
-/**
- * A callback function that receives the RoomController instance when its state changes and returns a boolean
- * to indicate whether the update should trigger a component update, therefore also making new controller accissible.
- */
-type ListenerCallback = (msg: ServerMessage | null) => boolean | void;
-
-/**
- * Custom React hook that provides a {@link RoomController} instance for managing
- * the connection and state of a room.
- *
- * @param roomID The ID of the room to connect to.
- * @param getCookies What cookies are currently set.
- * @param setCookies A function to allow updating cookies.
- * @returns An object containing a `getController` method to access the `RoomController` instance.
- */
-export function useRoomController(roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
-  // hold the class instance so it persists across renders
-  const controllerRef = useRef<RoomController | null>(null);
-
-  if (!controllerRef.current) {
-    controllerRef.current = new RoomController(roomID, getCookies, setCookies);
-  }
-
-  useEffect(() => {
-    // cleanup logic for when the component unmounts or roomID changes
-    return () => {
-      controllerRef.current?.destroy();
-      controllerRef.current = null;
-    };
-  }, [roomID]);
-
-  return {
-    getController: (): RoomController => controllerRef.current!,
-    // ready if the ref is populated
-    isReady: !!controllerRef.current,
-  };
-}
-
-/**
- * React context for providing the RoomController instance to child components.
- */
-export const RoomContext = createContext<RoomController | null>(null);
-
-/**
- * Custom React hook to access the RoomController from the React context.
- *
- * @returns The RoomController instance.
- * @throws Error if used outside a RoomProvider.
- */
-export function useControllerContext() {
-  const controller = use(RoomContext);
-  if (!controller)
-    throw new Error("useRoom must be used within RoomProvider");
-  return controller;
-}
-
-/**
- * Custom React hook to subscribe to state changes in a {@link RoomController}.
- * @param controller The RoomController instance to listen to.
- * @param cb The {@link ListenerCallback} function.
- */
-export function useRoomControllerListener(controller: RoomController, cb: ListenerCallback) {
-  const [updateVal, setUpdateVal] = React.useState(false);
-  // eslint-disable-next-line react/set-state-in-effect
-  const forceUpdateComponent = React.useCallback(() => setUpdateVal(!updateVal), [updateVal]);
-
-  useEffect(() => {
-    if (cb(null) ?? true) {
-      forceUpdateComponent();
-    }
-
-    return controller.registerOnStateChangeListener((msg) => {
-      const update = cb(msg) ?? true;
-      if (update) {
-        forceUpdateComponent();
-      }
-      return update;
-    });
-  }, [controller, cb, forceUpdateComponent]);
-}
-
-/**
- * A wrapper around {@link useRoomControllerListener} that forces a React update when the specified message is received.
- * @param controller The RoomController instance to listen to.
- * @param msgType The {@link ServerMessage["type"]} to listen for.
- * @param cb Optional callback invoked when the message is received.
- */
-export function useRoomControllerMessageTypeListener<T extends ServerMessage["type"] | null>(
-  controller: RoomController,
-  msgType: T,
-  cb?: (msg: Extract<ServerMessage, { type: T }> | (T extends null ? null : never)) => boolean | void,
-) {
-  useRoomControllerListener(controller, useCallback((msg) => {
-    const matches = (msg?.type ?? null) === msgType;
-
-    if (matches && cb) {
-      return cb(msg as any);
-    }
-    return matches;
-  }, [msgType, cb]));
-}
-
-class QuestionData {
-  /**
-   * The round message, containing most important info
-   */
-  roundMsg?: RoundStateMessage;
-
-  /**
-   * The currently selected answer index.
-   */
-  selectedAnswerIndex?: number;
-
-  /**
-   * The currently selected answer string.
-   */
-  selectedAnswer?: string;
-
-  /**
-   * The random/user-defined audio start position index (0-2) for the question.
-   * @see RoomConfigMessageSchema.audioStartPosition
-   */
-  audioStartPos: number = 0;
-
-  /**
-   * The duration where the progress bar should start.
-   */
-  progressbarDuration: number = 0;
-
-  /**
-   * The offset position for the progress bar.
-   */
-  progressbarOffset: number = 0;
-
-  /**
-   * Whether the player has already picked a song this round.
-   */
-  pickedSong: Song | null = null;
-}
 
 /**
  * Manages the connection and state of a room.
@@ -187,7 +46,7 @@ export class RoomController {
   private socket: PartySocket;
 
   /**
-   * The users id.
+   * The user's id.
    */
   get userID(): string {
     return this.socket.id;

@@ -2,8 +2,8 @@ import type { Playlist } from "../../types/MessageTypes";
 import { useState } from "react";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { getPlaylistByURL, performSearch } from "../../shared/Utils";
+import { PlaylistCard } from "../room/components/PlaylistCard";
 import { Button } from "./Button";
-import { PlaylistCard } from "./PlaylistCard";
 
 /**
  * The current status of the search operation.

@@ -1,7 +1,8 @@
 import { Button } from "../../../components/Button";
 import { showConfirm } from "../../../modal/DialogOpeners";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
-import { PlayerCard } from "../PlayerCard";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
+import { PlayerCard } from "../player/PlayerCard";
 
 /**
  * Displays all players in the room as a grid. Shows empty slots

@@ -1,4 +1,4 @@
-import { ConfirmDialog } from "./ConfirmDialog";
+import { ConfirmDialog } from "../components/modal/ConfirmDialog";
 import { Modal } from "./Modal";
 
 /**

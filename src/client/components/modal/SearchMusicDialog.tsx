@@ -1,5 +1,5 @@
-import type { SearchMusicComponentProps } from "../components/SearchMusicComponent";
-import { SearchMusicComponent } from "../components/SearchMusicComponent";
+import type { SearchMusicComponentProps } from "../SearchMusicComponent";
+import { SearchMusicComponent } from "../SearchMusicComponent";
 import { ModalContent } from "./ModalContent";
 
 /**

@@ -2,7 +2,8 @@ import * as React from "react";
 import { toast } from "react-toastify";
 import { importPlaylistFile, validatePlaylistsFile } from "../../../../../shared/Utils";
 import { Button } from "../../../../components/Button";
-import { useControllerContext } from "../../../RoomController";
+import { useControllerContext } from "../../../hooks/RoomControllerHooks";
+
 
 /**
  * Button component that imports playlists from a JSON file.

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import type { PlayerMessage } from "../../../types/MessageTypes";
+import type { PlayerMessage } from "../../../../types/MessageTypes";
 import { memo, useState } from "react";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../RoomController";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
 import { PlayerAvatar } from "./PlayerAvatar";
 import { UsernameInputField } from "./UsernameInputField";
 

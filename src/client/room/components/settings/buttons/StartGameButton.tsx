@@ -1,5 +1,6 @@
 import { Button } from "../../../../components/Button";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../../../RoomController";
+import { useControllerContext } from "../../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../../hooks/RoomControllerListenerHooks";
 
 /**
  * Host-only component to start the game. Shows validation errors

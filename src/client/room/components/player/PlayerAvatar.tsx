@@ -1,4 +1,4 @@
-import type { PlayerMessage } from "../../../types/MessageTypes";
+import type { PlayerMessage } from "../../../../types/MessageTypes";
 import chroma from "chroma-js";
 import { memo } from "react";
 

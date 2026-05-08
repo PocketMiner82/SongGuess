@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
 
 /**
  * Server-controlled progress bar.

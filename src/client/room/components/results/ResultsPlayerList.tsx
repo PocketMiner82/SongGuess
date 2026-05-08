@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import type { PlayerAnswerData, PlayerMessage } from "../../../types/MessageTypes";
+import type { PlayerAnswerData, PlayerMessage } from "../../../../types/MessageTypes";
 import { useMemo } from "react";
-import { PlayerMessageSchema } from "../../../schemas/ServerMessageSchemas";
-import { PlayerCard } from "./PlayerCard";
+import { PlayerMessageSchema } from "../../../../schemas/ServerMessageSchemas";
+import { PlayerCard } from "../player/PlayerCard";
 
 
 type PossibleFields = Exclude<(keyof PlayerAnswerData | keyof PlayerMessage), "answerData">;

@@ -1,6 +1,8 @@
 import { Button } from "../../../../components/Button";
 import { showConfirm } from "../../../../modal/DialogOpeners";
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../../../RoomController";
+import { useControllerContext } from "../../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../../hooks/RoomControllerListenerHooks";
+
 
 /**
  * Button component that clears all playlists after user confirmation.

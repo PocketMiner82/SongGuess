@@ -6,24 +6,19 @@ import { CookieConsent } from "react-cookie-consent";
 import { createRoot } from "react-dom/client";
 import { ModalContainer } from "react-modal-global";
 import { Button } from "./components/Button";
+import { ChooseUsernameDialog } from "./components/modal/ChooseUsernameDialog";
 import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
-import { ChooseUsernameDialog } from "./modal/ChooseUsernameDialog";
 import { showConfirm } from "./modal/DialogOpeners";
 import { Modal } from "./modal/Modal";
-import { Audio } from "./room/audio/Audio";
+import { Audio } from "./room/components/audio/Audio";
 import { BottomBar } from "./room/components/BottomBar";
 import { Ingame } from "./room/components/ingame/Ingame";
 import { QuestionHeader } from "./room/components/ingame/QuestionHeader";
 import { Lobby } from "./room/components/lobby/Lobby";
-import { Results } from "./room/components/Results";
-import {
-  RoomContext,
-  useControllerContext,
-  useRoomController,
-  useRoomControllerListener,
-  useRoomControllerMessageTypeListener,
-} from "./room/RoomController";
+import { Results } from "./room/components/results/Results";
+import { RoomContext, useControllerContext, useRoomController } from "./room/hooks/RoomControllerHooks";
+import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "./room/hooks/RoomControllerListenerHooks";
 
 /**
  * Loading component displayed while the room controller is initializing.

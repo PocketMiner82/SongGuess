@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useControllerContext } from "../../RoomController";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
 
 
 export function GameModeSelector() {

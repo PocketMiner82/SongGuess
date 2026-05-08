@@ -2,12 +2,9 @@ import type { PlayerMessage } from "../../../../types/MessageTypes";
 import { memo, useCallback } from "react";
 import GamePhase from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
-import {
-  useControllerContext,
-  useRoomControllerListener,
-  useRoomControllerMessageTypeListener,
-} from "../../RoomController";
-import { PlayerAvatar } from "../PlayerAvatar";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
+import { PlayerAvatar } from "../player/PlayerAvatar";
 
 
 type AnswerState = "pending" | "selected" | "correct" | "incorrect" | "disabled";

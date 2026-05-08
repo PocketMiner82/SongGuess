@@ -1,11 +1,12 @@
-import type ICookieProps from "../../../types/ICookieProps";
-import type { ServerMessage } from "../../../types/MessageTypes";
+import type ICookieProps from "../../../../types/ICookieProps";
+import type { ServerMessage } from "../../../../types/MessageTypes";
 import { useCallback } from "react";
 import { useCookies } from "react-cookie";
-import { QUESTION_PADDING_TICKS } from "../../../shared/ConfigConstants";
-import { useControllerContext, useRoomControllerListener } from "../RoomController";
+import { QUESTION_PADDING_TICKS } from "../../../../shared/ConfigConstants";
+import { useAudioPlayer } from "../../hooks/AudioPlayerHook";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerListener } from "../../hooks/RoomControllerListenerHooks";
 import { AudioControls } from "./AudioControls";
-import { useAudioPlayer } from "./AudioPlayerHook";
 
 /**
  * Audio component that handles audio playback and controls.

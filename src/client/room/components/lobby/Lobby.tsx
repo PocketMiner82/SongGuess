@@ -1,4 +1,5 @@
-import { useControllerContext, useRoomControllerMessageTypeListener } from "../../RoomController";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
 import { Settings } from "./LobbySettings";
 import { PlayerList } from "./PlayerList";
 import { PlaylistsList } from "./PlaylistsList";
