@@ -19,6 +19,7 @@ import { Lobby } from "./room/components/lobby/Lobby";
 import { Results } from "./room/components/results/Results";
 import { RoomContext, useControllerContext, useRoomController } from "./room/hooks/RoomControllerHooks";
 import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "./room/hooks/RoomControllerListenerHooks";
+import { PING_INTERVAL } from "./room/RoomController";
 
 /**
  * Loading component displayed while the room controller is initializing.
@@ -135,7 +136,7 @@ function Room() {
                   : "text-success"
             }`}
             >
-              {controller.currentPingMs}
+              {controller.currentPingMs >= PING_INTERVAL ? "999+" : controller.currentPingMs}
               {" "}
               ms
             </span>

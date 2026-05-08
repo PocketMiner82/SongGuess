@@ -37,6 +37,12 @@ import { QuestionData } from "./QuestionData";
 declare const PARTYKIT_HOST: string;
 
 /**
+ * The interval of pinging (ms).
+ * The maximum ping time to show is this - 1.
+ */
+export const PING_INTERVAL = 1000;
+
+/**
  * Manages the connection and state of a room.
  */
 export class RoomController {
@@ -119,6 +125,21 @@ export class RoomController {
   filteredSongsCount: number = 0;
 
   /**
+   * The config of this room
+   */
+  config: BaseConfig = new BaseConfig();
+
+  /**
+   * The currently cached ingame data
+   */
+  questionData: QuestionData = new QuestionData();
+
+  /**
+   * The list of songs played in the last round.
+   */
+  playedSongs: (Song | undefined)[] = [];
+
+  /**
    * The interval of the ping function.
    */
   pingInterval?: number;
@@ -142,21 +163,6 @@ export class RoomController {
    * The current ping in milliseconds.
    */
   currentPingMs: number = -1;
-
-  /**
-   * The config of this room
-   */
-  config: BaseConfig = new BaseConfig();
-
-  /**
-   * The currently cached ingame data
-   */
-  questionData: QuestionData = new QuestionData();
-
-  /**
-   * The list of songs played in the last round.
-   */
-  playedSongs: (Song | undefined)[] = [];
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -202,10 +208,7 @@ export class RoomController {
   public destroy() {
     this.socket.close();
 
-    if (this.pingInterval) {
-      window.clearInterval(this.pingInterval);
-      this.pingInterval = undefined;
-    }
+    this.stopPingInterval();
   }
 
   /**
@@ -266,8 +269,7 @@ export class RoomController {
     this.reconnecting = false;
     console.log(`Connected to ${this.socket.room}`);
 
-    // send a ping every second
-    this.pingInterval = window.setInterval(() => this.sendPing(), 1000);
+    this.startPingInterval();
   }
 
   /**
@@ -278,9 +280,7 @@ export class RoomController {
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
 
-    if (this.pingInterval) {
-      window.clearInterval(this.pingInterval);
-    }
+    this.stopPingInterval();
 
     // Show fatal error for disconnection
     if (!this.reconnecting) {
@@ -296,9 +296,7 @@ export class RoomController {
   private onError(ev: ErrorEvent) {
     console.error(`Disconnected from ${this.socket.room} due to:`, ev);
 
-    if (this.pingInterval) {
-      window.clearInterval(this.pingInterval);
-    }
+    this.stopPingInterval();
 
     // Show fatal error for connection failure
     if (!this.reconnecting) {
@@ -307,12 +305,34 @@ export class RoomController {
   }
 
   /**
+   * Starts the ping interval if not running. Will send pings to the server every second.
+   * @private
+   */
+  private startPingInterval() {
+    if (!this.pingInterval) {
+      this.pingInterval = window.setInterval(() => this.sendPing(), PING_INTERVAL);
+    }
+  }
+
+  /**
+   * Stops ping interval if running.
+   * @private
+   */
+  private stopPingInterval() {
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+      this.pingInterval = undefined;
+    }
+  }
+
+  /**
    * Sends a ping with the current sequence number to the server and tracks the start timestamp.
    */
   private sendPing() {
-    // wait until server answers first ping
-    if (this.pingSeq !== this.pongSeq)
-      return;
+    if (this.pingSeq !== this.pongSeq) {
+      // server did not respond fast enough, calling handleMessage will set ping to max
+      this.handleMessage({ type: "pong", seq: this.pongSeq });
+    }
 
     this.pingStart = performance.now();
     this.socket.send(JSON.stringify({
@@ -351,10 +371,19 @@ export class RoomController {
     if (msg.type !== "ping" && msg.type !== "pong")
       console.debug("Server sent:", ev.data);
 
+    this.handleMessage(msg);
+  }
+
+  /**
+   * Handles a message sent from the server.
+   * @param msg the message the server sent.
+   * @private
+   */
+  private handleMessage(msg: ServerMessage) {
     switch (msg.type) {
       case "pong":
-        this.currentPingMs = Math.round(performance.now() - this.pingStart);
         this.pongSeq = msg.seq;
+        this.currentPingMs = this.pingSeq !== this.pongSeq ? PING_INTERVAL : Math.round(performance.now() - this.pingStart);
         break;
       case "confirmation":
         if (msg.error) {
