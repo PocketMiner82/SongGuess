@@ -20,7 +20,7 @@ export class BaseConfig implements RoomConfigMessage {
 
   public audioStartPosition: number = 3;
 
-  public playerPickTimeout: number = 120;
+  public playerPickTimeout: number = 180;
 
   constructor(msg?: RoomConfigMessage) {
     if (msg)

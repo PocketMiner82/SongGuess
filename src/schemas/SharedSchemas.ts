@@ -133,7 +133,7 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * The amount of time a player should have to pick a song.
    */
-  playerPickTimeout: z.number().min(30).max(300),
+  playerPickTimeout: z.number().min(60).max(300),
 });
 
 export const PingMessageSchema = z.object({

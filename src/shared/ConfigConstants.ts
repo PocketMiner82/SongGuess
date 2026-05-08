@@ -26,13 +26,12 @@ export const QUESTION_ROUND_START_TICK = 0;
 /**
  * The tick count BEFORE the pick phase ends, when the first warning sound effect gets played.
  */
-export const QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK = 15;
+export const QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK = 30;
 
 /**
  * The tick count BEFORE the pick phase ends, where from now on every tick a warning sound gets played.
  */
-export const QUESTION_ROUND_PICK_PHASE_CONTINUOUS_WARNING_TICK = 5;
-
+export const QUESTION_ROUND_PICK_PHASE_CONTINUOUS_WARNING_TICK = 10;
 
 /**
  * The amount of ticks before and after a question is/was displayed.
