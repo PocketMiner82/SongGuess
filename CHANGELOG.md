@@ -1,3 +1,10 @@
+# [3.0.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.9...3.0.0-dev.10) (2026-05-08)
+
+
+### Bug Fixes
+
+* **Config:** update defaults + increase min pick timeout ([5005f6b](https://github.com/PocketMiner82/SongGuess/commit/5005f6bf7174919f3c2ef9a5840a42882f553725))
+
 # [3.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.8...3.0.0-dev.9) (2026-05-08)
 
 
