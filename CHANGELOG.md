@@ -1,3 +1,10 @@
+# [3.0.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.8...3.0.0-dev.9) (2026-05-08)
+
+
+### Bug Fixes
+
+* **ping:** cap at 1000 + always send ping even if server does not respond ([6282f62](https://github.com/PocketMiner82/SongGuess/commit/6282f6298ff37bfd0ad1014b9585c1b1e7a5ae53))
+
 # [3.0.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.7...3.0.0-dev.8) (2026-05-07)
 
 
