@@ -1,3 +1,16 @@
+# [3.0.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.10...3.0.0-dev.11) (2026-05-11)
+
+
+### Bug Fixes
+
+* **Ingame:** answer results should be sorted by descending points ([47fa71c](https://github.com/PocketMiner82/SongGuess/commit/47fa71cc10078971d6b6bc84920c5586e1262aef))
+* **LobbySettings:** also increase min pick timeout in UI ([cf84df9](https://github.com/PocketMiner82/SongGuess/commit/cf84df9a912b37ca4f455927c3e75050e1d4e3db))
+
+
+### Features
+
+* **MultipleChoiceQuestion:** if no distractions were found, attempt to use songs as distractions which artist also appears only once ([9ca7e6c](https://github.com/PocketMiner82/SongGuess/commit/9ca7e6cbf5f2f152fde3d0f215a3c0e3ea1e79ce))
+
 # [3.0.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.9...3.0.0-dev.10) (2026-05-08)
 
 
