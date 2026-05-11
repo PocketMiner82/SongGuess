@@ -17,22 +17,14 @@ function AnswerResults() {
 
     return [...controller.playerMessages]
       .sort((a, b) => {
-        if (a.answerData && b.answerData) {
-          return a.answerData.answerSpeed - b.answerData.answerSpeed;
-        }
-        return 0;
-      })
-      .sort((a, b) => {
-        if (a.answerData?.questionPoints && !b.answerData?.questionPoints)
-          return -1;
-        if (!a.answerData?.questionPoints && b.answerData?.questionPoints)
-          return 1;
-        return 0;
+        return (b.answerData?.questionPoints ?? 0)
+          - (a.answerData?.questionPoints ?? 0);
       });
   }, [controller.playerMessages, controller.questionData.roundMsg?.gamePhase]);
 
-  if (rankedPlayers.length === 0)
+  if (rankedPlayers.length === 0) {
     return null;
+  }
 
   return (
     <div className="space-y-6 xl:max-w-3/4 mx-auto p-4 min-h-full mt-8 text-center">
