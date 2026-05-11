@@ -30,8 +30,7 @@ export default class MultipleChoiceQuestion extends Question {
    * @throws Error if distraction generation fails.
    */
   private generateDistractions(possibleDistractions: Song[]) {
-    possibleDistractions = _.shuffle(possibleDistractions.filter(s =>
-      s.audioURL !== this.song!.audioURL && s.name !== this.song!.name));
+    possibleDistractions = _.shuffle(possibleDistractions.filter(s => s.name !== this.song!.name));
     let distractions = possibleDistractions;
 
     if (this.distractionsPreferSameArtist) {
@@ -40,7 +39,20 @@ export default class MultipleChoiceQuestion extends Question {
         this.song!.artist.split(" & ")
           .some(a => s.artist.split(" & ").includes(a)));
 
-      // add all other distractions as fallback if there are not enough distractions available by the same artist
+      // if no distractions were found, attempt to use songs as distractions which artist also appears only once
+      if (distractions.length === 0) {
+        const artistCounts = new Map();
+
+        possibleDistractions.forEach((s) => {
+          s.artist.split(" & ").forEach(a =>
+            artistCounts.set(a, (artistCounts.get(a) || 0) + 1));
+        });
+
+        distractions = possibleDistractions.filter(s =>
+          s.artist.split(" & ").every(a => artistCounts.get(a) === 1));
+      }
+
+      // add all other distractions as fallback if there are not enough distractions available
       distractions.push(..._.difference(possibleDistractions, distractions));
     }
 
