@@ -30,7 +30,9 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
       volume,
       mute: muted,
       preload: true,
+      onload: () => setState("loading"),
       onplay: () => setState("playing"),
+      onloaderror: () => setState("not_playing"),
       onpause: () => setState("not_playing"),
       onend: () => setState("not_playing"),
       onstop: () => setState("not_playing"),
@@ -73,9 +75,22 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
    */
   const load = (src: string) => {
     if (audioURL !== src) {
-      howlerRef.current = createHowl(src);
-      setAudioURL(src);
+      if (howlerRef.current) {
+        const howler = howlerRef.current;
+        howler.off("load");
+        howler.off("play");
+        howler.off("loaderror");
+        howler.off("pause");
+        howler.off("end");
+        howler.off("stop");
+        howler.off("playerror");
+        howler.unload();
+        howler.stop();
+      }
+
       setState("loading");
+      setAudioURL(src);
+      howlerRef.current = createHowl(src);
     }
   };
 
@@ -91,9 +106,9 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
     const howler = howlerRef.current;
 
     howler.once("play", () => {
-      howler.volume(0);
       howler.fade(0, volume, fadeDuration);
     });
+    howler.volume(0);
     howler.play();
   };
 

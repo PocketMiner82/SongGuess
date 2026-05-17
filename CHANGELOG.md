@@ -1,3 +1,93 @@
+# [3.0.0](https://github.com/PocketMiner82/SongGuess/compare/2.13.0...3.0.0) (2026-05-17)
+
+
+### Bug Fixes
+
+* add back close button if modal is closable ([c1d2248](https://github.com/PocketMiner82/SongGuess/commit/c1d2248fd8f5b745e9a370eff3181fcbf05a099e))
+* add missing spaces in HTML ([746e1c2](https://github.com/PocketMiner82/SongGuess/commit/746e1c206404abaf7431db1972b7bc8025d0e52d))
+* add server side caching for soundcloud + fix styling of playlistcard and questionheader ([9cb49a8](https://github.com/PocketMiner82/SongGuess/commit/9cb49a862a51e1d72b0659b2f4d0cf848d52dfa2))
+* **Audio:** only allow player to choose start pos when configured ([9df530d](https://github.com/PocketMiner82/SongGuess/commit/9df530d2de1991594ae11b55786636bf51cfc81e))
+* big cleanup + update ESLint + apply guides/patterns in .agents ([ab70442](https://github.com/PocketMiner82/SongGuess/commit/ab7044287cbc08dab8015a24dfdaa7cabc22fdba))
+* **Config:** update defaults + increase min pick timeout ([5005f6b](https://github.com/PocketMiner82/SongGuess/commit/5005f6bf7174919f3c2ef9a5840a42882f553725))
+* **convertToAlnum:** return original string if sanitized is empty ([b4f29d8](https://github.com/PocketMiner82/SongGuess/commit/b4f29d81147c5ceffea589bbeaa263df52dde811))
+* corrected wrong api endpoint names + playlist.songs.length check ([9e2b0ec](https://github.com/PocketMiner82/SongGuess/commit/9e2b0ecdf9ac4483795044b1f1bbe867727de5d1))
+* don't allow picker to guess + fix progressbar not updating when values same ([c13e921](https://github.com/PocketMiner82/SongGuess/commit/c13e92182316b5de1d7df2eb293115d60808caff))
+* don't ask if user wants to clear when importing playlists ([b1a8f8c](https://github.com/PocketMiner82/SongGuess/commit/b1a8f8cb7ae5b7e595dbdcdfb0fd840bb4f73510))
+* endless loop when rendering question displays ([82e154c](https://github.com/PocketMiner82/SongGuess/commit/82e154cf6c9b8d967a6d240bc2c99440eda64692))
+* **FatalErrorPopup:** always show on top ([d81bc0f](https://github.com/PocketMiner82/SongGuess/commit/d81bc0f0138be3f6bdd14723116e228626daf500))
+* fixed wrong styling (overflow) of dialogs ([513a902](https://github.com/PocketMiner82/SongGuess/commit/513a90216aba24c0cac27455cf76015be6c77723))
+* **fixedCoverSize:** set fixed size to 160px (max size of cover in components) ([b25d6bb](https://github.com/PocketMiner82/SongGuess/commit/b25d6bb092eb0f07ed7fefc641c77adec8225975))
+* **Game:** clear questions at each game start ([b81712c](https://github.com/PocketMiner82/SongGuess/commit/b81712c4f9ddef889b9d9ce97825cffd850f97c3))
+* improve behavior of search dialog ([3fdb781](https://github.com/PocketMiner82/SongGuess/commit/3fdb7812da9c98f1d39ac1e573a03f160571ba2b))
+* **Ingame:** answer results should be sorted by descending points ([47fa71c](https://github.com/PocketMiner82/SongGuess/commit/47fa71cc10078971d6b6bc84920c5586e1262aef))
+* **Lobby:** improve styling for mobile ([8248840](https://github.com/PocketMiner82/SongGuess/commit/824884026fba828fa44de0adf48645f36de8a0db))
+* **LobbySettings:** also increase min pick timeout in UI ([cf84df9](https://github.com/PocketMiner82/SongGuess/commit/cf84df9a912b37ca4f455927c3e75050e1d4e3db))
+* **normalizeSongName:** also filter out parens not at end ([30bc6c2](https://github.com/PocketMiner82/SongGuess/commit/30bc6c206a962aedced5667f104f382894c1bd90))
+* **normalizeSongName:** replace underscores with spaces ([88c01d0](https://github.com/PocketMiner82/SongGuess/commit/88c01d01e68b658f327f5672010094d578cd9b7a))
+* **ping:** cap at 1000 + always send ping even if server does not respond ([6282f62](https://github.com/PocketMiner82/SongGuess/commit/6282f6298ff37bfd0ad1014b9585c1b1e7a5ae53))
+* **PlayerPicksGame:** actually dont show wrong answer timestamps ([eb4df4b](https://github.com/PocketMiner82/SongGuess/commit/eb4df4be0c53e638deb6187b5974c3556b778c21))
+* **PlayerPicksGame:** add points instead of overwriting ([9c2442f](https://github.com/PocketMiner82/SongGuess/commit/9c2442f4f7b650b0ec6e5de673ed6546decc9c68))
+* **PlayerPicksGame:** correct token_set_ratio weight calculation ([6decaa9](https://github.com/PocketMiner82/SongGuess/commit/6decaa9dd60b501752162738c4d0305b5fb8d69f))
+* **PlayerPicksGame:** don't allow picking multiple songs ([f92025f](https://github.com/PocketMiner82/SongGuess/commit/f92025fe771312740a65b76275ebaeaaa820489f))
+* **PlayerPicksGame:** don't be as forgiving to get bonus points ([1b69307](https://github.com/PocketMiner82/SongGuess/commit/1b6930759c6f62d448a22bf724341013da9e1ee4))
+* **PlayerPicksGame:** don't give time points when guessed wrongly ([6456cad](https://github.com/PocketMiner82/SongGuess/commit/6456cadbc3972c2059a9e40646c07a05eedf1ad5))
+* **PlayerPicksGame:** dont remove parens content of player answers ([9ec80d0](https://github.com/PocketMiner82/SongGuess/commit/9ec80d09132018dd4dc90ee8515c323274d15022))
+* **PlayerPicksGame:** dont show wrong answer timestamps + more generous levenshtein points ([c362bd3](https://github.com/PocketMiner82/SongGuess/commit/c362bd3c5aef1157ee92f9e446e78188b9d1840b))
+* **PlayerPicksGame:** improve scoring logic by using combination of levenshtein ratio and token set ratio ([9c16b5f](https://github.com/PocketMiner82/SongGuess/commit/9c16b5fd5b3ea2c807afb990d6119652bab478b3))
+* **PlayerPicksGame:** set pick timeout to 120s ([7424e8b](https://github.com/PocketMiner82/SongGuess/commit/7424e8bb27f069be6bcd074284b15a4e3d0dee08))
+* **PlayerPicksGame:** use ANSWER_MIN_SIMILARITY config constant ([0cbe342](https://github.com/PocketMiner82/SongGuess/commit/0cbe342637db0d8b3b0267ecf9a92ff318a7bb84))
+* **PlayerPicksQuestionDisplay:** clear answer when new question starts ([3110315](https://github.com/PocketMiner82/SongGuess/commit/3110315b5dd99ce9ada97c87e631c18f567c1aac))
+* **PlayerPicksQuestionDisplay:** disable input when answer shown ([ef28a86](https://github.com/PocketMiner82/SongGuess/commit/ef28a8652ae4f05f083e88670006ba83e937262a))
+* **PlaylistCard:** wrap playlist title anywhere ([b747147](https://github.com/PocketMiner82/SongGuess/commit/b747147968e49283b877b2b46974b07fff6a9982))
+* **RoomController:** fix type error ([a8c6d0a](https://github.com/PocketMiner82/SongGuess/commit/a8c6d0aa3d66b573030de3202d19728848435196))
+* **SearchMusicComponent:** stop currently playing audio before playing new + scroll to top after search ([676fa16](https://github.com/PocketMiner82/SongGuess/commit/676fa16ed51543f388ea1e7fa8939b246136e2b5))
+* **SearchMusicDialog:** improve styling ([cebc395](https://github.com/PocketMiner82/SongGuess/commit/cebc3956adffdaef29932ab87b7e004e0394808a))
+* **SearchMusicDialog:** improve styling + show artist name for songs/albums ([d020b58](https://github.com/PocketMiner82/SongGuess/commit/d020b58ac49d2428571c4c8bb90e57d788c3bd07))
+* **SettingsDropdown:** improve styling on chromium browsers ([eaae7a4](https://github.com/PocketMiner82/SongGuess/commit/eaae7a45440d186d47c6c422ac30dc931aec3f86))
+* **SoundCloud:** add fallback to preview + only cache fetchSoundCloudAudio ([06f5468](https://github.com/PocketMiner82/SongGuess/commit/06f5468af4ee837944c020c327ffe87733845633))
+* **SoundCloudAPI:** store refresh token correctly + fix soundCloudSongRegex ([595bb52](https://github.com/PocketMiner82/SongGuess/commit/595bb5225789cfc2e2dba5f8d19c85ab22b332b1))
+* **wip:** start implementing PlayerPicksGame + refactor existing game logic to ease implementation ([d470886](https://github.com/PocketMiner82/SongGuess/commit/d470886e77d817589cb7df680803e1b16bf51294))
+
+
+### chore
+
+* trigger major version bump ([94db0eb](https://github.com/PocketMiner82/SongGuess/commit/94db0eba189c73c1e824c9ae01d529b837761d86))
+
+
+### Features
+
+* add audio preview to song picker ([eff4923](https://github.com/PocketMiner82/SongGuess/commit/eff49238a2b5d341bf98f24f65f99c35031dcbf5))
+* add confirm dialog + refactor dialog handling to use react-modal-global library ([620a8a1](https://github.com/PocketMiner82/SongGuess/commit/620a8a1a20b8b78c627c6940c0a780a4e81e5073))
+* add music search dialog ([4d76719](https://github.com/PocketMiner82/SongGuess/commit/4d767193e3917ea4d2731867598bad54c6f1f97f))
+* add SoundCloud support (only for songs) ([14a91b6](https://github.com/PocketMiner82/SongGuess/commit/14a91b6cf7252a91f2aa4c5253434490c6c14ac7))
+* **API:** add endpoints for soundcloud song support ([baf508d](https://github.com/PocketMiner82/SongGuess/commit/baf508d36baa85f0386499d5e27a18c16af318e7))
+* **Config:** allow changing player pick timeout + show in UI ([7c4a1d0](https://github.com/PocketMiner82/SongGuess/commit/7c4a1d063f602761b4c0b39c06f01f5c224aeb0e))
+* **game:** improve answer matching with metadata and show players on all states ([fd668d5](https://github.com/PocketMiner82/SongGuess/commit/fd668d51af66d0c66cfbfe00989cb661424f736d))
+* implement PlayerPicksGame where a player selects the song others should guess ([beb56bb](https://github.com/PocketMiner82/SongGuess/commit/beb56bb3f85e12e09827ed9993c47113ba3de0f0))
+* **MultipleChoiceQuestion:** if no distractions were found, attempt to use songs as distractions which artist also appears only once ([9ca7e6c](https://github.com/PocketMiner82/SongGuess/commit/9ca7e6cbf5f2f152fde3d0f215a3c0e3ea1e79ce))
+* **PlayerPicksGame:** first beta implementation in frontend ([f4e2943](https://github.com/PocketMiner82/SongGuess/commit/f4e2943a475fdf056a47ca2f86cfa95adea44b73))
+* **PlayerPicksGame:** picking is now at start of round. ([fea8f7d](https://github.com/PocketMiner82/SongGuess/commit/fea8f7d8caa73d1d3fba77dc5b49b7aa0bbca6df))
+* **PlayerPicksGame:** play sound effects shortly before picking phase ends ([b11a07c](https://github.com/PocketMiner82/SongGuess/commit/b11a07c5145c1820edbf979279319cb3f43f4c92))
+* **PlayerPicksQuestionDisplay:** add settings dropdown to change audio start position of track ([11d99ef](https://github.com/PocketMiner82/SongGuess/commit/11d99efe3d748c437267b2fd55a26e2ca1222ce8))
+* **PlayerPicksQuestionDisplay:** allow editing answer after submission ([5ccdb95](https://github.com/PocketMiner82/SongGuess/commit/5ccdb958a72958b87edd40647633a16a5464100b))
+* **ProgressBar:** made fully controlled by server + improve styling of site ([b3f7f3e](https://github.com/PocketMiner82/SongGuess/commit/b3f7f3e7cc4d0a0dffd18b9a415e881a17ecc40f))
+* **ResultsPlayerList:** show answer of players in player picks game ([7ae6552](https://github.com/PocketMiner82/SongGuess/commit/7ae6552153547b5164c5ba1d154d911475fddcfb))
+* **ResultsPlayerList:** show roundPoints if available + split Lobby components in multiple files ([ebe0fb4](https://github.com/PocketMiner82/SongGuess/commit/ebe0fb435021c23b3bbdef326baa6fbc5ab69d8d))
+* selected audio position in player picks game is used to define preview playback start position + refactor audio system ([98cdcc0](https://github.com/PocketMiner82/SongGuess/commit/98cdcc0093d98ac0dd2ea8a65eda9bffd4a3d90f))
+* switch to react-toastify for toast system ([6af0cf9](https://github.com/PocketMiner82/SongGuess/commit/6af0cf9448e08d7cbb01e47e8b4459b670d2adbf))
+
+
+### BREAKING CHANGES
+
+* removes refresh playlists functionality - didn't work for custom playlists and also does not work with new SoundCloud integration
+
+# [3.0.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.11...3.0.0-dev.12) (2026-05-17)
+
+
+### Bug Fixes
+
+* **SearchMusicComponent:** stop currently playing audio before playing new + scroll to top after search ([676fa16](https://github.com/PocketMiner82/SongGuess/commit/676fa16ed51543f388ea1e7fa8939b246136e2b5))
+
 # [3.0.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.10...3.0.0-dev.11) (2026-05-11)
 
 

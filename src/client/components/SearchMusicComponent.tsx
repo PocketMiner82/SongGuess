@@ -1,8 +1,15 @@
+import type ICookieProps from "../../types/ICookieProps";
 import type { Playlist } from "../../types/MessageTypes";
-import { useState } from "react";
+import type { AudioPlayer } from "../room/hooks/AudioPlayerHook";
+import { useCallback, useRef, useState } from "react";
+import { useCookies } from "react-cookie";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
+import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { getPlaylistByURL, performSearch } from "../../shared/Utils";
 import { PlaylistCard } from "../room/components/PlaylistCard";
+import { useAudioPlayer } from "../room/hooks/AudioPlayerHook";
+import { useControllerContext } from "../room/hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../room/hooks/RoomControllerListenerHooks";
 import { Button } from "./Button";
 
 /**
@@ -50,10 +57,45 @@ export function SearchMusicComponent({
   onSuccess,
   audioStartPos,
 }: SearchMusicComponentProps) {
+  const controller = useControllerContext();
+  const [cookies] = useCookies<"audioVolume" | "audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
+
+  const searchResultsListRef = useRef<HTMLUListElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [searchResults, setSearchResults] = useState<Playlist[]>([]);
   const [addedIndices, setAddedIndices] = useState<Set<number>>(() => new Set());
+
+  useRoomControllerMessageTypeListener(controller, "room_config");
+
+  const player = useAudioPlayer(
+    cookies.audioVolume ?? 0.2,
+    cookies.audioMuted ?? false,
+  );
+
+  const handlePlayPause = (playlist: Playlist) => {
+    if (playlist.songs.length !== 1) {
+      return;
+    }
+    const audioURL = playlist.songs[0].audioURL;
+
+    if (player.audioURL !== audioURL || player.state !== "playing") {
+      player.load(audioURL);
+      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + QUESTION_PADDING_TICKS);
+    } else {
+      player.howler?.pause();
+    }
+  };
+
+  const getAudioState = useCallback((playlist: Playlist): AudioPlayer["state"] | undefined => {
+    if (playlist.songs.length === 1 && playlist.songs[0].audioURL === player.audioURL) {
+      return player.state;
+    } else if (playlist.songs.length === 1) {
+      return "not_playing";
+    }
+
+    return undefined;
+  }, [player.audioURL, player.state]);
 
   const isValidURL = (onlyAcceptSongs
     ? songRegex.test(searchQuery)
@@ -94,6 +136,7 @@ export function SearchMusicComponent({
 
     setAddedIndices(new Set());
     setSearchStatus(items.length === 0 ? "error" : "idle");
+    searchResultsListRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSelectResult = async (playlist: Playlist, index: number) => {
@@ -173,29 +216,27 @@ export function SearchMusicComponent({
       </div>
 
       {searchResults.length > 0 && (
-        <div className="mt-4 overflow-y-auto flex-1 -mx-2 px-2">
-          <ul className="space-y-2">
-            {searchResults.map((playlist, idx) => (
-              <PlaylistCard
-                key={idx}
-                title={playlist.name}
-                subtitle={playlist.subtitle}
-                coverURL={playlist.cover}
-                hrefURL={playlist.hrefURL}
-                previewURL={playlist.songs.length === 1 ? playlist.songs[0].audioURL : undefined}
-                audioStartPos={audioStartPos}
+        <ul ref={searchResultsListRef} className="mt-4 overflow-y-auto flex-1 -mx-2 px-2 space-y-2">
+          {searchResults.map((playlist, idx) => (
+            <PlaylistCard
+              key={playlist.hrefURL}
+              title={playlist.name}
+              subtitle={playlist.subtitle}
+              coverURL={playlist.cover}
+              hrefURL={playlist.hrefURL}
+              onPlayPause={() => handlePlayPause(playlist)}
+              audioState={getAudioState(playlist)}
+            >
+              <Button
+                onClick={() => handleSelectResult(playlist, idx)}
+                disabled={searchStatus === "loading" || addedIndices.has(idx)}
+                className="min-w-20"
               >
-                <Button
-                  onClick={() => handleSelectResult(playlist, idx)}
-                  disabled={searchStatus === "loading" || addedIndices.has(idx)}
-                  className="min-w-20"
-                >
-                  Select
-                </Button>
-              </PlaylistCard>
-            ))}
-          </ul>
-        </div>
+                Select
+              </Button>
+            </PlaylistCard>
+          ))}
+        </ul>
       )}
 
       {searchStatus === "error" && (

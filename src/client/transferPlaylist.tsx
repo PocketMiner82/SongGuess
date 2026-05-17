@@ -1,7 +1,7 @@
 import type { Playlist, PlaylistsFile, Song } from "../types/MessageTypes";
 import Papa from "papaparse";
 import * as React from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CookieConsent } from "react-cookie-consent";
 import { createRoot } from "react-dom/client";
 import { toast } from "react-toastify";
@@ -78,6 +78,7 @@ async function findBySearch(term: string): Promise<Song | null> {
  * Button component that imports playlists from a CSV file.
  */
 function ImportCSV() {
+  const csvImportRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [progress, setProgress] = useState<string>("");
 
@@ -247,6 +248,7 @@ function ImportCSV() {
   return (
     <div>
       <input
+        ref={csvImportRef}
         type="file"
         accept=".csv"
         onChange={async (e) => {
@@ -255,10 +257,9 @@ function ImportCSV() {
           window.onbeforeunload = () => undefined;
         }}
         className="hidden"
-        id="csv-import"
       />
       <Button
-        onClick={() => document.getElementById("csv-import")?.click()}
+        onClick={() => csvImportRef.current?.click()}
         className="min-w-full"
         disabled={status === "loading"}
       >
