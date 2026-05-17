@@ -1,8 +1,9 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import crypto from "crypto";
-import partykitConfig from "./partykit.json" with { type: "json"};
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import partykitConfig from "./partykit.json" with { type: "json" };
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,14 +18,14 @@ const templateContent = fs.readFileSync(templatePath, "utf8");
 const buildHash = crypto.randomBytes(4).toString("hex");
 
 // Generate HTML files
-partykitConfig.serve.build.entry.forEach(variant => {
+partykitConfig.serve.build.entry.forEach((variant) => {
   // Format the script source path for the current variant
   const scriptSrc = variant.replace("src/client", "dist").replace(".tsx", ".js");
 
   // Replace both the script source and all instances of the build hash placeholder
   const htmlContent = templateContent
-      .replace("{{SCRIPT_SRC}}", scriptSrc)
-      .replace(/{{BUILD_HASH}}/g, buildHash);
+    .replace("{{SCRIPT_SRC}}", scriptSrc)
+    .replace(/\{\{BUILD_HASH\}\}/g, buildHash);
 
   // Format the final output path for the HTML file
   const outputPath = variant.replace("src/client", "public").replace(".tsx", ".html");

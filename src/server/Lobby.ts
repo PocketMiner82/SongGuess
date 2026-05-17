@@ -1,12 +1,16 @@
-import type {IEventListener} from "./listener/IEventListener";
-import type {ValidRoom} from "./ValidRoom";
 import type {
   AddPlaylistsMessage,
-  ClientMessage, Playlist,
+  ClientMessage,
+  Playlist,
   RemovePlaylistMessage,
-  Song, UpdatePlaylistsMessage
+  Song,
+  UpdatePlaylistsMessage,
 } from "../types/MessageTypes";
+import type { IEventListener } from "./listener/IEventListener";
 import type Player from "./Player";
+import type { ValidRoom } from "./ValidRoom";
+import { normalizeSongName } from "../shared/Utils";
+import { MultipleChoiceGame } from "./game/multipleChoice/MultipleChoiceGame";
 
 
 export default class Lobby implements IEventListener {
@@ -20,11 +24,9 @@ export default class Lobby implements IEventListener {
    */
   songs: Song[] = [];
 
-
   constructor(private room: ValidRoom) {
     room.listener.registerEvents(this);
   }
-
 
   onMessage(player: Player, msg: ClientMessage): boolean {
     switch (msg.type) {
@@ -35,7 +37,7 @@ export default class Lobby implements IEventListener {
         }
 
         if (msg.type === "add_playlists") {
-          let omitted = this.addPlaylists(msg);
+          const omitted = this.addPlaylists(msg);
           if (omitted > 0) {
             player.sendConfirmationOrError(msg, `${omitted}/${msg.playlists.length} playlist(s) were omitted because they don't have songs or they don't have a unique name and album cover.`);
 
@@ -54,7 +56,9 @@ export default class Lobby implements IEventListener {
         this.filterSongs();
 
         // playlist updates will force to include all songs again
-        this.room.game.remainingSongs = [];
+        if (this.room.game instanceof MultipleChoiceGame) {
+          this.room.game.remainingSongs = [];
+        }
 
         // send the update to all players + confirmation to the host
         this.room.server.safeBroadcast(this.getPlaylistsUpdateMessage());
@@ -72,14 +76,14 @@ export default class Lobby implements IEventListener {
    */
   public addPlaylists(msg: AddPlaylistsMessage): number {
     const playlists = msg.playlists.filter(playlist =>
-        playlist.songs && this.playlists.every(p =>
-            p.name !== playlist.name || p.cover !== playlist.cover
-        ));
+      playlist.songs && this.playlists.every(p =>
+        p.name !== playlist.name || p.cover !== playlist.cover,
+      ));
 
     if (playlists.length > 0) {
       this.playlists.push(...playlists);
       this.room.server.logger.info(`The playlist(s) ${
-          playlists.map(p => p.name).join("; ")
+        playlists.map(p => p.name).join("; ")
       } has/have been added.`);
     }
 
@@ -91,26 +95,19 @@ export default class Lobby implements IEventListener {
    */
   public filterSongs(): Song[] {
     this.songs = [];
-    for (let playlist of this.playlists) {
+    for (const playlist of this.playlists) {
       this.songs.push(...playlist.songs);
     }
 
     this.songs = [
-      ...new Map(this.songs.map(s => {
-            // filter for unique name and artist
-            let normalizedName = s.name.toLowerCase();
-            let normalizedArtist = s.artist.toLowerCase();
+      ...new Map(this.songs.map((s) => {
+        // filter for unique name and artist
+        const normalizedName = normalizeSongName(s.name, this.room.config.advancedSongFiltering);
+        const normalizedArtist = s.artist.toLowerCase();
 
-            if (this.room.config.advancedSongFiltering) {
-              // replace parens at end like "Test Song (feat. SomeArtist) [Live]" => "Test Song"
-              normalizedName = normalizedName.replace(/(\s*[[(].*[)\]]\s*)+$/, "");
-              normalizedName = normalizedName.replace(/[^\p{L}\p{N} ]/gu, "");
-              normalizedName = normalizedName.replace(/ +/g, " ");
-            }
-
-            return [`${normalizedName}|${normalizedArtist}`, s]
-          }
-      )).values()
+        return [`${normalizedName}|${normalizedArtist}`, s];
+      },
+      )).values(),
     ];
 
     return this.songs;
@@ -128,12 +125,12 @@ export default class Lobby implements IEventListener {
     }
 
     if (msg.index !== null) {
-      let playlistName = this.playlists[msg.index].name;
+      const playlistName = this.playlists[msg.index].name;
       this.playlists.splice(msg.index, 1);
       this.room.server.logger.info(`The playlist "${playlistName}" has been removed.`);
     } else {
       this.playlists = [];
-      this.room.server.logger.info(`All playlists have been removed.`);
+      this.room.server.logger.info("All playlists have been removed.");
     }
     return true;
   }
@@ -148,7 +145,7 @@ export default class Lobby implements IEventListener {
     return {
       type: "update_playlists",
       playlists: onlyCount ? undefined : this.playlists,
-      filteredSongsCount: this.songs.length
+      filteredSongsCount: this.songs.length,
     };
   }
 }

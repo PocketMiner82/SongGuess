@@ -1,32 +1,36 @@
 /**
  * Regex of the allowed username characters + length restriction
  */
-export const usernameRegex = /^(?! )(?!.* $)[a-zA-ZäöüÄÖÜßẞ0-9!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<>_ -]{1,16}$/;
+// eslint-disable-next-line regexp/no-contradiction-with-assertion
+export const usernameRegex = /^(?! )(?!.* $)[\wäöüÄÖÜßẞ!"§$%&/(){}[\]=?*'#+|,.;:~@€µ´`<> -]{1,16}$/;
 
 /**
  * Regular expression to validate that a URL starts with the apple music domain.
  */
 export const appleMusicRegex = /^https?:\/\/music\.apple\.com\/[^/]+\//;
+export const soundCloudRegex = /^https:\/\/soundcloud\.com\//;
 
 /**
- * Regular expression to validate a preview URL.
+ * Regular expression to validate a preview/song audio URL.
  */
 export const appleMusicPreviewRegex = /^https:\/\/audio-ssl\.itunes\.apple\.com\/itunes-assets\/AudioPreview.*\.m4a$/;
+export const soundCloudSongRegex = /^\/parties\/api\/fetchSoundCloudAudio\?urn=soundcloud%3Atracks%3A[a-zA-Z0-9]+$/;
 
 /**
  * Regular expression to validate cover/image urls.
  */
 export const appleMusicCoverRegex = /^https:\/\/is.?-ssl\.mzstatic\.com\/image\/thumb\/Music.*\.jpg$/;
+export const soundCloudCoverRegex = /^https:\/\/i.\.sndcdn\.com\/artworks-.*\.jpg$/;
 
 /**
  * Regular expression to validate Apple Music artist URLs.
  */
-export const artistRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/artist\/[^/]+\/(?<id>\d+);?)+$/
+export const artistRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/artist\/[^/]+\/(?<id>\d+)(\?.*)?;?)$/;
 /**
  * Regular expression to validate Apple Music album URLs.
  */
-export const albumRegex =  /^(https?:\/\/music\.apple\.com\/[^/]+\/album\/[^/]+\/(?<id>\d+)(?:\?.*i=(?<trackId>\d+))?;?)+$/
+export const albumRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/album\/[^/]+\/(?<id>\d+)(\?(?:[^&]*&)?i=(?<trackId>\d+))?(\?[^;]*)?;?)$/;
 /**
  * Regular expression to validate Apple Music song URLs.
  */
-export const songRegex =   /^(https?:\/\/music\.apple\.com\/[^/]+\/(?<song>song)\/[^/]+\/(?<id>\d+);?)+$/
+export const songRegex = /^(https?:\/\/music\.apple\.com\/[^/]+\/(?<song>song)\/[^/]+\/(?<id>\d+)(\?.*)?;?)$/;

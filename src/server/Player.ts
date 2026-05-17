@@ -1,18 +1,22 @@
 import type * as Party from "partykit/server";
 import type {
   ChangeUsernameMessage,
-  PlayerMessage,
+  ClientMessage,
+  ConfirmationMessage,
   PlayerAnswerData,
-  SelectAnswerMessage, ServerMessage, SourceMessage, ConfirmationMessage, ClientMessage
+  PlayerMessage,
+  SelectAnswerMessage,
+  ServerMessage,
+  SourceMessage,
 } from "../types/MessageTypes";
-import type {ValidRoom} from "./ValidRoom";
-import {usernameRegex} from "../schemas/ValidationRegexes";
-import {adjectives, nouns, uniqueUsernameGenerator} from "unique-username-generator";
-import {ROOM_INACTIVITY_KICK_TIMEOUT} from "../ConfigConstants";
-import {PlayerMessageSchema} from "../schemas/ServerMessageSchemas";
-import GamePhase from "./game/GamePhase";
-import {version} from "../../package.json";
-import type {IEventListener} from "./listener/IEventListener";
+import type { IEventListener } from "./listener/IEventListener";
+import type { ValidRoom } from "./ValidRoom";
+import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
+import { version } from "../../package.json";
+import { PlayerMessageSchema } from "../schemas/ServerMessageSchemas";
+import { usernameRegex } from "../schemas/ValidationRegexes";
+import { ROOM_INACTIVITY_KICK_TIMEOUT } from "../shared/ConfigConstants";
+import GamePhase from "../shared/game/GamePhase";
 
 
 export default class Player implements PlayerMessage, IEventListener {
@@ -39,9 +43,21 @@ export default class Player implements PlayerMessage, IEventListener {
    */
   isOnline: boolean = false;
 
+  /**
+   * Whether this player is an admin
+   */
+  isAdmin: boolean;
 
-  constructor(readonly room: ValidRoom, public conn: Party.Connection) {
+  /**
+   * Whether this player is host.
+   */
+  get isHost(): boolean {
+    return this.room.host === this;
+  }
+
+  constructor(readonly room: ValidRoom, public conn: Party.Connection, readonly uuid: string) {
     room.listener.registerEvents(this);
+    this.isAdmin = this.room.server.hasTag(conn, "admin");
   }
 
   /**
@@ -49,10 +65,10 @@ export default class Player implements PlayerMessage, IEventListener {
    * @returns false if the room is full.
    */
   onConnect(ctx: Party.ConnectionContext): boolean {
-    let url = new URL(ctx.request.url);
+    const url = new URL(ctx.request.url);
     this.isSpectator = url.searchParams.get("spectator") !== null;
 
-    let color = this.room.getUnusedColors()[0];
+    const color = this.room.getUnusedColors()[0];
     if (!color && !this.isSpectator) {
       this.kick(4002, "Room is full.");
       return false;
@@ -60,32 +76,26 @@ export default class Player implements PlayerMessage, IEventListener {
     this.color = color;
     this.isOnline = true;
 
-    let requestedUsername = url.searchParams.get("username");
-    let usernameValid = requestedUsername && usernameRegex.test(requestedUsername);
+    const requestedUsername = url.searchParams.get("username");
+    const usernameValid = requestedUsername && usernameRegex.test(requestedUsername);
     if (!usernameValid || !this.changeUsername(requestedUsername!)) {
       if (requestedUsername && !usernameValid) {
         this.sendConfirmationOrError({
           type: "change_username",
-          username: "?"
+          username: "?",
         } satisfies ChangeUsernameMessage, "Username reset because it was invalid.");
       } else if (requestedUsername) {
         this.sendConfirmationOrError({
           type: "change_username",
-          username: requestedUsername!
+          username: requestedUsername!,
         } satisfies ChangeUsernameMessage, "Username reset because someone in the room already uses that name.");
       }
 
       this.username = uniqueUsernameGenerator({
         dictionaries: [adjectives, nouns],
         style: "titleCase",
-        length: 16
+        length: 16,
       });
-    }
-
-    // clear cached answer when we're already at the next question
-    if (this.answerData?.questionNumber !== this.room.game.currentQuestion || this.room.state !== "ingame") {
-      // reset points only if in lobby
-      this.resetAnswerData(this.room.state === "lobby");
     }
 
     // send the current playlist to the connection
@@ -100,14 +110,15 @@ export default class Player implements PlayerMessage, IEventListener {
     this.safeSend(this.room.config.toConfigMessage());
 
     // inform client about current round state
-    this.room.game.getGameMessages(true)
-        .forEach(msg => this.safeSend(msg));
+    this.room.game.getGameMessages(true, this)
+      .forEach(msg => this.safeSend(msg));
 
     // send client's answer if client selected one previously
-    if (this.answerData?.answerIndex !== undefined) {
+    if (this.answerData?.answerIndex !== undefined || this.answerData?.answer !== undefined) {
       this.sendConfirmationOrError({
         type: "select_answer",
-        answerIndex: this.answerData.answerIndex
+        answerIndex: this.answerData.answerIndex,
+        answer: this.answerData.answer,
       } satisfies SelectAnswerMessage);
     }
 
@@ -145,9 +156,9 @@ export default class Player implements PlayerMessage, IEventListener {
    * @param msg The message object to be stringified and transmitted to the client.
    * @param log Whether to log the sent message
    */
-  public safeSend(msg: ServerMessage, log:boolean = true) {
+  public safeSend(msg: ServerMessage, log: boolean = true) {
     // silently ignore if not online
-    if (this.isOnline) {
+    if (this.isOnline || this.isAdmin) {
       this.room.server.safeSend(this.conn, msg, log);
     }
   }
@@ -159,11 +170,11 @@ export default class Player implements PlayerMessage, IEventListener {
    * @param error An optional error message to include in the confirmation
    */
   public sendConfirmationOrError(source: SourceMessage, error?: string) {
-    let resp: ConfirmationMessage = {
+    const resp: ConfirmationMessage = {
       type: "confirmation",
       sourceMessage: source,
-      error: error
-    }
+      error,
+    };
 
     this.safeSend(resp);
   }
@@ -171,15 +182,13 @@ export default class Player implements PlayerMessage, IEventListener {
   /**
    * Constructs and sends an update message with the current room/connection states to the player.
    */
-  public sendUpdateMessage() {
+  public sendRoomStateMessage() {
     this.safeSend({
-      type: "update",
-      version: version,
+      type: "room_state",
+      version,
       state: this.room.state,
-      players: this.room.getActivePlayerMessages(),
-      username: this.username,
-      color: this.color,
-      isHost: this === this.room.host
+      players: this.room.getOnlinePlayerMessages(),
+      uuid: this.uuid,
     });
   }
 
@@ -201,10 +210,10 @@ export default class Player implements PlayerMessage, IEventListener {
   public handleUsernameChangeRequest(msg: ChangeUsernameMessage) {
     if (this.changeUsername(msg.username)) {
       // inform all players about the username change + send confirmation to the user
-      this.room.broadcastUpdateMessage();
+      this.room.broadcastRoomStateMessage();
       this.sendConfirmationOrError(msg);
     } else {
-      this.sendUpdateMessage();
+      this.sendRoomStateMessage();
       this.sendConfirmationOrError(msg, "Username is already taken.");
     }
   }
@@ -244,7 +253,7 @@ export default class Player implements PlayerMessage, IEventListener {
    * @param resetPoints whether to also reset the points of a player.
    * @public
    */
-  public resetAnswerData(resetPoints:boolean = false): void {
+  public resetAnswerData(resetPoints: boolean = false): void {
     this.answerData = undefined;
     if (resetPoints) {
       this.points = 0;

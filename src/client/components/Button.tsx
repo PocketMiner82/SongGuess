@@ -1,64 +1,63 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from "react";
+
+/**
+ * Button variant styles for different visual appearances.
+ * - `primary`: Primary action button with filled background
+ * - `secondary`: Secondary action button with outlined background
+ * - `plain`: Minimal button with no background styling
+ */
+export type ButtonVariant = "primary" | "secondary" | "plain";
+
+const variantClasses: Record<ButtonVariant, string> = {
+  primary: "text-white bg-primary hover:bg-primary-hover disabled:bg-disabled-bg disabled:text-disabled-text",
+  secondary: "bg-secondary hover:bg-secondary-hover text-white disabled:opacity-50",
+  plain: "focus-visible:ring-2 focus-visible:ring-secondary",
+};
 
 /**
  * Props for the Button component.
  */
-type ButtonProps = {
-  /**
-   * Click event handler for the button.
-   */
+interface ButtonProps {
+  /** Click handler for the button */
   onClick?: () => void;
-
-  /**
-   * The tooltip on hover for the button.
-   */
+  /** Tooltip text displayed on hover */
   title?: string;
-  
-  /**
-   * Whether the button is disabled.
-   */
+  /** Whether the button is disabled */
   disabled?: boolean;
-  
-  /**
-   * Additional CSS classes to apply to the button.
-   */
+  /** Additional CSS classes to apply */
   className?: string;
-  
-  /**
-   * Whether to use default button colors (primary theme colors).
-   */
-  defaultColors?: boolean;
-  
-  /**
-   * Content to render inside the button.
-   */
+  /** Visual style variant of the button */
+  variant?: ButtonVariant;
+  /** HTML button type attribute */
+  type?: "button" | "submit" | "reset";
+  /** Button content */
   children: ReactNode;
-};
+}
 
 /**
- * A reusable button component with customizable styling and behavior.
- * 
- * @param props The button props including onClick handler, disabled state, and styling options.
- * @returns A styled button element.
+ * A customizable button component with multiple variants.
+ * Supports primary, secondary, and plain styling with disabled state.
+ *
+ * @example
+ * ```tsx
+ * <Button onClick={handleClick}>Click me</Button>
+ * <Button variant="secondary" disabled>Disabled</Button>
+ * ```
  */
 export function Button({
   onClick,
   title,
   disabled = false,
-  className = '',
-  defaultColors = true,
-  children
+  className = "",
+  variant = "primary",
+  type = "button",
+  children,
 }: ButtonProps) {
-  let colorClasses = "";
-  if (defaultColors) {
-    colorClasses = "text-white bg-primary hover:bg-primary-hover " +
-        "disabled:bg-disabled-bg disabled:text-disabled-text";
-  }
-
   return (
     <button
+      type={type}
       disabled={disabled}
-      className={`${colorClasses} rounded disabled:cursor-not-allowed
+      className={`${variantClasses[variant]} rounded disabled:cursor-not-allowed
         cursor-pointer font-bold text-lg py-2 px-4 ${className}`}
       onClick={onClick}
       title={title}
