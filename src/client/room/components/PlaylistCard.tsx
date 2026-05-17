@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
-import type ICookieProps from "../../../types/ICookieProps";
 import type { AudioPlayer } from "../hooks/AudioPlayerHook";
-import { useCookies } from "react-cookie";
-import { QUESTION_PADDING_TICKS } from "../../../shared/ConfigConstants";
-import { useAudioPlayer } from "../hooks/AudioPlayerHook";
-import { useControllerContext } from "../hooks/RoomControllerHooks";
-import { useRoomControllerMessageTypeListener } from "../hooks/RoomControllerListenerHooks";
 
 
 interface PlaylistCardProps {
@@ -40,14 +34,15 @@ interface PlaylistCardProps {
   children?: ReactNode;
 
   /**
-   * The preview URL for this playlist, utilized to render the audio player preview.
+   * Function called when the "play/pause" button is clicked.
    */
-  previewURL?: string;
+  onPlayPause?: () => void;
 
   /**
-   * The start position for the audio preview. See {@link RoomConfigMessageSchema.audioStartPosition} (only 0-2 here!).
+   * The state that should be shown for this audio element.
+   * Won't show play/pause/loading if undefined.
    */
-  audioStartPos?: number;
+  audioState?: AudioPlayer["state"];
 }
 
 function StateIcon({ state }: { state: AudioPlayer["state"] }) {
@@ -86,26 +81,7 @@ function stateToAriaLabel(state: AudioPlayer["state"]) {
  * Displays a single playlist entry with cover art, title and subtitle.
  * Shows a delete button for hosts.
  */
-export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, previewURL, audioStartPos }: PlaylistCardProps) {
-  const controller = useControllerContext();
-  const [cookies] = useCookies<"audioVolume" | "audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
-
-  useRoomControllerMessageTypeListener(controller, "room_config");
-
-  const player = useAudioPlayer(
-    cookies.audioVolume ?? 0.2,
-    cookies.audioMuted ?? false,
-  );
-
-  const handlePlayPause = () => {
-    if (player.state === "not_playing") {
-      player.load(previewURL!);
-      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + QUESTION_PADDING_TICKS);
-    } else {
-      player.howler?.pause();
-    }
-  };
-
+export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, onPlayPause, audioState }: PlaylistCardProps) {
   return (
     <li className="flex items-center gap-6 p-3 bg-card-bg rounded-lg">
       <div className="relative aspect-square flex-none flex w-25 lg:w-30 2xl:w-40 items-center justify-center bg-disabled-bg rounded-xl">
@@ -122,14 +98,14 @@ export function PlaylistCard({ title, subtitle, coverURL, hrefURL, children, pre
                 <div className="rounded-xl text-disabled-text text-4xl">?</div>
               )
         }
-        {previewURL && (
+        {audioState && (
           <button
             type="button"
-            onClick={handlePlayPause}
+            onClick={onPlayPause}
             className="absolute inset-0 flex items-center justify-center rounded-xl hover:bg-black/50 hover:cursor-pointer transition-colors"
-            aria-label={stateToAriaLabel(player.state)}
+            aria-label={stateToAriaLabel(audioState)}
           >
-            <StateIcon state={player.state} />
+            <StateIcon state={audioState} />
           </button>
         )}
       </div>
