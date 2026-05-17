@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useRef } from "react";
 import { toast } from "react-toastify";
 import { importPlaylistFile, validatePlaylistsFile } from "../../../../../shared/Utils";
 import { Button } from "../../../../components/Button";
@@ -10,6 +11,7 @@ import { useControllerContext } from "../../../hooks/RoomControllerHooks";
  */
 export function ImportPlaylistsButton() {
   const controller = useControllerContext();
+  const playlistImportRef = useRef<HTMLInputElement>(null);
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -37,15 +39,15 @@ export function ImportPlaylistsButton() {
   return (
     <div className="flex-1">
       <input
+        ref={playlistImportRef}
         type="file"
         accept=".sgjson"
         onChange={handleImport}
         className="hidden"
-        id="playlist-import"
       />
       <Button
         type="button"
-        onClick={() => document.getElementById("playlist-import")?.click()}
+        onClick={() => playlistImportRef.current?.click()}
         className="w-full text-nowrap"
         aria-label="Import playlists from file"
       >

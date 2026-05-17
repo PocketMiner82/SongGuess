@@ -8,7 +8,7 @@ import {
 import Logger from "./logger/Logger";
 import { ValidRoom } from "./ValidRoom";
 
-// noinspection JSUnusedGlobalSymbols
+
 export default class Server implements Party.Server {
   /**
    * The main logger, logging messages to console and storage.
