@@ -1,3 +1,10 @@
+# [3.0.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.11...3.0.0-dev.12) (2026-05-17)
+
+
+### Bug Fixes
+
+* **SearchMusicComponent:** stop currently playing audio before playing new + scroll to top after search ([676fa16](https://github.com/PocketMiner82/SongGuess/commit/676fa16ed51543f388ea1e7fa8939b246136e2b5))
+
 # [3.0.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/3.0.0-dev.10...3.0.0-dev.11) (2026-05-11)
 
 
