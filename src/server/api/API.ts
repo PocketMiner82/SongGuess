@@ -121,7 +121,13 @@ export default class API implements Party.Server {
   }
 
   private async searchSoundCloud(query: string): Promise<Song[]> {
-    const tracks: SoundcloudTrack[] = await this.soundCloud.fetchGetJson("/tracks", { q: query });
+    const tracks: SoundcloudTrack[] = await this.soundCloud.fetchGetJson("/tracks", {
+      "q": query,
+      // require at least 5 seconds
+      "duration[from]": "5000",
+      // limit to 15min max
+      "duration[to]": "900000",
+    });
 
     return tracks.map(col => ({
       name: col.title,
