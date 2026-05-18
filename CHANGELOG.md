@@ -1,3 +1,10 @@
+## [3.0.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.1-dev.1...3.0.1-dev.2) (2026-05-18)
+
+
+### Bug Fixes
+
+* **API:** only fetch soundcloud songs with 5-900s ([d63c345](https://github.com/PocketMiner82/SongGuess/commit/d63c345a730994b86dbd1f1dec628d6443a6f529))
+
 ## [3.0.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.0...3.0.1-dev.1) (2026-05-18)
 
 
