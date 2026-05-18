@@ -137,6 +137,7 @@ export function SearchMusicComponent({
     setAddedIndices(new Set());
     setSearchStatus(items.length === 0 ? "error" : "idle");
     searchResultsListRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    player.howler?.pause();
   };
 
   const handleSelectResult = async (playlist: Playlist, index: number) => {
