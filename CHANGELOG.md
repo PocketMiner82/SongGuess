@@ -1,3 +1,10 @@
+## [3.0.2-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.1...3.0.2-dev.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* add try-catch with error logging to many methods to attempt to better log errors ([7e6f548](https://github.com/PocketMiner82/SongGuess/commit/7e6f54832d153a73102e82790c4a5642ade3aeb3))
+
 ## [3.0.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.0...3.0.1) (2026-05-18)
 
 
