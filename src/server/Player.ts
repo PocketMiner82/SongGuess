@@ -243,8 +243,13 @@ export default class Player implements PlayerMessage, IEventListener {
     }
 
     this.kickPlayerTimeout = setTimeout(() => {
-      this.room.server.logger.info(`Kicked ${this.conn.id} due to inactivity.`);
-      this.kick(4001, "Didn't receive updates within 15 seconds.");
+      try {
+        this.room.server.logger.info(`Kicked ${this.conn.id} due to inactivity.`);
+        this.kick(4001, "Didn't receive updates within 15 seconds.");
+      } catch (e) {
+        this.room.server.logger.error("Error running kick player timeout:");
+        this.room.server.logger.error(e);
+      }
     }, ROOM_INACTIVITY_KICK_TIMEOUT * 1000);
   }
 

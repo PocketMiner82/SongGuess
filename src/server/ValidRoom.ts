@@ -314,17 +314,22 @@ export class ValidRoom implements Party.Server {
     this.host = undefined;
 
     this.hostTransferTimeout = setTimeout(() => {
-      if (this.host === undefined) {
-        const next = this.activePlayers[Symbol.iterator]().next();
-        if (!next.done) {
-          this.server.logger.info(`Host left, transferring host to ${next.value.conn.id}`);
-          this.transferHost(next.value);
-        } else {
-          this.transferHost(undefined);
+      try {
+        if (this.host === undefined) {
+          const next = this.activePlayers[Symbol.iterator]().next();
+          if (!next.done) {
+            this.server.logger.info(`Host left, transferring host to ${next.value.conn.id}`);
+            this.transferHost(next.value);
+          } else {
+            this.transferHost(undefined);
+          }
         }
-      }
 
-      this.hostTransferTimeout = null;
+        this.hostTransferTimeout = null;
+      } catch (e) {
+        this.server.logger.error("Error running host transfer timeout:");
+        this.server.logger.error(e);
+      }
     }, ROOM_HOST_TRANSFER_TIMEOUT * 1000);
   }
 
@@ -395,15 +400,20 @@ export class ValidRoom implements Party.Server {
    */
   public startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
-      this.server.safeBroadcast(this.getCountdownMessage());
+      try {
+        this.server.safeBroadcast(this.getCountdownMessage());
 
-      if (this.countdown === 0) {
-        this.stopCountdown();
-        callback();
-        return;
+        if (this.countdown === 0) {
+          this.stopCountdown();
+          callback();
+          return;
+        }
+
+        this.countdown--;
+      } catch (e) {
+        this.server.logger.error("Error running decrement countdown interval:");
+        this.server.logger.error(e);
       }
-
-      this.countdown--;
     };
 
     this.countdown = from;

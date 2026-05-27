@@ -84,7 +84,7 @@ export default class Logger {
     else
       console.log(`${this.LOG_PREFIX} ${message}`);
 
-    if (level === "debug")
+    if (level !== "info")
       message = this.truncateMessage(message);
 
     this.server.safeBroadcast({

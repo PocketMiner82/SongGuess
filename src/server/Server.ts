@@ -1,7 +1,6 @@
 import type * as Party from "partykit/server";
 import type { RoomGetResponse } from "../types/APIResponseTypes";
 import type { ServerMessage } from "../types/MessageTypes";
-import { clearInterval, clearTimeout } from "node:timers";
 import {
   ROOM_CLEANUP_TIMEOUT,
 } from "../shared/ConfigConstants";
@@ -58,15 +57,20 @@ export default class Server implements Party.Server {
    */
   private delayedCleanup() {
     this.cleanupTimeout = setTimeout(() => {
-      if (this.getOnlinePlayersCount() === 0) {
-        clearInterval(this.tickInterval!);
-        this.tickInterval = null;
+      try {
+        if (this.getOnlinePlayersCount() === 0) {
+          clearInterval(this.tickInterval!);
+          this.tickInterval = null;
 
-        this.validRoom = undefined;
+          this.validRoom = undefined;
 
-        this.logger.info("Room closed due to timeout.");
+          this.logger.info("Room closed due to timeout.");
+        }
+        this.cleanupTimeout = null;
+      } catch (e) {
+        this.logger.error("Error running cleanup timeout:");
+        this.logger.error(e);
       }
-      this.cleanupTimeout = null;
     }, ROOM_CLEANUP_TIMEOUT * 1000);
   }
 
@@ -183,6 +187,9 @@ export default class Server implements Party.Server {
         }
 
         this.logger.info(`Admin ${conn.id} connected.`);
+      }).catch((e) => {
+        this.logger.error("Error running Logger#getLogMessages():");
+        this.logger.error(e);
       });
 
       return;
@@ -206,7 +213,7 @@ export default class Server implements Party.Server {
         try {
           this.validRoom?.onTick();
         } catch (e) {
-          this.logger.error("Error running onTick():");
+          this.logger.error("Error running ValidRoom#onTick():");
           this.logger.error(e);
         }
       }, 1000);
@@ -214,7 +221,12 @@ export default class Server implements Party.Server {
 
     this.logger.info(`${conn.id} connected.`);
 
-    this.validRoom.onConnect(conn, ctx);
+    try {
+      this.validRoom.onConnect(conn, ctx);
+    } catch (e) {
+      this.logger.error("Error running ValidRoom#onConnect():");
+      this.logger.error(e);
+    }
   }
 
   /**
@@ -229,7 +241,12 @@ export default class Server implements Party.Server {
       return;
     }
 
-    this.validRoom.onMessage(message, conn);
+    try {
+      this.validRoom.onMessage(message, conn);
+    } catch (e) {
+      this.logger.error("Error running ValidRoom#onMessage():");
+      this.logger.error(e);
+    }
   }
 
   /**
@@ -250,7 +267,12 @@ export default class Server implements Party.Server {
 
     this.logger.info(`${conn.id} left.`);
 
-    this.validRoom.onClose(conn);
+    try {
+      this.validRoom.onClose(conn);
+    } catch (e) {
+      this.logger.error("Error running ValidRoom#onClose():");
+      this.logger.error(e);
+    }
 
     if (this.getOnlinePlayersCount() === 0) {
       this.delayedCleanup();
