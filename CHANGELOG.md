@@ -1,3 +1,5 @@
+## [3.0.2-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.2-dev.1...3.0.2-dev.2) (2026-05-30)
+
 ## [3.0.2-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.1...3.0.2-dev.1) (2026-05-27)
 
 
