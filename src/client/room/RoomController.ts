@@ -31,10 +31,6 @@ import { FatalErrorDialog } from "../components/modal/FatalErrorDialog";
 import { Modal } from "../modal/Modal";
 import { QuestionData } from "./QuestionData";
 
-/**
- * The PartyKit host URL for WebSocket connections.
- */
-declare const PARTYKIT_HOST: string;
 
 /**
  * The interval of pinging (ms).
@@ -167,11 +163,12 @@ export class RoomController {
   /**
    * Creates a new RoomController instance and initializes the socket connection.
    *
+   * @param host the host used when creating the socket connection.
    * @param roomID The ID of the room to connect to.
    * @param getCookies What cookies are currently set.
    * @param setCookies A function to allow updating cookies.
    */
-  constructor(readonly roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
+  constructor(readonly host: string, readonly roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
     const cookies = getCookies();
 
     // generate uuid if not set via cookie
@@ -185,7 +182,8 @@ export class RoomController {
 
     const newUsername = cookies.userName;
     this.socket = new PartySocket({
-      host: PARTYKIT_HOST,
+      host,
+      party: "song-guess-server",
       room: roomID,
       maxRetries: 0,
       id,

@@ -1,5 +1,5 @@
 /**
- * Response returned by GET request to a /parties/main/{roomId}.
+ * Response returned by GET request to a /parties/song-guess-server/{roomId}.
  */
 export interface RoomGetResponse {
   /**
@@ -16,7 +16,7 @@ export interface RoomGetResponse {
 }
 
 /**
- * Response returned by /parties/api/createRoom endpoint.
+ * Response returned by /api/createRoom endpoint.
  */
 export interface CreateRoomResponse {
   /**

@@ -162,4 +162,5 @@ dist
 .pnp.\*
 
 .partykit
+.wrangler
 .DS_Store

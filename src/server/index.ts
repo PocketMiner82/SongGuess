@@ -1,6 +1,7 @@
-import type * as Party from "partykit/server";
+import type { Connection, ConnectionContext } from "partyserver";
 import type { RoomGetResponse } from "../types/APIResponseTypes";
 import type { ServerMessage } from "../types/MessageTypes";
+import { routePartykitRequest, Server } from "partyserver";
 import {
   ROOM_CLEANUP_TIMEOUT,
 } from "../shared/ConfigConstants";
@@ -8,7 +9,11 @@ import Logger from "./logger/Logger";
 import { ValidRoom } from "./ValidRoom";
 
 
-export default class Server implements Party.Server {
+export { default as SongGuessAPI } from "./api/SongGuessAPI";
+
+export class SongGuessServer extends Server<Env> {
+  static options = { hibernate: false };
+
   /**
    * The main logger, logging messages to console and storage.
    */
@@ -31,10 +36,9 @@ export default class Server implements Party.Server {
 
   /**
    * Creates a new room server.
-   *
-   * @param partyRoom The room to serve
    */
-  constructor(readonly partyRoom: Party.Room) {
+  constructor(ctx: DurableObjectState, env: Env) {
+    super(ctx, env);
     this.logger = new Logger(this);
   }
 
@@ -98,7 +102,7 @@ export default class Server implements Party.Server {
    * @param msg The message object to be stringified and transmitted to the client.
    * @param log Whether to log the sended message
    */
-  public safeSend(conn: Party.Connection, msg: ServerMessage, log: boolean = true) {
+  public safeSend(conn: Connection, msg: ServerMessage, log: boolean = true) {
     try {
       // silently ignore if not open
       if (conn.readyState === WebSocket.OPEN) {
@@ -121,8 +125,8 @@ export default class Server implements Party.Server {
    *
    * @param tag An optional filter to target a specific subset of connections.
    */
-  private* getActiveConnections(tag?: string): Iterable<Party.Connection> {
-    for (const conn of this.partyRoom.getConnections(tag)) {
+  private* getActiveConnections(tag?: string): Iterable<Connection> {
+    for (const conn of this.getConnections(tag)) {
       if (conn && conn.readyState === WebSocket.OPEN) {
         yield conn;
       }
@@ -135,7 +139,7 @@ export default class Server implements Party.Server {
    * @param tag The tag that should be present.
    * @returns whether the connection has the tag or not.
    */
-  public hasTag(conn: Party.Connection, tag: string): boolean {
+  public hasTag(conn: Connection, tag: string): boolean {
     for (const activeConn of this.getActiveConnections(tag)) {
       if (conn === activeConn) {
         return true;
@@ -148,14 +152,14 @@ export default class Server implements Party.Server {
   // ROOM WS EVENTS
   //
 
-  getConnectionTags(conn: Party.Connection, ctx: Party.ConnectionContext) {
+  getConnectionTags(conn: Connection, ctx: ConnectionContext) {
     const url = new URL(ctx.request.url);
     const authParam = url.searchParams.get("auth");
     if (authParam) {
       const credentials = atob(authParam).split(":");
 
       if (conn.id.startsWith("admin_") && credentials.length === 2
-        && credentials[0] === this.partyRoom.env.ADMIN_USER && credentials[1] === this.partyRoom.env.ADMIN_PASSWORD) {
+        && credentials[0] === this.env.ADMIN_USER && credentials[1] === this.env.ADMIN_PASSWORD) {
         return ["admin"];
       } else {
         return ["unauthorized"];
@@ -170,7 +174,7 @@ export default class Server implements Party.Server {
    * @param conn The new connection.
    * @param ctx The connection context.
    */
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+  onConnect(conn: Connection, ctx: ConnectionContext) {
     if (this.hasTag(conn, "unauthorized")) {
       conn.close(4403, "Access denied.");
       return;
@@ -178,19 +182,19 @@ export default class Server implements Party.Server {
 
     // admin should not be registered "normally" to the room.
     if (this.hasTag(conn, "admin")) {
-      this.logger.getLogMessages().then(async (loggerStorage) => {
-        if (loggerStorage) {
-          this.safeSend(conn, {
-            type: "update_log_messages",
-            messages: loggerStorage,
-          });
-        }
-
-        this.logger.info(`Admin ${conn.id} connected.`);
-      }).catch((e) => {
-        this.logger.error("Error running Logger#getLogMessages():");
-        this.logger.error(e);
-      });
+      // this.logger.getLogMessages().then(async (loggerStorage) => {
+      //   if (loggerStorage) {
+      //     this.safeSend(conn, {
+      //       type: "update_log_messages",
+      //       messages: loggerStorage,
+      //     });
+      //   }
+      //
+      //   this.logger.info(`Admin ${conn.id} connected.`);
+      // }).catch((e) => {
+      //   this.logger.error("Error running Logger#getLogMessages():");
+      //   this.logger.error(e);
+      // });
 
       return;
     }
@@ -232,17 +236,17 @@ export default class Server implements Party.Server {
   /**
    * Handles incoming messages from a WebSocket connection.
    *
-   * @param message The message content as a string.
    * @param conn The connection that sent the message.
+   * @param message The message content as a string.
    */
-  onMessage(message: string, conn: Party.Connection) {
+  onMessage(conn: Connection, message: string) {
     // ignore all messages if room is not valid
     if (!this.validRoom) {
       return;
     }
 
     try {
-      this.validRoom.onMessage(message, conn);
+      this.validRoom.onMessage(conn, message);
     } catch (e) {
       this.logger.error("Error running ValidRoom#onMessage():");
       this.logger.error(e);
@@ -254,7 +258,7 @@ export default class Server implements Party.Server {
    *
    * @param conn The connection that closed.
    */
-  onClose(conn: Party.Connection) {
+  onClose(conn: Connection) {
     if (this.hasTag(conn, "admin")) {
       this.logger.info(`Admin ${conn.id} left.`);
       return;
@@ -291,7 +295,7 @@ export default class Server implements Party.Server {
    * @param req The HTTP request to handle.
    * @returns A Promise resolving to the HTTP response.
    */
-  async onRequest(req: Party.Request): Promise<Response> {
+  async onRequest(req: Request): Promise<Response> {
     // respond with JSON containing the current online count and if the room is valid
     if (req.method === "GET") {
       const json: RoomGetResponse = {
@@ -303,7 +307,7 @@ export default class Server implements Party.Server {
     // used to initially validate and activate the room, requires a secret token shared between this method and the static createRoom method
     } else if (req.method === "POST") {
       const url = new URL(req.url);
-      if (url.searchParams.has("token") && url.searchParams.get("token") === this.partyRoom.env.VALIDATE_ROOM_TOKEN) {
+      if (url.searchParams.has("token") && url.searchParams.get("token") === this.env.VALIDATE_ROOM_TOKEN) {
         this.validRoom = new ValidRoom(this);
         this.delayedCleanup();
 
@@ -316,33 +320,27 @@ export default class Server implements Party.Server {
 
     return new Response("Bad request. Only GET and POST is supported.", { status: 400 });
   }
-
-  //
-  // GLOBAL HTTP EVENTS
-  //
-
-  /**
-   * Handles global HTTP requests to the PartyKit worker.
-   *
-   * @param req The fetch request.
-   * @param lobby The fetch lobby for asset serving.
-   * @param _ctx The execution context (unused).
-   * @returns A Promise resolving to the fetch response.
-   */
-  static async onFetch(req: Party.Request, lobby: Party.FetchLobby, _ctx: Party.ExecutionContext) {
-    const url: URL = new URL(req.url);
-
-    // if room url is requested without HTML extension, add it
-    if (!url.pathname.endsWith(".html")) {
-      const resp = await lobby.assets.fetch(`${url.pathname}.html${url.search}`);
-      if (resp)
-        return resp;
-    }
-
-    // redirect to main page, if on another one
-    return Response.redirect(url.origin);
-  }
 }
 
-// noinspection BadExpressionStatementJS
-Server satisfies Party.Worker;
+export default {
+  async fetch(req, env) {
+    const url: URL = new URL(req.url);
+
+    // route api endpoint to a shared durable object
+    if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/parties/api/")) {
+      const id = env.SongGuessAPI.idFromName("default");
+      const stub = env.SongGuessAPI.get(id);
+      return stub.fetch(req);
+    }
+
+    let resp = await routePartykitRequest(req, { ...env });
+
+    // if some url is requested without HTML extension, try adding it
+    if (!resp && !url.pathname.endsWith(".html")) {
+      resp = await env.ASSETS.fetch(`${url.pathname}.html${url.search}`);
+    }
+
+    // redirect to main page, if requested site not found
+    return resp || Response.redirect(url.origin);
+  },
+} satisfies ExportedHandler<Env>;
