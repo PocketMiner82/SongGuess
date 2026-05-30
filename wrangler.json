@@ -35,5 +35,22 @@
   "compatibility_flags": [
     "nodejs_compat_v2",
     "global_fetch_private_origin"
-  ]
+  ],
+  "env": {
+    "dev": {
+      "workers_dev": true,
+      "durable_objects": {
+        "bindings": [
+          {
+            "class_name": "SongGuessServer",
+            "name": "SongGuessServer"
+          },
+          {
+            "class_name": "SongGuessAPI",
+            "name": "SongGuessAPI"
+          }
+        ]
+      }
+    }
+  }
 }
