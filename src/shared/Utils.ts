@@ -216,7 +216,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
   }
 
   try {
-    const resp = await fetch(`/parties/api/searchSoundCloud?q=${encodeURIComponent(query)}`);
+    const resp = await fetch(`/api/searchSoundCloud?q=${encodeURIComponent(query)}`);
     const results: Song[] = await resp.json();
     const playlists: Playlist[] = results.map(song => ({
       name: song.name,
@@ -251,7 +251,7 @@ export function fixedCoverSize(url: string | undefined | null): string | null {
  */
 async function fetchPlaylistInfo(url: string): Promise<Playlist> {
   try {
-    const page = await fetch(`/parties/api/playlistInfo?url=${encodeURIComponent(url)}`);
+    const page = await fetch(`/api/playlistInfo?url=${encodeURIComponent(url)}`);
     return await page.json();
   } catch {
     return DefaultPlaylist;
@@ -288,7 +288,7 @@ export function getFirstSong(results: ResultMusicTrack[]): Song | null {
  */
 export async function fetchSongByISRC(isrc: string): Promise<Song | null> {
   try {
-    const page = await fetch(`/parties/api/songByISRC?isrc=${encodeURIComponent(isrc)}`);
+    const page = await fetch(`/api/songByISRC?isrc=${encodeURIComponent(isrc)}`);
     return await page.json();
   } catch (e) {
     console.error("Error fetching song from api:", e);

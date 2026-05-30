@@ -12,27 +12,27 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-    
-    - name: Semantic Release
-      uses: cycjimmy/semantic-release-action@v6
-      with:
-        tag_format: ${version}
-        branches: |
-          [
-            'main',
-            {
-              name: 'dev',
-              prerelease: true
-            }
-          ]
-        extra_plugins: |
-          @semantic-release/changelog
-          @semantic-release/git
-          @saithodev/semantic-release-backmerge
-          @semantic-release/exec
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PARTYKIT_TOKEN: ${{ secrets.PARTYKIT_TOKEN }}
-        PARTYKIT_LOGIN: ${{ secrets.PARTYKIT_LOGIN  }}
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v6
+        with:
+          tag_format: ${version}
+          branches: |
+            [
+              'main',
+              {
+                name: 'dev',
+                prerelease: true
+              }
+            ]
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/git
+            @saithodev/semantic-release-backmerge
+            @semantic-release/exec
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

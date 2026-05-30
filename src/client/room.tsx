@@ -154,7 +154,7 @@ function Room() {
 export function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
   const [cookies, setCookie] = useCookies<"userID" | "userName", ICookieProps>(["userID", "userName"]);
-  const { getController, isReady } = useRoomController(roomID, () => cookies, setCookie);
+  const { getController, isReady } = useRoomController(window.location.host, roomID, () => cookies, setCookie);
 
   if (!isReady)
     return <Loading />;

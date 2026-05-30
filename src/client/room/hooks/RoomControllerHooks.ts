@@ -6,17 +6,18 @@ import { RoomController } from "../RoomController";
  * Custom React hook that provides a {@link RoomController} instance for managing
  * the connection and state of a room.
  *
+ * @param host the host used when creating the socket connection.
  * @param roomID The ID of the room to connect to.
  * @param getCookies What cookies are currently set.
  * @param setCookies A function to allow updating cookies.
  * @returns An object containing a `getController` method to access the `RoomController` instance.
  */
-export function useRoomController(roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
+export function useRoomController(host: string, roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
   // hold the class instance so it persists across renders
   const controllerRef = useRef<RoomController | null>(null);
 
   if (!controllerRef.current) {
-    controllerRef.current = new RoomController(roomID, getCookies, setCookies);
+    controllerRef.current = new RoomController(host, roomID, getCookies, setCookies);
   }
 
   useEffect(() => {

@@ -1,23 +1,21 @@
-import type { LoggerStorage } from "../../types/LoggerStorageTypes";
 import type { AddLogMessage } from "../../types/MessageTypes";
-import type Server from "../Server";
+import type { SongGuessServer } from "../index";
 import * as util from "node:util";
-import { DefaultLoggerStorage } from "../../types/LoggerStorageTypes";
 
 
 export default class Logger {
   /**
    * Log messages are prefixed with this string.
    */
-  readonly LOG_PREFIX: string = `[Room ${this.server.partyRoom.id}]`;
+  readonly LOG_PREFIX: string = `[Room ${this.server.name}]`;
 
   // track last write operation
-  private writeQueue: Promise<void> = Promise.resolve();
+  // private writeQueue: Promise<void> = Promise.resolve();
 
   /**
    * Creates a new Logger instance.
    */
-  constructor(readonly server: Server) {}
+  constructor(readonly server: SongGuessServer) {}
 
   /**
    * Logs an informational message to storage and console.
@@ -77,48 +75,44 @@ export default class Logger {
    */
   private storeAndLogMessage(message: string, level: AddLogMessage["level"]): void {
     message = this.formatLogEntry(message);
-    if (level === "warn")
-      console.warn(`${this.LOG_PREFIX} ${message}`);
-    else if (level === "error")
-      console.error(`${this.LOG_PREFIX} ${message}`);
-    else
-      console.log(`${this.LOG_PREFIX} ${message}`);
 
-    if (level === "debug")
+    if (level !== "info")
       message = this.truncateMessage(message);
 
-    this.server.safeBroadcast({
-      type: "add_log_message",
-      level,
-      entry: {
-        msg: message,
-        timestamp: Date.now(),
-      },
-    }, "admin");
+    console[level](`${this.LOG_PREFIX} ${message}`);
 
-    this.writeQueue = this.writeQueue.then(async () => {
-      const loggerStorage = await this.getLogMessages();
-      loggerStorage[level].push({
-        msg: message,
-        timestamp: Date.now(),
-      });
-
-      // limit log size to 50 messages (200 for debug)
-      while (loggerStorage[level].length > (level === "debug" ? 200 : 50)) {
-        loggerStorage[level].shift();
-      }
-
-      await this.server.partyRoom.storage.put("logger", loggerStorage);
-    }).catch((err) => {
-      console.error("Failed to save log to storage:", err);
-    });
+    // this.server.safeBroadcast({
+    //   type: "add_log_message",
+    //   level,
+    //   entry: {
+    //     msg: message,
+    //     timestamp: Date.now(),
+    //   },
+    // }, "admin");
+    //
+    // this.writeQueue = this.writeQueue.then(async () => {
+    //   const loggerStorage = await this.getLogMessages();
+    //   loggerStorage[level].push({
+    //     msg: message,
+    //     timestamp: Date.now(),
+    //   });
+    //
+    //   // limit log size to 50 messages (200 for debug)
+    //   while (loggerStorage[level].length > (level === "debug" ? 200 : 50)) {
+    //     loggerStorage[level].shift();
+    //   }
+    //
+    //   await this.server.partyRoom.storage.put("logger", loggerStorage);
+    // }).catch((err) => {
+    //   console.error("Failed to save log to storage:", err);
+    // });
   }
 
-  /**
-   * Fetches and returns all log messages.
-   * @returns The messages inside a {@link LoggerStorage} object.
-   */
-  public async getLogMessages(): Promise<LoggerStorage> {
-    return await this.server.partyRoom.storage.get<LoggerStorage>("logger") || DefaultLoggerStorage;
-  }
+  // /**
+  //  * Fetches and returns all log messages.
+  //  * @returns The messages inside a {@link LoggerStorage} object.
+  //  */
+  // public async getLogMessages(): Promise<LoggerStorage> {
+  //   return await this.server.partyRoom.storage.get<LoggerStorage>("logger") || DefaultLoggerStorage;
+  // }
 }

@@ -13,10 +13,6 @@ import { Button } from "./components/Button";
 import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
 
-/**
- * The PartyKit host URL for WebSocket connections.
- */
-declare const PARTYKIT_HOST: string;
 
 interface AuthData {
   username: string;
@@ -244,8 +240,8 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
   const id = `admin_${cookies.userID ? cookies.userID : uuidv4()}`;
 
   const socketRef = usePartySocket({
-    host: PARTYKIT_HOST,
     room: roomID,
+    party: "song-guess-server",
     maxRetries: 50,
     id,
     onOpen: () => {

@@ -19,7 +19,7 @@ export function App() {
    * Creates a new room via API and redirects to room page.
    */
   const buttonClick = async () => {
-    const resp = await fetchPostCreateRoom("/parties/api/createRoom");
+    const resp = await fetchPostCreateRoom("/api/createRoom");
 
     if (!resp) {
       toast.error("Unknown server error");

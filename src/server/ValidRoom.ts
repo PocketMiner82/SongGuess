@@ -1,4 +1,4 @@
-import type * as Party from "partykit/server";
+import type { Connection, ConnectionContext } from "partyserver";
 import type {
   CountdownMessage,
   GameState,
@@ -6,7 +6,7 @@ import type {
   SourceMessage,
 } from "../types/MessageTypes";
 import type Game from "./game/Game";
-import type Server from "./Server";
+import type { SongGuessServer } from "./index";
 import { v4 } from "uuid";
 import z from "zod";
 import { ClientMessageSchema, OtherMessageSchema } from "../schemas/MessageSchemas";
@@ -20,7 +20,7 @@ import Player from "./Player";
 /**
  * A validated SongGuess room.
  */
-export class ValidRoom implements Party.Server {
+export class ValidRoom {
   /**
    * The listener, handling incoming messages.
    */
@@ -95,14 +95,14 @@ export class ValidRoom implements Party.Server {
     return Array.from(this.players.values()).filter(player => player.isOnline && !player.isSpectator);
   }
 
-  constructor(readonly server: Server) {
+  constructor(readonly server: SongGuessServer) {
     this.listener = new Listener(this);
     this.config = new ServerConfig(this);
     this.game = new MultipleChoiceGame(this);
     this.lobby = new Lobby(this);
   }
 
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+  onConnect(conn: Connection, ctx: ConnectionContext) {
     const player = this.getOrCreatePlayer(conn);
 
     if (!player.onConnect(ctx))
@@ -125,7 +125,7 @@ export class ValidRoom implements Party.Server {
     this.broadcastRoomStateMessage();
   }
 
-  onMessage(message: string, conn: Party.Connection) {
+  onMessage(conn: Connection, message: string) {
     const player = this.getOrCreatePlayer(conn);
 
     // refresh inactive timeout (admins don't have that)
@@ -195,7 +195,7 @@ export class ValidRoom implements Party.Server {
     }
   }
 
-  onClose(conn: Party.Connection) {
+  onClose(conn: Connection) {
     this.getOrCreatePlayer(conn).onClose();
 
     // host left
@@ -208,17 +208,10 @@ export class ValidRoom implements Party.Server {
   }
 
   /**
-   * Returns the instance of the current {@link Party.Room}
-   */
-  public getPartyRoom(): Party.Room {
-    return this.server.partyRoom;
-  }
-
-  /**
    * Gets a player from the players map. If not found, create new player.
    * @param conn the connection to search for
    */
-  public getOrCreatePlayer(conn: Party.Connection): Player {
+  public getOrCreatePlayer(conn: Connection): Player {
     let player = this.players.get(conn.id);
     if (!player) {
       const uuid = v4();
@@ -314,17 +307,22 @@ export class ValidRoom implements Party.Server {
     this.host = undefined;
 
     this.hostTransferTimeout = setTimeout(() => {
-      if (this.host === undefined) {
-        const next = this.activePlayers[Symbol.iterator]().next();
-        if (!next.done) {
-          this.server.logger.info(`Host left, transferring host to ${next.value.conn.id}`);
-          this.transferHost(next.value);
-        } else {
-          this.transferHost(undefined);
+      try {
+        if (this.host === undefined) {
+          const next = this.activePlayers[Symbol.iterator]().next();
+          if (!next.done) {
+            this.server.logger.info(`Host left, transferring host to ${next.value.conn.id}`);
+            this.transferHost(next.value);
+          } else {
+            this.transferHost(undefined);
+          }
         }
-      }
 
-      this.hostTransferTimeout = null;
+        this.hostTransferTimeout = null;
+      } catch (e) {
+        this.server.logger.error("Error running host transfer timeout:");
+        this.server.logger.error(e);
+      }
     }, ROOM_HOST_TRANSFER_TIMEOUT * 1000);
   }
 
@@ -395,15 +393,20 @@ export class ValidRoom implements Party.Server {
    */
   public startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
-      this.server.safeBroadcast(this.getCountdownMessage());
+      try {
+        this.server.safeBroadcast(this.getCountdownMessage());
 
-      if (this.countdown === 0) {
-        this.stopCountdown();
-        callback();
-        return;
+        if (this.countdown === 0) {
+          this.stopCountdown();
+          callback();
+          return;
+        }
+
+        this.countdown--;
+      } catch (e) {
+        this.server.logger.error("Error running decrement countdown interval:");
+        this.server.logger.error(e);
       }
-
-      this.countdown--;
     };
 
     this.countdown = from;

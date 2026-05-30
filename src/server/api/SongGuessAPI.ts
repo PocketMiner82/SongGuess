@@ -1,11 +1,11 @@
 import type { SongsEndpointTypes } from "@syncfm/applemusic-api";
 import type { AxiosInstance } from "axios";
-import type * as Party from "partykit/server";
 import type { SoundcloudTrack } from "soundcloud.ts";
 import type { CreateRoomResponse } from "../../types/APIResponseTypes";
 import type { Playlist, Song } from "../../types/MessageTypes";
 import type { SoundCloudStreams } from "./SoundCloudAPI";
 import { AppleMusicConfig, AuthType, getAuthenticatedAxios, Region } from "@syncfm/applemusic-api";
+import { Server } from "partyserver";
 import { albumRegex, appleMusicPreviewRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { fixedCoverSize } from "../../shared/Utils";
 import { DefaultPlaylist } from "../../types/MessageTypes";
@@ -13,9 +13,9 @@ import { fetchGetRoom, fetchPostRoom } from "./HTTPHelpers";
 import { SoundCloudAPI } from "./SoundCloudAPI";
 
 /**
- * Handles API requests to the /parties/api/{endpoint} endpoints.
+ * Handles API requests to the /api/{endpoint} endpoints.
  */
-export default class API implements Party.Server {
+export default class SongGuessAPI extends Server<Env> {
   /**
    * Client used for communication with Apple Music API.
    */
@@ -24,83 +24,14 @@ export default class API implements Party.Server {
   /**
    * Client used for communication with SoundCloud API.
    */
-  soundCloud: SoundCloudAPI = new SoundCloudAPI(this.room, this.room.env.SOUNDCLOUD_CLIENT_ID as string, this.room.env.SOUNDCLOUD_CLIENT_SECRET as string);
+  soundCloud: SoundCloudAPI = new SoundCloudAPI(this, this.env.SOUNDCLOUD_CLIENT_ID as string, this.env.SOUNDCLOUD_CLIENT_SECRET as string);
 
-
-  constructor(readonly room: Party.Room) { }
 
   /**
-   * Handles HTTP request to the room's endpoint.
+   * Returns the current {@link this.ctx}
    */
-  async onRequest(req: Party.Request): Promise<Response> {
-    const url: URL = new URL(req.url);
-
-    if (url.pathname.endsWith(this.room.id)) {
-      // handle room creation
-      if (this.room.id === "createRoom") {
-        return await this.createNewRoom(new URL(req.url).origin, this.room.env.VALIDATE_ROOM_TOKEN as string);
-      // handle playlist info request
-      } else if (this.room.id === "playlistInfo") {
-        // fetch playlist info
-        const playlistURL = url.searchParams.get("url");
-        if (!playlistURL) {
-          return new Response("Missing url parameter.", { status: 400 });
-        }
-
-        return Response.json(await this.getPlaylistInfo(playlistURL));
-      // handle isrc to song convert request
-      } else if (this.room.id === "songByISRC") {
-        const isrc = url.searchParams.get("isrc");
-        if (!isrc) {
-          return new Response("Missing isrc parameter.", { status: 400 });
-        }
-
-        return this.songByISRC(isrc);
-      // handle search soundcloud for tracks request
-      } else if (this.room.id === "searchSoundCloud") {
-        const query = url.searchParams.get("q");
-        if (!query) {
-          return new Response("Missing q (query) parameter.", { status: 400 });
-        }
-
-        return Response.json(await this.searchSoundCloud(query));
-      } else if (this.room.id === "fetchSoundCloudAudio") {
-        const urn = url.searchParams.get("urn");
-        if (!urn) {
-          return new Response("Missing urn parameter.", { status: 400 });
-        }
-
-        const cache = await caches.open("default");
-        let resp = await cache.match(url.toString());
-
-        if (!resp) {
-          const originalResponse = await this.fetchSoundCloudAudio(urn);
-          const headers = new Headers(originalResponse.headers);
-
-          headers.set("Cache-Control", "public, max-age=7200");
-          headers.delete("Age");
-          headers.delete("Set-Cookie");
-
-          resp = new Response(originalResponse.body, {
-            status: originalResponse.status,
-            statusText: originalResponse.statusText,
-            headers,
-          });
-          await cache.put(url.toString(), resp.clone());
-        }
-
-        return resp;
-      }
-    }
-
-    // redirect to main page, if on another one
-    return new Response("Bad request.\n\n"
-      + "Supported enpoints:\n"
-      + "/parties/api/createRoom\n"
-      + "/parties/api/playlistInfo?url={Apple Music URL}\n"
-      + "/parties/api/songByISRC?isrc={International Standard Recording Code}\n"
-      + "/parties/api/searchSoundCloud?q={search term}\n"
-      + "/parties/api/fetchSoundCloudAudio?urn={SoundCloud track URN}", { status: 400 });
+  public getCtx() {
+    return this.ctx;
   }
 
   private async fetchSoundCloudAudio(urn: string): Promise<Response> {
@@ -133,7 +64,7 @@ export default class API implements Party.Server {
       name: col.title,
       hrefURL: col.permalink_url,
       cover: col.artwork_url,
-      audioURL: `/parties/api/fetchSoundCloudAudio?urn=${encodeURIComponent(col.urn)}`,
+      audioURL: `/api/fetchSoundCloudAudio?urn=${encodeURIComponent(col.urn)}`,
       artist: col.user.username,
     } satisfies Song));
   }
@@ -252,7 +183,7 @@ export default class API implements Party.Server {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
       }
 
-      const roomInfo = await fetchGetRoom(`${origin}/parties/main/${text}`);
+      const roomInfo = await fetchGetRoom(`${origin}/parties/song-guess-server/${text}`);
 
       // room already exists
       if (roomInfo && roomInfo.isValidRoom) {
@@ -284,7 +215,7 @@ export default class API implements Party.Server {
     let statusCode = 201;
 
     if (roomID) {
-      if (!await fetchPostRoom(`${origin}/parties/main/${roomID}`, token)) {
+      if (!await fetchPostRoom(`${origin}/parties/song-guess-server/${roomID}`, token)) {
         errorMessage = "Can't validate room.";
         statusCode = 500;
       }
@@ -298,7 +229,81 @@ export default class API implements Party.Server {
       error: errorMessage,
     } satisfies CreateRoomResponse, { status: statusCode });
   }
-}
 
-// noinspection BadExpressionStatementJS
-API satisfies Party.Worker;
+  /**
+   * Handles HTTP request to the room's endpoint.
+   */
+  async onRequest(req: Request): Promise<Response> {
+    const url: URL = new URL(req.url);
+
+    switch (url.pathname.split("/").pop()) {
+      case "createRoom":
+        return await this.createNewRoom(new URL(req.url).origin, this.env.VALIDATE_ROOM_TOKEN as string);
+
+      case "playlistInfo": {
+        // fetch playlist info
+        const playlistURL = url.searchParams.get("url");
+        if (!playlistURL) {
+          return new Response("Missing url parameter.", { status: 400 });
+        }
+
+        return Response.json(await this.getPlaylistInfo(playlistURL));
+      }
+
+      case "songByISRC": {
+        const isrc = url.searchParams.get("isrc");
+        if (!isrc) {
+          return new Response("Missing isrc parameter.", { status: 400 });
+        }
+
+        return this.songByISRC(isrc);
+      }
+
+      case "searchSoundCloud": {
+        const query = url.searchParams.get("q");
+        if (!query) {
+          return new Response("Missing q (query) parameter.", { status: 400 });
+        }
+
+        return Response.json(await this.searchSoundCloud(query));
+      }
+
+      case "fetchSoundCloudAudio": {
+        const urn = url.searchParams.get("urn");
+        if (!urn) {
+          return new Response("Missing urn parameter.", { status: 400 });
+        }
+
+        const cache = await caches.open("default");
+        let resp = await cache.match(url.toString());
+
+        if (!resp) {
+          const originalResponse = await this.fetchSoundCloudAudio(urn);
+          const headers = new Headers(originalResponse.headers);
+
+          headers.set("Cache-Control", "public, max-age=7200");
+          headers.delete("Age");
+          headers.delete("Set-Cookie");
+
+          resp = new Response(originalResponse.body, {
+            status: originalResponse.status,
+            statusText: originalResponse.statusText,
+            headers,
+          });
+          await cache.put(url.toString(), resp.clone());
+        }
+
+        return resp;
+      }
+
+      default:
+        return new Response("Bad request.\n\n"
+          + "Supported enpoints:\n"
+          + "/api/createRoom\n"
+          + "/api/playlistInfo?url={Apple Music URL}\n"
+          + "/api/songByISRC?isrc={International Standard Recording Code}\n"
+          + "/api/searchSoundCloud?q={search term}\n"
+          + "/api/fetchSoundCloudAudio?urn={SoundCloud track URN}", { status: 400 });
+    }
+  }
+}

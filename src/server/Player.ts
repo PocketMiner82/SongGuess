@@ -1,4 +1,4 @@
-import type * as Party from "partykit/server";
+import type { Connection, ConnectionContext } from "partyserver";
 import type {
   ChangeUsernameMessage,
   ClientMessage,
@@ -55,7 +55,7 @@ export default class Player implements PlayerMessage, IEventListener {
     return this.room.host === this;
   }
 
-  constructor(readonly room: ValidRoom, public conn: Party.Connection, readonly uuid: string) {
+  constructor(readonly room: ValidRoom, public conn: Connection, readonly uuid: string) {
     room.listener.registerEvents(this);
     this.isAdmin = this.room.server.hasTag(conn, "admin");
   }
@@ -64,7 +64,7 @@ export default class Player implements PlayerMessage, IEventListener {
    * Must be called when this player connects to the room.
    * @returns false if the room is full.
    */
-  onConnect(ctx: Party.ConnectionContext): boolean {
+  onConnect(ctx: ConnectionContext): boolean {
     const url = new URL(ctx.request.url);
     this.isSpectator = url.searchParams.get("spectator") !== null;
 
@@ -243,8 +243,13 @@ export default class Player implements PlayerMessage, IEventListener {
     }
 
     this.kickPlayerTimeout = setTimeout(() => {
-      this.room.server.logger.info(`Kicked ${this.conn.id} due to inactivity.`);
-      this.kick(4001, "Didn't receive updates within 15 seconds.");
+      try {
+        this.room.server.logger.info(`Kicked ${this.conn.id} due to inactivity.`);
+        this.kick(4001, "Didn't receive updates within 15 seconds.");
+      } catch (e) {
+        this.room.server.logger.error("Error running kick player timeout:");
+        this.room.server.logger.error(e);
+      }
     }, ROOM_INACTIVITY_KICK_TIMEOUT * 1000);
   }
 

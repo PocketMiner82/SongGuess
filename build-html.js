@@ -2,7 +2,27 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import partykitConfig from "./partykit.json" with { type: "json" };
+
+
+/**
+ * Retrieves all .tsx files from a specified directory recursively.
+ * @param dirPath - The base directory to search.
+ * @returns An array of file paths.
+ */
+function getEntryFiles(dirPath) {
+  const files = [];
+
+  const items = fs.readdirSync(dirPath, { withFileTypes: true, recursive: false });
+
+  for (const item of items) {
+    const fullPath = path.join(dirPath, item.name);
+    if (item.isFile() && item.name.endsWith(".tsx")) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,7 +38,7 @@ const templateContent = fs.readFileSync(templatePath, "utf8");
 const buildHash = crypto.randomBytes(4).toString("hex");
 
 // Generate HTML files
-partykitConfig.serve.build.entry.forEach((variant) => {
+getEntryFiles("src/client").forEach((variant) => {
   // Format the script source path for the current variant
   const scriptSrc = variant.replace("src/client", "dist").replace(".tsx", ".js");
 

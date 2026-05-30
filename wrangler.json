@@ -1,0 +1,56 @@
+{
+  "compatibility_date": "2026-05-30",
+  "main": "src/server/index.ts",
+  "name": "songguess",
+  "migrations": [
+    {
+      "new_sqlite_classes": ["SongGuessServer", "SongGuessAPI"],
+      "tag": "v1"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "SongGuessServer",
+        "name": "SongGuessServer"
+      },
+      {
+        "class_name": "SongGuessAPI",
+        "name": "SongGuessAPI"
+      }
+    ]
+  },
+  "assets": {
+    "directory": "./public/",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  },
+  "build": {
+    "command": "npm run build"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true,
+  "compatibility_flags": [
+    "nodejs_compat_v2",
+    "global_fetch_private_origin"
+  ],
+  "env": {
+    "dev": {
+      "workers_dev": true,
+      "durable_objects": {
+        "bindings": [
+          {
+            "class_name": "SongGuessServer",
+            "name": "SongGuessServer"
+          },
+          {
+            "class_name": "SongGuessAPI",
+            "name": "SongGuessAPI"
+          }
+        ]
+      }
+    }
+  }
+}
