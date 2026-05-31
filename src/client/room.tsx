@@ -22,12 +22,20 @@ import { useRoomControllerListener, useRoomControllerMessageTypeListener } from 
 import { PING_INTERVAL } from "./room/RoomController";
 
 /**
- * Loading component displayed while the room controller is initializing.
+ * Loading component displayed while the room controller is initializing and (re-)connecting.
  */
-function Loading() {
+function Connecting({ roomID }: { roomID: string }) {
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="text-2xl">Loading…</div>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="material-symbols-outlined animate-spin text-gray-500 mb-8" role="img" aria-label="Loading">
+        progress_activity
+      </div>
+      <div className="text-2xl">
+        Connecting to
+        {" "}
+        {roomID}
+        …
+      </div>
     </div>
   );
 }
@@ -71,9 +79,8 @@ function ChooseUsernameScreen({ onChoose }: { onChoose: () => void }) {
   return <div className="h-full w-full"></div>;
 }
 
-function Room() {
+function Room({ hasJoined, setHasJoined }: { hasJoined: boolean; setHasJoined: (val: boolean) => void }) {
   const controller = useControllerContext();
-  const [hasJoined, setHasJoined] = useState(false);
 
   useRoomControllerMessageTypeListener(controller, "room_state");
   useRoomControllerMessageTypeListener(controller, "pong");
@@ -156,14 +163,22 @@ export function App() {
   const [cookies, setCookie] = useCookies<"userID" | "userName", ICookieProps>(["userID", "userName"]);
   const { getController, isReady } = useRoomController(window.location.host, roomID, () => cookies, setCookie);
 
-  if (!isReady)
-    return <Loading />;
+  const [hasJoined, setHasJoined] = useState(false);
 
   const controller = getController();
 
+  if (!controller) {
+    return <Connecting roomID={roomID} />;
+  }
+
   return (
     <RoomContext value={controller}>
-      <Room />
+      {
+        isReady
+          ? <Room hasJoined={hasJoined} setHasJoined={setHasJoined} />
+          : <Connecting roomID={roomID} />
+      }
+
       <ToastDisplay />
       <ModalContainer controller={Modal} />
     </RoomContext>

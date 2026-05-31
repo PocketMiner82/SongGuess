@@ -23,7 +23,7 @@ export function useRoomController(host: string, roomID: string, getCookies: Cook
       roomID,
       getCookies,
       setCookies,
-      () => setIsReady(true),
+      (ready: boolean) => setIsReady(ready),
     );
   }
 
@@ -36,8 +36,8 @@ export function useRoomController(host: string, roomID: string, getCookies: Cook
   }, [roomID]);
 
   return {
-    getController: (): RoomController => controllerRef.current!,
-    // ready if the ref is populated
+    getController: (): RoomController | null => controllerRef.current,
+    // ready if connection is opened
     isReady,
   };
 }
