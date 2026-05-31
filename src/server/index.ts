@@ -102,7 +102,7 @@ export class SongGuessServer extends Server<Env> {
    * @param msg The message object to be stringified and transmitted to the client.
    * @param log Whether to log the sended message
    */
-  public safeSend(conn: Connection, msg: ServerMessage, log: boolean = true) {
+  public safeSend(conn: Connection<string>, msg: ServerMessage, log: boolean = true) {
     try {
       // silently ignore if not open
       if (conn.readyState === WebSocket.OPEN) {
@@ -111,11 +111,11 @@ export class SongGuessServer extends Server<Env> {
 
         if (log && msg.type !== "add_log_message" && msg.type !== "update_log_messages"
           && msg.type !== "ping" && msg.type !== "pong") {
-          this.logger.debug(`To ${conn.id}: ${textMsg}`);
+          this.logger.debug(`To ${conn.state}: ${textMsg}`);
         }
       }
     } catch (e) {
-      this.logger.error(`Failed to send ${msg.type} message to ${conn.id}:`);
+      this.logger.error(`Failed to send ${msg.type} message to ${conn.state}:`);
       this.logger.error(e);
     }
   }
@@ -125,8 +125,8 @@ export class SongGuessServer extends Server<Env> {
    *
    * @param tag An optional filter to target a specific subset of connections.
    */
-  private* getActiveConnections(tag?: string): Iterable<Connection> {
-    for (const conn of this.getConnections(tag)) {
+  private* getActiveConnections(tag?: string): Iterable<Connection<string>> {
+    for (const conn of this.getConnections<string>(tag)) {
       if (conn && conn.readyState === WebSocket.OPEN) {
         yield conn;
       }
@@ -139,7 +139,7 @@ export class SongGuessServer extends Server<Env> {
    * @param tag The tag that should be present.
    * @returns whether the connection has the tag or not.
    */
-  public hasTag(conn: Connection, tag: string): boolean {
+  public hasTag(conn: Connection<string>, tag: string): boolean {
     for (const activeConn of this.getActiveConnections(tag)) {
       if (conn === activeConn) {
         return true;
@@ -152,7 +152,7 @@ export class SongGuessServer extends Server<Env> {
   // ROOM WS EVENTS
   //
 
-  getConnectionTags(conn: Connection, ctx: ConnectionContext) {
+  getConnectionTags(conn: Connection<string>, ctx: ConnectionContext) {
     const url = new URL(ctx.request.url);
     const authParam = url.searchParams.get("auth");
     if (authParam) {
@@ -174,28 +174,18 @@ export class SongGuessServer extends Server<Env> {
    * @param conn The new connection.
    * @param ctx The connection context.
    */
-  onConnect(conn: Connection, ctx: ConnectionContext) {
+  onConnect(conn: Connection<string>, ctx: ConnectionContext) {
     if (this.hasTag(conn, "unauthorized")) {
       conn.close(4403, "Access denied.");
       return;
     }
 
+    // connection state is id (and username later) used to print in logs
+    conn.state = conn.id;
+
     // admin should not be registered "normally" to the room.
     if (this.hasTag(conn, "admin")) {
-      // this.logger.getLogMessages().then(async (loggerStorage) => {
-      //   if (loggerStorage) {
-      //     this.safeSend(conn, {
-      //       type: "update_log_messages",
-      //       messages: loggerStorage,
-      //     });
-      //   }
-      //
-      //   this.logger.info(`Admin ${conn.id} connected.`);
-      // }).catch((e) => {
-      //   this.logger.error("Error running Logger#getLogMessages():");
-      //   this.logger.error(e);
-      // });
-
+      this.logger.info(`Admin ${conn.state} connected.`);
       return;
     }
 
@@ -207,7 +197,7 @@ export class SongGuessServer extends Server<Env> {
     // kick player if room is not created yet
     if (!this.validRoom) {
       conn.close(4000, "Room ID not found");
-      this.logger.debug(`${conn.id} tried connecting to non-validated room.`);
+      this.logger.debug(`${conn.state} tried connecting to non-validated room.`);
       return;
     }
 
@@ -223,7 +213,7 @@ export class SongGuessServer extends Server<Env> {
       }, 1000);
     }
 
-    this.logger.info(`${conn.id} connected.`);
+    this.logger.info(`${conn.state} connected.`);
 
     try {
       this.validRoom.onConnect(conn, ctx);
@@ -239,7 +229,7 @@ export class SongGuessServer extends Server<Env> {
    * @param conn The connection that sent the message.
    * @param message The message content as a string.
    */
-  onMessage(conn: Connection, message: string) {
+  onMessage(conn: Connection<string>, message: string) {
     // ignore all messages if room is not valid
     if (!this.validRoom) {
       return;
@@ -258,9 +248,9 @@ export class SongGuessServer extends Server<Env> {
    *
    * @param conn The connection that closed.
    */
-  onClose(conn: Connection) {
+  onClose(conn: Connection<string>) {
     if (this.hasTag(conn, "admin")) {
-      this.logger.info(`Admin ${conn.id} left.`);
+      this.logger.info(`Admin ${conn.state} left.`);
       return;
     }
 
@@ -269,7 +259,7 @@ export class SongGuessServer extends Server<Env> {
       return;
     }
 
-    this.logger.info(`${conn.id} left.`);
+    this.logger.info(`${conn.state} left.`);
 
     try {
       this.validRoom.onClose(conn);
@@ -283,6 +273,28 @@ export class SongGuessServer extends Server<Env> {
 
       this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
     }
+  }
+
+  /**
+   * Handles errors for a connection.
+   * Currently just logs them as warnings.
+   *
+   * @param conn the connection that had an error
+   * @param error the error that occured
+   */
+  onError(conn: Connection<string>, error: unknown): void {
+    this.logger.warn(`Error with connection ${conn.state}:`);
+    this.logger.warn(error);
+  }
+
+  /**
+   * Called when an exception occurs.
+   *
+   * @param error the error that occurred
+   */
+  onException(error: unknown): void {
+    this.logger.error("Exception was thrown:");
+    this.logger.error(error);
   }
 
   //
@@ -337,7 +349,9 @@ export default {
 
     // if some url is requested without HTML extension, try adding it
     if (!resp && !url.pathname.endsWith(".html")) {
-      resp = await env.ASSETS.fetch(`${url.pathname}.html${url.search}`);
+      try {
+        resp = await env.ASSETS.fetch(`${url.pathname}.html${url.search}`);
+      } catch { }
     }
 
     // redirect to main page, if requested site not found
