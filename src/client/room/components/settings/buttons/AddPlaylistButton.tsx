@@ -7,11 +7,12 @@ import { useControllerContext } from "../../../hooks/RoomControllerHooks";
 /**
  * Button component that opens the search dialog for adding playlists.
  */
-export function AddPlaylistButton() {
+export function AddPlaylistButton({ disabled }: { disabled?: boolean }) {
   const controller = useControllerContext();
 
   return (
     <Button
+      disabled={disabled}
       onClick={() => Modal.open(SearchMusicDialog, {
         onPlaylistSelected: async (playlist) => {
           if (playlist.songs.length > 0) {

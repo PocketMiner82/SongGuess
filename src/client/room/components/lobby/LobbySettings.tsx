@@ -11,7 +11,7 @@ import { SettingsNumberInput } from "../settings/SettingsInput";
 import { SettingsToggle } from "../settings/SettingsToggle";
 
 
-export function Settings() {
+export function Settings({ disabled }: { disabled?: boolean }) {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "room_config");
 
@@ -20,21 +20,22 @@ export function Settings() {
       <h3 className="text-xl font-bold mb-3">Settings</h3>
 
       <div className="grid gap-4">
-        <GameModeSelector />
+        <GameModeSelector disabled={disabled} />
 
         {controller.config.gameMode === "multiple_choice" && (
           <>
-            <ImportPlaylistsButton />
+            <ImportPlaylistsButton disabled={disabled} />
 
             <div className="flex flex-wrap gap-4 w-full">
-              <AddPlaylistButton />
-              <ClearPlaylistsButton />
+              <AddPlaylistButton disabled={disabled} />
+              <ClearPlaylistsButton disabled={disabled} />
             </div>
 
             <div className="border-t border-disabled-bg my-1"></div>
 
             <SettingsToggle
               value={controller.config.advancedSongFiltering}
+              disabled={disabled}
               onToggle={(v) => {
                 controller.config.advancedSongFiltering = v;
                 controller.sendConfig();
@@ -45,6 +46,7 @@ export function Settings() {
 
             <SettingsToggle
               value={controller.config.distractionsPreferSameArtist}
+              disabled={disabled}
               onToggle={(v) => {
                 controller.config.distractionsPreferSameArtist = v;
                 controller.sendConfig();
@@ -55,6 +57,7 @@ export function Settings() {
 
             <SettingsToggle
               value={controller.config.endWhenAnswered}
+              disabled={disabled}
               onToggle={(v) => {
                 controller.config.endWhenAnswered = v;
                 controller.sendConfig();
@@ -71,6 +74,7 @@ export function Settings() {
           <>
             <SettingsNumberInput
               value={controller.config.playerPickTimeout}
+              disabled={disabled}
               onChange={(v) => {
                 controller.config.playerPickTimeout = v;
                 controller.sendConfig();
@@ -87,6 +91,7 @@ export function Settings() {
 
         <SettingsNumberInput
           value={controller.config.roundsCount}
+          disabled={disabled}
           onChange={(v) => {
             controller.config.roundsCount = v;
             controller.sendConfig();
@@ -99,6 +104,7 @@ export function Settings() {
 
         <SettingsNumberInput
           value={controller.config.timePerQuestion}
+          disabled={disabled}
           onChange={(v) => {
             controller.config.timePerQuestion = v;
             controller.sendConfig();
@@ -111,6 +117,7 @@ export function Settings() {
 
         <SettingsDropdown
           value={controller.config.audioStartPosition}
+          disabled={disabled}
           onChange={(v) => {
             controller.config.audioStartPosition = v;
             controller.sendConfig();
@@ -129,7 +136,7 @@ export function Settings() {
 
         <div className="flex flex-wrap gap-4">
           <CopyLinkButton />
-          <StartGame />
+          <StartGame disabled={disabled} />
         </div>
       </div>
     </div>
