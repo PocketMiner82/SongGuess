@@ -20,9 +20,9 @@ export function Lobby() {
   return (
     <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
       <PlayerList />
-      <div className={`grid gap-4 grid-cols-1 flex-1 ${controller.isHost ? "lg:grid-cols-2" : ""}`}>
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 flex-1">
         <div className="lg:order-last">
-          {controller.isHost && <Settings />}
+          <Settings disabled={!controller.isHost} />
         </div>
 
         <div className="lg:order-first min-h-0">

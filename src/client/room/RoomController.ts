@@ -167,8 +167,15 @@ export class RoomController {
    * @param roomID The ID of the room to connect to.
    * @param getCookies What cookies are currently set.
    * @param setCookies A function to allow updating cookies.
+   * @param setIsReady A function called when the connection was opened the first time.
    */
-  constructor(readonly host: string, readonly roomID: string, readonly getCookies: CookieGetter, readonly setCookies: CookieSetter) {
+  constructor(
+    readonly host: string,
+    readonly roomID: string,
+    readonly getCookies: CookieGetter,
+    readonly setCookies: CookieSetter,
+    readonly setIsReady: (ready: boolean) => void,
+  ) {
     const cookies = getCookies();
 
     // generate uuid if not set via cookie
@@ -192,6 +199,7 @@ export class RoomController {
         username: newUsername,
         spectator: "true",
       },
+      connectionTimeout: 10000,
     });
 
     this.socket.addEventListener("message", this.onMessage.bind(this));
@@ -217,6 +225,7 @@ export class RoomController {
   public reconnect(newUsername?: string, spectator: boolean = false) {
     this.questionData = new QuestionData();
     this.reconnecting = true;
+    this.setIsReady(false);
 
     this.socket.updateProperties({
       query: !newUsername
@@ -268,6 +277,7 @@ export class RoomController {
     console.log(`Connected to ${this.socket.room}`);
 
     this.startPingInterval();
+    this.setIsReady(true);
   }
 
   /**
@@ -309,6 +319,7 @@ export class RoomController {
   private startPingInterval() {
     if (!this.pingInterval) {
       this.pingInterval = window.setInterval(() => this.sendPing(), PING_INTERVAL);
+      this.sendPing();
     }
   }
 

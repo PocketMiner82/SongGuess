@@ -7,7 +7,7 @@ import { useRoomControllerMessageTypeListener } from "../../../hooks/RoomControl
 /**
  * Button component that clears all playlists after user confirmation.
  */
-export function ClearPlaylistsButton() {
+export function ClearPlaylistsButton({ disabled }: { disabled?: boolean }) {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "update_playlists");
 
@@ -25,7 +25,7 @@ export function ClearPlaylistsButton() {
     <Button
       type="button"
       onClick={handleClearPlaylists}
-      disabled={controller.playlists.length === 0}
+      disabled={disabled || controller.playlists.length === 0}
       className="items-center flex justify-center flex-1 text-nowrap"
       aria-label="Clear all playlists"
     >

@@ -1,3 +1,31 @@
+# [3.1.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.3-dev.3...3.1.0-dev.1) (2026-05-31)
+
+
+### Features
+
+* show room config to all clients but only host can edit ([8b8b6cb](https://github.com/PocketMiner82/SongGuess/commit/8b8b6cb45a6719345357f7ce66e5b152cab6a350))
+
+## [3.0.3-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.0.3-dev.2...3.0.3-dev.3) (2026-05-31)
+
+
+### Bug Fixes
+
+* **client/RoomController:** also show loading when reconnecting ([991fd5f](https://github.com/PocketMiner82/SongGuess/commit/991fd5f232ef7be10e0d158a4b9a72fe92440281))
+
+## [3.0.3-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.3-dev.1...3.0.3-dev.2) (2026-05-31)
+
+
+### Bug Fixes
+
+* **client/RoomController:** increase connection timeout + actually show loading if socket not opened ([579a54a](https://github.com/PocketMiner82/SongGuess/commit/579a54acb0113487f7058a19bdde2bd817757f7a))
+
+## [3.0.3-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.2...3.0.3-dev.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* implement onError and onException to catch errors + fix error when visiting unknown site + show username in logs if available ([aaa7c3a](https://github.com/PocketMiner82/SongGuess/commit/aaa7c3a1a213d1be1bf99d592a35e0006758b3dd))
+
 ## [3.0.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.1...3.0.2) (2026-05-30)
 
 

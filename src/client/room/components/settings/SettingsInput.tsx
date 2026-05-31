@@ -1,19 +1,26 @@
 import type { ReactNode } from "react";
-import * as React from "react";
 import { useState } from "react";
+import * as React from "react";
 
 /**
  * Number input component for settings with validation.
  * Features left-aligned label and right-aligned number input.
  */
-export function SettingsNumberInput({ value, onChange, min, max, children }: {
+export function SettingsNumberInput({ value, onChange, min, max, disabled, children }: {
   value: number;
   onChange: (value: number) => void;
   min: number;
   max: number;
+  disabled?: boolean;
   children: ReactNode;
 }) {
   const [inputValue, setInputValue] = useState(value.toString());
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (value !== prevValue) {
+    setInputValue(value.toString());
+    setPrevValue(value);
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -35,7 +42,7 @@ export function SettingsNumberInput({ value, onChange, min, max, children }: {
   const label = children?.toString() || "value";
   return (
     <div className="flex items-center justify-between">
-      <span>
+      <span className={disabled ? "text-disabled-text" : ""}>
         {children}
       </span>
       <input
@@ -43,10 +50,11 @@ export function SettingsNumberInput({ value, onChange, min, max, children }: {
         min={min}
         max={max}
         value={inputValue}
+        disabled={disabled}
         onChange={handleChange}
         onBlur={handleBlur}
         aria-label={label}
-        className="w-11 px-2 text-center border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0"
+        className={`w-11 px-2 text-center border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       />
     </div>
   );

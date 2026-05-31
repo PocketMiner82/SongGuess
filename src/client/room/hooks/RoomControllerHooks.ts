@@ -1,5 +1,5 @@
 import type { CookieGetter, CookieSetter } from "../../../types/CookieFunctionTypes";
-import { createContext, use, useEffect, useRef } from "react";
+import { createContext, use, useEffect, useRef, useState } from "react";
 import { RoomController } from "../RoomController";
 
 /**
@@ -15,9 +15,16 @@ import { RoomController } from "../RoomController";
 export function useRoomController(host: string, roomID: string, getCookies: CookieGetter, setCookies: CookieSetter) {
   // hold the class instance so it persists across renders
   const controllerRef = useRef<RoomController | null>(null);
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   if (!controllerRef.current) {
-    controllerRef.current = new RoomController(host, roomID, getCookies, setCookies);
+    controllerRef.current = new RoomController(
+      host,
+      roomID,
+      getCookies,
+      setCookies,
+      (ready: boolean) => setIsReady(ready),
+    );
   }
 
   useEffect(() => {
@@ -29,9 +36,9 @@ export function useRoomController(host: string, roomID: string, getCookies: Cook
   }, [roomID]);
 
   return {
-    getController: (): RoomController => controllerRef.current!,
-    // ready if the ref is populated
-    isReady: !!controllerRef.current,
+    getController: (): RoomController | null => controllerRef.current,
+    // ready if connection is opened
+    isReady,
   };
 }
 

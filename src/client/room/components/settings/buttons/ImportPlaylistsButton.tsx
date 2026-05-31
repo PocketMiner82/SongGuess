@@ -9,7 +9,7 @@ import { useControllerContext } from "../../../hooks/RoomControllerHooks";
 /**
  * Button component that imports playlists from a JSON file.
  */
-export function ImportPlaylistsButton() {
+export function ImportPlaylistsButton({ disabled }: { disabled?: boolean }) {
   const controller = useControllerContext();
   const playlistImportRef = useRef<HTMLInputElement>(null);
 
@@ -47,6 +47,7 @@ export function ImportPlaylistsButton() {
       />
       <Button
         type="button"
+        disabled={disabled}
         onClick={() => playlistImportRef.current?.click()}
         className="w-full text-nowrap"
         aria-label="Import playlists from file"

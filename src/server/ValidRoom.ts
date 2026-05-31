@@ -102,7 +102,7 @@ export class ValidRoom {
     this.lobby = new Lobby(this);
   }
 
-  onConnect(conn: Connection, ctx: ConnectionContext) {
+  onConnect(conn: Connection<string>, ctx: ConnectionContext) {
     const player = this.getOrCreatePlayer(conn);
 
     if (!player.onConnect(ctx))
@@ -125,7 +125,7 @@ export class ValidRoom {
     this.broadcastRoomStateMessage();
   }
 
-  onMessage(conn: Connection, message: string) {
+  onMessage(conn: Connection<string>, message: string) {
     const player = this.getOrCreatePlayer(conn);
 
     // refresh inactive timeout (admins don't have that)
@@ -138,7 +138,7 @@ export class ValidRoom {
     try {
       json = JSON.parse(message);
     } catch {
-      this.server.logger.debug(`From ${conn.id}: ${message}`);
+      this.server.logger.debug(`From ${conn.state}: ${message}`);
       player.sendConfirmationOrError(OtherMessageSchema.parse({}), "Message is not JSON.");
       return;
     }
@@ -146,8 +146,8 @@ export class ValidRoom {
     // check if received message is valid
     const result = ClientMessageSchema.safeParse(json);
     if (!result.success) {
-      this.server.logger.debug(`From ${conn.id}: ${message}`);
-      this.server.logger.warn(`Parsing client message from ${conn.id} failed:\n${z.prettifyError(result.error)}`);
+      this.server.logger.debug(`From ${conn.state}: ${message}`);
+      this.server.logger.warn(`Parsing client message from ${conn.state} failed:\n${z.prettifyError(result.error)}`);
       player.sendConfirmationOrError(OtherMessageSchema.parse({}), `Parsing error:\n${z.prettifyError(result.error)}`);
       return;
     }
@@ -156,7 +156,7 @@ export class ValidRoom {
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
-      this.server.logger.debug(`From ${conn.id}: ${message}`);
+      this.server.logger.debug(`From ${conn.state}: ${message}`);
 
     // handle host transfer request
     if (msg.type === "transfer_host") {
@@ -195,7 +195,7 @@ export class ValidRoom {
     }
   }
 
-  onClose(conn: Connection) {
+  onClose(conn: Connection<string>) {
     this.getOrCreatePlayer(conn).onClose();
 
     // host left
@@ -211,7 +211,7 @@ export class ValidRoom {
    * Gets a player from the players map. If not found, create new player.
    * @param conn the connection to search for
    */
-  public getOrCreatePlayer(conn: Connection): Player {
+  public getOrCreatePlayer(conn: Connection<string>): Player {
     let player = this.players.get(conn.id);
     if (!player) {
       const uuid = v4();
@@ -311,7 +311,7 @@ export class ValidRoom {
         if (this.host === undefined) {
           const next = this.activePlayers[Symbol.iterator]().next();
           if (!next.done) {
-            this.server.logger.info(`Host left, transferring host to ${next.value.conn.id}`);
+            this.server.logger.info(`Host left, transferring host to ${next.value.conn.state}`);
             this.transferHost(next.value);
           } else {
             this.transferHost(undefined);

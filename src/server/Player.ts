@@ -55,7 +55,7 @@ export default class Player implements PlayerMessage, IEventListener {
     return this.room.host === this;
   }
 
-  constructor(readonly room: ValidRoom, public conn: Connection, readonly uuid: string) {
+  constructor(readonly room: ValidRoom, public conn: Connection<string>, readonly uuid: string) {
     room.listener.registerEvents(this);
     this.isAdmin = this.room.server.hasTag(conn, "admin");
   }
@@ -91,11 +91,14 @@ export default class Player implements PlayerMessage, IEventListener {
         } satisfies ChangeUsernameMessage, "Username reset because someone in the room already uses that name.");
       }
 
-      this.username = uniqueUsernameGenerator({
+      if (!this.changeUsername(uniqueUsernameGenerator({
         dictionaries: [adjectives, nouns],
         style: "titleCase",
         length: 16,
-      });
+      }))) {
+        this.kick(4000, "Error assigning random username. Please try again.");
+        return false;
+      }
     }
 
     // send the current playlist to the connection
@@ -229,6 +232,7 @@ export default class Player implements PlayerMessage, IEventListener {
       return false;
     }
     this.username = username;
+    this.conn.setState(`${this.conn.state} (${username})`);
 
     return true;
   }
@@ -244,7 +248,7 @@ export default class Player implements PlayerMessage, IEventListener {
 
     this.kickPlayerTimeout = setTimeout(() => {
       try {
-        this.room.server.logger.info(`Kicked ${this.conn.id} due to inactivity.`);
+        this.room.server.logger.info(`Kicked ${this.conn.state} due to inactivity.`);
         this.kick(4001, "Didn't receive updates within 15 seconds.");
       } catch (e) {
         this.room.server.logger.error("Error running kick player timeout:");
