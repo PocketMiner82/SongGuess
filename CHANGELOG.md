@@ -1,3 +1,10 @@
+# [3.1.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.3-dev.3...3.1.0-dev.1) (2026-05-31)
+
+
+### Features
+
+* show room config to all clients but only host can edit ([8b8b6cb](https://github.com/PocketMiner82/SongGuess/commit/8b8b6cb45a6719345357f7ce66e5b152cab6a350))
+
 ## [3.0.3-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.0.3-dev.2...3.0.3-dev.3) (2026-05-31)
 
 
