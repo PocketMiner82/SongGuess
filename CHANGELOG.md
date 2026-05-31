@@ -1,3 +1,10 @@
+## [3.0.3-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.3-dev.1...3.0.3-dev.2) (2026-05-31)
+
+
+### Bug Fixes
+
+* **client/RoomController:** increase connection timeout + actually show loading if socket not opened ([579a54a](https://github.com/PocketMiner82/SongGuess/commit/579a54acb0113487f7058a19bdde2bd817757f7a))
+
 ## [3.0.3-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.2...3.0.3-dev.1) (2026-05-31)
 
 
