@@ -1,3 +1,10 @@
+## [3.0.3-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.0.2...3.0.3-dev.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* implement onError and onException to catch errors + fix error when visiting unknown site + show username in logs if available ([aaa7c3a](https://github.com/PocketMiner82/SongGuess/commit/aaa7c3a1a213d1be1bf99d592a35e0006758b3dd))
+
 ## [3.0.2](https://github.com/PocketMiner82/SongGuess/compare/3.0.1...3.0.2) (2026-05-30)
 
 
