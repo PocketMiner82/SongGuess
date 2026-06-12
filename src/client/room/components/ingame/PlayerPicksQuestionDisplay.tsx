@@ -1,11 +1,16 @@
 import type { Playlist } from "../../../../types/MessageTypes";
+import type { ListenerCallback } from "../../hooks/RoomControllerListenerHooks";
 import random from "lodash/random";
 import { useCallback, useEffect, useState } from "react";
 import GamePhase from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
 import { SearchMusicComponent } from "../../../components/SearchMusicComponent";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
-import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
+import {
+
+  useRoomControllerListener,
+  useRoomControllerMessageTypeListener,
+} from "../../hooks/RoomControllerListenerHooks";
 import { PlaylistCard } from "../PlaylistCard";
 import { SettingsDropdown } from "../settings/SettingsDropdown";
 
@@ -24,10 +29,27 @@ function PlayerPickingDisplay() {
   const pickedSong = controller.questionData.pickedSong;
 
   const handlePickSong = useCallback(async (playlist: Playlist) => {
-    // TODO: maybe check here if the song can actually be downloaded?
     if (playlist.songs.length > 0 && !pickedSong) {
       controller.pickSong(playlist.songs[0], audioStartPos);
-      return true;
+
+      return new Promise<boolean>((resolve) => {
+        let timeoutId: NodeJS.Timeout;
+
+        const successListener: ListenerCallback = (msg) => {
+          if (msg?.type === "confirmation" && msg.sourceMessage.type === "player_pick_song") {
+            clearTimeout(timeoutId);
+            controller.unregisterOnStateChangeListener(successListener);
+            resolve(msg.error === undefined);
+          }
+        };
+
+        timeoutId = setTimeout(() => {
+          controller.unregisterOnStateChangeListener(successListener);
+          resolve(false);
+        }, 10000);
+
+        controller.registerOnStateChangeListener(successListener);
+      });
     }
 
     return false;
