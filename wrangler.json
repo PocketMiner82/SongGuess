@@ -39,6 +39,9 @@
   "env": {
     "dev": {
       "workers_dev": true,
+      "build": {
+        "command": "npm run build:dev"
+      },
       "durable_objects": {
         "bindings": [
           {
