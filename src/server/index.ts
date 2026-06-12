@@ -197,7 +197,7 @@ export class SongGuessServer extends Server<Env> {
     // kick player if room is not created yet
     if (!this.validRoom) {
       conn.close(4000, "Room ID not found");
-      this.logger.debug(`${conn.state} tried connecting to non-validated room.`);
+      this.logger.info(`${conn.state} tried connecting to non-validated room.`);
       return;
     }
 
