@@ -1,3 +1,11 @@
+## [3.1.1-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.3...3.1.1-dev.4) (2026-06-12)
+
+
+### Bug Fixes
+
+* **PlayerPicksQuestionDisplay:** show result of check if the song can actually be downloaded ([5b6e066](https://github.com/PocketMiner82/SongGuess/commit/5b6e0667a36c3307a716007a5c67a33b000da68e))
+* **RoomController:** don't update questiondata when confirmation contains error ([99cfd3c](https://github.com/PocketMiner82/SongGuess/commit/99cfd3c174425a088bbbfe1177ccfb4972a28b4d))
+
 ## [3.1.1-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.2...3.1.1-dev.3) (2026-06-12)
 
 ## [3.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.1...3.1.1-dev.2) (2026-06-12)
