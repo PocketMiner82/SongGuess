@@ -1,3 +1,10 @@
+## [3.1.1-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.4...3.1.1-dev.5) (2026-06-12)
+
+
+### Bug Fixes
+
+* **admin:** increase connectionTimeout as well ([1633a82](https://github.com/PocketMiner82/SongGuess/commit/1633a82975964a3985a4659d6a9df434a62964f2))
+
 ## [3.1.1-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.3...3.1.1-dev.4) (2026-06-12)
 
 
