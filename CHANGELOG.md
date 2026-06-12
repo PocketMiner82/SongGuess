@@ -1,3 +1,12 @@
+## [3.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.1...3.1.1-dev.2) (2026-06-12)
+
+
+### Bug Fixes
+
+* **API:** attempt to fix preview loading for some songs ([d394041](https://github.com/PocketMiner82/SongGuess/commit/d3940412f647e09573e0f053d2e9ea7ff670e530))
+* **Logger:** do not log debug messages to console, only send them to admins ([b9ea283](https://github.com/PocketMiner82/SongGuess/commit/b9ea283c9bb896f758dfbb2c3aa6cc36a41261d3))
+* **PlayerPicks:** don't allow adding soundcloud songs that cannot be fetched ([66f337d](https://github.com/PocketMiner82/SongGuess/commit/66f337d17ee1fd4737e18b5b80a25c73bf6dd4f3))
+
 ## [3.1.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.1.0...3.1.1-dev.1) (2026-06-12)
 
 # [3.1.0](https://github.com/PocketMiner82/SongGuess/compare/3.0.2...3.1.0) (2026-05-31)
