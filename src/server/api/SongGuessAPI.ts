@@ -44,11 +44,12 @@ export default class SongGuessAPI extends Server<Env> {
       }
     }
 
-    if (streams.preview_mp3_128_url) {
-      return await this.soundCloud.fetchGet(streams.preview_mp3_128_url);
+    const resp = await this.soundCloud.fetchGet(`/tracks/${urn}/preview`);
+    if (resp.ok) {
+      return resp;
     }
 
-    return new Response("Couldn't find stream url.", { status: 500 });
+    return new Response("Couldn't find fetchable stream url.", { status: 500 });
   }
 
   private async searchSoundCloud(query: string): Promise<Song[]> {
