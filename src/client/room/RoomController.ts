@@ -398,14 +398,11 @@ export class RoomController {
         if (msg.error) {
           console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
           toast.error(msg.error);
-        }
-
-        if (msg.sourceMessage.type === "select_answer") {
+          break;
+        } else if (msg.sourceMessage.type === "select_answer") {
           this.questionData.selectedAnswerIndex = msg.sourceMessage.answerIndex;
           this.questionData.selectedAnswer = msg.sourceMessage.answer;
-        }
-
-        if (msg.sourceMessage.type === "player_pick_song") {
+        } else if (msg.sourceMessage.type === "player_pick_song") {
           this.questionData.pickedSong = msg.sourceMessage.song;
         }
         break;
