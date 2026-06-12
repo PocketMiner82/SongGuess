@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.0.0",
-    "@eslint-react/eslint-plugin": "^5.8.7",
+    "@eslint-react/eslint-plugin": "^5.8.19",
     "@types/chroma-js": "^3.1.2",
     "@types/howler": "^2.2.13",
     "@types/lodash": "^4.17.24",
