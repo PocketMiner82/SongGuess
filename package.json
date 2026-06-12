@@ -31,7 +31,7 @@
     "react": "^19.2.6",
     "react-cookie": "^8.1.2",
     "react-cookie-consent": "^10.0.1",
-    "react-dom": "^19.2.6",
+    "react-dom": "^19.2.7",
     "react-modal-global": "^2.3.7",
     "react-toastify": "^11.1.0",
     "soundcloud.ts": "^0.7.4",
