@@ -15,10 +15,8 @@
   },
   "dependencies": {
     "@syncfm/applemusic-api": "^0.0.4",
-    "@tailwindcss/postcss": "^4.3.1",
     "chroma-js": "^3.2.0",
     "cookie": "^1.1.1",
-    "esbuild": "^0.28.1",
     "fuzzball": "^2.2.6",
     "howler": "^2.2.4",
     "itunes-store-api": "^2.1.0",
@@ -26,8 +24,6 @@
     "papaparse": "^5.5.3",
     "partyserver": "^0.5.6",
     "partysocket": "^1.2.0",
-    "postcss": "^8.5.15",
-    "postcss-cli": "^11.0.1",
     "react": "^19.2.7",
     "react-cookie": "^8.1.2",
     "react-cookie-consent": "^10.0.1",
@@ -35,7 +31,6 @@
     "react-modal-global": "^2.3.7",
     "react-toastify": "^11.1.0",
     "soundcloud.ts": "^0.7.4",
-    "tailwindcss": "^4.3.1",
     "unique-username-generator": "^1.5.1",
     "uuid": "^14.0.0",
     "zod": "^4.4.3"
@@ -43,6 +38,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^9.0.0",
     "@eslint-react/eslint-plugin": "^5.9.0",
+    "@tailwindcss/postcss": "^4.3.1",
     "@types/chroma-js": "^3.1.2",
     "@types/howler": "^2.2.13",
     "@types/lodash": "^4.17.24",
@@ -53,8 +49,12 @@
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",
     "autoprefixer": "^10.5.0",
+    "esbuild": "^0.28.1",
     "eslint": "^10.2.0",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "postcss": "^8.5.15",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3",
     "wrangler": "^4.100.0"
   }
