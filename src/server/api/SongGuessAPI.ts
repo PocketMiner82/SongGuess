@@ -5,11 +5,11 @@ import type { CreateRoomResponse } from "../../types/APIResponseTypes";
 import type { Playlist, Song } from "../../types/MessageTypes";
 import type { SoundCloudStreams } from "./SoundCloudAPI";
 import { AppleMusicConfig, AuthType, getAuthenticatedAxios, Region } from "@syncfm/applemusic-api";
+import { env } from "cloudflare:workers";
 import { Server } from "partyserver";
 import { albumRegex, appleMusicPreviewRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { fixedCoverSize } from "../../shared/Utils";
 import { DefaultPlaylist } from "../../types/MessageTypes";
-import { fetchGetRoom, fetchPostRoom } from "./HTTPHelpers";
 import { SoundCloudAPI } from "./SoundCloudAPI";
 
 /**
@@ -167,60 +167,58 @@ export default class SongGuessAPI extends Server<Env> {
   }
 
   /**
-   * Generates a unique 6-character room ID that does not currently exist on the server.
+   * Generates a unique 6-character room ID that does not currently exist.
    *
-   * It attempts to generate a random ID and checks for its existence up to 100 times.
-   * The possible characters for the ID are alphanumeric (A-Z, a-z, 0-9).
-   *
-   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
    * @returns A Promise that resolves with the unique 6-character room ID, or `null` if a unique ID couldn't be found after 100 attempts.
    */
-  private async generateRoomID(origin: string): Promise<string | null> {
-    let text: string = "";
+  private async generateRoomID(): Promise<string | null> {
+    let roomID: string = "";
     const possible: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     for (let attempt = 0; attempt < 100; attempt++) {
       for (let i: number = 0; i < 6; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
+        roomID += possible.charAt(Math.floor(Math.random() * possible.length));
       }
 
-      const roomInfo = await fetchGetRoom(`${origin}/parties/song-guess-server/${text}`);
+      try {
+        const stub = env.SongGuessServer.getByName(roomID);
 
-      // room already exists
-      if (roomInfo && roomInfo.isValidRoom) {
-        continue;
+        // room already exists
+        if (!(await stub.isValidRoom())) {
+          return roomID;
+        }
+      } catch (e) {
+        console.error(`Error checking if room ${roomID} already is validated:`, e);
       }
-
-      return text;
     }
 
     return null;
   }
 
   /**
-   * Creates a new room on the server by generating a unique ID and then returning the room data.
+   * Creates a new SongGuessServer Durable Object by generating a unique ID and then returning the room data.
    *
-   * It first calls `generateRoomID` to get an available room ID. If an ID is successfully
-   * generated, it sends a request to create the room with the provided token.
-   *
-   * @param origin The base URL or origin of the server (e.g., 'http://localhost:3000').
-   * @param token The initial authentication token to associate with the new room.
    * @returns A Promise that resolves with a standard `Response` object.
    * - Status 201 (Created) with the room ID as the body on success.
    * - Status 409 (Conflict) if no free room ID could be generated.
    * - Status 500 (Internal Server Error) on room validation failure.
    */
-  private async createNewRoom(origin: string, token: string): Promise<Response> {
-    const roomID = await this.generateRoomID(origin);
+  private async createNewRoom(): Promise<Response> {
+    const roomID = await this.generateRoomID();
     let errorMessage = "";
     let statusCode = 201;
 
     if (roomID) {
-      if (!await fetchPostRoom(`${origin}/parties/song-guess-server/${roomID}`, token)) {
+      try {
+        const stub = env.SongGuessServer.getByName(roomID);
+        await stub.createValidRoom();
+      } catch (e) {
+        console.error(`Error validating room ${roomID}:`, e);
         errorMessage = "Can't validate room.";
         statusCode = 500;
       }
     } else {
+      console.warn("Can't find a free room id.");
       errorMessage = "Can't find a free room id.";
       statusCode = 409;
     }
@@ -239,7 +237,7 @@ export default class SongGuessAPI extends Server<Env> {
 
     switch (url.pathname.split("/").pop()) {
       case "createRoom":
-        return await this.createNewRoom(new URL(req.url).origin, this.env.VALIDATE_ROOM_TOKEN as string);
+        return await this.createNewRoom();
 
       case "playlistInfo": {
         // fetch playlist info
