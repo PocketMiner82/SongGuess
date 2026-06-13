@@ -5,6 +5,7 @@ import type {
   PlayerMessage,
   SourceMessage,
 } from "../types/MessageTypes";
+import type { PersistedPlayer, PersistedRoomState } from "../types/PersistedStateTypes";
 import type Game from "./game/Game";
 import type { SongGuessServer } from "./index";
 import { v4 } from "uuid";
@@ -186,7 +187,7 @@ export class ValidRoom {
 
     if (this.activePlayers.length > 0) {
       for (const player of this.activePlayers) {
-        if (!this.host || player.conn.id === this.hostID)
+        if (!this.host || player.conn?.id === this.hostID)
           return;
       }
 
@@ -215,7 +216,7 @@ export class ValidRoom {
     let player = this.players.get(conn.id);
     if (!player) {
       const uuid = v4();
-      player = new Player(this, conn, uuid);
+      player = new Player(this, conn, uuid, conn.id);
       this.players.set(conn.id, player);
     } else {
       player.conn = conn;
@@ -249,7 +250,7 @@ export class ValidRoom {
     for (const element of checks) {
       switch (element) {
         case "host":
-          if (!player || (this.host !== player && !this.server.hasTag(player.conn, "admin"))) {
+          if (!player || (this.host !== player && player.conn && !this.server.hasTag(player.conn, "admin"))) {
             possibleErrorFunc("Action can only be used by host.");
             successful = false;
           }
@@ -311,7 +312,7 @@ export class ValidRoom {
         if (this.host === undefined) {
           const next = this.activePlayers[Symbol.iterator]().next();
           if (!next.done) {
-            this.server.logger.info(`Host left, transferring host to ${next.value.conn.state}`);
+            this.server.logger.info(`Host left, transferring host to ${next.value.conn?.state}`);
             this.transferHost(next.value);
           } else {
             this.transferHost(undefined);
@@ -333,7 +334,7 @@ export class ValidRoom {
    */
   public transferHost(newHost: Player | undefined, sendUpdate: boolean = true) {
     this.host = newHost;
-    this.hostID = newHost?.conn.id;
+    this.hostID = newHost?.connID;
 
     this.server.logger.info(`Host transferred to ${this.hostID}`);
 
@@ -435,6 +436,30 @@ export class ValidRoom {
     return {
       type: "countdown",
       countdown: this.countdown,
+    };
+  }
+
+  /**
+   * Serializes this room instance to a {@link PersistedRoomState} object.
+   */
+  public toStorage(): PersistedRoomState {
+    const persistedPlayers: Record<string, PersistedPlayer> = {};
+
+    this.players.forEach((player, connID) => {
+      if (!player.isAdmin && (player.isOnline || player.isHost)) {
+        persistedPlayers[connID] = player.toStorage();
+      }
+    });
+
+    return {
+      config: this.config.toConfigMessage(),
+      countdown: this.countdown,
+      game: this.game.toStorage(),
+      hostID: this.hostID,
+      lobby: this.lobby.toStorage(),
+      players: persistedPlayers,
+      state: this.state,
+      version: 1,
     };
   }
 }

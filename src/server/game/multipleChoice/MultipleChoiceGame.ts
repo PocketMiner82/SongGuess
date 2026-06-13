@@ -2,6 +2,7 @@ import type {
   SelectAnswerMessage,
   Song,
 } from "../../../types/MessageTypes";
+import type { PersistedGame } from "../../../types/PersistedStateTypes";
 import type Player from "../../Player";
 import type Question from "../Question";
 import _ from "lodash";
@@ -85,5 +86,14 @@ export class MultipleChoiceGame extends Game {
         player.points += player.answerData.questionPoints;
       }
     }
+  }
+
+  toStorage(): PersistedGame {
+    return {
+      type: "multiple_choice",
+      questions: this.questions.map(q => q.toStorage()),
+      remainingSongs: this.remainingSongs,
+      ...this.baseToStorage(),
+    };
   }
 }

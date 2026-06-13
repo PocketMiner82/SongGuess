@@ -1,4 +1,5 @@
 import type { MultipleChoiceQuestionMessage, Song } from "../../../types/MessageTypes";
+import type { PersistedMultipleChoiceQuestion } from "../../../types/PersistedStateTypes";
 import _ from "lodash";
 import GamePhase from "../../../shared/game/GamePhase";
 import Question, { InitError } from "../Question";
@@ -91,6 +92,13 @@ export default class MultipleChoiceQuestion extends Question {
       answerOptions: this.getSongNames(),
       correctAnswerIndex: gamePhase === GamePhase.ANSWER ? this.getCorrectAnswer() : undefined,
       startPos: this.startPos,
+    };
+  }
+
+  toStorage(): PersistedMultipleChoiceQuestion {
+    return {
+      answers: this.answers,
+      ...this.baseToStorage(),
     };
   }
 }

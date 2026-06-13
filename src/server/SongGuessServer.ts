@@ -1,6 +1,7 @@
 import type { Connection, ConnectionContext } from "partyserver";
 import type { RoomGetResponse } from "../types/APIResponseTypes";
 import type { ServerMessage } from "../types/MessageTypes";
+import type { PersistedRoomState } from "../types/PersistedStateTypes";
 import { Server } from "partyserver";
 import { ROOM_CLEANUP_TIMEOUT } from "../shared/ConfigConstants";
 import Logger from "./logger/Logger";
@@ -36,6 +37,36 @@ export default class SongGuessServer extends Server<Env> {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     this.logger = new Logger(this);
+
+    ctx.blockConcurrencyWhile(async () => await this.restoreState(ctx)).catch(this.logger.error);
+  }
+
+  /**
+   * Saves relevant state of the room to storage.
+   */
+  async saveState() {
+    if (!this.validRoom) {
+      await this.ctx.storage.delete("state");
+      return;
+    }
+
+    const state: PersistedRoomState = this.validRoom.toStorage();
+    console.debug(state);
+    // await this.ctx.storage.put("state", state);
+  }
+
+  /**
+   * Restores the state of the room, e.g. when the Durable Object gets restarted.
+   */
+  async restoreState(ctx: DurableObjectState = this.ctx) {
+    const state = await ctx.storage.get<PersistedRoomState>("state");
+    if (!state) {
+      // the room is not valid, nothing to do
+      return;
+    }
+
+    this.logger.info("Restoring state...");
+    // this.validRoom = ValidRoom.fromStorage(this, state);
   }
 
   /**
@@ -46,6 +77,7 @@ export default class SongGuessServer extends Server<Env> {
     this.delayedCleanup();
 
     this.logger.info("Room created.");
+    this.saveState().catch(this.logger.error);
   }
 
   /**
@@ -73,13 +105,14 @@ export default class SongGuessServer extends Server<Env> {
    * Uses milliseconds for the setTimeout function (ROOM_CLEANUP_TIMEOUT * 1000).
    */
   private delayedCleanup() {
-    this.cleanupTimeout = setTimeout(() => {
+    this.cleanupTimeout = setTimeout(async () => {
       try {
         if (this.getOnlinePlayersCount() === 0) {
           clearInterval(this.tickInterval!);
           this.tickInterval = null;
 
           this.validRoom = undefined;
+          await this.saveState();
 
           this.logger.info("Room closed due to timeout.");
         }
@@ -187,7 +220,7 @@ export default class SongGuessServer extends Server<Env> {
    * @param conn The new connection.
    * @param ctx The connection context.
    */
-  onConnect(conn: Connection<string>, ctx: ConnectionContext) {
+  async onConnect(conn: Connection<string>, ctx: ConnectionContext) {
     if (this.hasTag(conn, "unauthorized")) {
       conn.close(4403, "Access denied.");
       return;
@@ -216,9 +249,10 @@ export default class SongGuessServer extends Server<Env> {
 
     // start the tick interval
     if (!this.tickInterval) {
-      this.tickInterval = setInterval(() => {
+      this.tickInterval = setInterval(async () => {
         try {
           this.validRoom?.onTick();
+          await this.saveState();
         } catch (e) {
           this.logger.error("Error running ValidRoom#onTick():");
           this.logger.error(e);
@@ -230,6 +264,7 @@ export default class SongGuessServer extends Server<Env> {
 
     try {
       this.validRoom.onConnect(conn, ctx);
+      await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onConnect():");
       this.logger.error(e);
@@ -242,7 +277,7 @@ export default class SongGuessServer extends Server<Env> {
    * @param conn The connection that sent the message.
    * @param message The message content as a string.
    */
-  onMessage(conn: Connection<string>, message: string) {
+  async onMessage(conn: Connection<string>, message: string) {
     // ignore all messages if room is not valid
     if (!this.validRoom) {
       return;
@@ -250,6 +285,7 @@ export default class SongGuessServer extends Server<Env> {
 
     try {
       this.validRoom.onMessage(conn, message);
+      await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onMessage():");
       this.logger.error(e);
@@ -261,7 +297,7 @@ export default class SongGuessServer extends Server<Env> {
    *
    * @param conn The connection that closed.
    */
-  onClose(conn: Connection<string>) {
+  async onClose(conn: Connection<string>) {
     if (this.hasTag(conn, "admin")) {
       this.logger.info(`Admin ${conn.state} left.`);
       return;
@@ -276,15 +312,17 @@ export default class SongGuessServer extends Server<Env> {
 
     try {
       this.validRoom.onClose(conn);
+
+      if (this.getOnlinePlayersCount() === 0) {
+        this.delayedCleanup();
+
+        this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
+      }
+
+      await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onClose():");
       this.logger.error(e);
-    }
-
-    if (this.getOnlinePlayersCount() === 0) {
-      this.delayedCleanup();
-
-      this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
     }
   }
 

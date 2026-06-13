@@ -2,6 +2,7 @@ import type {
   PlayerPicksQuestionMessage,
   Song,
 } from "../../../types/MessageTypes";
+import type { PersistedPlayerPicksQuestion } from "../../../types/PersistedStateTypes";
 import GamePhase from "../../../shared/game/GamePhase";
 import Question from "../Question";
 
@@ -28,6 +29,14 @@ export default class PlayerPicksQuestion extends Question {
       correctAnswer: gamePhase === GamePhase.ANSWER ? this.song : undefined,
       pickerId: this.pickerId,
       startPos: this.startPos,
+    };
+  }
+
+  toStorage(): PersistedPlayerPicksQuestion {
+    return {
+      pickerId: this.pickerId,
+      questionCurrent: this.questionCurrent,
+      ...this.baseToStorage(),
     };
   }
 }

@@ -9,6 +9,7 @@ import type {
   Song,
   UpdatePlayedSongsMessage,
 } from "../../types/MessageTypes";
+import type { PersistedAbstractGame, PersistedGame } from "../../types/PersistedStateTypes";
 import type { IEventListener } from "../listener/IEventListener";
 import type Player from "../Player";
 import type { ValidRoom } from "../ValidRoom";
@@ -518,4 +519,24 @@ export default abstract class Game implements IEventListener {
       player.resetAnswerData(true);
     }
   }
+
+  /**
+   * Serializes only this base class to a {@link PersistedAbstractGame} object.
+   * @protected
+   */
+  protected baseToStorage(): PersistedAbstractGame {
+    return {
+      currentQuestionIndex: this.currentQuestionIndex,
+      gamePhase: this.gamePhase,
+      isRunning: this.isRunning,
+      questionStartTime: this.questionStartTime,
+      questionTick: this.questionTick,
+      roundCurrent: this.roundCurrent,
+    };
+  }
+
+  /**
+   * Serializes this game to a {@link PersistedGame} object.
+   */
+  abstract toStorage(): PersistedGame;
 }

@@ -9,6 +9,7 @@ import type {
   ServerMessage,
   SourceMessage,
 } from "../types/MessageTypes";
+import type { PersistedPlayer } from "../types/PersistedStateTypes";
 import type { IEventListener } from "./listener/IEventListener";
 import type { ValidRoom } from "./ValidRoom";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
@@ -52,12 +53,16 @@ export default class Player implements PlayerMessage, IEventListener {
    * Whether this player is host.
    */
   get isHost(): boolean {
-    return this.room.host === this;
+    return this.room.hostID === this.connID;
   }
 
-  constructor(readonly room: ValidRoom, public conn: Connection<string>, readonly uuid: string) {
+  constructor(readonly room: ValidRoom, public conn: Connection<string> | null, readonly uuid: string, readonly connID: string) {
     room.listener.registerEvents(this);
-    this.isAdmin = this.room.server.hasTag(conn, "admin");
+    if (conn) {
+      this.isAdmin = this.room.server.hasTag(conn, "admin");
+    } else {
+      this.isAdmin = false;
+    }
   }
 
   /**
@@ -68,13 +73,15 @@ export default class Player implements PlayerMessage, IEventListener {
     const url = new URL(ctx.request.url);
     this.isSpectator = url.searchParams.get("spectator") !== null;
 
-    const color = this.room.getUnusedColors()[0];
-    if (!color && !this.isSpectator) {
-      this.kick(4002, "Room is full.");
-      return false;
+    // spectators should not get a color
+    if (!this.isSpectator) {
+      const color = this.room.getUnusedColors()[0];
+      if (!color) {
+        this.kick(4002, "Room is full.");
+        return false;
+      }
+      this.color = color;
     }
-    this.color = color;
-    this.isOnline = true;
 
     const requestedUsername = url.searchParams.get("username");
     const usernameValid = requestedUsername && usernameRegex.test(requestedUsername);
@@ -100,6 +107,8 @@ export default class Player implements PlayerMessage, IEventListener {
         return false;
       }
     }
+
+    this.isOnline = true;
 
     // send the current playlist to the connection
     this.safeSend(this.room.lobby.getPlaylistsUpdateMessage());
@@ -151,6 +160,7 @@ export default class Player implements PlayerMessage, IEventListener {
     }
 
     this.isOnline = false;
+    this.conn = null;
   }
 
   /**
@@ -161,7 +171,7 @@ export default class Player implements PlayerMessage, IEventListener {
    */
   public safeSend(msg: ServerMessage, log: boolean = true) {
     // silently ignore if not online
-    if (this.isOnline || this.isAdmin) {
+    if ((this.isOnline || this.isAdmin) && this.conn) {
       this.room.server.safeSend(this.conn, msg, log);
     }
   }
@@ -202,7 +212,7 @@ export default class Player implements PlayerMessage, IEventListener {
    */
   public kick(code: number, msg: string) {
     this.onClose();
-    this.conn.close(code, msg);
+    this.conn?.close(code, msg);
   }
 
   /**
@@ -232,7 +242,7 @@ export default class Player implements PlayerMessage, IEventListener {
       return false;
     }
     this.username = username;
-    this.conn.setState(`${this.conn.state} (${username})`);
+    this.conn?.setState(`${this.conn.state} (${username})`);
 
     return true;
   }
@@ -248,7 +258,7 @@ export default class Player implements PlayerMessage, IEventListener {
 
     this.kickPlayerTimeout = setTimeout(() => {
       try {
-        this.room.server.logger.info(`Kicked ${this.conn.state} due to inactivity.`);
+        this.room.server.logger.info(`Kicked ${this.conn?.state} due to inactivity.`);
         this.kick(4001, "Didn't receive updates within 15 seconds.");
       } catch (e) {
         this.room.server.logger.error("Error running kick player timeout:");
@@ -284,5 +294,15 @@ export default class Player implements PlayerMessage, IEventListener {
 
     const entries = baseKeys.map(key => [key, this[key as keyof this]]);
     return Object.fromEntries(entries);
+  }
+
+  /**
+   * Serializes this player to a {@link PersistedPlayer} object.
+   */
+  toStorage(): PersistedPlayer {
+    return {
+      uuid: this.uuid,
+      ...this.toPlayerMessage(),
+    };
   }
 }

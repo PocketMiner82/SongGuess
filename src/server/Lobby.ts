@@ -6,6 +6,7 @@ import type {
   Song,
   UpdatePlaylistsMessage,
 } from "../types/MessageTypes";
+import type { PersistedLobby } from "../types/PersistedStateTypes";
 import type { IEventListener } from "./listener/IEventListener";
 import type Player from "./Player";
 import type { ValidRoom } from "./ValidRoom";
@@ -146,6 +147,16 @@ export default class Lobby implements IEventListener {
       type: "update_playlists",
       playlists: onlyCount ? undefined : this.playlists,
       filteredSongsCount: this.songs.length,
+    };
+  }
+
+  /**
+   * Serializes this room to a {@link PersistedLobby} object.
+   */
+  public toStorage(): PersistedLobby {
+    return {
+      playlists: this.playlists,
+      songs: this.songs,
     };
   }
 }
