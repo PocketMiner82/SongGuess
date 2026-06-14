@@ -51,6 +51,24 @@
           }
         ]
       }
+    },
+    "localdev": {
+      "workers_dev": true,
+      "build": {
+        "command": "npm run build:localdev"
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "class_name": "SongGuessServer",
+            "name": "SongGuessServer"
+          },
+          {
+            "class_name": "SongGuessAPI",
+            "name": "SongGuessAPI"
+          }
+        ]
+      }
     }
   }
 }

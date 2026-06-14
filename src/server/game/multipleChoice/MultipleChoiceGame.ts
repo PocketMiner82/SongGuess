@@ -2,6 +2,7 @@ import type {
   SelectAnswerMessage,
   Song,
 } from "../../../types/MessageTypes";
+import type { PersistedGame } from "../../../types/PersistedStateTypes";
 import type Player from "../../Player";
 import type Question from "../Question";
 import _ from "lodash";
@@ -84,6 +85,25 @@ export class MultipleChoiceGame extends Game {
         player.answerData.questionPoints = Math.round(player.answerData.questionPoints);
         player.points += player.answerData.questionPoints;
       }
+    }
+  }
+
+  toStorage(): PersistedGame {
+    return {
+      type: "multiple_choice",
+      questions: this.questions.map(q => q.toStorage()),
+      remainingSongs: this.remainingSongs,
+      ...this.baseToStorage(),
+    };
+  }
+
+  derivativeUpdateFromStorage(persistedGame: PersistedGame) {
+    if (persistedGame.type === "multiple_choice") {
+      this.remainingSongs = persistedGame.remainingSongs;
+
+      this.questions = persistedGame.questions.map(q => MultipleChoiceQuestion.fromStorage(q));
+    } else {
+      this.room.server.logger.error(`Type mismatch while trying to load PersistedGame. Expected type=multiple_choice but got type=${persistedGame.type}`);
     }
   }
 }

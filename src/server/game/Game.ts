@@ -9,6 +9,7 @@ import type {
   Song,
   UpdatePlayedSongsMessage,
 } from "../../types/MessageTypes";
+import type { PersistedAbstractGame, PersistedGame } from "../../types/PersistedStateTypes";
 import type { IEventListener } from "../listener/IEventListener";
 import type Player from "../Player";
 import type { ValidRoom } from "../ValidRoom";
@@ -518,4 +519,45 @@ export default abstract class Game implements IEventListener {
       player.resetAnswerData(true);
     }
   }
+
+  /**
+   * Serializes only this base class to a {@link PersistedAbstractGame} object.
+   * @protected
+   */
+  protected baseToStorage(): PersistedAbstractGame {
+    return {
+      currentQuestionIndex: this.currentQuestionIndex,
+      gamePhase: this.gamePhase,
+      isRunning: this.isRunning,
+      questionStartTime: this.questionStartTime,
+      questionTick: this.questionTick,
+      roundCurrent: this.roundCurrent,
+    };
+  }
+
+  /**
+   * Serializes this game to a {@link PersistedGame} object.
+   */
+  abstract toStorage(): PersistedGame;
+
+  /**
+   * Updates the derived classes with data from storage.
+   * @param persistedGame the serialized {@link PersistedGame} to update the derived game with
+   */
+  abstract derivativeUpdateFromStorage(persistedGame: PersistedGame): void;
+
+  /**
+   * Updates the game with data from storage.
+   * @param persistedGame the serialized {@link PersistedGame} to update the game with
+   */
+  updateFromStorage(persistedGame: PersistedGame) {
+    this.isRunning = persistedGame.isRunning;
+    this.questionTick = persistedGame.questionTick;
+    this.questionStartTime = persistedGame.questionStartTime;
+    this.gamePhase = persistedGame.gamePhase;
+    this.currentQuestionIndex = persistedGame.currentQuestionIndex;
+    this.roundCurrent = persistedGame.roundCurrent;
+
+    this.derivativeUpdateFromStorage(persistedGame);
+  };
 }

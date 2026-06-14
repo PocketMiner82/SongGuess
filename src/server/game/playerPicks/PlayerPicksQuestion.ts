@@ -2,6 +2,7 @@ import type {
   PlayerPicksQuestionMessage,
   Song,
 } from "../../../types/MessageTypes";
+import type { PersistedPlayerPicksQuestion } from "../../../types/PersistedStateTypes";
 import GamePhase from "../../../shared/game/GamePhase";
 import Question from "../Question";
 
@@ -29,5 +30,19 @@ export default class PlayerPicksQuestion extends Question {
       pickerId: this.pickerId,
       startPos: this.startPos,
     };
+  }
+
+  toStorage(): PersistedPlayerPicksQuestion {
+    return {
+      pickerId: this.pickerId,
+      questionCurrent: this.questionCurrent,
+      ...this.baseToStorage(),
+    };
+  }
+
+  public static fromStorage(persistedQuestion: PersistedPlayerPicksQuestion): PlayerPicksQuestion {
+    const q = new PlayerPicksQuestion(persistedQuestion.questionCurrent, persistedQuestion.pickerId, persistedQuestion.song);
+    q.startPos = persistedQuestion.startPos;
+    return q;
   }
 }

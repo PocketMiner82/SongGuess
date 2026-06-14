@@ -243,6 +243,7 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
     room: roomID,
     party: "song-guess-server",
     maxRetries: 50,
+    connectionTimeout: 10000,
     id,
     onOpen: () => {
       setConnectionStatus(null);

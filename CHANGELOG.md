@@ -1,3 +1,38 @@
+# [3.2.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.5...3.2.0-dev.1) (2026-06-14)
+
+
+### Features
+
+* persist all required room state to storage + use alarms instead of setTimeout for host transfer and cleanup + add limit for total song count ([594124f](https://github.com/PocketMiner82/SongGuess/commit/594124f5c18300d9e31c4dc4edb74af1c6639ce6))
+
+## [3.1.1-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.4...3.1.1-dev.5) (2026-06-12)
+
+
+### Bug Fixes
+
+* **admin:** increase connectionTimeout as well ([1633a82](https://github.com/PocketMiner82/SongGuess/commit/1633a82975964a3985a4659d6a9df434a62964f2))
+
+## [3.1.1-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.3...3.1.1-dev.4) (2026-06-12)
+
+
+### Bug Fixes
+
+* **PlayerPicksQuestionDisplay:** show result of check if the song can actually be downloaded ([5b6e066](https://github.com/PocketMiner82/SongGuess/commit/5b6e0667a36c3307a716007a5c67a33b000da68e))
+* **RoomController:** don't update questiondata when confirmation contains error ([99cfd3c](https://github.com/PocketMiner82/SongGuess/commit/99cfd3c174425a088bbbfe1177ccfb4972a28b4d))
+
+## [3.1.1-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.2...3.1.1-dev.3) (2026-06-12)
+
+## [3.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.1...3.1.1-dev.2) (2026-06-12)
+
+
+### Bug Fixes
+
+* **API:** attempt to fix preview loading for some songs ([d394041](https://github.com/PocketMiner82/SongGuess/commit/d3940412f647e09573e0f053d2e9ea7ff670e530))
+* **Logger:** do not log debug messages to console, only send them to admins ([b9ea283](https://github.com/PocketMiner82/SongGuess/commit/b9ea283c9bb896f758dfbb2c3aa6cc36a41261d3))
+* **PlayerPicks:** don't allow adding soundcloud songs that cannot be fetched ([66f337d](https://github.com/PocketMiner82/SongGuess/commit/66f337d17ee1fd4737e18b5b80a25c73bf6dd4f3))
+
+## [3.1.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.1.0...3.1.1-dev.1) (2026-06-12)
+
 # [3.1.0](https://github.com/PocketMiner82/SongGuess/compare/3.0.2...3.1.0) (2026-05-31)
 
 
