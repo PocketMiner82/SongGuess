@@ -7,8 +7,9 @@ export default class Logger {
   /**
    * Log messages are prefixed with this string.
    */
-  readonly LOG_PREFIX: string = `[Room ${this.server.name}]`;
-
+  get LOG_PREFIX(): string {
+    return `[Room ${this.server.name}]`;
+  }
 
   /**
    * Creates a new Logger instance.

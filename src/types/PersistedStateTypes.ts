@@ -62,11 +62,23 @@ export interface PersistedRoomState {
   hostID?: string;
   players: Record<string, PersistedPlayer>;
   state: GameState;
-  countdown: number;
   // next tick due time (for gap calculation after eviction)
   gameTickDeadline?: number;
   // for countdown continuity
   countdownEndTime?: number;
-  // the version number of the current storage deployment
-  version: number;
+
 }
+
+export interface PersistedServerState extends PersistedRoomState {
+  // the version number of the current storage deployment
+  // DO NOT REMOVE/RENAME
+  version: number;
+  // the room's name
+  // DO NOT REMOVE/RENAME
+  name: string;
+}
+
+/**
+ * The version of this file. Should be changed when breaking changes are introduced in an update.
+ */
+export const PERSISTED_STATE_VERSION = 1;

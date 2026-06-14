@@ -1,9 +1,11 @@
 import type { Connection, ConnectionContext } from "partyserver";
 import type { RoomGetResponse } from "../types/APIResponseTypes";
+import type { ScheduledAlarmEvent } from "../types/DurableObjectAlarms";
 import type { ServerMessage } from "../types/MessageTypes";
-import type { PersistedRoomState } from "../types/PersistedStateTypes";
+import type { PersistedServerState } from "../types/PersistedStateTypes";
 import { Server } from "partyserver";
 import { ROOM_CLEANUP_TIMEOUT } from "../shared/ConfigConstants";
+import { PERSISTED_STATE_VERSION } from "../types/PersistedStateTypes";
 import Logger from "./logger/Logger";
 import { ValidRoom } from "./ValidRoom";
 
@@ -22,14 +24,18 @@ export default class SongGuessServer extends Server<Env> {
   validRoom?: ValidRoom;
 
   /**
-   * Timeout to clean up the room if no players join after {@link ROOM_CLEANUP_TIMEOUT} seconds.
-   */
-  cleanupTimeout: NodeJS.Timeout | null = null;
-
-  /**
    * The interval that ticks the room every second.
    */
   tickInterval: NodeJS.Timeout | null = null;
+
+  private _name: string = "(uninitialized)";
+  public get name(): string {
+    try {
+      return super.name;
+    } catch {
+      return this._name;
+    }
+  }
 
   /**
    * Creates a new room server.
@@ -50,19 +56,28 @@ export default class SongGuessServer extends Server<Env> {
       return;
     }
 
-    const state: PersistedRoomState = this.validRoom.toStorage();
-    console.debug(state);
-    // await this.ctx.storage.put("state", state);
+    const state: PersistedServerState = {
+      version: PERSISTED_STATE_VERSION,
+      name: this.name,
+      ...this.validRoom.toStorage(),
+    };
+    // console.debug(state);
+    await this.ctx.storage.put("state", state);
   }
 
   /**
    * Restores the state of the room, e.g. when the Durable Object gets restarted.
    */
   async restoreState(ctx: DurableObjectState = this.ctx) {
-    const state = await ctx.storage.get<PersistedRoomState>("state");
+    const state = await ctx.storage.get<PersistedServerState>("state");
     if (!state) {
       // the room is not valid, nothing to do
       return;
+    }
+
+    this._name = state.name;
+    if (state.version !== PERSISTED_STATE_VERSION) {
+      this.logger.warn(`Discarding state with old version ${state.version}`);
     }
 
     this.logger.info("Restoring state...");
@@ -72,12 +87,16 @@ export default class SongGuessServer extends Server<Env> {
   /**
    * Creates a ValidRoom instance, allowing players to connect to this room.
    */
-  public createValidRoom() {
-    this.validRoom = new ValidRoom(this);
-    this.delayedCleanup();
+  public async createValidRoom() {
+    try {
+      this._name = super.name;
+    } catch { }
 
+    this.validRoom = new ValidRoom(this);
     this.logger.info("Room created.");
-    this.saveState().catch(this.logger.error);
+
+    await this.scheduleCleanup();
+    await this.saveState();
   }
 
   /**
@@ -88,11 +107,11 @@ export default class SongGuessServer extends Server<Env> {
   }
 
   /**
-   * Calculates the current number of active WebSocket connections in the room.
+   * Calculates the current number of active WebSocket connections with the "player" tag in the room.
    *
    * @returns The count of connected clients.
    */
-  public getOnlinePlayersCount(): number {
+  public getActivePlayersCount(): number {
     let count = 0;
     for (const _connection of this.getActiveConnections("player")) {
       count++;
@@ -104,24 +123,18 @@ export default class SongGuessServer extends Server<Env> {
    * Invalidates the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
    * Uses milliseconds for the setTimeout function (ROOM_CLEANUP_TIMEOUT * 1000).
    */
-  private delayedCleanup() {
-    this.cleanupTimeout = setTimeout(async () => {
-      try {
-        if (this.getOnlinePlayersCount() === 0) {
-          clearInterval(this.tickInterval!);
-          this.tickInterval = null;
-
-          this.validRoom = undefined;
-          await this.saveState();
-
-          this.logger.info("Room closed due to timeout.");
-        }
-        this.cleanupTimeout = null;
-      } catch (e) {
-        this.logger.error("Error running cleanup timeout:");
-        this.logger.error(e);
+  private async onDelayedCleanup() {
+    if (this.getActivePlayersCount() === 0) {
+      if (this.tickInterval) {
+        clearInterval(this.tickInterval);
+        this.tickInterval = null;
       }
-    }, ROOM_CLEANUP_TIMEOUT * 1000);
+
+      this.validRoom = undefined;
+      await this.saveState();
+
+      this.logger.info("Room closed due to timeout.");
+    }
   }
 
   /**
@@ -235,11 +248,6 @@ export default class SongGuessServer extends Server<Env> {
       return;
     }
 
-    if (this.cleanupTimeout) {
-      clearTimeout(this.cleanupTimeout);
-      this.cleanupTimeout = null;
-    }
-
     // kick player if room is not created yet
     if (!this.validRoom) {
       conn.close(4000, "Room ID not found");
@@ -263,7 +271,7 @@ export default class SongGuessServer extends Server<Env> {
     this.logger.info(`${conn.state} connected.`);
 
     try {
-      this.validRoom.onConnect(conn, ctx);
+      await this.validRoom.onConnect(conn, ctx);
       await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onConnect():");
@@ -285,6 +293,7 @@ export default class SongGuessServer extends Server<Env> {
 
     try {
       this.validRoom.onMessage(conn, message);
+      await this.scheduleCleanup();
       await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onMessage():");
@@ -311,13 +320,12 @@ export default class SongGuessServer extends Server<Env> {
     this.logger.info(`${conn.state} left.`);
 
     try {
-      this.validRoom.onClose(conn);
-
-      if (this.getOnlinePlayersCount() === 0) {
-        this.delayedCleanup();
-
-        this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins...`);
+      if (this.getActivePlayersCount() === 0) {
+        await this.scheduleCleanup();
+        this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins.`);
       }
+
+      await this.validRoom.onClose(conn);
 
       await this.saveState();
     } catch (e) {
@@ -362,7 +370,7 @@ export default class SongGuessServer extends Server<Env> {
     // respond with JSON containing the current online count and if the room is valid
     if (req.method === "GET") {
       const json: RoomGetResponse = {
-        onlineCount: this.getOnlinePlayersCount(),
+        onlineCount: this.getActivePlayersCount(),
         isValidRoom: this.isValidRoom(),
       };
 
@@ -370,5 +378,89 @@ export default class SongGuessServer extends Server<Env> {
     }
 
     return new Response("Bad request. Only GET is supported.", { status: 400 });
+  }
+
+  //
+  // ROOM ALARM EVENT SCHEDULING
+  // code inspired by https://developers.cloudflare.com/durable-objects/api/alarms/#scheduling-multiple-events-with-a-single-alarm
+  //
+
+  async scheduleCleanup(): Promise<void> {
+    return this.scheduleEvent("cleanup", ROOM_CLEANUP_TIMEOUT * 1000);
+  }
+
+  /**
+   * Schedules a one-time or recurring event.
+   * @param id - The unique identifier for the event.
+   * @param runAfter - The time (in milliseconds) after which the event should execute.
+   * @param repeatMs - The repetition interval in milliseconds, or null if one-time.
+   */
+  async scheduleEvent(id: ScheduledAlarmEvent["id"], runAfter: number, repeatMs: number | null = null): Promise<void> {
+    const runAt = Date.now() + runAfter;
+    await this.ctx.storage.put<ScheduledAlarmEvent>(`event:${id}`, { id, runAt, repeatMs });
+    const currentAlarm = await this.ctx.storage.getAlarm();
+    if (!currentAlarm || runAt < currentAlarm) {
+      await this.ctx.storage.setAlarm(runAt);
+    }
+  }
+
+  /**
+   * Cancels a scheduled event by its identifier and removes it from storage.
+   * @param id - The unique identifier of the event to cancel.
+   * @returns true if the event existed and was removed, false if not
+   */
+  async cancelEvent(id: ScheduledAlarmEvent["id"]): Promise<boolean> {
+    return this.ctx.storage.delete(`event:${id}`);
+  }
+
+  /**
+   * The alarm handler invoked by the Cloudflare Workers runtime.
+   */
+  async alarm(): Promise<void> {
+    const now = Date.now();
+    const events = await this.ctx.storage.list<ScheduledAlarmEvent>({ prefix: "event:" });
+    let nextAlarm: number | null = null;
+
+    for (const [key, event] of events) {
+      if (event.runAt <= now) {
+        try {
+          await this.processEvent(event);
+        } catch (e) {
+          this.logger.error(`Error processing alarm ${event.id}:`);
+          this.logger.error(e);
+        }
+        if (event.repeatMs) {
+          event.runAt = now + event.repeatMs;
+          await this.ctx.storage.put(key, event);
+        } else {
+          await this.ctx.storage.delete(key);
+        }
+      }
+      // Track the next event time
+      if (event.runAt > now && (!nextAlarm || event.runAt < nextAlarm)) {
+        nextAlarm = event.runAt;
+      }
+    }
+
+    if (nextAlarm) {
+      await this.ctx.storage.setAlarm(nextAlarm);
+    }
+  }
+
+  /**
+   * Processes an individual scheduled event.
+   * @param event - The event object to be processed.
+   */
+  async processEvent(event: ScheduledAlarmEvent): Promise<void> {
+    switch (event.id) {
+      case "cleanup":
+        await this.onDelayedCleanup();
+        break;
+      case "host_transfer":
+        if (this.validRoom) {
+          await this.validRoom.onDelayedHostTransfer();
+        }
+        break;
+    }
   }
 }

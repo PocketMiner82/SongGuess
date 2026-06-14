@@ -11,7 +11,7 @@ export const ROOM_CLEANUP_TIMEOUT = 30;
 /**
  * The time (in seconds) after the host leaved where a new player will get host.
  */
-export const ROOM_HOST_TRANSFER_TIMEOUT = 10;
+export const ROOM_HOST_TRANSFER_TIMEOUT = 15;
 
 /**
  * The time (in seconds) after which an inactive player will get kicked.
