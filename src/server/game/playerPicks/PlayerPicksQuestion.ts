@@ -39,4 +39,10 @@ export default class PlayerPicksQuestion extends Question {
       ...this.baseToStorage(),
     };
   }
+
+  public static fromStorage(persistedQuestion: PersistedPlayerPicksQuestion): PlayerPicksQuestion {
+    const q = new PlayerPicksQuestion(persistedQuestion.questionCurrent, persistedQuestion.pickerId, persistedQuestion.song);
+    q.startPos = persistedQuestion.startPos;
+    return q;
+  }
 }

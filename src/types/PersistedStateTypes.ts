@@ -1,14 +1,10 @@
 import type GamePhase from "../shared/game/GamePhase";
-import type { GameState, PlayerAnswerData, Playlist, RoomConfigMessage, Song } from "./MessageTypes";
+import type { GameState, PlayerMessage, Playlist, RoomConfigMessage, Song } from "./MessageTypes";
 
 
-export interface PersistedPlayer {
+export interface PersistedPlayer extends PlayerMessage {
+  connId: string;
   uuid: string;
-  username: string;
-  color: string;
-  points: number;
-  answerData?: PlayerAnswerData;
-  isSpectator: boolean;
 }
 
 export interface PersistedAbstractQuestion {
@@ -44,29 +40,23 @@ export interface PersistedMultipleChoiceGame extends PersistedAbstractGame {
 
 export interface PersistedPlayerPicksGame extends PersistedAbstractGame {
   type: "player_picks";
-  nextQuestions: PersistedPlayerPicksQuestion[];
   questions: PersistedPlayerPicksQuestion[];
+  nextQuestions: PersistedPlayerPicksQuestion[];
 }
 
 export type PersistedGame = PersistedMultipleChoiceGame | PersistedPlayerPicksGame;
 
 export interface PersistedLobby {
   playlists: Playlist[];
-  songs: Song[];
 }
 
 export interface PersistedRoomState {
   config: RoomConfigMessage;
-  lobby: PersistedLobby;
-  game: PersistedGame | null;
+  game: PersistedGame;
   hostID?: string;
-  players: Record<string, PersistedPlayer>;
+  lobby: PersistedLobby;
+  players: PersistedPlayer[];
   state: GameState;
-  // next tick due time (for gap calculation after eviction)
-  gameTickDeadline?: number;
-  // for countdown continuity
-  countdownEndTime?: number;
-
 }
 
 export interface PersistedServerState extends PersistedRoomState {

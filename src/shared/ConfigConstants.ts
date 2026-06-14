@@ -6,12 +6,17 @@ export const COLORS = ["Red", "DarkGreen", "Blue", "Orange", "LawnGreen", "Black
 /**
  * The time (in seconds) after which an empty room is cleaned up.
  */
-export const ROOM_CLEANUP_TIMEOUT = 30;
+export const ROOM_CLEANUP_TIMEOUT = 172800;
 
 /**
  * The time (in seconds) after the host leaved where a new player will get host.
  */
 export const ROOM_HOST_TRANSFER_TIMEOUT = 15;
+
+/**
+ * The total amount of songs all playlists in the lobby can have at max.
+ */
+export const ROOM_MAX_SONG_COUNT = 2000;
 
 /**
  * The time (in seconds) after which an inactive player will get kicked.

@@ -10,6 +10,7 @@ import type { PersistedLobby } from "../types/PersistedStateTypes";
 import type { IEventListener } from "./listener/IEventListener";
 import type Player from "./Player";
 import type { ValidRoom } from "./ValidRoom";
+import { ROOM_MAX_SONG_COUNT } from "../shared/ConfigConstants";
 import { normalizeSongName } from "../shared/Utils";
 import { MultipleChoiceGame } from "./game/multipleChoice/MultipleChoiceGame";
 
@@ -40,7 +41,7 @@ export default class Lobby implements IEventListener {
         if (msg.type === "add_playlists") {
           const omitted = this.addPlaylists(msg);
           if (omitted > 0) {
-            player.sendConfirmationOrError(msg, `${omitted}/${msg.playlists.length} playlist(s) were omitted because they don't have songs or they don't have a unique name and album cover.`);
+            player.sendConfirmationOrError(msg, `${omitted}/${msg.playlists.length} playlist(s) were omitted because they don't have songs or they don't have a unique name and album cover or the total maximum song count of ${ROOM_MAX_SONG_COUNT} would be exceeded.`);
 
             // everything was omitted
             if (omitted === msg.playlists.length) {
@@ -76,19 +77,26 @@ export default class Lobby implements IEventListener {
    * @returns the amount of playlists omitted.
    */
   public addPlaylists(msg: AddPlaylistsMessage): number {
-    const playlists = msg.playlists.filter(playlist =>
-      playlist.songs && this.playlists.every(p =>
-        p.name !== playlist.name || p.cover !== playlist.cover,
-      ));
+    const addedPlaylistNames: string[] = [];
 
-    if (playlists.length > 0) {
-      this.playlists.push(...playlists);
-      this.room.server.logger.info(`The playlist(s) ${
-        playlists.map(p => p.name).join("; ")
-      } has/have been added.`);
+    if (msg.playlists.length > 0) {
+      let totalSongCount = 0;
+      for (const playlist of this.playlists) {
+        totalSongCount += playlist.songs.length;
+      }
+
+      for (const playlist of msg.playlists) {
+        if (playlist.songs && (playlist.songs.length + totalSongCount <= ROOM_MAX_SONG_COUNT)
+          && this.playlists.every(p => p.name !== playlist.name || p.cover !== playlist.cover)) {
+          this.playlists.push(playlist);
+          addedPlaylistNames.push(playlist.name);
+          totalSongCount += playlist.songs.length;
+        }
+      }
+      this.room.server.logger.info(`The playlist(s) ${addedPlaylistNames.join("; ")} has/have been added.`);
     }
 
-    return msg.playlists.length - playlists.length;
+    return msg.playlists.length - addedPlaylistNames.length;
   }
 
   /**
@@ -156,7 +164,15 @@ export default class Lobby implements IEventListener {
   public toStorage(): PersistedLobby {
     return {
       playlists: this.playlists,
-      songs: this.songs,
     };
+  }
+
+  /**
+   * Updates the lobby with data from storage.
+   * @param persistedLobby the serialized {@link PersistedLobby} to update the lobby with
+   */
+  public updateFromStorage(persistedLobby: PersistedLobby) {
+    this.playlists = persistedLobby.playlists;
+    this.filterSongs();
   }
 }

@@ -5,7 +5,7 @@ import type {
   PlayerMessage,
   SourceMessage,
 } from "../types/MessageTypes";
-import type { PersistedPlayer, PersistedRoomState } from "../types/PersistedStateTypes";
+import type { PersistedPlayer, PersistedRoomState, PersistedServerState } from "../types/PersistedStateTypes";
 import type Game from "./game/Game";
 import type { SongGuessServer } from "./index";
 import { v4 } from "uuid";
@@ -165,7 +165,9 @@ export class ValidRoom {
     }
 
     if (player.isHost) {
-      this.server.scheduleEvent("host_transfer", ROOM_HOST_TRANSFER_TIMEOUT * 1000).catch(this.server.logger.error);
+      // on each host message, re-schedule delayed transfer
+      // => if host leaves, another player will get host after ROOM_HOST_TRANSFER_TIMEOUT seconds
+      this.server.scheduleHostTransfer().catch(this.server.logger.error);
     }
   }
 
@@ -286,7 +288,7 @@ export class ValidRoom {
    * @see SongGuessServer#processEvent
    * @returns true if host was transfered, false if not.
    */
-  public async onDelayedHostTransfer(): Promise<boolean> {
+  public async onDelayedHostTransfer(): Promise<void> {
     if (this.host === undefined) {
       const next = this.activePlayers[Symbol.iterator]().next();
       if (!next.done) {
@@ -295,10 +297,8 @@ export class ValidRoom {
       } else {
         this.transferHost(undefined);
       }
-
-      return true;
     } else {
-      return false;
+      await this.server.scheduleHostTransfer();
     }
   }
 
@@ -387,7 +387,7 @@ export class ValidRoom {
 
     this.countdown = from;
     decrementCountdown();
-    this.countdownInterval = setInterval(decrementCountdown, 1000);
+    this.countdownInterval = setInterval(decrementCountdown.bind(this), 1000);
   }
 
   /**
@@ -418,11 +418,11 @@ export class ValidRoom {
    * Serializes this room instance to a {@link PersistedRoomState} object.
    */
   public toStorage(): PersistedRoomState {
-    const persistedPlayers: Record<string, PersistedPlayer> = {};
+    const persistedPlayers: PersistedPlayer[] = [];
 
-    this.players.forEach((player, connID) => {
+    this.players.forEach((player) => {
       if (!player.isAdmin && (player.isOnline || player.isHost)) {
-        persistedPlayers[connID] = player.toStorage();
+        persistedPlayers.push(player.toStorage());
       }
     });
 
@@ -434,5 +434,30 @@ export class ValidRoom {
       players: persistedPlayers,
       state: this.state,
     };
+  }
+
+  /**
+   * Creates a new {@link ValidRoom} object.
+   * @param server a reference to the {@link SongGuessServer} this room belongs to
+   * @param state the serialized {@link PersistedServerState} or {@link PersistedRoomState} to create this room from
+   */
+  public static fromStorage(server: SongGuessServer, state: PersistedServerState | PersistedRoomState): ValidRoom {
+    const validRoom = new ValidRoom(server);
+
+    validRoom.hostID = state.hostID;
+    validRoom.state = state.state;
+
+    for (const persistedPlayer of state.players) {
+      const player = Player.fromStorage(validRoom, persistedPlayer);
+      validRoom.players.set(persistedPlayer.connId, player);
+    }
+
+    // this will also set the correct game mode
+    validRoom.config.applyMessage(state.config);
+
+    validRoom.lobby.updateFromStorage(state.lobby);
+    validRoom.game.updateFromStorage(state.game);
+
+    return validRoom;
   }
 }

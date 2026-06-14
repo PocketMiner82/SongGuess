@@ -18,10 +18,12 @@ export default class MultipleChoiceQuestion extends Question {
    * @param possibleDistractions all possible songs that could be used for distractions
    * @param distractionsPreferSameArtist whether to prefer searching for distractions by the same artist as the searched song
    */
-  constructor(song: Song, possibleDistractions: Song[], readonly distractionsPreferSameArtist: boolean) {
+  constructor(song: Song, possibleDistractions: Song[] | null, readonly distractionsPreferSameArtist: boolean | null) {
     super(song);
-    this.answers.push(song);
-    this.generateDistractions(possibleDistractions);
+    if (possibleDistractions) {
+      this.answers.push(song);
+      this.generateDistractions(possibleDistractions);
+    }
   }
 
   /**
@@ -100,5 +102,13 @@ export default class MultipleChoiceQuestion extends Question {
       answers: this.answers,
       ...this.baseToStorage(),
     };
+  }
+
+  public static fromStorage(persistedQuestion: PersistedMultipleChoiceQuestion): MultipleChoiceQuestion {
+    const q = new MultipleChoiceQuestion(persistedQuestion.song, null, null);
+    q.answers = persistedQuestion.answers;
+    q.startPos = persistedQuestion.startPos;
+
+    return q;
   }
 }

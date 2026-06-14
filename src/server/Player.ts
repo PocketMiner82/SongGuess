@@ -281,14 +281,14 @@ export default class Player implements PlayerMessage, IEventListener {
 
   /**
    * Constructs a player update message.
-   *
+   * @param forceFullMessage whether to always return the full player message, including the answer data, ignoring game phase. default: false
    * @returns a JSON string of the constructed {@link PlayerMessage}
    */
-  public toPlayerMessage(): PlayerMessage {
+  public toPlayerMessage(forceFullMessage: boolean = false): PlayerMessage {
     const baseKeys = Object.keys(PlayerMessageSchema.shape);
 
     // only send full state when answer is already shown, otherwise remove it
-    if (this.room.game.gamePhase !== GamePhase.ANSWER) {
+    if (this.room.game.gamePhase !== GamePhase.ANSWER && !forceFullMessage) {
       baseKeys.splice(baseKeys.indexOf("answerData"), 1);
     }
 
@@ -302,7 +302,21 @@ export default class Player implements PlayerMessage, IEventListener {
   toStorage(): PersistedPlayer {
     return {
       uuid: this.uuid,
-      ...this.toPlayerMessage(),
+      connId: this.connID,
+      ...this.toPlayerMessage(true),
     };
+  }
+
+  /**
+   * Creates a new {@link Player} object.
+   * @param validRoom a reference to the {@link ValidRoom} object this player belongs to
+   * @param persistedPlayer the serialized {@link PersistedPlayer} to create this player from
+   */
+  public static fromStorage(validRoom: ValidRoom, persistedPlayer: PersistedPlayer): Player {
+    const player: Player = new Player(validRoom, null, persistedPlayer.uuid, persistedPlayer.connId);
+    player.points = persistedPlayer.points;
+    player.answerData = persistedPlayer.answerData;
+
+    return player;
   }
 }

@@ -3,8 +3,9 @@ import type { RoomGetResponse } from "../types/APIResponseTypes";
 import type { ScheduledAlarmEvent } from "../types/DurableObjectAlarms";
 import type { ServerMessage } from "../types/MessageTypes";
 import type { PersistedServerState } from "../types/PersistedStateTypes";
+import { clearInterval } from "node:timers";
 import { Server } from "partyserver";
-import { ROOM_CLEANUP_TIMEOUT } from "../shared/ConfigConstants";
+import { ROOM_CLEANUP_TIMEOUT, ROOM_HOST_TRANSFER_TIMEOUT } from "../shared/ConfigConstants";
 import { PERSISTED_STATE_VERSION } from "../types/PersistedStateTypes";
 import Logger from "./logger/Logger";
 import { ValidRoom } from "./ValidRoom";
@@ -81,7 +82,7 @@ export default class SongGuessServer extends Server<Env> {
     }
 
     this.logger.info("Restoring state...");
-    // this.validRoom = ValidRoom.fromStorage(this, state);
+    this.validRoom = ValidRoom.fromStorage(this, state);
   }
 
   /**
@@ -96,7 +97,6 @@ export default class SongGuessServer extends Server<Env> {
     this.logger.info("Room created.");
 
     await this.scheduleCleanup();
-    await this.saveState();
   }
 
   /**
@@ -120,20 +120,16 @@ export default class SongGuessServer extends Server<Env> {
   }
 
   /**
-   * Invalidates the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
-   * Uses milliseconds for the setTimeout function (ROOM_CLEANUP_TIMEOUT * 1000).
+   * Hook to invalidate the room if no players join within {@link ROOM_CLEANUP_TIMEOUT} seconds.
    */
   private async onDelayedCleanup() {
     if (this.getActivePlayersCount() === 0) {
-      if (this.tickInterval) {
-        clearInterval(this.tickInterval);
-        this.tickInterval = null;
-      }
-
       this.validRoom = undefined;
       await this.saveState();
 
       this.logger.info("Room closed due to timeout.");
+    } else {
+      await this.scheduleCleanup();
     }
   }
 
@@ -207,6 +203,37 @@ export default class SongGuessServer extends Server<Env> {
     return false;
   }
 
+  /**
+   * Called every second as soon as the first player connects.
+   */
+  public async onTick() {
+    try {
+      if (this.validRoom) {
+        this.validRoom.onTick();
+
+        // re-schedule cleanup, as the room is still active while the tick loop is running
+        await this.scheduleCleanup();
+      } else {
+        this.stopTickInterval();
+      }
+
+      await this.saveState();
+    } catch (e) {
+      this.logger.error("Error running SongGuessServer#onTick():");
+      this.logger.error(e);
+    }
+  }
+
+  /**
+   * Stops the tick loop, if running.
+   */
+  public stopTickInterval() {
+    if (this.tickInterval) {
+      clearInterval(this.tickInterval);
+      this.tickInterval = null;
+    }
+  }
+
   //
   // ROOM WS EVENTS
   //
@@ -257,22 +284,13 @@ export default class SongGuessServer extends Server<Env> {
 
     // start the tick interval
     if (!this.tickInterval) {
-      this.tickInterval = setInterval(async () => {
-        try {
-          this.validRoom?.onTick();
-          await this.saveState();
-        } catch (e) {
-          this.logger.error("Error running ValidRoom#onTick():");
-          this.logger.error(e);
-        }
-      }, 1000);
+      this.tickInterval = setInterval(this.onTick.bind(this), 1000);
     }
 
     this.logger.info(`${conn.state} connected.`);
 
     try {
       await this.validRoom.onConnect(conn, ctx);
-      await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onConnect():");
       this.logger.error(e);
@@ -293,8 +311,6 @@ export default class SongGuessServer extends Server<Env> {
 
     try {
       this.validRoom.onMessage(conn, message);
-      await this.scheduleCleanup();
-      await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onMessage():");
       this.logger.error(e);
@@ -302,7 +318,7 @@ export default class SongGuessServer extends Server<Env> {
   }
 
   /**
-   * Handles a WebSocket connection closing.
+   * Handles a WebSocket connection that was closed.
    *
    * @param conn The connection that closed.
    */
@@ -320,14 +336,17 @@ export default class SongGuessServer extends Server<Env> {
     this.logger.info(`${conn.state} left.`);
 
     try {
+      // the websocket is already closed before this got called, so this will run after the last player left
       if (this.getActivePlayersCount() === 0) {
-        await this.scheduleCleanup();
         this.logger.info(`Last client left, room will close in ${ROOM_CLEANUP_TIMEOUT} seconds if no one joins.`);
+
+        // stopping the tick interval will also stop re-scheduling the cleanup - so the cleanup will eventually run
+        this.stopTickInterval();
+
+        await this.saveState();
       }
 
       await this.validRoom.onClose(conn);
-
-      await this.saveState();
     } catch (e) {
       this.logger.error("Error running ValidRoom#onClose():");
       this.logger.error(e);
@@ -385,12 +404,22 @@ export default class SongGuessServer extends Server<Env> {
   // code inspired by https://developers.cloudflare.com/durable-objects/api/alarms/#scheduling-multiple-events-with-a-single-alarm
   //
 
+  /**
+   * (Re-)Schedules a cleanup after ROOM_CLEANUP_TIMEOUT seconds.
+   */
   async scheduleCleanup(): Promise<void> {
     return this.scheduleEvent("cleanup", ROOM_CLEANUP_TIMEOUT * 1000);
   }
 
   /**
-   * Schedules a one-time or recurring event.
+   * (Re-)Schedules a host transfer to another player after ROOM_HOST_TRANSFER_TIMEOUT seconds.
+   */
+  public async scheduleHostTransfer() {
+    return this.scheduleEvent("host_transfer", ROOM_HOST_TRANSFER_TIMEOUT * 1000);
+  }
+
+  /**
+   * (Re-)Schedules a one-time or recurring event.
    * @param id - The unique identifier for the event.
    * @param runAfter - The time (in milliseconds) after which the event should execute.
    * @param repeatMs - The repetition interval in milliseconds, or null if one-time.
@@ -459,6 +488,8 @@ export default class SongGuessServer extends Server<Env> {
       case "host_transfer":
         if (this.validRoom) {
           await this.validRoom.onDelayedHostTransfer();
+        } else {
+          this.logger.info("Skipped delayed host transfer because validRoom is not set.");
         }
         break;
     }

@@ -539,4 +539,25 @@ export default abstract class Game implements IEventListener {
    * Serializes this game to a {@link PersistedGame} object.
    */
   abstract toStorage(): PersistedGame;
+
+  /**
+   * Updates the derived classes with data from storage.
+   * @param persistedGame the serialized {@link PersistedGame} to update the derived game with
+   */
+  abstract derivativeUpdateFromStorage(persistedGame: PersistedGame): void;
+
+  /**
+   * Updates the game with data from storage.
+   * @param persistedGame the serialized {@link PersistedGame} to update the game with
+   */
+  updateFromStorage(persistedGame: PersistedGame) {
+    this.isRunning = persistedGame.isRunning;
+    this.questionTick = persistedGame.questionTick;
+    this.questionStartTime = persistedGame.questionStartTime;
+    this.gamePhase = persistedGame.gamePhase;
+    this.currentQuestionIndex = persistedGame.currentQuestionIndex;
+    this.roundCurrent = persistedGame.roundCurrent;
+
+    this.derivativeUpdateFromStorage(persistedGame);
+  };
 }
