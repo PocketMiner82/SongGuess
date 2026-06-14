@@ -1,3 +1,10 @@
+# [3.2.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.5...3.2.0-dev.1) (2026-06-14)
+
+
+### Features
+
+* persist all required room state to storage + use alarms instead of setTimeout for host transfer and cleanup + add limit for total song count ([594124f](https://github.com/PocketMiner82/SongGuess/commit/594124f5c18300d9e31c4dc4edb74af1c6639ce6))
+
 ## [3.1.1-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.4...3.1.1-dev.5) (2026-06-12)
 
 
