@@ -297,6 +297,8 @@ export class ValidRoom {
       } else {
         this.transferHost(undefined);
       }
+
+      await this.server.saveState();
     } else {
       await this.server.scheduleHostTransfer();
     }
@@ -421,7 +423,7 @@ export class ValidRoom {
     const persistedPlayers: PersistedPlayer[] = [];
 
     this.players.forEach((player) => {
-      if (!player.isAdmin && (player.isOnline || player.isHost)) {
+      if (!player.isAdmin && (player.isOnline || player.connID === this.hostID)) {
         persistedPlayers.push(player.toStorage());
       }
     });

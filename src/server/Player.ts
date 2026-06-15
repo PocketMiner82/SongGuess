@@ -53,7 +53,7 @@ export default class Player implements PlayerMessage, IEventListener {
    * Whether this player is host.
    */
   get isHost(): boolean {
-    return this.room.hostID === this.connID;
+    return this.room.host === this;
   }
 
   constructor(readonly room: ValidRoom, public conn: Connection<string> | null, readonly uuid: string, readonly connID: string) {
