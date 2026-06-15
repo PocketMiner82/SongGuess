@@ -1,3 +1,10 @@
+# [3.2.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.2.0-dev.1...3.2.0-dev.2) (2026-06-15)
+
+
+### Bug Fixes
+
+* **server:** resolve issues with host transfer not working ([3e0a396](https://github.com/PocketMiner82/SongGuess/commit/3e0a396f8f2dd2fd30cf491b1fb9e364f984cbaa))
+
 # [3.2.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.1.1-dev.5...3.2.0-dev.1) (2026-06-14)
 
 
