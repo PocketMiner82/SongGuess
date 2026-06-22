@@ -1,3 +1,10 @@
+# [3.2.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.2.0-dev.3...3.2.0-dev.4) (2026-06-22)
+
+
+### Bug Fixes
+
+* resolve array-index warnings where possible ([24f86f3](https://github.com/PocketMiner82/SongGuess/commit/24f86f378bbacca271db329a2f1b3b44f5a6628f))
+
 # [3.2.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.2.0-dev.2...3.2.0-dev.3) (2026-06-22)
 
 # [3.2.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.2.0-dev.1...3.2.0-dev.2) (2026-06-15)
