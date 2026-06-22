@@ -11,7 +11,7 @@
     "clean": "rm -rf public/dist",
     "build": "node build-html.js && postcss ./src/client/global.css -o ./public/dist/global.css && esbuild src/client/*.tsx --bundle --splitting --format=esm --platform=browser --outdir=public/dist --define:process.env.NODE_ENV=\\\"production\\\" --minify",
     "build:localdev": "node build-html.js && postcss ./src/client/global.css -o ./public/dist/global.css && esbuild src/client/*.tsx --bundle --splitting --format=esm --platform=browser --outdir=public/dist",
-    "typegen": "wrangler types ./src/server/worker-configuration.d.ts",
+    "typegen": "wrangler types --env-file .env.example ./src/server/worker-configuration.d.ts",
     "check": "tsc && eslint src/ && wrangler deploy --dry-run",
     "docs:generate": "typedoc",
     "docs:serve": "typedoc --watch"
