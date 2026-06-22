@@ -1,4 +1,4 @@
-import type GamePhase from "../shared/game/GamePhase";
+import type { GamePhase } from "../shared/game/GamePhase";
 import type { GameState, PlayerMessage, Playlist, RoomConfigMessage, Song } from "./MessageTypes";
 
 

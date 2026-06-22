@@ -1,4 +1,4 @@
-import type ICookieProps from "../types/ICookieProps";
+import type { ICookieProps } from "../types/ICookieProps";
 import type { LogEntry, LoggerStorage } from "../types/LoggerStorageTypes";
 import type { ServerMessage, TransferHostMessage } from "../types/MessageTypes";
 import usePartySocket from "partysocket/react";

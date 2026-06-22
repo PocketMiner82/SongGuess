@@ -15,7 +15,7 @@ import { SoundCloudAPI } from "./SoundCloudAPI";
 /**
  * Handles API requests to the /api/{endpoint} endpoints.
  */
-export default class SongGuessAPI extends Server<Env> {
+export class SongGuessAPI extends Server<Env> {
   /**
    * Client used for communication with Apple Music API.
    */

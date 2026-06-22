@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import GamePhase from "../../../../shared/game/GamePhase";
+import { GamePhase } from "../../../../shared/game/GamePhase";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
 import { ResultsPlayerList } from "../results/ResultsPlayerList";

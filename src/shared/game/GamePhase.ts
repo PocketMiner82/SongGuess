@@ -1,4 +1,4 @@
-enum GamePhase {
+export enum GamePhase {
   /**
    * Picking phase, where the question(s) for this round get picked.
    */
@@ -24,5 +24,3 @@ enum GamePhase {
    */
   PAUSE_MUSIC,
 }
-
-export default GamePhase;

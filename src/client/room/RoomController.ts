@@ -26,7 +26,7 @@ import z from "zod";
 import { version } from "../../../package.json";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { BaseConfig } from "../../shared/BaseConfig";
-import GamePhase from "../../shared/game/GamePhase";
+import { GamePhase } from "../../shared/game/GamePhase";
 import { FatalErrorDialog } from "../components/modal/FatalErrorDialog";
 import { Modal } from "../modal/Modal";
 import { QuestionData } from "./QuestionData";

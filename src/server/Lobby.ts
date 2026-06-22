@@ -8,14 +8,14 @@ import type {
 } from "../types/MessageTypes";
 import type { PersistedLobby } from "../types/PersistedStateTypes";
 import type { IEventListener } from "./listener/IEventListener";
-import type Player from "./Player";
+import type { Player } from "./Player";
 import type { ValidRoom } from "./ValidRoom";
 import { ROOM_MAX_SONG_COUNT } from "../shared/ConfigConstants";
 import { normalizeSongName } from "../shared/Utils";
 import { MultipleChoiceGame } from "./game/multipleChoice/MultipleChoiceGame";
 
 
-export default class Lobby implements IEventListener {
+export class Lobby implements IEventListener {
   /**
    * Currently selected playlist(s)
    */

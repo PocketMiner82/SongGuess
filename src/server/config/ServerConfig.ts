@@ -1,6 +1,6 @@
 import type { ClientMessage, RoomConfigMessage } from "../../types/MessageTypes";
 import type { IEventListener } from "../listener/IEventListener";
-import type Player from "../Player";
+import type { Player } from "../Player";
 import type { ValidRoom } from "../ValidRoom";
 import _ from "lodash";
 import { BaseConfig } from "../../shared/BaseConfig";
@@ -8,7 +8,7 @@ import { MultipleChoiceGame } from "../game/multipleChoice/MultipleChoiceGame";
 import { PlayerPicksGame } from "../game/playerPicks/PlayerPicksGame";
 
 
-export default class ServerConfig extends BaseConfig implements IEventListener {
+export class ServerConfig extends BaseConfig implements IEventListener {
   constructor(private readonly room: ValidRoom) {
     super();
     room.listener.registerEvents(this);

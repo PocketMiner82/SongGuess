@@ -3,11 +3,11 @@ import type {
   Song,
 } from "../../../types/MessageTypes";
 import type { PersistedPlayerPicksQuestion } from "../../../types/PersistedStateTypes";
-import GamePhase from "../../../shared/game/GamePhase";
-import Question from "../Question";
+import { GamePhase } from "../../../shared/game/GamePhase";
+import { Question } from "../Question";
 
 
-export default class PlayerPicksQuestion extends Question {
+export class PlayerPicksQuestion extends Question {
   /**
    * The amount of questions shown. Must be set before getQuestionMessage is called.
    */

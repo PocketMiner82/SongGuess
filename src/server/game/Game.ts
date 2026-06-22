@@ -11,9 +11,9 @@ import type {
 } from "../../types/MessageTypes";
 import type { PersistedAbstractGame, PersistedGame } from "../../types/PersistedStateTypes";
 import type { IEventListener } from "../listener/IEventListener";
-import type Player from "../Player";
+import type { Player } from "../Player";
 import type { ValidRoom } from "../ValidRoom";
-import type Question from "./Question";
+import type { Question } from "./Question";
 import {
   QUESTION_MAX_POINTS,
   QUESTION_PADDING_TICKS,
@@ -21,12 +21,12 @@ import {
   QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK,
   QUESTION_ROUND_START_TICK,
 } from "../../shared/ConfigConstants";
-import GamePhase from "../../shared/game/GamePhase";
+import { GamePhase } from "../../shared/game/GamePhase";
 import { MultipleChoiceGame } from "./multipleChoice/MultipleChoiceGame";
 import { InitError } from "./Question";
 
 
-export default abstract class Game implements IEventListener {
+export abstract class Game implements IEventListener {
   /**
    * Whether the game currently is running
    */

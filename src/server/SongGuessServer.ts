@@ -7,11 +7,11 @@ import { clearInterval } from "node:timers";
 import { Server } from "partyserver";
 import { ROOM_CLEANUP_TIMEOUT, ROOM_HOST_TRANSFER_TIMEOUT } from "../shared/ConfigConstants";
 import { PERSISTED_STATE_VERSION } from "../types/PersistedStateTypes";
-import Logger from "./logger/Logger";
+import { Logger } from "./logger/Logger";
 import { ValidRoom } from "./ValidRoom";
 
 
-export default class SongGuessServer extends Server<Env> {
+export class SongGuessServer extends Server<Env> {
   static options = { hibernate: false };
 
   /**

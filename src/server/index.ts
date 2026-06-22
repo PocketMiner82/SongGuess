@@ -1,9 +1,9 @@
 import { routePartykitRequest } from "partyserver";
 
 
-export { default as SongGuessAPI } from "./api/SongGuessAPI";
+export { SongGuessAPI } from "./api/SongGuessAPI";
 
-export { default as SongGuessServer } from "./SongGuessServer";
+export { SongGuessServer } from "./SongGuessServer";
 
 export default {
   async fetch(req, env) {

@@ -3,7 +3,7 @@ import type { SongGuessServer } from "../index";
 import * as util from "node:util";
 
 
-export default class Logger {
+export class Logger {
   /**
    * Log messages are prefixed with this string.
    */

@@ -6,17 +6,17 @@ import type {
   SourceMessage,
 } from "../types/MessageTypes";
 import type { PersistedPlayer, PersistedRoomState, PersistedServerState } from "../types/PersistedStateTypes";
-import type Game from "./game/Game";
+import type { Game } from "./game/Game";
 import type { SongGuessServer } from "./index";
 import { v4 } from "uuid";
 import z from "zod";
 import { ClientMessageSchema, OtherMessageSchema } from "../schemas/MessageSchemas";
 import { COLORS, ROOM_HOST_TRANSFER_TIMEOUT } from "../shared/ConfigConstants";
-import ServerConfig from "./config/ServerConfig";
+import { ServerConfig } from "./config/ServerConfig";
 import { MultipleChoiceGame } from "./game/multipleChoice/MultipleChoiceGame";
-import Listener from "./listener/Listener";
-import Lobby from "./Lobby";
-import Player from "./Player";
+import { Listener } from "./listener/Listener";
+import { Lobby } from "./Lobby";
+import { Player } from "./Player";
 
 /**
  * A validated SongGuess room.

@@ -1,11 +1,11 @@
 import type { MultipleChoiceQuestionMessage, Song } from "../../../types/MessageTypes";
 import type { PersistedMultipleChoiceQuestion } from "../../../types/PersistedStateTypes";
 import _ from "lodash";
-import GamePhase from "../../../shared/game/GamePhase";
-import Question, { InitError } from "../Question";
+import { GamePhase } from "../../../shared/game/GamePhase";
+import { InitError, Question } from "../Question";
 
 
-export default class MultipleChoiceQuestion extends Question {
+export class MultipleChoiceQuestion extends Question {
   /**
    * The list of songs for this question (1 correct answer + 3 distractors).
    */

@@ -1,4 +1,4 @@
-import type ICookieProps from "../types/ICookieProps";
+import type { ICookieProps } from "../types/ICookieProps";
 import type { ServerMessage } from "../types/MessageTypes";
 import { useCallback, useEffect, useState } from "react";
 import { CookiesProvider, useCookies } from "react-cookie";

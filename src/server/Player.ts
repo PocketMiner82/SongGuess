@@ -17,10 +17,10 @@ import { version } from "../../package.json";
 import { PlayerMessageSchema } from "../schemas/ServerMessageSchemas";
 import { usernameRegex } from "../schemas/ValidationRegexes";
 import { ROOM_INACTIVITY_KICK_TIMEOUT } from "../shared/ConfigConstants";
-import GamePhase from "../shared/game/GamePhase";
+import { GamePhase } from "../shared/game/GamePhase";
 
 
-export default class Player implements PlayerMessage, IEventListener {
+export class Player implements PlayerMessage, IEventListener {
   username: string = "";
 
   color: string = "";

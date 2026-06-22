@@ -3,12 +3,12 @@ import type {
   Song,
 } from "../../../types/MessageTypes";
 import type { PersistedGame } from "../../../types/PersistedStateTypes";
-import type Player from "../../Player";
-import type Question from "../Question";
+import type { Player } from "../../Player";
+import type { Question } from "../Question";
 import _ from "lodash";
 import { QUESTION_MAX_POINTS } from "../../../shared/ConfigConstants";
-import Game from "../Game";
-import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
+import { Game } from "../Game";
+import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
 
 
 export class MultipleChoiceGame extends Game {

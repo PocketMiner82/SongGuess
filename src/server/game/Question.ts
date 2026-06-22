@@ -1,4 +1,4 @@
-import type GamePhase from "../../shared/game/GamePhase";
+import type { GamePhase } from "../../shared/game/GamePhase";
 import type {
   QuestionMessage,
   Song,
@@ -7,7 +7,7 @@ import type { PersistedAbstractQuestion, PersistedQuestion } from "../../types/P
 import _ from "lodash";
 
 
-export default abstract class Question {
+export abstract class Question {
   /**
    * The random/user-defined audio start position index (0-2) for this question.
    * @see RoomConfigMessageSchema.audioStartPosition

@@ -1,10 +1,10 @@
 import type { ClientMessage } from "../../types/MessageTypes";
-import type Player from "../Player";
+import type { Player } from "../Player";
 import type { ValidRoom } from "../ValidRoom";
 import type { IEventListener } from "./IEventListener";
 
 
-export default class Listener {
+export class Listener {
   /**
    * Contains all listeners that want to receive client messages.
    * @see registerEvents

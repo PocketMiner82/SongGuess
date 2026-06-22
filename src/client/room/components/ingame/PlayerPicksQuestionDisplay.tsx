@@ -2,7 +2,7 @@ import type { Playlist } from "../../../../types/MessageTypes";
 import type { ListenerCallback } from "../../hooks/RoomControllerListenerHooks";
 import random from "lodash/random";
 import { useCallback, useEffect, useState } from "react";
-import GamePhase from "../../../../shared/game/GamePhase";
+import { GamePhase } from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
 import { SearchMusicComponent } from "../../../components/SearchMusicComponent";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";

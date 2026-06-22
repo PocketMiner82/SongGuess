@@ -6,15 +6,15 @@ import type {
   ServerMessage,
 } from "../../../types/MessageTypes";
 import type { PersistedGame } from "../../../types/PersistedStateTypes";
-import type Player from "../../Player";
-import type Question from "../Question";
+import type { Player } from "../../Player";
+import type { Question } from "../Question";
 import { ratio, token_set_ratio } from "fuzzball";
 import { QUESTION_ANSWER_MIN_SIMILARITY, QUESTION_MAX_POINTS } from "../../../shared/ConfigConstants";
-import GamePhase from "../../../shared/game/GamePhase";
+import { GamePhase } from "../../../shared/game/GamePhase";
 import { normalizeSongName } from "../../../shared/Utils";
 import { fetchTestSoundCloudSong } from "../../api/HTTPHelpers";
-import Game from "../Game";
-import PlayerPicksQuestion from "./PlayerPicksQuestion";
+import { Game } from "../Game";
+import { PlayerPicksQuestion } from "./PlayerPicksQuestion";
 
 
 export class PlayerPicksGame extends Game {
