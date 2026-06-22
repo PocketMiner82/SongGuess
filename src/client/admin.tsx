@@ -202,6 +202,7 @@ function LogViewer({ logs, filters, onFilterChange }: {
         className="flex-1 overflow-auto mt-2"
       >
         {filteredLogs.map(({ level, entry }, index) => (
+          // eslint-disable-next-line react/no-array-index-key
           <div key={index} className={`mb-0.5 ${getLogColor(level)}`}>
             <span className="text-gray-500">
               [
@@ -215,6 +216,7 @@ function LogViewer({ logs, filters, onFilterChange }: {
             </span>
             <span className="text-sm text-default whitespace-pre-wrap">
               {React.createElement(React.Fragment, {}, ...entry.msg.split("[...]").flatMap((part, i) =>
+                // eslint-disable-next-line react/no-array-index-key
                 i === 0 ? [part] : [<span key={i} className="text-gray-500">[...]</span>, part],
               ))}
             </span>
