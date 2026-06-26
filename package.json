@@ -17,7 +17,7 @@
     "docs:serve": "typedoc --watch"
   },
   "dependencies": {
-    "@syncfm/applemusic-api": "^0.0.4",
+    "@syncfm/applemusic-api": "^0.0.6",
     "chroma-js": "^3.2.0",
     "cookie": "^1.1.1",
     "fuzzball": "^2.2.6",
