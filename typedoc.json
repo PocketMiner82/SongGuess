@@ -4,8 +4,8 @@
   "entryPointStrategy": "expand",
   "name": "SongGuess",
   "exclude": ["node_modules", "public/dist", "**/*.js"],
-  "excludePrivate": true,
-  "excludeInternal": true,
+  "excludePrivate": false,
+  "excludeInternal": false,
   "readme": "README.md",
   "tsconfig": "tsconfig.json"
 }
