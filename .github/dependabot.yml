@@ -16,7 +16,7 @@ updates:
     commit-message:
       prefix: "build(deps)"
     groups:
-      all-deps:
+      all-actions-deps:
         patterns:
           - "*"
   # Maintain dependencies for NPM
@@ -30,6 +30,6 @@ updates:
     commit-message:
       prefix: "build(deps)"
     groups:
-      all-deps:
+      all-npm-deps:
         patterns:
           - "*"
