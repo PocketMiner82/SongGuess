@@ -1,0 +1,46 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Set doc destination
+        id: vars
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "dest_dir=docs" >> "$GITHUB_OUTPUT"
+          else
+            echo "dest_dir=docs-dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate TypeDoc
+        run: npx typedoc --out "temp-docs/${{ steps.vars.outputs.dest_dir }}"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./temp-docs/${{ steps.vars.outputs.dest_dir }}
+          destination_dir: ${{ steps.vars.outputs.dest_dir }}
+          keep_files: true

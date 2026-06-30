@@ -1,10 +1,11 @@
 import type { MultipleChoiceQuestionMessage, Song } from "../../../types/MessageTypes";
+import type { PersistedMultipleChoiceQuestion } from "../../../types/PersistedStateTypes";
 import _ from "lodash";
-import GamePhase from "../../../shared/game/GamePhase";
-import Question, { InitError } from "../Question";
+import { GamePhase } from "../../../shared/game/GamePhase";
+import { InitError, Question } from "../Question";
 
 
-export default class MultipleChoiceQuestion extends Question {
+export class MultipleChoiceQuestion extends Question {
   /**
    * The list of songs for this question (1 correct answer + 3 distractors).
    */
@@ -17,10 +18,12 @@ export default class MultipleChoiceQuestion extends Question {
    * @param possibleDistractions all possible songs that could be used for distractions
    * @param distractionsPreferSameArtist whether to prefer searching for distractions by the same artist as the searched song
    */
-  constructor(song: Song, possibleDistractions: Song[], readonly distractionsPreferSameArtist: boolean) {
+  constructor(song: Song, possibleDistractions: Song[] | null, readonly distractionsPreferSameArtist: boolean | null) {
     super(song);
-    this.answers.push(song);
-    this.generateDistractions(possibleDistractions);
+    if (possibleDistractions) {
+      this.answers.push(song);
+      this.generateDistractions(possibleDistractions);
+    }
   }
 
   /**
@@ -92,5 +95,20 @@ export default class MultipleChoiceQuestion extends Question {
       correctAnswerIndex: gamePhase === GamePhase.ANSWER ? this.getCorrectAnswer() : undefined,
       startPos: this.startPos,
     };
+  }
+
+  toStorage(): PersistedMultipleChoiceQuestion {
+    return {
+      answers: this.answers,
+      ...this.baseToStorage(),
+    };
+  }
+
+  public static fromStorage(persistedQuestion: PersistedMultipleChoiceQuestion): MultipleChoiceQuestion {
+    const q = new MultipleChoiceQuestion(persistedQuestion.song, null, null);
+    q.answers = persistedQuestion.answers;
+    q.startPos = persistedQuestion.startPos;
+
+    return q;
   }
 }

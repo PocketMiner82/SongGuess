@@ -1,6 +1,6 @@
 import type { PlayerMessage } from "../../../../types/MessageTypes";
 import { memo, useCallback } from "react";
-import GamePhase from "../../../../shared/game/GamePhase";
+import { GamePhase } from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
@@ -130,9 +130,10 @@ export function MultipleChoiceQuestionDisplay() {
             state = "disabled";
           }
 
+          // we can use the option as key here, because the server ensures song names are unique in each question
           return (
             <AnswerOption
-              key={index}
+              key={option}
               option={option}
               index={index}
               state={state}

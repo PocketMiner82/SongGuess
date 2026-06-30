@@ -1,0 +1,11 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "name": "SongGuess",
+  "exclude": ["node_modules", "public/dist", "**/*.js"],
+  "excludePrivate": false,
+  "excludeInternal": false,
+  "readme": "README.md",
+  "tsconfig": "tsconfig.json"
+}

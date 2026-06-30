@@ -2,11 +2,12 @@ import type {
   PlayerPicksQuestionMessage,
   Song,
 } from "../../../types/MessageTypes";
-import GamePhase from "../../../shared/game/GamePhase";
-import Question from "../Question";
+import type { PersistedPlayerPicksQuestion } from "../../../types/PersistedStateTypes";
+import { GamePhase } from "../../../shared/game/GamePhase";
+import { Question } from "../Question";
 
 
-export default class PlayerPicksQuestion extends Question {
+export class PlayerPicksQuestion extends Question {
   /**
    * The amount of questions shown. Must be set before getQuestionMessage is called.
    */
@@ -29,5 +30,19 @@ export default class PlayerPicksQuestion extends Question {
       pickerId: this.pickerId,
       startPos: this.startPos,
     };
+  }
+
+  toStorage(): PersistedPlayerPicksQuestion {
+    return {
+      pickerId: this.pickerId,
+      questionCurrent: this.questionCurrent,
+      ...this.baseToStorage(),
+    };
+  }
+
+  public static fromStorage(persistedQuestion: PersistedPlayerPicksQuestion): PlayerPicksQuestion {
+    const q = new PlayerPicksQuestion(persistedQuestion.questionCurrent, persistedQuestion.pickerId, persistedQuestion.song);
+    q.startPos = persistedQuestion.startPos;
+    return q;
   }
 }

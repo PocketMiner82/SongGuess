@@ -1,5 +1,5 @@
 import z from "zod";
-import GamePhase from "../shared/game/GamePhase";
+import { GamePhase } from "../shared/game/GamePhase";
 import { PlaylistSchema, SongSchema, UsernameSchema } from "./SharedSchemas";
 
 

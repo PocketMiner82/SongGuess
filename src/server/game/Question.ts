@@ -1,12 +1,13 @@
-import type GamePhase from "../../shared/game/GamePhase";
+import type { GamePhase } from "../../shared/game/GamePhase";
 import type {
   QuestionMessage,
   Song,
 } from "../../types/MessageTypes";
+import type { PersistedAbstractQuestion, PersistedQuestion } from "../../types/PersistedStateTypes";
 import _ from "lodash";
 
 
-export default abstract class Question {
+export abstract class Question {
   /**
    * The random/user-defined audio start position index (0-2) for this question.
    * @see RoomConfigMessageSchema.audioStartPosition
@@ -26,6 +27,22 @@ export default abstract class Question {
    * @param gamePhase the current game phase
    */
   abstract getQuestionMessage(gamePhase: GamePhase): QuestionMessage;
+
+  /**
+   * Serializes only this base class to a {@link PersistedAbstractGame} object.
+   * @protected
+   */
+  protected baseToStorage(): PersistedAbstractQuestion {
+    return {
+      startPos: this.startPos,
+      song: this.song,
+    };
+  }
+
+  /**
+   * Serializes this game to a {@link PersistedGame} object.
+   */
+  abstract toStorage(): PersistedQuestion;
 }
 
 /**

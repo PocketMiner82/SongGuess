@@ -1,7 +1,7 @@
 /**
  * Interface representing all cookie properties used by the application.
  */
-export default interface ICookieProps {
+export interface ICookieProps {
   /** Audio volume level (0-1) */
   audioVolume?: number;
   /** Whether audio is muted */

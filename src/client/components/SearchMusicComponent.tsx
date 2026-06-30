@@ -1,4 +1,4 @@
-import type ICookieProps from "../../types/ICookieProps";
+import type { ICookieProps } from "../../types/ICookieProps";
 import type { Playlist } from "../../types/MessageTypes";
 import type { AudioPlayer } from "../room/hooks/AudioPlayerHook";
 import { useCallback, useRef, useState } from "react";

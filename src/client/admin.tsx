@@ -1,4 +1,4 @@
-import type ICookieProps from "../types/ICookieProps";
+import type { ICookieProps } from "../types/ICookieProps";
 import type { LogEntry, LoggerStorage } from "../types/LoggerStorageTypes";
 import type { ServerMessage, TransferHostMessage } from "../types/MessageTypes";
 import usePartySocket from "partysocket/react";
@@ -202,6 +202,7 @@ function LogViewer({ logs, filters, onFilterChange }: {
         className="flex-1 overflow-auto mt-2"
       >
         {filteredLogs.map(({ level, entry }, index) => (
+          // eslint-disable-next-line react/no-array-index-key
           <div key={index} className={`mb-0.5 ${getLogColor(level)}`}>
             <span className="text-gray-500">
               [
@@ -215,6 +216,7 @@ function LogViewer({ logs, filters, onFilterChange }: {
             </span>
             <span className="text-sm text-default whitespace-pre-wrap">
               {React.createElement(React.Fragment, {}, ...entry.msg.split("[...]").flatMap((part, i) =>
+                // eslint-disable-next-line react/no-array-index-key
                 i === 0 ? [part] : [<span key={i} className="text-gray-500">[...]</span>, part],
               ))}
             </span>
@@ -243,6 +245,7 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
     room: roomID,
     party: "song-guess-server",
     maxRetries: 50,
+    connectionTimeout: 10000,
     id,
     onOpen: () => {
       setConnectionStatus(null);

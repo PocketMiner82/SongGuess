@@ -1,4 +1,4 @@
-import type SongGuessAPI from "./SongGuessAPI";
+import type { SongGuessAPI } from "./SongGuessAPI";
 
 
 export class SoundCloudAPI {

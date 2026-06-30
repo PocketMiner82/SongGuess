@@ -5,17 +5,18 @@ import type {
   PlayerMessage,
   SourceMessage,
 } from "../types/MessageTypes";
-import type Game from "./game/Game";
+import type { PersistedPlayer, PersistedRoomState, PersistedServerState } from "../types/PersistedStateTypes";
+import type { Game } from "./game/Game";
 import type { SongGuessServer } from "./index";
 import { v4 } from "uuid";
 import z from "zod";
 import { ClientMessageSchema, OtherMessageSchema } from "../schemas/MessageSchemas";
 import { COLORS, ROOM_HOST_TRANSFER_TIMEOUT } from "../shared/ConfigConstants";
-import ServerConfig from "./config/ServerConfig";
+import { ServerConfig } from "./config/ServerConfig";
 import { MultipleChoiceGame } from "./game/multipleChoice/MultipleChoiceGame";
-import Listener from "./listener/Listener";
-import Lobby from "./Lobby";
-import Player from "./Player";
+import { Listener } from "./listener/Listener";
+import { Lobby } from "./Lobby";
+import { Player } from "./Player";
 
 /**
  * A validated SongGuess room.
@@ -45,21 +46,15 @@ export class ValidRoom {
    * The player object that has host permissions in this room.
    *
    * Can be:
-   *  - undefined: No host is set. If hostID is set, host left. If he doesn't reconnect within 3 seconds, another player will get host.
+   *  - undefined: Host is not online/set. If hostID is set, host left. If the host doesn't reconnect within {@link ROOM_HOST_TRANSFER_TIMEOUT} seconds, another player will get host.
    *  - the actual {@link Player} object if the host is online.
    */
   host?: Player;
 
   /**
-   * The id of the current host.
+   * The id of the current host or undefined if the room has no host.
    */
-  hostID: string | undefined = undefined;
-
-  /**
-   * Timeout for host transfer when the current host disconnects.
-   * If the host doesn't reconnect within this timeout, another player becomes host.
-   */
-  hostTransferTimeout: NodeJS.Timeout | null = null;
+  hostID?: string;
 
   /**
    * Map containing all players, online and offline. Key is connection id.
@@ -102,7 +97,7 @@ export class ValidRoom {
     this.lobby = new Lobby(this);
   }
 
-  onConnect(conn: Connection<string>, ctx: ConnectionContext) {
+  async onConnect(conn: Connection<string>, ctx: ConnectionContext) {
     const player = this.getOrCreatePlayer(conn);
 
     if (!player.onConnect(ctx))
@@ -112,13 +107,9 @@ export class ValidRoom {
       this.transferHost(player, false);
     } else if (!this.host && this.hostID === conn.id && !player.isSpectator) {
       this.server.logger.info("Host reconnected.");
+
       // host joined again within timeout
       this.transferHost(player, false);
-
-      if (this.hostTransferTimeout) {
-        clearTimeout(this.hostTransferTimeout);
-        this.hostTransferTimeout = null;
-      }
     }
 
     // send the first update to the connection (and inform all other connections about the new player)
@@ -160,22 +151,24 @@ export class ValidRoom {
 
     // handle host transfer request
     if (msg.type === "transfer_host") {
-      if (!this.performChecks(player, msg, "host")) {
-        return;
+      if (this.performChecks(player, msg, "host")) {
+        const newHost = this.getActivePlayerByName(msg.playerName);
+        if (newHost) {
+          player.sendConfirmationOrError(msg);
+          this.transferHost(newHost);
+        } else {
+          player.sendConfirmationOrError(msg, `Player '${msg.playerName}' not found.`);
+        }
       }
-
-      const newHost = this.getActivePlayerByName(msg.playerName);
-      if (!newHost) {
-        player.sendConfirmationOrError(msg, `Player '${msg.playerName}' not found.`);
-        return;
-      }
-
-      player.sendConfirmationOrError(msg);
-      this.transferHost(newHost);
-      return;
+    } else {
+      this.listener.handleMessage(player, msg);
     }
 
-    this.listener.handleMessage(player, msg);
+    if (player.isHost) {
+      // on each host message, re-schedule delayed transfer
+      // => if host leaves, another player will get host after ROOM_HOST_TRANSFER_TIMEOUT seconds
+      this.server.scheduleHostTransfer().catch(this.server.logger.error);
+    }
   }
 
   /**
@@ -183,24 +176,14 @@ export class ValidRoom {
    */
   onTick() {
     this.listener.handleTick();
-
-    if (this.activePlayers.length > 0) {
-      for (const player of this.activePlayers) {
-        if (!this.host || player.conn.id === this.hostID)
-          return;
-      }
-
-      // host left
-      this.delayedHostTransfer();
-    }
   }
 
-  onClose(conn: Connection<string>) {
+  async onClose(conn: Connection<string>) {
     this.getOrCreatePlayer(conn).onClose();
 
     // host left
     if (this.hostID === conn.id) {
-      this.delayedHostTransfer();
+      this.host = undefined;
     }
 
     // inform all clients about changes, including possible host transfer
@@ -215,7 +198,7 @@ export class ValidRoom {
     let player = this.players.get(conn.id);
     if (!player) {
       const uuid = v4();
-      player = new Player(this, conn, uuid);
+      player = new Player(this, conn, uuid, conn.id);
       this.players.set(conn.id, player);
     } else {
       player.conn = conn;
@@ -249,7 +232,7 @@ export class ValidRoom {
     for (const element of checks) {
       switch (element) {
         case "host":
-          if (!player || (this.host !== player && !this.server.hasTag(player.conn, "admin"))) {
+          if (!player || (this.host !== player && player.conn && !this.server.hasTag(player.conn, "admin"))) {
             possibleErrorFunc("Action can only be used by host.");
             successful = false;
           }
@@ -301,29 +284,24 @@ export class ValidRoom {
   }
 
   /**
-   * Transfers host to another client after ROOM_HOST_TRANSFER_TIMEOUT seconds if the client does not join again.
+   * Callback to transfer host to another client after ROOM_HOST_TRANSFER_TIMEOUT seconds if the client does not join again.
+   * @see SongGuessServer#processEvent
+   * @returns true if host was transfered, false if not.
    */
-  public delayedHostTransfer() {
-    this.host = undefined;
-
-    this.hostTransferTimeout = setTimeout(() => {
-      try {
-        if (this.host === undefined) {
-          const next = this.activePlayers[Symbol.iterator]().next();
-          if (!next.done) {
-            this.server.logger.info(`Host left, transferring host to ${next.value.conn.state}`);
-            this.transferHost(next.value);
-          } else {
-            this.transferHost(undefined);
-          }
-        }
-
-        this.hostTransferTimeout = null;
-      } catch (e) {
-        this.server.logger.error("Error running host transfer timeout:");
-        this.server.logger.error(e);
+  public async onDelayedHostTransfer(): Promise<void> {
+    if (this.host === undefined) {
+      const next = this.activePlayers[Symbol.iterator]().next();
+      if (!next.done) {
+        this.server.logger.info(`Host left, transferring host to ${next.value.conn?.state}`);
+        this.transferHost(next.value);
+      } else {
+        this.transferHost(undefined);
       }
-    }, ROOM_HOST_TRANSFER_TIMEOUT * 1000);
+
+      await this.server.saveState();
+    } else {
+      await this.server.scheduleHostTransfer();
+    }
   }
 
   /**
@@ -333,7 +311,7 @@ export class ValidRoom {
    */
   public transferHost(newHost: Player | undefined, sendUpdate: boolean = true) {
     this.host = newHost;
-    this.hostID = newHost?.conn.id;
+    this.hostID = newHost?.connID;
 
     this.server.logger.info(`Host transferred to ${this.hostID}`);
 
@@ -411,7 +389,7 @@ export class ValidRoom {
 
     this.countdown = from;
     decrementCountdown();
-    this.countdownInterval = setInterval(decrementCountdown, 1000);
+    this.countdownInterval = setInterval(decrementCountdown.bind(this), 1000);
   }
 
   /**
@@ -436,5 +414,52 @@ export class ValidRoom {
       type: "countdown",
       countdown: this.countdown,
     };
+  }
+
+  /**
+   * Serializes this room instance to a {@link PersistedRoomState} object.
+   */
+  public toStorage(): PersistedRoomState {
+    const persistedPlayers: PersistedPlayer[] = [];
+
+    this.players.forEach((player) => {
+      if (!player.isAdmin && (player.isOnline || player.connID === this.hostID)) {
+        persistedPlayers.push(player.toStorage());
+      }
+    });
+
+    return {
+      config: this.config.toConfigMessage(),
+      game: this.game.toStorage(),
+      hostID: this.hostID,
+      lobby: this.lobby.toStorage(),
+      players: persistedPlayers,
+      state: this.state,
+    };
+  }
+
+  /**
+   * Creates a new {@link ValidRoom} object.
+   * @param server a reference to the {@link SongGuessServer} this room belongs to
+   * @param state the serialized {@link PersistedServerState} or {@link PersistedRoomState} to create this room from
+   */
+  public static fromStorage(server: SongGuessServer, state: PersistedServerState | PersistedRoomState): ValidRoom {
+    const validRoom = new ValidRoom(server);
+
+    validRoom.hostID = state.hostID;
+    validRoom.state = state.state;
+
+    for (const persistedPlayer of state.players) {
+      const player = Player.fromStorage(validRoom, persistedPlayer);
+      validRoom.players.set(persistedPlayer.connId, player);
+    }
+
+    // this will also set the correct game mode
+    validRoom.config.applyMessage(state.config);
+
+    validRoom.lobby.updateFromStorage(state.lobby);
+    validRoom.game.updateFromStorage(state.game);
+
+    return validRoom;
   }
 }

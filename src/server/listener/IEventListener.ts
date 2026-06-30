@@ -1,5 +1,5 @@
 import type { ClientMessage } from "../../types/MessageTypes";
-import type Player from "../Player";
+import type { Player } from "../Player";
 
 
 export interface IEventListener {

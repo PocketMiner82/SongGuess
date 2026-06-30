@@ -1,12 +1,20 @@
-import type { ClientMessage, ConfirmationMessage, SelectAnswerMessage, ServerMessage } from "../../../types/MessageTypes";
-import type Player from "../../Player";
-import type Question from "../Question";
+import type {
+  ClientMessage,
+  ConfirmationMessage,
+  PlayerPicksSongMessage,
+  SelectAnswerMessage,
+  ServerMessage,
+} from "../../../types/MessageTypes";
+import type { PersistedGame } from "../../../types/PersistedStateTypes";
+import type { Player } from "../../Player";
+import type { Question } from "../Question";
 import { ratio, token_set_ratio } from "fuzzball";
 import { QUESTION_ANSWER_MIN_SIMILARITY, QUESTION_MAX_POINTS } from "../../../shared/ConfigConstants";
-import GamePhase from "../../../shared/game/GamePhase";
+import { GamePhase } from "../../../shared/game/GamePhase";
 import { normalizeSongName } from "../../../shared/Utils";
-import Game from "../Game";
-import PlayerPicksQuestion from "./PlayerPicksQuestion";
+import { fetchTestSoundCloudSong } from "../../api/HTTPHelpers";
+import { Game } from "../Game";
+import { PlayerPicksQuestion } from "./PlayerPicksQuestion";
 
 
 export class PlayerPicksGame extends Game {
@@ -26,9 +34,7 @@ export class PlayerPicksGame extends Game {
    * List of all players still needing to pick a song.
    */
   get remainingPickers(): Player[] {
-    return this.room.activePlayers.filter(player =>
-      Array.from(this.nextQuestions.values()).every(q =>
-        q.pickerId !== player.uuid));
+    return this.room.activePlayers.filter(player => !this.nextQuestions.has(player.uuid));
   }
 
   getGameMessages(sendPrevious?: boolean, player?: Player): ServerMessage[] {
@@ -66,36 +72,46 @@ export class PlayerPicksGame extends Game {
   }
 
   onMessage(player: Player, msg: ClientMessage): boolean {
-    const ret = super.onMessage(player, msg);
-
     if (msg.type === "player_pick_song") {
-      if (this.gamePhase !== GamePhase.PICKING) {
-        player.sendConfirmationOrError(msg, "Can only pick songs during picking phase.");
-        return true;
-      } else if (this.nextQuestions.has(player.uuid)) {
-        player.sendConfirmationOrError(msg, "You cannot change your picked song.");
-        return true;
-      }
-
-      const newQuestion = new PlayerPicksQuestion(
-        this.nextQuestions.size + 1,
-        player.uuid,
-        msg.song,
-      );
-      newQuestion.startPos = msg.startPos;
-
-      this.nextQuestions.set(player.uuid, newQuestion);
-
-      // if every player has picked a song, continue to picked phase
-      if (this.remainingPickers.length === 0) {
-        this.questionTick = this.room.config.getQuestionPickedSongTick();
-      }
-
-      player.sendConfirmationOrError(msg);
+      this.playerPicksSong(player, msg).then();
       return true;
     }
 
-    return ret;
+    return super.onMessage(player, msg);
+  }
+
+  /**
+   * Handles a player picking a song during the PICKING phase.
+   * @param player - The player submitting the pick.
+   * @param msg - The message containing the chosen song and start position.
+   */
+  private async playerPicksSong(player: Player, msg: PlayerPicksSongMessage): Promise<void> {
+    if (this.gamePhase !== GamePhase.PICKING) {
+      player.sendConfirmationOrError(msg, "Can only pick songs during picking phase.");
+      return;
+    } else if (this.nextQuestions.has(player.uuid)) {
+      player.sendConfirmationOrError(msg, "You cannot change your picked song.");
+      return;
+    } else if (!(await fetchTestSoundCloudSong(msg.song.audioURL))) {
+      player.sendConfirmationOrError(msg, "Failed to fetch song audio. Please select a different song.");
+      return;
+    }
+
+    const newQuestion = new PlayerPicksQuestion(
+      this.nextQuestions.size + 1,
+      player.uuid,
+      msg.song,
+    );
+    newQuestion.startPos = msg.startPos;
+
+    this.nextQuestions.set(player.uuid, newQuestion);
+
+    // if every player has picked a song, continue to picked phase
+    if (this.remainingPickers.length === 0) {
+      this.questionTick = this.room.config.getQuestionPickedSongTick();
+    }
+
+    player.sendConfirmationOrError(msg);
   }
 
   onGamePhaseChanged(previous: GamePhase) {
@@ -220,6 +236,28 @@ export class PlayerPicksGame extends Game {
         player.answerData!.questionPoints = Math.round(player.answerData!.questionPoints);
         player.points += player.answerData!.questionPoints;
       }
+    }
+  }
+
+  toStorage(): PersistedGame {
+    return {
+      type: "player_picks",
+      questions: this.questions.map(q => q.toStorage()),
+      nextQuestions: Array.from(this.nextQuestions.values()).map(q => q.toStorage()),
+      ...this.baseToStorage(),
+    };
+  }
+
+  derivativeUpdateFromStorage(persistedGame: PersistedGame) {
+    if (persistedGame.type === "player_picks") {
+      this.questions = persistedGame.questions.map(q => PlayerPicksQuestion.fromStorage(q));
+
+      const nextQ = persistedGame.nextQuestions.map(q => PlayerPicksQuestion.fromStorage(q));
+      for (const q of nextQ) {
+        this.nextQuestions.set(q.pickerId, q);
+      }
+    } else {
+      this.room.server.logger.error(`Type mismatch while trying to load PersistedGame. Expected type=player_picks but got type=${persistedGame.type}`);
     }
   }
 }

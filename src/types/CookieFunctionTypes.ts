@@ -1,5 +1,5 @@
 import type { Cookie, CookieSetOptions } from "universal-cookie";
-import type ICookieProps from "./ICookieProps";
+import type { ICookieProps } from "./ICookieProps";
 
 /**
  * Function type for setting a cookie value.

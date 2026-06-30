@@ -9,10 +9,11 @@ import type {
   Song,
   UpdatePlayedSongsMessage,
 } from "../../types/MessageTypes";
+import type { PersistedAbstractGame, PersistedGame } from "../../types/PersistedStateTypes";
 import type { IEventListener } from "../listener/IEventListener";
-import type Player from "../Player";
+import type { Player } from "../Player";
 import type { ValidRoom } from "../ValidRoom";
-import type Question from "./Question";
+import type { Question } from "./Question";
 import {
   QUESTION_MAX_POINTS,
   QUESTION_PADDING_TICKS,
@@ -20,12 +21,12 @@ import {
   QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK,
   QUESTION_ROUND_START_TICK,
 } from "../../shared/ConfigConstants";
-import GamePhase from "../../shared/game/GamePhase";
+import { GamePhase } from "../../shared/game/GamePhase";
 import { MultipleChoiceGame } from "./multipleChoice/MultipleChoiceGame";
 import { InitError } from "./Question";
 
 
-export default abstract class Game implements IEventListener {
+export abstract class Game implements IEventListener {
   /**
    * Whether the game currently is running
    */
@@ -518,4 +519,45 @@ export default abstract class Game implements IEventListener {
       player.resetAnswerData(true);
     }
   }
+
+  /**
+   * Serializes only this base class to a {@link PersistedAbstractGame} object.
+   * @protected
+   */
+  protected baseToStorage(): PersistedAbstractGame {
+    return {
+      currentQuestionIndex: this.currentQuestionIndex,
+      gamePhase: this.gamePhase,
+      isRunning: this.isRunning,
+      questionStartTime: this.questionStartTime,
+      questionTick: this.questionTick,
+      roundCurrent: this.roundCurrent,
+    };
+  }
+
+  /**
+   * Serializes this game to a {@link PersistedGame} object.
+   */
+  abstract toStorage(): PersistedGame;
+
+  /**
+   * Updates the derived classes with data from storage.
+   * @param persistedGame the serialized {@link PersistedGame} to update the derived game with
+   */
+  abstract derivativeUpdateFromStorage(persistedGame: PersistedGame): void;
+
+  /**
+   * Updates the game with data from storage.
+   * @param persistedGame the serialized {@link PersistedGame} to update the game with
+   */
+  updateFromStorage(persistedGame: PersistedGame) {
+    this.isRunning = persistedGame.isRunning;
+    this.questionTick = persistedGame.questionTick;
+    this.questionStartTime = persistedGame.questionStartTime;
+    this.gamePhase = persistedGame.gamePhase;
+    this.currentQuestionIndex = persistedGame.currentQuestionIndex;
+    this.roundCurrent = persistedGame.roundCurrent;
+
+    this.derivativeUpdateFromStorage(persistedGame);
+  };
 }

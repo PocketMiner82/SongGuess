@@ -3,12 +3,13 @@ import type { SongGuessServer } from "../index";
 import * as util from "node:util";
 
 
-export default class Logger {
+export class Logger {
   /**
    * Log messages are prefixed with this string.
    */
-  readonly LOG_PREFIX: string = `[Room ${this.server.name}]`;
-
+  get LOG_PREFIX(): string {
+    return `[Room ${this.server.name}]`;
+  }
 
   /**
    * Creates a new Logger instance.
@@ -67,8 +68,8 @@ export default class Logger {
   }
 
   /**
-   * Stores the message in storage and logs it to console.
-   * @param message The message to log.
+   * Sends the log message to all connected admins and logs it to console which the worker runtime will store.
+   * @param message The message to log. Debug messages will not be logged to console (and therefore not be stored).
    * @param level The log level (info, warn, error, debug).
    */
   private storeAndLogMessage(message: string, level: AddLogMessage["level"]): void {
@@ -77,7 +78,9 @@ export default class Logger {
     if (level !== "info")
       message = this.truncateMessage(message);
 
-    console[level](`${this.LOG_PREFIX} ${message}`);
+    if (level !== "debug") {
+      console[level](`${this.LOG_PREFIX} ${message}`);
+    }
 
     this.server.safeBroadcast({
       type: "add_log_message",
