@@ -510,6 +510,7 @@ export abstract class Game implements IEventListener {
     this.room.server.logger.info("Resetting game to lobby state...");
 
     this.questionTick = QUESTION_ROUND_START_TICK;
+    this.gamePhase = GamePhase.PAUSE_MUSIC;
     this.currentQuestionIndex = -1;
     this.roundCurrent = 0;
     this.room.state = "lobby";

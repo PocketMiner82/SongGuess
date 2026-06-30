@@ -1,7 +1,7 @@
 import type { ICookieProps } from "../../types/ICookieProps";
 import type { Playlist } from "../../types/MessageTypes";
 import type { AudioPlayer } from "../room/hooks/AudioPlayerHook";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
@@ -65,6 +65,7 @@ export function SearchMusicComponent({
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [searchResults, setSearchResults] = useState<Playlist[]>([]);
   const [addedIndices, setAddedIndices] = useState<Set<number>>(() => new Set());
+  const prevAudioStartPosRef = useRef(audioStartPos);
 
   useRoomControllerMessageTypeListener(controller, "room_config");
 
@@ -86,6 +87,14 @@ export function SearchMusicComponent({
       player.howler?.pause();
     }
   };
+
+  // restart audio when audio position is changed
+  useEffect(() => {
+    if (player.state === "playing" && audioStartPos !== prevAudioStartPosRef.current) {
+      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + QUESTION_PADDING_TICKS);
+      prevAudioStartPosRef.current = audioStartPos;
+    }
+  }, [audioStartPos, controller.config.timePerQuestion, player]);
 
   const getAudioState = useCallback((playlist: Playlist): AudioPlayer["state"] | undefined => {
     if (playlist.songs.length === 1 && playlist.songs[0].audioURL === player.audioURL) {

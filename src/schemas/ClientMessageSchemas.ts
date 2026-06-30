@@ -40,7 +40,7 @@ export const PlayerPickSongMessageSchema = z.object({
    * The selected start pos for the song.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  startPos: z.number().min(0).max(2),
+  startPos: z.number().min(0).max(1),
 });
 
 /**

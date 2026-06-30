@@ -18,7 +18,7 @@ export class QuestionData {
   selectedAnswer?: string;
 
   /**
-   * The random/user-defined audio start position index (0-2) for the question.
+   * The random/user-defined audio start position for the question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
   audioStartPos: number = 0;

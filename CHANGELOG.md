@@ -1,3 +1,10 @@
+# [3.3.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.2.0...3.3.0-dev.1) (2026-06-30)
+
+
+### Features
+
+* allow setting audio start position as percentage ([f81aeef](https://github.com/PocketMiner82/SongGuess/commit/f81aeefd0863f0309f77f54a9b7deac1f4ee58cf))
+
 # [3.2.0](https://github.com/PocketMiner82/SongGuess/compare/3.1.0...3.2.0) (2026-06-30)
 
 

@@ -79,6 +79,7 @@ export class SongGuessServer extends Server<Env> {
     this._name = state.name;
     if (state.version !== PERSISTED_STATE_VERSION) {
       this.logger.warn(`Discarding state with old version ${state.version}`);
+      return;
     }
 
     this.logger.info("Restoring state...");

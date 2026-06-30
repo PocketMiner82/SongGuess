@@ -25,10 +25,10 @@ export const ProgressbarUpdateMessageSchema = z.object({
  */
 const QuestionMessageSchema = z.object({
   /**
-   * The random/user-defined audio start position index (0-2) for the current question.
+   * The random/user-defined audio start position for the current question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  startPos: z.number().min(0).max(2),
+  startPos: z.number().min(0).max(1),
 });
 
 export const MultipleChoiceQuestionMessageSchema = QuestionMessageSchema.extend({

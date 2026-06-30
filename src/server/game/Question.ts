@@ -9,10 +9,10 @@ import _ from "lodash";
 
 export abstract class Question {
   /**
-   * The random/user-defined audio start position index (0-2) for this question.
+   * The random/user-defined audio start position for this question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  startPos: number = _.random(0, 2);
+  startPos: number = _.random(0, 1, true);
 
 
   /**

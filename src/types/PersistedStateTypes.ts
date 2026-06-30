@@ -71,4 +71,4 @@ export interface PersistedServerState extends PersistedRoomState {
 /**
  * The version of this file. Should be changed when breaking changes are introduced in an update.
  */
-export const PERSISTED_STATE_VERSION = 1;
+export const PERSISTED_STATE_VERSION = 2;
