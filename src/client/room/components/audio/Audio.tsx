@@ -39,7 +39,7 @@ export function Audio() {
         case "play": {
           console.debug("[Audio] play");
 
-          const startPosition = controller.config.audioStartPosition === 3
+          const startPosition = controller.config.audioStartPosition === null
             ? controller.questionData.audioStartPos
             : controller.config.audioStartPosition;
 

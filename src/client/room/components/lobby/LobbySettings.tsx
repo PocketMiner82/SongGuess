@@ -116,17 +116,17 @@ export function Settings({ disabled }: { disabled?: boolean }) {
         </SettingsNumberInput>
 
         <SettingsDropdown
-          value={controller.config.audioStartPosition}
+          value={controller.config.audioStartPosition ?? -1}
           disabled={disabled}
           onChange={(v) => {
-            controller.config.audioStartPosition = v;
+            controller.config.audioStartPosition = v === -1 ? null : v;
             controller.sendConfig();
           }}
           options={[
             { value: 0, label: "Start of audio" },
-            { value: 1, label: "Close to middle" },
-            { value: 2, label: "Close to end" },
-            { value: 3, label: controller.config.gameMode === "player_picks" ? "Picker decides" : "Randomize above" },
+            { value: 0.5, label: "Close to middle" },
+            { value: 1, label: "Close to end" },
+            { value: -1, label: controller.config.gameMode === "player_picks" ? "Picker decides" : "Randomize above" },
           ]}
         >
           Audio start position

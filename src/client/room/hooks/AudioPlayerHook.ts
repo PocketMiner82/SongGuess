@@ -8,7 +8,7 @@ export interface AudioPlayer {
   state: "loading" | "playing" | "not_playing";
   howler: Howl | null;
   load: (src: string) => void;
-  playWithPositionAndFade: (startPosition: (number | null), audioPlayTime: number, startOffset?: number, fadeDuration?: number) => void;
+  playWithPositionAndFade: (startPosition: number, audioPlayTime: number, startOffset?: number, fadeDuration?: number) => void;
   playWithFade: (fadeDuration?: number) => void;
   pauseWithFade: (fadeDuration?: number) => void;
 }
@@ -104,6 +104,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
       return;
     }
     const howler = howlerRef.current;
+    howler.stop();
 
     howler.once("play", () => {
       howler.fade(0, volume, fadeDuration);
@@ -120,7 +121,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
    * @param fadeDuration the fade-in duration (ms) to use.
    */
   const playWithPositionAndFade = (
-    startPosition: number | null,
+    startPosition: number,
     audioPlayTime: number,
     startOffset: number = 0,
     fadeDuration: number = 1000,
@@ -134,16 +135,10 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
     playWithFade(fadeDuration);
 
     howler.once("play", () => {
-      const duration = howler.duration();
+      const duration = howler.duration() - 0.5;
 
-      switch (startPosition) {
-        // null|0: start, nothing to do
-        case 1: // Middle
-          startOffset += Math.max(0, (duration - audioPlayTime) / 2);
-          break;
-        case 2: // End
-          startOffset += Math.max(0, duration - audioPlayTime - 0.5);
-          break;
+      if (startPosition !== null && startPosition > 0) {
+        startOffset += Math.max(0, (duration - audioPlayTime) * startPosition);
       }
 
       howler.seek(startOffset);
