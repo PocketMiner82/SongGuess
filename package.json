@@ -39,27 +39,27 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.2.0",
-    "@eslint-react/eslint-plugin": "^5.18.1",
+    "@antfu/eslint-config": "^9.3.0",
+    "@eslint-react/eslint-plugin": "^5.18.3",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/chroma-js": "^3.1.2",
     "@types/howler": "^2.2.13",
     "@types/lodash": "^4.17.25",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "@typescript-eslint/eslint-plugin": "^8.66.0",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.61.0",
     "autoprefixer": "^10.5.4",
-    "esbuild": "^0.28.1",
-    "eslint": "^10.8.0",
-    "eslint-plugin-react-refresh": "^0.5.3",
-    "postcss": "^8.5.25",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.8.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "postcss": "^8.5.26",
     "postcss-cli": "^11.0.1",
     "tailwindcss": "^4.3.1",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "wrangler": "^4.120.0"
+    "wrangler": "^4.120.1"
   }
 }
