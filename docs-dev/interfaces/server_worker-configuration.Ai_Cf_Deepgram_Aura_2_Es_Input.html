@@ -13,7 +13,7 @@
 <h1>Interface Ai_Cf_Deepgram_Aura_2_Es_Input</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">Ai_Cf_Deepgram_Aura_2_Es_Input</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#bit_rate">bit_rate</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#container">container</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;none&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;wav&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;ogg&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#encoding">encoding</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;mp3&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;aac&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;flac&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;opus&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;linear16&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;mulaw&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;alaw&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#sample_rate">sample_rate</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#speaker">speaker</a><span class="tsd-signature-symbol">?:</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;sirio&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;nestor&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;carina&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;celeste&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;alvaro&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;diana&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;aquila&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;selena&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;estrella&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;javier&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#text">text</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9975</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:10004</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -37,42 +37,42 @@
 <div class="tsd-comment tsd-typography"><p>The bitrate of the audio in bits per second. Choose from predefined ranges or specific values based on the encoding type.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9999</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10028</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="container"><code class="tsd-tag">Optional</code><span>container</span><a href="#container" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">container</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;none&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;wav&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;ogg&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Container specifies the file format wrapper for the output audio. The available options depend on the encoding type..</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9987</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10016</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="encoding"><code class="tsd-tag">Optional</code><span>encoding</span><a href="#encoding" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">encoding</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;mp3&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;aac&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;flac&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;opus&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;linear16&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;mulaw&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;alaw&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Encoding of the output audio.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9983</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10012</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="sample_rate"><code class="tsd-tag">Optional</code><span>sample_<wbr/>rate</span><a href="#sample_rate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">sample_rate</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Sample Rate specifies the sample rate for the output audio. Based on the encoding, different sample rates are supported. For some encodings, the sample rate is not configurable</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9995</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10024</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="speaker"><code class="tsd-tag">Optional</code><span>speaker</span><a href="#speaker" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">speaker</span><span class="tsd-signature-symbol">?:</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;sirio&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;nestor&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;carina&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;celeste&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;alvaro&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;diana&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;aquila&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;selena&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;estrella&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;javier&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Speaker used to produce the audio.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9979</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10008</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="text"><span>text</span><a href="#text" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">text</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The text content to be converted to speech</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9991</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:10020</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

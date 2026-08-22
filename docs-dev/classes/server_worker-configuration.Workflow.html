@@ -16,7 +16,7 @@
 <ul class="tsd-type-parameter-list">
 <li><span id="params"><span class="tsd-kind-type-parameter">PARAMS</span> = <span class="tsd-signature-type">unknown</span></span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:14614</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:14700</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -30,6 +30,7 @@
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#create" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create</span></a>
 <a href="#createbatch" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Batch</span></a>
+<a href="#deletebatch" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Batch</span></a>
 <a href="#get" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -66,7 +67,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with a handle for the Instance</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:14626</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:14712</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="createbatch"><span>create<wbr/>Batch</span><a href="#createbatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -85,7 +86,27 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with a list of handles for the created instances.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:14633</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:14719</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="deletebatch"><span>delete<wbr/>Batch</span><a href="#deletebatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="deletebatch-1"><span class="tsd-kind-call-signature">deleteBatch</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">instanceIds</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/server_worker-configuration.WorkflowBatchDeleteResult.html" class="tsd-signature-type tsd-kind-type-alias">WorkflowBatchDeleteResult</a><span class="tsd-signature-symbol">&gt;</span><a href="#deletebatch-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Delete a batch of Workflow instances and their stored state.
+<code>deleteBatch</code> is limited to 100 instances at a time. Duplicate IDs are deleted once.
+The result contains one entry for each input position; IDs that do not exist are returned as per-instance errors.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">instanceIds</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></span>
+<div class="tsd-comment tsd-typography"><p>IDs of the Workflow instances to delete</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/server_worker-configuration.WorkflowBatchDeleteResult.html" class="tsd-signature-type tsd-kind-type-alias">WorkflowBatchDeleteResult</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with the successfully deleted instances and any per-instance errors.</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in src/server/worker-configuration.d.ts:14727</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="get"><span>get</span><a href="#get" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -103,7 +124,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with a handle for the Instance</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:14620</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:14706</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -123,7 +144,7 @@
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#create"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create</span></a><a href="#createbatch"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Batch</span></a><a href="#get"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a></div></details></div></details></div>
+<div><a href="#create"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create</span></a><a href="#createbatch"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Batch</span></a><a href="#deletebatch"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Batch</span></a><a href="#get"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">SongGuess</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
