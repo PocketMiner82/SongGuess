@@ -16,7 +16,7 @@
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">ChatCompletionsCommonOptions</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#audio">audio</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.AudioParams.html" class="tsd-signature-type tsd-kind-type-alias">AudioParams</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#chat_template_kwargs">chat_template_kwargs</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatTemplateKwargs.html" class="tsd-signature-type tsd-kind-type-alias">ChatTemplateKwargs</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#frequency_penalty">frequency_penalty</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#function_call">function_call</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;none&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;auto&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#functions">functions</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.FunctionDefinition.html" class="tsd-signature-type tsd-kind-type-alias">FunctionDefinition</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#logit_bias">logit_bias</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#logprobs">logprobs</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#max_completion_tokens">max_completion_tokens</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#max_tokens">max_tokens</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#metadata">metadata</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#modalities">modalities</a><span class="tsd-signature-symbol">?:</span> (<span class="tsd-signature-type">&quot;text&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;audio&quot;</span>)<span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#model">model</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#n">n</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#parallel_tool_calls">parallel_tool_calls</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#prediction">prediction</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.PredictionContent.html" class="tsd-signature-type tsd-kind-type-alias">PredictionContent</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#presence_penalty">presence_penalty</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#reasoning_effort">reasoning_effort</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;low&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;medium&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;high&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#response_format">response_format</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ResponseFormat.html" class="tsd-signature-type tsd-kind-type-alias">ResponseFormat</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#seed">seed</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#service_tier">service_tier</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;auto&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;default&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;flex&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;scale&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;priority&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#stop">stop</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#store">store</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#stream">stream</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#stream_options">stream_options</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatCompletionsStreamOptions.html" class="tsd-signature-type tsd-kind-type-alias">ChatCompletionsStreamOptions</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#temperature">temperature</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#tool_choice">tool_choice</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatCompletionToolChoiceOption.html" class="tsd-signature-type tsd-kind-type-alias">ChatCompletionToolChoiceOption</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#tools">tools</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatCompletionTool.html" class="tsd-signature-type tsd-kind-type-alias">ChatCompletionTool</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#top_logprobs">top_logprobs</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#top_p">top_p</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#user">user</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#web_search_options">web_search_options</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.WebSearchOptions.html" class="tsd-signature-type tsd-kind-type-alias">WebSearchOptions</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5084</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:5087</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -63,157 +63,157 @@
 <h3 class="tsd-anchor-link" id="audio"><code class="tsd-tag">Optional</code><span>audio</span><a href="#audio" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">audio</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.AudioParams.html" class="tsd-signature-type tsd-kind-type-alias">AudioParams</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5086</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5089</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="chat_template_kwargs"><code class="tsd-tag">Optional</code><span>chat_<wbr/>template_<wbr/>kwargs</span><a href="#chat_template_kwargs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">chat_template_kwargs</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatTemplateKwargs.html" class="tsd-signature-type tsd-kind-type-alias">ChatTemplateKwargs</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5100</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5103</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="frequency_penalty"><code class="tsd-tag">Optional</code><span>frequency_<wbr/>penalty</span><a href="#frequency_penalty" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">frequency_penalty</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5087</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5090</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="function_call"><code class="tsd-tag">Optional</code><span>function_<wbr/>call</span><a href="#function_call" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">function_call</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;none&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;auto&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5114</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5117</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="functions"><code class="tsd-tag">Optional</code><span>functions</span><a href="#functions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">functions</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.FunctionDefinition.html" class="tsd-signature-type tsd-kind-type-alias">FunctionDefinition</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5117</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5120</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="logit_bias"><code class="tsd-tag">Optional</code><span>logit_<wbr/>bias</span><a href="#logit_bias" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">logit_bias</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5088</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5091</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="logprobs"><code class="tsd-tag">Optional</code><span>logprobs</span><a href="#logprobs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">logprobs</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5089</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5092</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="max_completion_tokens"><code class="tsd-tag">Optional</code><span>max_<wbr/>completion_<wbr/>tokens</span><a href="#max_completion_tokens" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">max_completion_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5092</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5095</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="max_tokens"><code class="tsd-tag">Optional</code><span>max_<wbr/>tokens</span><a href="#max_tokens" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">max_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5091</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5094</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="metadata"><code class="tsd-tag">Optional</code><span>metadata</span><a href="#metadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">metadata</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5093</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5096</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="modalities"><code class="tsd-tag">Optional</code><span>modalities</span><a href="#modalities" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">modalities</span><span class="tsd-signature-symbol">?:</span> (<span class="tsd-signature-type">&quot;text&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;audio&quot;</span>)<span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5094</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5097</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Optional</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5085</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5088</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="n"><code class="tsd-tag">Optional</code><span>n</span><a href="#n" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">n</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5095</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5098</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="parallel_tool_calls"><code class="tsd-tag">Optional</code><span>parallel_<wbr/>tool_<wbr/>calls</span><a href="#parallel_tool_calls" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">parallel_tool_calls</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5096</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5099</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="prediction"><code class="tsd-tag">Optional</code><span>prediction</span><a href="#prediction" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">prediction</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.PredictionContent.html" class="tsd-signature-type tsd-kind-type-alias">PredictionContent</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5097</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5100</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="presence_penalty"><code class="tsd-tag">Optional</code><span>presence_<wbr/>penalty</span><a href="#presence_penalty" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">presence_penalty</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5098</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5101</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="reasoning_effort"><code class="tsd-tag">Optional</code><span>reasoning_<wbr/>effort</span><a href="#reasoning_effort" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">reasoning_effort</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;low&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;medium&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;high&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5099</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5102</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="response_format"><code class="tsd-tag">Optional</code><span>response_<wbr/>format</span><a href="#response_format" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">response_format</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ResponseFormat.html" class="tsd-signature-type tsd-kind-type-alias">ResponseFormat</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5101</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5104</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="seed"><code class="tsd-tag">Optional</code><span>seed</span><a href="#seed" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">seed</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5102</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5105</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="service_tier"><code class="tsd-tag">Optional</code><span>service_<wbr/>tier</span><a href="#service_tier" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">service_tier</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;auto&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;default&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;flex&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;scale&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;priority&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5103</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5106</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="stop"><code class="tsd-tag">Optional</code><span>stop</span><a href="#stop" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">stop</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5104</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5107</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="store"><code class="tsd-tag">Optional</code><span>store</span><a href="#store" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">store</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5105</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5108</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="stream"><code class="tsd-tag">Optional</code><span>stream</span><a href="#stream" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">stream</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5106</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5109</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="stream_options"><code class="tsd-tag">Optional</code><span>stream_<wbr/>options</span><a href="#stream_options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">stream_options</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatCompletionsStreamOptions.html" class="tsd-signature-type tsd-kind-type-alias">ChatCompletionsStreamOptions</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5107</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5110</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="temperature"><code class="tsd-tag">Optional</code><span>temperature</span><a href="#temperature" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">temperature</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5108</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5111</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="tool_choice"><code class="tsd-tag">Optional</code><span>tool_<wbr/>choice</span><a href="#tool_choice" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tool_choice</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatCompletionToolChoiceOption.html" class="tsd-signature-type tsd-kind-type-alias">ChatCompletionToolChoiceOption</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5109</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5112</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="tools"><code class="tsd-tag">Optional</code><span>tools</span><a href="#tools" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tools</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.ChatCompletionTool.html" class="tsd-signature-type tsd-kind-type-alias">ChatCompletionTool</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5110</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5113</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="top_logprobs"><code class="tsd-tag">Optional</code><span>top_<wbr/>logprobs</span><a href="#top_logprobs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">top_logprobs</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5090</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5093</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="top_p"><code class="tsd-tag">Optional</code><span>top_<wbr/>p</span><a href="#top_p" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">top_p</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5111</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5114</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="user"><code class="tsd-tag">Optional</code><span>user</span><a href="#user" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">user</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5112</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5115</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="web_search_options"><code class="tsd-tag">Optional</code><span>web_<wbr/>search_<wbr/>options</span><a href="#web_search_options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">web_search_options</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.WebSearchOptions.html" class="tsd-signature-type tsd-kind-type-alias">WebSearchOptions</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5113</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:5116</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
