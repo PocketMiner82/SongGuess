@@ -1,3 +1,10 @@
+# [3.3.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.5...3.3.0-dev.6) (2026-08-27)
+
+
+### Bug Fixes
+
+* add hls support (wip) ([d10ddce](https://github.com/PocketMiner82/SongGuess/commit/d10ddcedd6e5c456ad564068caac40160b900533))
+
 # [3.3.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.4...3.3.0-dev.5) (2026-08-22)
 
 # [3.3.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.3...3.3.0-dev.4) (2026-08-19)
