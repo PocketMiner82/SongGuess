@@ -273,7 +273,6 @@ export class SongGuessAPI extends Server<Env> {
 
         const cache = await caches.open("default");
         let resp = await cache.match(url.toString());
-        resp = undefined;
 
         if (!resp) {
           const originalResponse = await this.fetchSoundCloudAudio(urn);
