@@ -1,3 +1,10 @@
+# [3.3.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.6...3.3.0-dev.7) (2026-08-27)
+
+
+### Bug Fixes
+
+* enable caching again ([1f5c8dc](https://github.com/PocketMiner82/SongGuess/commit/1f5c8dc0e9a782553642e520d4caca4f4cc8c0ef))
+
 # [3.3.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.5...3.3.0-dev.6) (2026-08-27)
 
 
