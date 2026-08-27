@@ -1,6 +1,7 @@
 import type { AddLogMessage } from "../../types/MessageTypes";
 import type { SongGuessServer } from "../index";
 import * as util from "node:util";
+import { env } from "cloudflare:workers";
 
 
 export class Logger {
@@ -75,10 +76,11 @@ export class Logger {
   private storeAndLogMessage(message: string, level: AddLogMessage["level"]): void {
     message = this.formatLogEntry(message);
 
-    if (level !== "info")
+    if (level !== "info") {
       message = this.truncateMessage(message);
+    }
 
-    if (level !== "debug") {
+    if (level !== "debug" || env.IS_DEV === "true") {
       console[level](`${this.LOG_PREFIX} ${message}`);
     }
 

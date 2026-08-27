@@ -37,14 +37,12 @@ export class SongGuessAPI extends Server<Env> {
   private async fetchSoundCloudAudio(urn: string): Promise<Response> {
     const streams: SoundCloudStreams = await this.soundCloud.fetchGetJson(`/tracks/${urn}/streams`);
 
-    if (streams.http_mp3_128_url) {
-      const resp = await this.soundCloud.fetchGet(streams.http_mp3_128_url);
-      if (resp.ok) {
-        return resp;
-      }
-    }
+    const audioUrl = streams.hls_aac_160_url
+      ?? streams.hls_mp3_128_url
+      ?? streams.http_mp3_128_url
+      ?? `/tracks/${urn}/preview`;
 
-    const resp = await this.soundCloud.fetchGet(`/tracks/${urn}/preview`);
+    const resp = await this.soundCloud.fetchGet(audioUrl);
     if (resp.ok) {
       return resp;
     }
@@ -275,6 +273,7 @@ export class SongGuessAPI extends Server<Env> {
 
         const cache = await caches.open("default");
         let resp = await cache.match(url.toString());
+        resp = undefined;
 
         if (!resp) {
           const originalResponse = await this.fetchSoundCloudAudio(urn);
