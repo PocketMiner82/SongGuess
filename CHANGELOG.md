@@ -1,3 +1,10 @@
+# [3.3.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.8...3.3.0-dev.9) (2026-09-01)
+
+
+### Bug Fixes
+
+* **SoundCloud:** use higher resolution artwork ([98b7c0b](https://github.com/PocketMiner82/SongGuess/commit/98b7c0b3fd57766e589d8f9555cb9f21ae6d7850))
+
 # [3.3.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.7...3.3.0-dev.8) (2026-09-01)
 
 
