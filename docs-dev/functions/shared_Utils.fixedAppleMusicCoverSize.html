@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>PlaylistCard | SongGuess</title><meta name="description" content="Documentation for SongGuess"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>fixedAppleMusicCoverSize | SongGuess</title><meta name="description" content="Documentation for SongGuess"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container"><a href="../index.html" class="title">SongGuess</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
@@ -8,24 +8,26 @@
 <div class="col-content">
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
-<li><a href="../modules/client_room_components_PlaylistCard.html">client/room/components/PlaylistCard</a></li>
-<li><a href="" aria-current="page">PlaylistCard</a></li></ul>
-<h1>Function PlaylistCard</h1></div>
+<li><a href="../modules/shared_Utils.html">shared/Utils</a></li>
+<li><a href="" aria-current="page">fixedAppleMusicCoverSize</a></li></ul>
+<h1>Function fixedAppleMusicCoverSize</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="playlistcard"><span class="tsd-kind-call-signature">PlaylistCard</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">__namedParameters</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PlaylistCardProps</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Element</span><a href="#playlistcard" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="fixedapplemusiccoversize"><span class="tsd-kind-call-signature">fixedAppleMusicCoverSize</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">url</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><a href="#fixedapplemusiccoversize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Displays a single playlist entry with cover art, title and subtitle.
-Shows a delete button for hosts.</p>
+<div class="tsd-comment tsd-typography"><p>Replaces the cover of an Apple Music <a href="../types/types_MessageTypes.Song.html" class="tsd-kind-type-alias">Song</a> with a larger version.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">__namedParameters</span>: <span class="tsd-signature-type">PlaylistCardProps</span></span></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Element</span></h4><aside class="tsd-sources">
+<li><span><span class="tsd-kind-parameter">url</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></span>
+<div class="tsd-comment tsd-typography"><p>The url to search and replace the dimensions in</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></h4><p>the replaced url or null if the provided param is not a string</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/PocketMiner82/SongGuess/blob/98b7c0b3fd57766e589d8f9555cb9f21ae6d7850/src/client/room/components/PlaylistCard.tsx#L84">src/client/room/components/PlaylistCard.tsx:84</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/PocketMiner82/SongGuess/blob/98b7c0b3fd57766e589d8f9555cb9f21ae6d7850/src/shared/Utils.ts#L242">src/shared/Utils.ts:242</a></li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
