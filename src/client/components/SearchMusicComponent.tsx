@@ -1,13 +1,13 @@
 import type { ICookieProps } from "../../types/ICookieProps";
 import type { Playlist } from "../../types/MessageTypes";
-import type { AudioPlayer } from "../room/hooks/AudioPlayerHook";
+import type { AudioPlayer } from "../room/hooks/audio/AudioPlayerHook";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { getPlaylistByURL, performSearch } from "../../shared/Utils";
 import { PlaylistCard } from "../room/components/PlaylistCard";
-import { useAudioPlayer } from "../room/hooks/AudioPlayerHook";
+import { useAudioPlayer } from "../room/hooks/audio/AudioPlayerHook";
 import { useControllerContext } from "../room/hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../room/hooks/RoomControllerListenerHooks";
 import { Button } from "./Button";

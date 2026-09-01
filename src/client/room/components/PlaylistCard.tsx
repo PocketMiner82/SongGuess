@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { AudioPlayer } from "../hooks/AudioPlayerHook";
+import type { AudioPlayer } from "../hooks/audio/AudioPlayerHook";
 
 
 interface PlaylistCardProps {
