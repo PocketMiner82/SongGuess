@@ -1,3 +1,10 @@
+# [3.3.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.7...3.3.0-dev.8) (2026-09-01)
+
+
+### Bug Fixes
+
+* **AudioHook:** cleanup + fix wrong audio position ([4b03830](https://github.com/PocketMiner82/SongGuess/commit/4b038309ffefd66d1de438b7cd7874f5663a684e))
+
 # [3.3.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.6...3.3.0-dev.7) (2026-08-27)
 
 
