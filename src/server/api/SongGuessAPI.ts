@@ -8,7 +8,7 @@ import { AppleMusicConfig, AuthType, getAuthenticatedAxios, Region } from "@sync
 import { env } from "cloudflare:workers";
 import { Server } from "partyserver";
 import { albumRegex, appleMusicPreviewRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
-import { fixedCoverSize } from "../../shared/Utils";
+import { fixedAppleMusicCoverSize, fixedSoundCloudCoverSize } from "../../shared/Utils";
 import { DefaultPlaylist } from "../../types/MessageTypes";
 import { SoundCloudAPI } from "./SoundCloudAPI";
 
@@ -37,14 +37,12 @@ export class SongGuessAPI extends Server<Env> {
   private async fetchSoundCloudAudio(urn: string): Promise<Response> {
     const streams: SoundCloudStreams = await this.soundCloud.fetchGetJson(`/tracks/${urn}/streams`);
 
-    if (streams.http_mp3_128_url) {
-      const resp = await this.soundCloud.fetchGet(streams.http_mp3_128_url);
-      if (resp.ok) {
-        return resp;
-      }
-    }
+    const audioUrl = streams.hls_aac_160_url
+      ?? streams.hls_mp3_128_url
+      ?? streams.http_mp3_128_url
+      ?? `/tracks/${urn}/preview`;
 
-    const resp = await this.soundCloud.fetchGet(`/tracks/${urn}/preview`);
+    const resp = await this.soundCloud.fetchGet(audioUrl);
     if (resp.ok) {
       return resp;
     }
@@ -64,7 +62,7 @@ export class SongGuessAPI extends Server<Env> {
     return tracks.map(col => ({
       name: col.title,
       hrefURL: col.permalink_url,
-      cover: col.artwork_url,
+      cover: fixedSoundCloudCoverSize(col.artwork_url),
       audioURL: `/api/fetchSoundCloudAudio?urn=${encodeURIComponent(col.urn)}`,
       artist: col.user.username,
     } satisfies Song));
@@ -98,7 +96,7 @@ export class SongGuessAPI extends Server<Env> {
                 name: s.attributes.name,
                 artist: s.attributes.artistName ?? "Unknown",
                 hrefURL: s.attributes.url ?? "https://music.apple.com/us/",
-                cover: fixedCoverSize(s.attributes.artwork?.url),
+                cover: fixedAppleMusicCoverSize(s.attributes.artwork?.url),
                 audioURL: s.attributes.previews!.find(p => appleMusicPreviewRegex.test(p.url))!.url,
               } satisfies Song);
             }
@@ -135,7 +133,7 @@ export class SongGuessAPI extends Server<Env> {
     try {
       const data = JSON.parse(json);
       const name: string = data.name ?? url;
-      const cover: string | null = fixedCoverSize(data.image ?? null);
+      const cover: string | null = fixedAppleMusicCoverSize(data.image ?? null);
       let songs: Song[] = [];
 
       // album always provides tracks

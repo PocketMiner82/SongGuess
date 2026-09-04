@@ -25,10 +25,10 @@ export const ProgressbarUpdateMessageSchema = z.object({
  */
 const QuestionMessageSchema = z.object({
   /**
-   * The random/user-defined audio start position index (0-2) for the current question.
+   * The random/user-defined audio start position for the current question.
    * @see RoomConfigMessageSchema.audioStartPosition
    */
-  startPos: z.number().min(0).max(2),
+  startPos: z.number().min(0).max(1),
 });
 
 export const MultipleChoiceQuestionMessageSchema = QuestionMessageSchema.extend({
@@ -37,12 +37,12 @@ export const MultipleChoiceQuestionMessageSchema = QuestionMessageSchema.extend(
   /**
    * The current 4 question answer options.
    */
-  answerOptions: z.array(z.string()).length(4),
+  answerOptions: z.array(z.string()),
 
   /**
    * The index of the correct answer, if answer is shown.
    */
-  correctAnswerIndex: z.optional(z.int().min(0).max(3)),
+  correctAnswerIndex: z.optional(z.int().nonnegative()),
 });
 
 export const PlayerPicksQuestionMessageSchema = QuestionMessageSchema.extend({
@@ -95,7 +95,7 @@ export const RoundStateMessageSchema = z.object({
 /**
  * Schema for messages controlling audio playback during the game.
  */
-export const AudioControlMessageSchema = z.discriminatedUnion("action", [
+export const AudioControlMessageSchema = z.union([
   z.object({
     type: z.literal("audio_control").default("audio_control"),
 
@@ -146,7 +146,7 @@ export const PlayerAnswerDataSchema = z.object({
    * Provided only for MultipleChoiceGame.
    * The index of the question the player selected.
    */
-  answerIndex: z.optional(z.int().min(0).max(3)),
+  answerIndex: z.optional(z.int().nonnegative()),
 
   /**
    * Provided only for PlayerPicksGame.

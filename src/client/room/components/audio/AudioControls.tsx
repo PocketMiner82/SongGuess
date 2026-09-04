@@ -1,3 +1,6 @@
+import { SettingsRange } from "../settings/SettingsRange";
+
+
 function getVolumeIcon(muted: boolean, volume: number) {
   if (muted)
     return "volume_off";
@@ -16,7 +19,15 @@ export function AudioControls({ muted, volume, onMuteChange, onVolumeChange }: {
   onVolumeChange: (newVolume: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <SettingsRange
+      value={volume}
+      onChange={onVolumeChange}
+      displayText={`${Math.round(volume * 100)}%`}
+      min={0}
+      max={1}
+      step={0.01}
+      className="w-25 align-middle"
+    >
       <button
         type="button"
         onClick={onMuteChange}
@@ -27,16 +38,6 @@ export function AudioControls({ muted, volume, onMuteChange, onVolumeChange }: {
           {getVolumeIcon(muted, volume)}
         </span>
       </button>
-      <input
-        type="range"
-        min="0"
-        max="1"
-        step="0.01"
-        value={volume}
-        onChange={e => onVolumeChange(Number.parseFloat(e.target.value))}
-        className="w-25 align-middle"
-        aria-label="Volume"
-      />
-    </div>
+    </SettingsRange>
   );
 }

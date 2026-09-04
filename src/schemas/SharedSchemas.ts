@@ -112,7 +112,7 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * The time per question in each round.
    */
-  timePerQuestion: z.number().min(5).max(25),
+  timePerQuestion: z.number().min(2).max(25),
 
   /**
    * Whether to prefer distractions by the same artist.
@@ -120,20 +120,28 @@ export const RoomConfigMessageSchema = z.object({
   distractionsPreferSameArtist: z.boolean(),
 
   /**
-   * The music start position.
-   *  - 0: start of audio
-   *  - 1: close to middle of audio
-   *  - 2: close to end of audio
-   *  - 3: random of the above
+   * The music start position for a game.
    *
-   * Used as default value in PlayerPicksGame, used as forced position in MultipleChoiceGame.
+   * Must be a float between
+   *  - 0.0: start of audio
+   *
+   *  and
+   *
+   *  - 1.0: close to end of audio (audio duration minus max play time determined by config + round padding)
+   *
+   *  Can be null to use random position (multiple choice) / let picker decide (player picks)
    */
-  audioStartPosition: z.number().min(0).max(3),
+  audioStartPosition: z.number().min(0).max(1).nullable(),
 
   /**
    * The amount of time a player should have to pick a song.
    */
   playerPickTimeout: z.number().min(60).max(300),
+
+  /**
+   * The amount of multiple choice answers to add.
+   */
+  multipleChoiceAnswersCount: z.int().min(2).max(8).multipleOf(2),
 });
 
 export const PingMessageSchema = z.object({

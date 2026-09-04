@@ -3,7 +3,7 @@ import type { ServerMessage } from "../../../../types/MessageTypes";
 import { useCallback } from "react";
 import { useCookies } from "react-cookie";
 import { QUESTION_PADDING_TICKS } from "../../../../shared/ConfigConstants";
-import { useAudioPlayer } from "../../hooks/AudioPlayerHook";
+import { useAudioPlayer } from "../../hooks/audio/AudioPlayerHook";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerListener } from "../../hooks/RoomControllerListenerHooks";
 import { AudioControls } from "./AudioControls";
@@ -39,7 +39,7 @@ export function Audio() {
         case "play": {
           console.debug("[Audio] play");
 
-          const startPosition = controller.config.audioStartPosition === 3
+          const startPosition = controller.config.audioStartPosition === null
             ? controller.questionData.audioStartPos
             : controller.config.audioStartPosition;
 

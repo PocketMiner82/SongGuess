@@ -18,9 +18,11 @@ export class BaseConfig implements RoomConfigMessage {
 
   public distractionsPreferSameArtist: boolean = true;
 
-  public audioStartPosition: number = 3;
+  public audioStartPosition: number | null = null;
 
   public playerPickTimeout: number = 180;
+
+  public multipleChoiceAnswersCount: number = 4;
 
   constructor(msg?: RoomConfigMessage) {
     if (msg)

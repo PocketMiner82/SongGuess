@@ -1,6 +1,5 @@
 import type { Playlist } from "../../../../types/MessageTypes";
 import type { ListenerCallback } from "../../hooks/RoomControllerListenerHooks";
-import random from "lodash/random";
 import { useCallback, useEffect, useState } from "react";
 import { GamePhase } from "../../../../shared/game/GamePhase";
 import { Button } from "../../../components/Button";
@@ -12,16 +11,12 @@ import {
   useRoomControllerMessageTypeListener,
 } from "../../hooks/RoomControllerListenerHooks";
 import { PlaylistCard } from "../PlaylistCard";
-import { SettingsDropdown } from "../settings/SettingsDropdown";
+import { SettingsRange } from "../settings/SettingsRange";
 
 
 function PlayerPickingDisplay() {
   const controller = useControllerContext();
-  const [audioStartPos, setAudioStartPos] = useState(() => {
-    return controller.config.audioStartPosition === 3
-      ? random(0, 2)
-      : controller.config.audioStartPosition;
-  });
+  const [audioStartPos, setAudioStartPos] = useState(() => controller.config.audioStartPosition ?? 0);
   useRoomControllerListener(controller, useCallback((msg) => {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "player_pick_song";
   }, []));
@@ -60,20 +55,16 @@ function PlayerPickingDisplay() {
       { !pickedSong
         ? (
             <div>
-              {controller.config.audioStartPosition === 3 && (
-                <SettingsDropdown
+              {controller.config.audioStartPosition === null && (
+                <SettingsRange
                   value={audioStartPos}
                   onChange={(v) => {
                     setAudioStartPos(v);
                   }}
-                  options={[
-                    { value: 0, label: "Start of audio" },
-                    { value: 1, label: "Close to middle" },
-                    { value: 2, label: "Close to end" },
-                  ]}
+                  displayText={`${Math.round((audioStartPos) * 100)}%`}
                 >
-                  Audio start position for this round
-                </SettingsDropdown>
+                  Start song at
+                </SettingsRange>
               )}
 
               <div className="mt-2 flex justify-center max-h-[calc(100vh-21rem)] min-h-0">

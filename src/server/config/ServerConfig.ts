@@ -46,6 +46,10 @@ export class ServerConfig extends BaseConfig implements IEventListener {
           this.room.game = new PlayerPicksGame(this.room);
           break;
       }
+
+      // reset rounds count and time per question on every game mode change
+      msg.roundsCount = 10;
+      msg.timePerQuestion = 25;
     }
 
     super.applyMessage(msg);

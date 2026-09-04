@@ -149,7 +149,7 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
       audioURL: r.previewUrl,
       artist: r.artistName,
       hrefURL: r.trackViewUrl,
-      cover: fixedCoverSize(r.artworkUrl100),
+      cover: fixedAppleMusicCoverSize(r.artworkUrl100),
     } satisfies Song));
   }
 
@@ -184,12 +184,12 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
           name: result.trackName,
           subtitle: `Song by ${result.artistName} (Apple Music)`,
           hrefURL: result.trackViewUrl,
-          cover: fixedCoverSize(result.artworkUrl100),
+          cover: fixedAppleMusicCoverSize(result.artworkUrl100),
           songs: [{
             name: result.trackName,
             artist: result.artistName,
             hrefURL: result.trackViewUrl,
-            cover: fixedCoverSize(result.artworkUrl100),
+            cover: fixedAppleMusicCoverSize(result.artworkUrl100),
             audioURL: result.previewUrl,
           }],
         });
@@ -198,7 +198,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
           name: result.collectionName,
           subtitle: `Album by ${result.artistName} | ${Math.min(result.trackCount, 50)} song(s)`,
           hrefURL: result.collectionViewUrl,
-          cover: fixedCoverSize(result.artworkUrl100),
+          cover: fixedAppleMusicCoverSize(result.artworkUrl100),
           songs: [],
         });
       } else if (!onlySongs && result.wrapperType === "artist") {
@@ -235,12 +235,22 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
 }
 
 /**
- * Replaces the cover of a {@link Song} with a larger version.
+ * Replaces the cover of an Apple Music {@link Song} with a larger version.
  * @param url The url to search and replace the dimensions in
  * @returns the replaced url or null if the provided param is not a string
  */
-export function fixedCoverSize(url: string | undefined | null): string | null {
+export function fixedAppleMusicCoverSize(url: string | undefined | null): string | null {
   return url?.replace(/\/[^/][^/x]*x[^/]+bb\.([a-z]+)$/, "/160x160bb.$1") ?? null;
+}
+
+
+/**
+ * Replaces the cover of a SoundCloud {@link Song} with a larger version.
+ * @param url The url to search and replace the dimensions in
+ * @returns the replaced url or null if the provided param is not a string
+ */
+export function fixedSoundCloudCoverSize(url: string | undefined | null): string | null {
+  return url?.replace(/-[^-]+\.([a-z]+)$/, "-t200x200.$1") ?? null;
 }
 
 /**
@@ -277,7 +287,7 @@ export function getFirstSong(results: ResultMusicTrack[]): Song | null {
     audioURL: track.previewUrl,
     artist: track.artistName,
     hrefURL: track.trackViewUrl,
-    cover: fixedCoverSize(track.artworkUrl100),
+    cover: fixedAppleMusicCoverSize(track.artworkUrl100),
   };
 }
 

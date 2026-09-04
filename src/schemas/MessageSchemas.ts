@@ -22,7 +22,7 @@ import {
 import { PingMessageSchema, PongMessageSchema, RoomConfigMessageSchema } from "./SharedSchemas";
 
 
-const _ClientMessageSchema = z.discriminatedUnion("type", [
+const _ClientMessageSchema = z.union([
   ChangeUsernameMessageSchema,
   AddPlaylistsMessageSchema,
   RemovePlaylistMessageSchema,
@@ -34,7 +34,7 @@ const _ClientMessageSchema = z.discriminatedUnion("type", [
   PlayerPickSongMessageSchema,
 ]);
 
-const _ServerMessageSchema = z.discriminatedUnion("type", [
+const _ServerMessageSchema = z.union([
   RoomStateMessage,
   UpdatePlaylistsMessageSchema,
   RoomConfigMessageSchema,
@@ -84,7 +84,7 @@ export const ConfirmationMessageSchema = z.object({
 /**
  * A message sent from the server.
  */
-export const ServerMessageSchema = z.discriminatedUnion("type", [
+export const ServerMessageSchema = z.union([
   ConfirmationMessageSchema,
   PingMessageSchema,
   PongMessageSchema,
@@ -94,7 +94,7 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
 /**
  * A message sent from a client.
  */
-export const ClientMessageSchema = z.discriminatedUnion("type", [
+export const ClientMessageSchema = z.union([
   ConfirmationMessageSchema,
   PingMessageSchema,
   PongMessageSchema,

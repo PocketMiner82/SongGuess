@@ -209,6 +209,10 @@ export abstract class Game implements IEventListener {
           player.sendRoomStateMessage();
           player.sendConfirmationOrError(msg, "You need to provide an answerIndex key.");
           return true;
+        } else if (this.room.config.gameMode === "multiple_choice" && msg.answerIndex && msg.answerIndex > (this.room.config.multipleChoiceAnswersCount - 1)) {
+          player.sendRoomStateMessage();
+          player.sendConfirmationOrError(msg, `Provided answerIndex is out of bounds (max: ${this.room.config.multipleChoiceAnswersCount - 1}).`);
+          return true;
         } else if (this.room.config.gameMode === "player_picks" && msg.answer === undefined) {
           player.sendRoomStateMessage();
           player.sendConfirmationOrError(msg, "You need to provide an answer key.");
@@ -510,6 +514,7 @@ export abstract class Game implements IEventListener {
     this.room.server.logger.info("Resetting game to lobby state...");
 
     this.questionTick = QUESTION_ROUND_START_TICK;
+    this.gamePhase = GamePhase.PAUSE_MUSIC;
     this.currentQuestionIndex = -1;
     this.roundCurrent = 0;
     this.room.state = "lobby";

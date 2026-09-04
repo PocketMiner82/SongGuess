@@ -20,7 +20,7 @@ export function SettingsDropdown({ value, onChange, options, disabled, children 
       <select
         value={value}
         disabled={disabled}
-        onChange={e => onChange(Number.parseInt(e.target.value, 10))}
+        onChange={e => onChange(Number.parseFloat(e.target.value))}
         aria-label={label}
         className={`px-2 py-1 border-b-2 border-gray-500 focus:border-secondary outline-0 focus:outline-0 focus-visible:ring-2 focus-visible:ring-secondary bg-transparent ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
