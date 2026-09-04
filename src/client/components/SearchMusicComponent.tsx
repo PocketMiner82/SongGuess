@@ -3,6 +3,7 @@ import type { Playlist } from "../../types/MessageTypes";
 import type { AudioPlayer } from "../room/hooks/audio/AudioPlayerHook";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
+import { useModalWindow } from "react-modal-global";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { getPlaylistByURL, performSearch } from "../../shared/Utils";
@@ -73,6 +74,14 @@ export function SearchMusicComponent({
     cookies.audioVolume ?? 0.2,
     cookies.audioMuted ?? false,
   );
+
+  try {
+    const modal = useModalWindow();
+
+    modal.then(() => {
+      player.howler?.pause();
+    });
+  } catch {}
 
   const handlePlayPause = (playlist: Playlist) => {
     if (playlist.songs.length !== 1) {
