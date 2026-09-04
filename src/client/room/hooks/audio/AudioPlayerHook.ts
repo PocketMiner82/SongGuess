@@ -1,6 +1,6 @@
 import type { Howl } from "howler";
 import type { PlayerWrapper } from "./PlayerWrapper";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HLSPlayerWrapper } from "./HLSPlayerWrapper";
 import { HowlPlayerWrapper } from "./HowlPlayerWrapper";
 
@@ -88,7 +88,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
     }
   };
 
-  const initializePlayer = async (src: string): Promise<void> => {
+  const initializePlayer = useCallback(async (src: string): Promise<void> => {
     console.debug("[Audio] initializePlayer:", src);
     if (playerRef.current) {
       const player = playerRef.current;
@@ -111,35 +111,35 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
 
     console.debug("[Audio] Player created, type:", playerRef.current.constructor.name);
 
-    playerRef.current.on("load", () => {
+    playerRef.current.on("load", async () => {
       console.debug("[Audio] Player load event");
       setState("loading");
     });
-    playerRef.current.on("play", () => {
+    playerRef.current.on("play", async () => {
       console.debug("[Audio] Player play event");
       setState("playing");
     });
-    playerRef.current.on("loaderror", () => {
+    playerRef.current.on("loaderror", async () => {
       console.debug("[Audio] Player loaderror event");
       setState("not_playing");
     });
-    playerRef.current.on("pause", () => {
+    playerRef.current.on("pause", async () => {
       console.debug("[Audio] Player pause event");
       setState("not_playing");
     });
-    playerRef.current.on("end", () => {
+    playerRef.current.on("end", async () => {
       console.debug("[Audio] Player end event");
       setState("not_playing");
     });
-    playerRef.current.on("stop", () => {
+    playerRef.current.on("stop", async () => {
       console.debug("[Audio] Player stop event");
       setState("not_playing");
     });
-    playerRef.current.on("playerror", () => {
+    playerRef.current.on("playerror", async () => {
       console.debug("[Audio] Player playerror event");
       setState("not_playing");
     });
-  };
+  }, [muted, volume]);
 
   const ensurePlayerReady = async (): Promise<PlayerWrapper | null> => {
     if (initializingRef.current) {
