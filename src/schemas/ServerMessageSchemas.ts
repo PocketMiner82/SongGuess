@@ -95,7 +95,7 @@ export const RoundStateMessageSchema = z.object({
 /**
  * Schema for messages controlling audio playback during the game.
  */
-export const AudioControlMessageSchema = z.discriminatedUnion("action", [
+export const AudioControlMessageSchema = z.union([
   z.object({
     type: z.literal("audio_control").default("audio_control"),
 
