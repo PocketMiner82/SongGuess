@@ -1,3 +1,5 @@
+# [3.3.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.18...3.3.0-dev.19) (2026-09-04)
+
 # [3.3.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.17...3.3.0-dev.18) (2026-09-04)
 
 
