@@ -24,30 +24,19 @@ function isHLSContentType(contentType: string | null): boolean {
 }
 
 async function detectIsHLS(url: string): Promise<boolean> {
-  console.debug("[Audio] Detecting HLS for:", url);
   try {
     const response = await fetch(url, { method: "HEAD" });
     const contentType = response.headers.get("content-type");
-    console.debug("[Audio] HEAD response content-type:", contentType);
-    if (isHLSContentType(contentType)) {
-      console.debug("[Audio] Detected HLS via HEAD");
-      return true;
-    }
-  } catch (e) {
-    console.debug("[Audio] HEAD request failed:", e);
-  }
+    return isHLSContentType(contentType);
+  } catch { }
+
   try {
     const response = await fetch(url, { method: "GET", headers: { Range: "bytes=0-1" } });
     const contentType = response.headers.get("content-type");
-    console.debug("[Audio] GET response content-type:", contentType);
-    if (isHLSContentType(contentType)) {
-      console.debug("[Audio] Detected HLS via GET");
-      return true;
-    }
+    return isHLSContentType(contentType);
   } catch (e) {
-    console.debug("[Audio] GET request failed:", e);
+    console.warn(`[Audio] HLS detection failed - both HEAD and GET requests to ${url} failed:`, e);
   }
-  console.debug("[Audio] Not HLS");
   return false;
 }
 
@@ -67,29 +56,23 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
   const initializingRef = useRef<Promise<void> | null>(null);
 
   const createPlayer = async (src: string, vol: number, mut: boolean): Promise<PlayerWrapper> => {
-    console.debug("[Audio] createPlayer called for:", src);
     if (isLocalFile(src)) {
-      console.debug("[Audio] Local file, using Howl");
       setIsHLS(false);
       return new HowlPlayerWrapper(src, vol, mut, setState);
     }
 
-    console.debug("[Audio] Remote file, detecting HLS");
     const hls = await detectIsHLS(src);
-    console.debug("[Audio] HLS detection result:", hls);
+    console.debug(`[Audio] HLS detection result for ${src}:`, hls);
     setIsHLS(hls);
 
     if (hls) {
-      console.debug("[Audio] Creating HLSPlayerWrapper");
       return new HLSPlayerWrapper(src, vol, mut);
     } else {
-      console.debug("[Audio] Creating Howl player");
       return new HowlPlayerWrapper(src, vol, mut, setState);
     }
   };
 
   const initializePlayer = useCallback(async (src: string): Promise<void> => {
-    console.debug("[Audio] initializePlayer:", src);
     if (playerRef.current) {
       const player = playerRef.current;
       player.off("load");
@@ -109,34 +92,25 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
 
     playerRef.current = await createPlayer(src, volume, muted);
 
-    console.debug("[Audio] Player created, type:", playerRef.current.constructor.name);
-
     playerRef.current.on("load", async () => {
-      console.debug("[Audio] Player load event");
       setState("loading");
     });
     playerRef.current.on("play", async () => {
-      console.debug("[Audio] Player play event");
       setState("playing");
     });
     playerRef.current.on("loaderror", async () => {
-      console.debug("[Audio] Player loaderror event");
       setState("not_playing");
     });
     playerRef.current.on("pause", async () => {
-      console.debug("[Audio] Player pause event");
       setState("not_playing");
     });
     playerRef.current.on("end", async () => {
-      console.debug("[Audio] Player end event");
       setState("not_playing");
     });
     playerRef.current.on("stop", async () => {
-      console.debug("[Audio] Player stop event");
       setState("not_playing");
     });
     playerRef.current.on("playerror", async () => {
-      console.debug("[Audio] Player playerror event");
       setState("not_playing");
     });
   }, [muted, volume]);
@@ -178,27 +152,23 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
   }, []);
 
   const load = async (src: string): Promise<void> => {
-    console.debug("[Audio] load() called:", src);
     if (audioURL !== src) {
       const initPromise = initializePlayer(src);
       initializingRef.current = initPromise;
       await initPromise;
       initializingRef.current = null;
-      console.debug("[Audio] load() completed");
     }
   };
 
   const playWithFade = async (fadeDuration: number = 1000) => {
-    console.debug("[Audio] playWithFade() called");
     const player = await ensurePlayerReady();
     if (!player) {
       console.error("[Audio] Cannot play audio before loading.");
       return;
     }
-    console.debug("[Audio] Player ready, stopping and playing");
+
     player.stop();
     player.once("play", () => {
-      console.debug("[Audio] Player play event in playWithFade, starting fade");
       player.fade(0, volume, fadeDuration);
     });
     player.volume(0);

@@ -29,25 +29,8 @@ export class HLSPlayerWrapper implements PlayerWrapper {
       lowLatencyMode: true,
     });
 
-    this.hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-      console.debug("[HLS] MEDIA_ATTACHED");
-    });
-
     this.hls.on(Hls.Events.MANIFEST_LOADING, () => {
-      console.debug("[HLS] MANIFEST_LOADING");
       this.emit("load");
-    });
-
-    this.hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-      console.debug("[HLS] MANIFEST_PARSED:", data);
-    });
-
-    this.hls.on(Hls.Events.LEVEL_LOADED, (_event, data) => {
-      console.debug("[HLS] LEVEL_LOADED:", data);
-    });
-
-    this.hls.on(Hls.Events.FRAG_LOADED, (_event, data) => {
-      console.debug("[HLS] FRAG_LOADED:", data);
     });
 
     this.hls.on(Hls.Events.ERROR, (_event, data) => {
@@ -65,18 +48,15 @@ export class HLSPlayerWrapper implements PlayerWrapper {
     this.audio.muted = this.mutedValue;
 
     this.audio.addEventListener("play", () => {
-      console.debug("[HLS] audio play event");
       this.isPlaying = true;
     });
 
     this.audio.addEventListener("pause", () => {
-      console.debug("[HLS] audio pause event");
       this.isPlaying = false;
       this.emit("pause");
     });
 
     this.audio.addEventListener("ended", () => {
-      console.debug("[HLS] audio ended event");
       this.isPlaying = false;
       this.emit("end");
     });
@@ -87,19 +67,10 @@ export class HLSPlayerWrapper implements PlayerWrapper {
       this.emit("playerror");
     });
 
-    this.audio.addEventListener("waiting", () => {
-      console.debug("[HLS] audio waiting event");
-    });
-
     this.audio.addEventListener("canplay", () => {
-      console.debug("[HLS] audio canplay event");
       if (this.isPlaying) {
         this.emit("play");
       }
-    });
-
-    this.audio.addEventListener("loadeddata", () => {
-      console.debug("[HLS] audio loadeddata event");
     });
   }
 
@@ -111,7 +82,6 @@ export class HLSPlayerWrapper implements PlayerWrapper {
   }
 
   play() {
-    console.debug("[HLS] play() called");
     this.audio.play().catch((e) => {
       console.error("[HLS] play() failed:", e);
       this.emit("playerror");
@@ -119,12 +89,10 @@ export class HLSPlayerWrapper implements PlayerWrapper {
   }
 
   pause() {
-    console.debug("[HLS] pause() called");
     this.audio.pause();
   }
 
   stop() {
-    console.debug("[HLS] stop() called");
     this.audio.pause();
     this.audio.currentTime = 0;
     this.isPlaying = false;
