@@ -1,3 +1,25 @@
+# [3.3.0](https://github.com/PocketMiner82/SongGuess/compare/3.2.0...3.3.0) (2026-09-04)
+
+
+### Bug Fixes
+
+* add hls support (wip) ([d10ddce](https://github.com/PocketMiner82/SongGuess/commit/d10ddcedd6e5c456ad564068caac40160b900533))
+* **AudioHook:** cleanup + fix wrong audio position ([4b03830](https://github.com/PocketMiner82/SongGuess/commit/4b038309ffefd66d1de438b7cd7874f5663a684e))
+* **Config:** reset some data on gamemode change + update timePerQuestion bounds ([5931bd2](https://github.com/PocketMiner82/SongGuess/commit/5931bd235fb3b0df9bf89a02f95a086bc970dd08))
+* **Config:** use msg instead of this ([4995c3d](https://github.com/PocketMiner82/SongGuess/commit/4995c3d6531a946684cf313444e8f7498d51b1c7))
+* enable caching again ([1f5c8dc](https://github.com/PocketMiner82/SongGuess/commit/1f5c8dc0e9a782553642e520d4caca4f4cc8c0ef))
+* **LobbySettings:** update audio start pos dropdown labels ([7715824](https://github.com/PocketMiner82/SongGuess/commit/77158245384f026355a4d20f676b0a56aad899bc))
+* **SearchMusicComponent:** pause audio on dialog close (if used as dialog) ([fc3693f](https://github.com/PocketMiner82/SongGuess/commit/fc3693f388aab213f5e82782da4fde0b7b46494d))
+* **SoundCloud:** use higher resolution artwork ([98b7c0b](https://github.com/PocketMiner82/SongGuess/commit/98b7c0b3fd57766e589d8f9555cb9f21ae6d7850))
+* **zod:** use union instead of discriminatedUnion everywhere ([6e11498](https://github.com/PocketMiner82/SongGuess/commit/6e114980b307642aee447ebde9aed901a671dc66))
+
+
+### Features
+
+* allow setting audio start position as percentage ([f81aeef](https://github.com/PocketMiner82/SongGuess/commit/f81aeefd0863f0309f77f54a9b7deac1f4ee58cf))
+* **MultipleChoice:** made amount of answers configurable ([c5959e2](https://github.com/PocketMiner82/SongGuess/commit/c5959e2f3e667fda4b3bc0250e86252014a8bb0e))
+* **SoundCloud:** implement HLS streaming - the mp3 http streams were deprecated and removed ([1143a4b](https://github.com/PocketMiner82/SongGuess/commit/1143a4b7c830c5a62d7b09365560532bf53f571b))
+
 # [3.3.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.18...3.3.0-dev.19) (2026-09-04)
 
 # [3.3.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.17...3.3.0-dev.18) (2026-09-04)
