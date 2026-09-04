@@ -1,3 +1,11 @@
+# [3.3.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.12...3.3.0-dev.13) (2026-09-04)
+
+
+### Bug Fixes
+
+* **Config:** reset some data on gamemode change + update timePerQuestion bounds ([5931bd2](https://github.com/PocketMiner82/SongGuess/commit/5931bd235fb3b0df9bf89a02f95a086bc970dd08))
+* **Config:** use msg instead of this ([4995c3d](https://github.com/PocketMiner82/SongGuess/commit/4995c3d6531a946684cf313444e8f7498d51b1c7))
+
 # [3.3.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.11...3.3.0-dev.12) (2026-09-04)
 
 
