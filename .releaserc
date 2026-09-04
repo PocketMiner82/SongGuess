@@ -14,8 +14,7 @@
         "parserOpts": {
           "noteKeywords": [
             "BREAKING CHANGE",
-            "BREAKING CHANGES",
-            "BREAKING"
+            "BREAKING CHANGES"
           ]
         },
         "releaseRules": [
@@ -34,8 +33,7 @@
         "parserOpts": {
           "noteKeywords": [
             "BREAKING CHANGE",
-            "BREAKING CHANGES",
-            "BREAKING"
+            "BREAKING CHANGES"
           ]
         }
       }
