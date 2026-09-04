@@ -1,3 +1,10 @@
+# [3.3.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.11...3.3.0-dev.12) (2026-09-04)
+
+
+### Features
+
+* **MultipleChoice:** made amount of answers configurable ([c5959e2](https://github.com/PocketMiner82/SongGuess/commit/c5959e2f3e667fda4b3bc0250e86252014a8bb0e))
+
 # [3.3.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.10...3.3.0-dev.11) (2026-09-04)
 
 
