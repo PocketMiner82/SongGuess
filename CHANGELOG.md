@@ -1,3 +1,798 @@
+# [4.0.0](https://github.com/PocketMiner82/SongGuess/compare/3.2.0...4.0.0) (2026-09-04)
+
+
+### Bug Fixes
+
+* add hls support (wip) ([d10ddce](https://github.com/PocketMiner82/SongGuess/commit/d10ddcedd6e5c456ad564068caac40160b900533))
+* **AudioHook:** cleanup + fix wrong audio position ([4b03830](https://github.com/PocketMiner82/SongGuess/commit/4b038309ffefd66d1de438b7cd7874f5663a684e))
+* **Config:** reset some data on gamemode change + update timePerQuestion bounds ([5931bd2](https://github.com/PocketMiner82/SongGuess/commit/5931bd235fb3b0df9bf89a02f95a086bc970dd08))
+* **Config:** use msg instead of this ([4995c3d](https://github.com/PocketMiner82/SongGuess/commit/4995c3d6531a946684cf313444e8f7498d51b1c7))
+* enable caching again ([1f5c8dc](https://github.com/PocketMiner82/SongGuess/commit/1f5c8dc0e9a782553642e520d4caca4f4cc8c0ef))
+* **LobbySettings:** update audio start pos dropdown labels ([7715824](https://github.com/PocketMiner82/SongGuess/commit/77158245384f026355a4d20f676b0a56aad899bc))
+* **SearchMusicComponent:** pause audio on dialog close (if used as dialog) ([fc3693f](https://github.com/PocketMiner82/SongGuess/commit/fc3693f388aab213f5e82782da4fde0b7b46494d))
+* **SoundCloud:** use higher resolution artwork ([98b7c0b](https://github.com/PocketMiner82/SongGuess/commit/98b7c0b3fd57766e589d8f9555cb9f21ae6d7850))
+* **zod:** use union instead of discriminatedUnion everywhere ([6e11498](https://github.com/PocketMiner82/SongGuess/commit/6e114980b307642aee447ebde9aed901a671dc66))
+
+
+### Build System
+
+* **deps:** bump the all-npm-deps group across 1 directory with 10 updates ([#203](https://github.com/PocketMiner82/SongGuess/issues/203)) ([22a8338](https://github.com/PocketMiner82/SongGuess/commit/22a8338397b8d0a618c719abb0190bc6b5256bf3))
+
+
+### Features
+
+* allow setting audio start position as percentage ([f81aeef](https://github.com/PocketMiner82/SongGuess/commit/f81aeefd0863f0309f77f54a9b7deac1f4ee58cf))
+* **MultipleChoice:** made amount of answers configurable ([c5959e2](https://github.com/PocketMiner82/SongGuess/commit/c5959e2f3e667fda4b3bc0250e86252014a8bb0e))
+* **SoundCloud:** implement HLS streaming - the mp3 http streams were deprecated and removed ([1143a4b](https://github.com/PocketMiner82/SongGuess/commit/1143a4b7c830c5a62d7b09365560532bf53f571b))
+
+
+### BREAKING CHANGES
+
+* **deps:** code in arrow-functions (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12707">#12707</a>)</li>
+<li><strong>eslint-plugin:</strong> [unified-signatures] report
+identical signatures (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12678">#12678</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-unnecessary-type-assertion]
+prevent stack overflow in recursive types (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12711">#12711</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-floating-promises] setting
+<code>ignoreVoid: false</code> results in false negative in
+ArrowFunctionExpression (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12646">#12646</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-empty-object-type] ignore
+suggestions that result in invalid interfaces and export defaults (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12739">#12739</a>)</li>
+<li><strong>website:</strong> playground crashes on <code>extends</code>
+configs (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12608">#12608</a>)</li>
+<li><strong>website:</strong> account for thanks.dev and out-of-band
+donors in sponsors list (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12735">#12735</a>)</li>
+</ul>
+<h3>❤️ Thank You</h3>
+<ul>
+<li>Evyatar Daud <a
+href="https://github.com/StyleShit"><code>@​StyleShit</code></a></li>
+<li>Hugo <a
+href="https://github.com/hugop95"><code>@​hugop95</code></a></li>
+<li>Josh Goldberg ✨</li>
+</ul>
+<!-- raw HTML omitted -->
+</blockquote>
+<p>... (truncated)</p>
+</details>
+<details>
+<summary>Changelog</summary>
+<p><em>Sourced from <a
+href="https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/CHANGELOG.md">@​typescript-eslint/eslint-plugin's
+changelog</a>.</em></p>
+<blockquote>
+<h2>8.69.0 (2026-08-31)</h2>
+<h3>🚀 Features</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [no-misused-promises] add flagUnions
+option for checkConditionals (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12603">#12603</a>)</li>
+</ul>
+<h3>🩹 Fixes</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [no-meaningless-void-operator]
+report void on non-call expressions (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12727">#12727</a>)</li>
+<li><strong>eslint-plugin:</strong> [unified-signatures] compare type
+parameters by constraint instead of name (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12741">#12741</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-mixed-enums] use scope analysis
+instead of type checking for merged namespaces (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12731">#12731</a>)</li>
+</ul>
+<h3>❤️ Thank You</h3>
+<ul>
+<li>Abdu Alim Arlikhozhaev <a
+href="https://github.com/Arlikhozhaev"><code>@​Arlikhozhaev</code></a></li>
+<li>Evyatar Daud <a
+href="https://github.com/StyleShit"><code>@​StyleShit</code></a></li>
+<li>Josh Goldberg ✨</li>
+<li>wonbeanie <a
+href="https://github.com/wonbeanie"><code>@​wonbeanie</code></a></li>
+</ul>
+<p>See <a
+href="https://github.com/typescript-eslint/typescript-eslint/releases/tag/v8.69.0">GitHub
+Releases</a> for more information.</p>
+<p>You can read about our <a
+href="https://typescript-eslint.io/users/versioning">versioning
+strategy</a> and <a
+href="https://typescript-eslint.io/users/releases">releases</a> on our
+website.</p>
+<h2>8.68.0 (2026-08-24)</h2>
+<h3>🚀 Features</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [strict-void-return] add fix
+suggestions (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12086">#12086</a>)</li>
+</ul>
+<h3>🩹 Fixes</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [no-empty-object-type] ignore
+suggestions that result in invalid interfaces and export defaults (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12739">#12739</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-floating-promises] setting
+<code>ignoreVoid: false</code> results in false negative in
+ArrowFunctionExpression (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12646">#12646</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-unnecessary-type-assertion]
+prevent stack overflow in recursive types (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12711">#12711</a>)</li>
+<li><strong>eslint-plugin:</strong> [unified-signatures] report
+identical signatures (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12678">#12678</a>)</li>
+<li><strong>eslint-plugin:</strong> [return-await] prevent autofix from
+* **deps:** code in arrow-functions (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12707">#12707</a>)</li>
+<li><strong>eslint-plugin:</strong> [unified-signatures] deduplicate
+types in report (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12656">#12656</a>)</li>
+</ul>
+<h3>❤️ Thank You</h3>
+<ul>
+<li>Evyatar Daud <a
+href="https://github.com/StyleShit"><code>@​StyleShit</code></a></li>
+<li>Hugo <a
+href="https://github.com/hugop95"><code>@​hugop95</code></a></li>
+<li>Niki <a
+href="https://github.com/phaux"><code>@​phaux</code></a></li>
+<li>Younsang Na <a
+href="https://github.com/nayounsang"><code>@​nayounsang</code></a></li>
+</ul>
+<p>See <a
+href="https://github.com/typescript-eslint/typescript-eslint/releases/tag/v8.68.0">GitHub
+Releases</a> for more information.</p>
+<p>You can read about our <a
+href="https://typescript-eslint.io/users/versioning">versioning
+strategy</a> and <a
+href="https://typescript-eslint.io/users/releases">releases</a> on our
+website.</p>
+</blockquote>
+</details>
+<details>
+<summary>Commits</summary>
+<ul>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/9a6e546823e5d8f2dc015df2aa66c0230615e209"><code>9a6e546</code></a>
+chore(release): publish 8.69.0</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/513638effe9e7b78566cc153d4d809a1435153f3"><code>513638e</code></a>
+fix(eslint-plugin): [no-meaningless-void-operator] report void on
+non-call ex...</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/1dba4c50f0599cc212e9d1eca9ec0f21a818f0b5"><code>1dba4c5</code></a>
+chore(eslint-plugin): fix
+<code>eslint-plugin/require-test-error-positions</code> report...</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/a2fccae39c7cb1e516a29b1c746b7767bffa03e2"><code>a2fccae</code></a>
+fix(eslint-plugin): [unified-signatures] compare type parameters by
+constrain...</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/a23069df170bc4f9c35c8aaf3a8634635591844a"><code>a23069d</code></a>
+test(eslint-plugin): [no-mixed-enums] add error positions (<a
+href="https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/eslint-plugin/issues/12779">#12779</a>)</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/3f0dffd45a91d0292bf1acc1159496d1b232d319"><code>3f0dffd</code></a>
+fix(eslint-plugin): [no-mixed-enums] use scope analysis instead of type
+check...</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/e18fea861d50ffc8b7b7149ae3454d114f6a8200"><code>e18fea8</code></a>
+test(eslint-plugin): [no-floating-promises] reactivate skipped
+<code>node:test</code> sp...</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/324515c53c2f541cff2a8af9b2a929decba0af91"><code>324515c</code></a>
+test(eslint-plugin): [no-unnecessary-condition] add tests for optional
+chains...</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/2a387f1298e9c10b83936044a017f84b8ee5b7f3"><code>2a387f1</code></a>
+feat(eslint-plugin): [no-misused-promises] add flagUnions option for
+checkCon...</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/8f4e00a4e8f3bdf93a5e5e8bc568ba1c15a4f896"><code>8f4e00a</code></a>
+chore(release): publish 8.68.0</li>
+<li>Additional commits viewable in <a
+href="https://github.com/typescript-eslint/typescript-eslint/commits/v8.69.0/packages/eslint-plugin">compare
+view</a></li>
+</ul>
+</details>
+<br />
+
+Updates `@typescript-eslint/parser` from 8.67.0 to 8.69.0
+<details>
+<summary>Release notes</summary>
+<p><em>Sourced from <a
+href="https://github.com/typescript-eslint/typescript-eslint/releases">@​typescript-eslint/parser's
+releases</a>.</em></p>
+<blockquote>
+<h2>v8.69.0</h2>
+<h2>8.69.0 (2026-08-31)</h2>
+<h3>🚀 Features</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [no-misused-promises] add flagUnions
+option for checkConditionals (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12603">#12603</a>)</li>
+</ul>
+<h3>🩹 Fixes</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [no-mixed-enums] use scope analysis
+instead of type checking for merged namespaces (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12731">#12731</a>)</li>
+<li><strong>eslint-plugin:</strong> [unified-signatures] compare type
+parameters by constraint instead of name (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12741">#12741</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-meaningless-void-operator]
+report void on non-call expressions (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12727">#12727</a>)</li>
+<li><strong>website:</strong> respect allowJs playground config (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12744">#12744</a>)</li>
+</ul>
+<h3>❤️ Thank You</h3>
+<ul>
+<li>Abdu Alim Arlikhozhaev <a
+href="https://github.com/Arlikhozhaev"><code>@​Arlikhozhaev</code></a></li>
+<li>Evyatar Daud <a
+href="https://github.com/StyleShit"><code>@​StyleShit</code></a></li>
+<li>Josh Goldberg ✨</li>
+<li>wonbeanie <a
+href="https://github.com/wonbeanie"><code>@​wonbeanie</code></a></li>
+<li>Younsang Na <a
+href="https://github.com/nayounsang"><code>@​nayounsang</code></a></li>
+</ul>
+<p>See <a
+href="https://github.com/typescript-eslint/typescript-eslint/releases/tag/v8.69.0">GitHub
+Releases</a> for more information.</p>
+<p>You can read about our <a
+href="https://typescript-eslint.io/users/versioning">versioning
+strategy</a> and <a
+href="https://typescript-eslint.io/users/releases">releases</a> on our
+website.</p>
+<h2>v8.68.0</h2>
+<h2>8.68.0 (2026-08-24)</h2>
+<h3>🚀 Features</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [strict-void-return] add fix
+suggestions (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12086">#12086</a>)</li>
+<li><strong>utils:</strong> support ESLint rule meta.languages (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12663">#12663</a>)</li>
+</ul>
+<h3>🩹 Fixes</h3>
+<ul>
+<li><strong>eslint-plugin:</strong> [unified-signatures] deduplicate
+types in report (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12656">#12656</a>)</li>
+<li><strong>eslint-plugin:</strong> [return-await] prevent autofix from
+* **deps:** code in arrow-functions (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12707">#12707</a>)</li>
+<li><strong>eslint-plugin:</strong> [unified-signatures] report
+identical signatures (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12678">#12678</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-unnecessary-type-assertion]
+prevent stack overflow in recursive types (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12711">#12711</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-floating-promises] setting
+<code>ignoreVoid: false</code> results in false negative in
+ArrowFunctionExpression (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12646">#12646</a>)</li>
+<li><strong>eslint-plugin:</strong> [no-empty-object-type] ignore
+suggestions that result in invalid interfaces and export defaults (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12739">#12739</a>)</li>
+<li><strong>website:</strong> playground crashes on <code>extends</code>
+configs (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12608">#12608</a>)</li>
+<li><strong>website:</strong> account for thanks.dev and out-of-band
+donors in sponsors list (<a
+href="https://redirect.github.com/typescript-eslint/typescript-eslint/pull/12735">#12735</a>)</li>
+</ul>
+<h3>❤️ Thank You</h3>
+<ul>
+<li>Evyatar Daud <a
+href="https://github.com/StyleShit"><code>@​StyleShit</code></a></li>
+<li>Hugo <a
+href="https://github.com/hugop95"><code>@​hugop95</code></a></li>
+<li>Josh Goldberg ✨</li>
+</ul>
+<!-- raw HTML omitted -->
+</blockquote>
+<p>... (truncated)</p>
+</details>
+<details>
+<summary>Changelog</summary>
+<p><em>Sourced from <a
+href="https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/parser/CHANGELOG.md">@​typescript-eslint/parser's
+changelog</a>.</em></p>
+<blockquote>
+<h2>8.69.0 (2026-08-31)</h2>
+<p>This was a version bump only for parser to align it with other
+projects, there were no code changes.</p>
+<p>See <a
+href="https://github.com/typescript-eslint/typescript-eslint/releases/tag/v8.69.0">GitHub
+Releases</a> for more information.</p>
+<p>You can read about our <a
+href="https://typescript-eslint.io/users/versioning">versioning
+strategy</a> and <a
+href="https://typescript-eslint.io/users/releases">releases</a> on our
+website.</p>
+<h2>8.68.0 (2026-08-24)</h2>
+<p>This was a version bump only for parser to align it with other
+projects, there were no code changes.</p>
+<p>See <a
+href="https://github.com/typescript-eslint/typescript-eslint/releases/tag/v8.68.0">GitHub
+Releases</a> for more information.</p>
+<p>You can read about our <a
+href="https://typescript-eslint.io/users/versioning">versioning
+strategy</a> and <a
+href="https://typescript-eslint.io/users/releases">releases</a> on our
+website.</p>
+</blockquote>
+</details>
+<details>
+<summary>Commits</summary>
+<ul>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/9a6e546823e5d8f2dc015df2aa66c0230615e209"><code>9a6e546</code></a>
+chore(release): publish 8.69.0</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/8f4e00a4e8f3bdf93a5e5e8bc568ba1c15a4f896"><code>8f4e00a</code></a>
+chore(release): publish 8.68.0</li>
+<li><a
+href="https://github.com/typescript-eslint/typescript-eslint/commit/55f6d5d4ca39d2fab93db97ced497b956017878d"><code>55f6d5d</code></a>
+chore: enable source maps (<a
+href="https://github.com/typescript-eslint/typescript-eslint/tree/HEAD/packages/parser/issues/12677">#12677</a>)</li>
+<li>See full diff in <a
+href="https://github.com/typescript-eslint/typescript-eslint/commits/v8.69.0/packages/parser">compare
+view</a></li>
+</ul>
+</details>
+<br />
+
+Updates `eslint` from 10.8.1 to 10.9.1
+<details>
+<summary>Release notes</summary>
+<p><em>Sourced from <a
+href="https://github.com/eslint/eslint/releases">eslint's
+releases</a>.</em></p>
+<blockquote>
+<h2>v10.9.1</h2>
+<h2>Bug Fixes</h2>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/1e641c919fc1421493bf913feb607896982451a3"><code>1e641c9</code></a>
+fix: no-loss-of-precision false positive with trailing decimal point (<a
+href="https://redirect.github.com/eslint/eslint/issues/21251">#21251</a>)
+(Aleksandr Shoronov)</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/ad74a8dada2aaa17bfd0b8cc7b4119ff7a8ac04b"><code>ad74a8d</code></a>
+docs: add deprecation steps for EOL package versions (<a
+href="https://redirect.github.com/eslint/eslint/issues/21248">#21248</a>)
+(Francesco Trotta)</li>
+</ul>
+<h2>Chores</h2>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/3c3ae53a43721162f0db76c69665ebd9d752ea52"><code>3c3ae53</code></a>
+chore: update ecosystem plugins (<a
+href="https://redirect.github.com/eslint/eslint/issues/21249">#21249</a>)
+(ESLint Bot)</li>
+</ul>
+<h2>v10.9.0</h2>
+<h2>Features</h2>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/08de88e50294c4e01f6cae97eceeb578da55792b"><code>08de88e</code></a>
+feat: handle underflow in no-loss-of-precision (<a
+href="https://redirect.github.com/eslint/eslint/issues/21218">#21218</a>)
+(Rithish S)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/55db4791120ae591d88089c43127b7b0e16866d4"><code>55db479</code></a>
+feat: add checkConditionalExpressions to
+<code>no-unmodified-loop-condition</code> (<a
+href="https://redirect.github.com/eslint/eslint/issues/21175">#21175</a>)
+(sethamus)</li>
+</ul>
+<h2>Bug Fixes</h2>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/2ba302554e7a24e9909bbdd026fd0c2d1d0d8638"><code>2ba3025</code></a>
+fix: prevent unsafe <code>no-var</code> autofix with hoisted functions
+(<a
+href="https://redirect.github.com/eslint/eslint/issues/21213">#21213</a>)
+(sethamus)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/8e6962219a605c5f5add10953aa31027da839194"><code>8e69622</code></a>
+fix: Prevent no-var autofix when var is shadowed by catch parameter (<a
+href="https://redirect.github.com/eslint/eslint/issues/21204">#21204</a>)
+(Yang Hyeonjong)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/684b57972e1ddf25e076fb36189c60bbcacee635"><code>684b579</code></a>
+fix: prefer-template invalid autofix creates a tagged template call (<a
+href="https://redirect.github.com/eslint/eslint/issues/21207">#21207</a>)
+(김채영)</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/9ef407a3b051e74f50dc7fb8914e2bd89b3e5e53"><code>9ef407a</code></a>
+docs: use eslint.config.* wherever config file names are listed (<a
+href="https://redirect.github.com/eslint/eslint/issues/21216">#21216</a>)
+(Marry (Subin Yang))</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/87f66f4435c4df7f4f6815c939d153196ec03e3c"><code>87f66f4</code></a>
+docs: Update README (GitHub Actions Bot)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/585ef37516c0dc29ddb91ce2a2cdcc46fdbbd610"><code>585ef37</code></a>
+docs: update architecture documentation (<a
+href="https://redirect.github.com/eslint/eslint/issues/21112">#21112</a>)
+(Francesco Trotta)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/f3993b0547bace7370e9728ee7408af49d367d76"><code>f3993b0</code></a>
+docs: Update README (GitHub Actions Bot)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/ffc87d6234b2aa4335eec069e5c4d6ac04832b9e"><code>ffc87d6</code></a>
+docs: fix broken links in Further Reading sections (<a
+href="https://redirect.github.com/eslint/eslint/issues/21203">#21203</a>)
+(Minsu)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/1a761e1d11b011fcb6bee181231a51010c500e4d"><code>1a761e1</code></a>
+docs: update moved JSX specification links (<a
+href="https://redirect.github.com/eslint/eslint/issues/21198">#21198</a>)
+(Imran Mustafa)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/4d00ca4064ae0d1a75b604a16c68ab9f386ad388"><code>4d00ca4</code></a>
+docs: update ESLint peer dependency to <code>^10.0.0</code> in shareable
+configs (<a
+href="https://redirect.github.com/eslint/eslint/issues/21202">#21202</a>)
+(lumir)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/510d1a2e87bc197219f42e195ddb638d2b183a5a"><code>510d1a2</code></a>
+docs: Update README (GitHub Actions Bot)</li>
+</ul>
+<h2>Chores</h2>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/899dbf131ce12a194b394bb8d67307df23509d17"><code>899dbf1</code></a>
+chore: update github/codeql-action action to v4.37.7 (<a
+href="https://redirect.github.com/eslint/eslint/issues/21243">#21243</a>)
+(renovate[bot])</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/9aa38732177935bd1d7f1493732c0b67666be28a"><code>9aa3873</code></a>
+chore: update ecosystem plugins (<a
+href="https://redirect.github.com/eslint/eslint/issues/21235">#21235</a>)
+(ESLint Bot)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/dc1e7a8416937edefe04cf836ee202a6fc03bedd"><code>dc1e7a8</code></a>
+chore: update ecosystem plugins (<a
+href="https://redirect.github.com/eslint/eslint/issues/21208">#21208</a>)
+(ESLint Bot)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/f878d212e9622da9513bcd60d2aedb2e8bb4fc8b"><code>f878d21</code></a>
+ci: bump pnpm/action-setup from 6.0.9 to 6.0.10 (<a
+href="https://redirect.github.com/eslint/eslint/issues/21200">#21200</a>)
+(dependabot[bot])</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/4891e50aceadb0e886ad7d8ab5ae2beab563de85"><code>4891e50</code></a>
+ci: bump github/codeql-action from 4.37.4 to 4.37.6 (<a
+href="https://redirect.github.com/eslint/eslint/issues/21199">#21199</a>)
+(dependabot[bot])</li>
+</ul>
+</blockquote>
+</details>
+<details>
+<summary>Commits</summary>
+<ul>
+<li><a
+href="https://github.com/eslint/eslint/commit/5c8c2417b9ff462f2dc4e54a062c59135b45b845"><code>5c8c241</code></a>
+10.9.1</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/a7f3b7ddca7de8464995707d1bbac3ca91090015"><code>a7f3b7d</code></a>
+Build: changelog update for 10.9.1</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/1e641c919fc1421493bf913feb607896982451a3"><code>1e641c9</code></a>
+fix: no-loss-of-precision false positive with trailing decimal point (<a
+href="https://redirect.github.com/eslint/eslint/issues/21251">#21251</a>)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/ad74a8dada2aaa17bfd0b8cc7b4119ff7a8ac04b"><code>ad74a8d</code></a>
+docs: add deprecation steps for EOL package versions (<a
+href="https://redirect.github.com/eslint/eslint/issues/21248">#21248</a>)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/3c3ae53a43721162f0db76c69665ebd9d752ea52"><code>3c3ae53</code></a>
+chore: update ecosystem plugins (<a
+href="https://redirect.github.com/eslint/eslint/issues/21249">#21249</a>)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/c27bc926e496985eb7911c09eb60914b2e4b5d0f"><code>c27bc92</code></a>
+10.9.0</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/fa831d95b326e6d23671d9b2df1ea5dbc64f6f34"><code>fa831d9</code></a>
+Build: changelog update for 10.9.0</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/899dbf131ce12a194b394bb8d67307df23509d17"><code>899dbf1</code></a>
+chore: update github/codeql-action action to v4.37.7 (<a
+href="https://redirect.github.com/eslint/eslint/issues/21243">#21243</a>)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/08de88e50294c4e01f6cae97eceeb578da55792b"><code>08de88e</code></a>
+feat: handle underflow in no-loss-of-precision (<a
+href="https://redirect.github.com/eslint/eslint/issues/21218">#21218</a>)</li>
+<li><a
+href="https://github.com/eslint/eslint/commit/9ef407a3b051e74f50dc7fb8914e2bd89b3e5e53"><code>9ef407a</code></a>
+docs: use eslint.config.* wherever config file names are listed (<a
+href="https://redirect.github.com/eslint/eslint/issues/21216">#21216</a>)</li>
+<li>Additional commits viewable in <a
+href="https://github.com/eslint/eslint/compare/v10.8.1...v10.9.1">compare
+view</a></li>
+</ul>
+</details>
+<br />
+
+Updates `eslint-plugin-react-refresh` from 0.5.4 to 0.5.5
+<details>
+<summary>Release notes</summary>
+<p><em>Sourced from <a
+href="https://github.com/ArnaudBarre/eslint-plugin-react-refresh/releases">eslint-plugin-react-refresh's
+releases</a>.</em></p>
+<blockquote>
+<h2>v0.5.5</h2>
+<ul>
+<li>Fix SCREAMING_SNAKE_CASE constant exported via <code>export { Name
+}</code> incorrectly treated as React component <a
+href="https://redirect.github.com/ArnaudBarre/eslint-plugin-react-refresh/pull/114">#114</a>
+(fixes <a
+href="https://redirect.github.com/ArnaudBarre/eslint-plugin-react-refresh/issues/113">#113</a>)</li>
+<li>Add <code>contentType</code> and <code>size</code> to
+<code>allowExportNames</code> in Next config <a
+href="https://redirect.github.com/ArnaudBarre/eslint-plugin-react-refresh/pull/115">#115</a></li>
+</ul>
+</blockquote>
+</details>
+<details>
+<summary>Changelog</summary>
+<p><em>Sourced from <a
+href="https://github.com/ArnaudBarre/eslint-plugin-react-refresh/blob/main/CHANGELOG.md">eslint-plugin-react-refresh's
+changelog</a>.</em></p>
+<blockquote>
+<h2>0.5.5</h2>
+<ul>
+<li>Fix SCREAMING_SNAKE_CASE constant exported via <code>export { Name
+}</code> incorrectly treated as React component <a
+href="https://redirect.github.com/ArnaudBarre/eslint-plugin-react-refresh/pull/114">#114</a>
+(fixes <a
+href="https://redirect.github.com/ArnaudBarre/eslint-plugin-react-refresh/issues/113">#113</a>)</li>
+<li>Add <code>contentType</code> and <code>size</code> to
+<code>allowExportNames</code> in Next config <a
+href="https://redirect.github.com/ArnaudBarre/eslint-plugin-react-refresh/pull/115">#115</a></li>
+</ul>
+</blockquote>
+</details>
+<details>
+<summary>Commits</summary>
+<ul>
+<li><a
+href="https://github.com/ArnaudBarre/eslint-plugin-react-refresh/commit/65c31725fa31cbcf4a037b8f06f4f72783d17006"><code>65c3172</code></a>
+[publish] v0.5.5</li>
+<li><a
+href="https://github.com/ArnaudBarre/eslint-plugin-react-refresh/commit/84110202c8a8277335d43fa08ddc96047db6d04a"><code>8411020</code></a>
+Bump deps</li>
+<li><a
+href="https://github.com/ArnaudBarre/eslint-plugin-react-refresh/commit/c28fa155e8371286ae347164425a513d55938349"><code>c28fa15</code></a>
+Fix SCREAMING_SNAKE_CASE constant exported via <code>export { Name
+}</code> incorrectly ...</li>
+<li><a
+href="https://github.com/ArnaudBarre/eslint-plugin-react-refresh/commit/554c764374d9a8875370a0cc2e46bfa8abf9a087"><code>554c764</code></a>
+[publish] add <code>contentType</code> and <code>size</code> to
+allowExportNames in Next config (<a
+href="https://redirect.github.com/ArnaudBarre/eslint-plugin-react-refresh/issues/115">#115</a>)</li>
+<li>See full diff in <a
+href="https://github.com/ArnaudBarre/eslint-plugin-react-refresh/compare/v0.5.4...v0.5.5">compare
+view</a></li>
+</ul>
+</details>
+<br />
+
+Updates `wrangler` from 4.123.0 to 4.127.1
+<details>
+<summary>Release notes</summary>
+<p><em>Sourced from <a
+href="https://github.com/cloudflare/workers-sdk/releases">wrangler's
+releases</a>.</em></p>
+<blockquote>
+<h2>wrangler@4.127.1</h2>
+<h3>Patch Changes</h3>
+<ul>
+<li>
+<p><a
+href="https://redirect.github.com/cloudflare/workers-sdk/pull/15383">#15383</a>
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/eb018505fdd8f721d57da64cd3704e4af5cb7753"><code>eb01850</code></a>
+Thanks <a
+href="https://github.com/apps/dependabot"><code>@​dependabot</code></a>!
+- Update dependencies of &quot;miniflare&quot;, &quot;wrangler&quot;</p>
+<p>The following dependency versions have been updated:</p>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>From</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@​cloudflare/workers-types</code></td>
+<td>^5.20260826.1</td>
+<td>^5.20260827.1</td>
+</tr>
+<tr>
+<td>workerd</td>
+<td>1.20260826.1</td>
+<td>1.20260827.1</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><a
+href="https://redirect.github.com/cloudflare/workers-sdk/pull/15393">#15393</a>
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/e1df91a2135c97806152760930fcab0211417bda"><code>e1df91a</code></a>
+Thanks <a
+href="https://github.com/apps/dependabot"><code>@​dependabot</code></a>!
+- Update dependencies of &quot;miniflare&quot;, &quot;wrangler&quot;</p>
+<p>The following dependency versions have been updated:</p>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>From</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@​cloudflare/workers-types</code></td>
+<td>^5.20260827.1</td>
+<td>^5.20260828.1</td>
+</tr>
+<tr>
+<td>workerd</td>
+<td>1.20260827.1</td>
+<td>1.20260828.1</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>Updated dependencies [<a
+href="https://github.com/cloudflare/workers-sdk/commit/eb018505fdd8f721d57da64cd3704e4af5cb7753"><code>eb01850</code></a>,
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/e1df91a2135c97806152760930fcab0211417bda"><code>e1df91a</code></a>,
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/b23de747f6a4e7c19655da3adb10a5da49b8e368"><code>b23de74</code></a>,
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/015550ac6763430db2132dbc1f412e820ea9f234"><code>015550a</code></a>,
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/015550ac6763430db2132dbc1f412e820ea9f234"><code>015550a</code></a>,
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/015550ac6763430db2132dbc1f412e820ea9f234"><code>015550a</code></a>,
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/3650d29f1cfcd6db103c25d22819e8fe41d592f3"><code>3650d29</code></a>,
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/b23de747f6a4e7c19655da3adb10a5da49b8e368"><code>b23de74</code></a>]:</p>
+<ul>
+<li><a
+href="mailto:miniflare@5.20260828.0-alpha">miniflare@5.20260828.0-alpha</a></li>
+</ul>
+</li>
+</ul>
+<h2>wrangler@4.127.0</h2>
+<h3>Minor Changes</h3>
+<ul>
+<li>
+<p><a
+href="https://redirect.github.com/cloudflare/workers-sdk/pull/15356">#15356</a>
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/fe265f87347ce253ed9ef00302f4cd2cdcb2bb19"><code>fe265f8</code></a>
+Thanks <a
+href="https://github.com/rubuy-74"><code>@​rubuy-74</code></a>! - Add
+support for configuring a per-workflow max concurrency limit via
+<code>workflows[].concurrency.limit</code> in your Wrangler config.</p>
+<p>The limit is the maximum number of Workflow instances that can run
+concurrently. It is validated as a positive integer and persisted on
+deploy; the ceiling is enforced server-side. Concurrency is ignored in
+local development.</p>
+<pre lang="jsonc"><code>{
+  &quot;workflows&quot;: [
+    {
+      &quot;binding&quot;: &quot;MY_WORKFLOW&quot;,
+      &quot;name&quot;: &quot;my-workflow&quot;,
+      &quot;class_name&quot;: &quot;MyWorkflow&quot;,
+      &quot;concurrency&quot;: { &quot;limit&quot;: 10 }
+    }
+  ]
+}
+</code></pre>
+</li>
+</ul>
+<h3>Patch Changes</h3>
+<ul>
+<li>
+<p><a
+href="https://redirect.github.com/cloudflare/workers-sdk/pull/15367">#15367</a>
+<a
+href="https://github.com/cloudflare/workers-sdk/commit/412c79e2735176727bdb2ab108fe581d4c7961d0"><code>412c79e</code></a>
+Thanks <a
+href="https://github.com/apps/dependabot"><code>@​dependabot</code></a>!
+- Update dependencies of &quot;miniflare&quot;, &quot;wrangler&quot;</p>
+<p>The following dependency versions have been updated:</p>
+</li>
+</ul>
+<!-- raw HTML omitted -->
+</blockquote>
+<p>... (truncated)</p>
+</details>
+<details>
+<summary>Commits</summary>
+<ul>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/f8085545bcaa2c639f171c25e4424685036a0e10"><code>f808554</code></a>
+Version Packages (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15385">#15385</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/b903a0978329de989c92a498c80b8cb6aab9e1c6"><code>b903a09</code></a>
+Pin <code>@netlify/build-info</code> to <code>10.5.1</code> and update
+pnpm patch (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/14808">#14808</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/3650d29f1cfcd6db103c25d22819e8fe41d592f3"><code>3650d29</code></a>
+Rename Worker target fields from workerName to worker (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15373">#15373</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/a831498703957fe6a6025402ed7c4a527555881e"><code>a831498</code></a>
+Version Packages (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15372">#15372</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/fe265f87347ce253ed9ef00302f4cd2cdcb2bb19"><code>fe265f8</code></a>
+[wrangler] Add per-workflow concurrency limit config (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15356">#15356</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/92874f639a197ee62ee6cd2fc508a87acb3ceb00"><code>92874f6</code></a>
+WC-5857 [wrangler] Upload preview deployments as multipart form data (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15375">#15375</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/e9df1204238ba26ed0e065b5bf441cfa4b4e683a"><code>e9df120</code></a>
+Support multiple named Workers in the build output (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15371">#15371</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/5377aaed47144ef5dc873d77a4e3aba0d0232f7c"><code>5377aae</code></a>
+Version Packages (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15354">#15354</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/e56d2e671b1db7381c9f65788b918ec953bd543f"><code>e56d2e6</code></a>
+Revert &quot;Version Packages&quot; (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15355">#15355</a>)</li>
+<li><a
+href="https://github.com/cloudflare/workers-sdk/commit/d765e10a90f666ffc5939988b1e859616f3b029c"><code>d765e10</code></a>
+Version Packages (<a
+href="https://github.com/cloudflare/workers-sdk/tree/HEAD/packages/wrangler/issues/15291">#15291</a>)</li>
+<li>Additional commits viewable in <a
+href="https://github.com/cloudflare/workers-sdk/commits/wrangler@4.127.1/packages/wrangler">compare
+view</a></li>
+</ul>
+</details>
+<br />
+
+
+Dependabot will resolve any ...
+
+_Description has been truncated_
+
 # [3.3.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.16...3.3.0-dev.17) (2026-09-04)
 
 
