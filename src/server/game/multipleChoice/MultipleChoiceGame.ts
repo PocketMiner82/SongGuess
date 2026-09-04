@@ -36,7 +36,7 @@ export class MultipleChoiceGame extends Game {
     const q = new MultipleChoiceQuestion(
       this.remainingSongs.pop()!,
       this.room.lobby.songs,
-      this.room.config.distractionsPreferSameArtist,
+      this.room.config,
     );
 
     let output = `Generated MultipleChoiceQuestion ${this.questions.length}:`;

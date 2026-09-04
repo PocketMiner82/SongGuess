@@ -33,6 +33,23 @@ export function Settings({ disabled }: { disabled?: boolean }) {
 
             <div className="border-t border-disabled-bg my-1"></div>
 
+            <SettingsDropdown
+              value={controller.config.multipleChoiceAnswersCount}
+              disabled={disabled}
+              onChange={(v) => {
+                controller.config.multipleChoiceAnswersCount = v;
+                controller.sendConfig();
+              }}
+              options={[
+                { value: 2, label: "2 answers" },
+                { value: 4, label: "4 answers" },
+                { value: 6, label: "6 answers" },
+                { value: 8, label: "8 answers" },
+              ]}
+            >
+              Amount of answers
+            </SettingsDropdown>
+
             <SettingsToggle
               value={controller.config.advancedSongFiltering}
               disabled={disabled}

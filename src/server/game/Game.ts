@@ -209,6 +209,10 @@ export abstract class Game implements IEventListener {
           player.sendRoomStateMessage();
           player.sendConfirmationOrError(msg, "You need to provide an answerIndex key.");
           return true;
+        } else if (this.room.config.gameMode === "multiple_choice" && msg.answerIndex && msg.answerIndex > (this.room.config.multipleChoiceAnswersCount - 1)) {
+          player.sendRoomStateMessage();
+          player.sendConfirmationOrError(msg, `Provided answerIndex is out of bounds (max: ${this.room.config.multipleChoiceAnswersCount - 1}).`);
+          return true;
         } else if (this.room.config.gameMode === "player_picks" && msg.answer === undefined) {
           player.sendRoomStateMessage();
           player.sendConfirmationOrError(msg, "You need to provide an answer key.");

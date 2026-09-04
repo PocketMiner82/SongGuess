@@ -37,12 +37,12 @@ export const MultipleChoiceQuestionMessageSchema = QuestionMessageSchema.extend(
   /**
    * The current 4 question answer options.
    */
-  answerOptions: z.array(z.string()).length(4),
+  answerOptions: z.array(z.string()),
 
   /**
    * The index of the correct answer, if answer is shown.
    */
-  correctAnswerIndex: z.optional(z.int().min(0).max(3)),
+  correctAnswerIndex: z.optional(z.int().nonnegative()),
 });
 
 export const PlayerPicksQuestionMessageSchema = QuestionMessageSchema.extend({
@@ -146,7 +146,7 @@ export const PlayerAnswerDataSchema = z.object({
    * Provided only for MultipleChoiceGame.
    * The index of the question the player selected.
    */
-  answerIndex: z.optional(z.int().min(0).max(3)),
+  answerIndex: z.optional(z.int().nonnegative()),
 
   /**
    * Provided only for PlayerPicksGame.

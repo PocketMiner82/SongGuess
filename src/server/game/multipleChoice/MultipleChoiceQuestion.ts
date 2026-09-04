@@ -1,5 +1,6 @@
 import type { MultipleChoiceQuestionMessage, Song } from "../../../types/MessageTypes";
 import type { PersistedMultipleChoiceQuestion } from "../../../types/PersistedStateTypes";
+import type { ServerConfig } from "../../config/ServerConfig";
 import _ from "lodash";
 import { GamePhase } from "../../../shared/game/GamePhase";
 import { InitError, Question } from "../Question";
@@ -16,9 +17,9 @@ export class MultipleChoiceQuestion extends Question {
    *
    * @param song The correct song for this question.
    * @param possibleDistractions all possible songs that could be used for distractions
-   * @param distractionsPreferSameArtist whether to prefer searching for distractions by the same artist as the searched song
+   * @param config the server config object
    */
-  constructor(song: Song, possibleDistractions: Song[] | null, readonly distractionsPreferSameArtist: boolean | null) {
+  constructor(song: Song, possibleDistractions: Song[] | null, readonly config: ServerConfig | null) {
     super(song);
     if (possibleDistractions) {
       this.answers.push(song);
@@ -36,7 +37,7 @@ export class MultipleChoiceQuestion extends Question {
     possibleDistractions = _.shuffle(possibleDistractions.filter(s => s.name !== this.song!.name));
     let distractions = possibleDistractions;
 
-    if (this.distractionsPreferSameArtist) {
+    if (this.config?.distractionsPreferSameArtist) {
       // filters for songs that share at least one artist with the current track
       distractions = possibleDistractions.filter(s =>
         this.song!.artist.split(" & ")
@@ -59,7 +60,7 @@ export class MultipleChoiceQuestion extends Question {
       distractions.push(..._.difference(possibleDistractions, distractions));
     }
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < (this.config?.multipleChoiceAnswersCount ?? 4) - 1; i++) {
       const distraction = distractions[i];
 
       if (!distraction) {

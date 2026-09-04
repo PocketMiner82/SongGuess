@@ -53,7 +53,7 @@ export const SelectAnswerMessageSchema = z.object({
    * Provided only for MultipleChoiceGame.
    * The index of the selected answer.
    */
-  answerIndex: z.int().min(0).max(3).optional(),
+  answerIndex: z.int().nonnegative().optional(),
 
   /**
    * Provided only for PlayerPicksGame.

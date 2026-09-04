@@ -22,6 +22,8 @@ export class BaseConfig implements RoomConfigMessage {
 
   public playerPickTimeout: number = 180;
 
+  public multipleChoiceAnswersCount: number = 4;
+
   constructor(msg?: RoomConfigMessage) {
     if (msg)
       this.applyMessage(msg);
