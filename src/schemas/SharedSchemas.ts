@@ -112,7 +112,7 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * The time per question in each round.
    */
-  timePerQuestion: z.number().min(5).max(25),
+  timePerQuestion: z.number().min(2).max(25),
 
   /**
    * Whether to prefer distractions by the same artist.

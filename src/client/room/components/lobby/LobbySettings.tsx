@@ -126,10 +126,10 @@ export function Settings({ disabled }: { disabled?: boolean }) {
             controller.config.timePerQuestion = v;
             controller.sendConfig();
           }}
-          min={5}
+          min={2}
           max={25}
         >
-          Time per question (5-25s)
+          Time per question (2-25s)
         </SettingsNumberInput>
 
         <SettingsDropdown
