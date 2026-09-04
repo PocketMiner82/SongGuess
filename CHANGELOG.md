@@ -1,3 +1,10 @@
+# [3.3.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.9...3.3.0-dev.10) (2026-09-04)
+
+
+### Bug Fixes
+
+* **SearchMusicComponent:** pause audio on dialog close (if used as dialog) ([fc3693f](https://github.com/PocketMiner82/SongGuess/commit/fc3693f388aab213f5e82782da4fde0b7b46494d))
+
 # [3.3.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.8...3.3.0-dev.9) (2026-09-01)
 
 
