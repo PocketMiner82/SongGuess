@@ -1,3 +1,10 @@
+# [3.3.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.13...3.3.0-dev.14) (2026-09-04)
+
+
+### Features
+
+* **SoundCloud:** implement HLS streaming - the mp3 http streams were deprecated and removed ([1143a4b](https://github.com/PocketMiner82/SongGuess/commit/1143a4b7c830c5a62d7b09365560532bf53f571b))
+
 # [3.3.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.12...3.3.0-dev.13) (2026-09-04)
 
 
