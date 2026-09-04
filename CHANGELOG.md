@@ -1,3 +1,10 @@
+# [3.3.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.16...3.3.0-dev.17) (2026-09-04)
+
+
+### Bug Fixes
+
+* **zod:** use union instead of discriminatedUnion everywhere ([6e11498](https://github.com/PocketMiner82/SongGuess/commit/6e114980b307642aee447ebde9aed901a671dc66))
+
 # [4.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.1...4.0.0-dev.2) (2026-09-04)
 
 # [4.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.14...4.0.0-dev.1) (2026-09-04)
