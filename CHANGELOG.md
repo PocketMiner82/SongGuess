@@ -1,3 +1,10 @@
+# [3.3.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.10...3.3.0-dev.11) (2026-09-04)
+
+
+### Bug Fixes
+
+* **LobbySettings:** update audio start pos dropdown labels ([7715824](https://github.com/PocketMiner82/SongGuess/commit/77158245384f026355a4d20f676b0a56aad899bc))
+
 # [3.3.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/3.3.0-dev.9...3.3.0-dev.10) (2026-09-04)
 
 
