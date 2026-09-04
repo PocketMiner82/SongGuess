@@ -13,7 +13,7 @@
 <h1>Interface SyncKvStorage</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">SyncKvStorage</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-call-signature" href="#delete-1">delete</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#get-1">get</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#list-1">list</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#listt">T</a> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.SyncKvListOptions.html" class="tsd-signature-type tsd-kind-interface">SyncKvListOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#listt">T</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#put-1">put</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#putt">T</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#putt">T</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:3484</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:3573</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -41,7 +41,7 @@
 <li><span><span class="tsd-kind-parameter">key</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:3491</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:3580</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="get"><span>get</span><a href="#get" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -58,7 +58,7 @@
 <li><span><span class="tsd-kind-parameter">key</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:3485</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:3574</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="list"><span>list</span><a href="#list" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -75,7 +75,7 @@
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">options</span>: <a href="server_worker-configuration.SyncKvListOptions.html" class="tsd-signature-type tsd-kind-interface">SyncKvListOptions</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#listt">T</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:3486</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:3575</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="put"><span>put</span><a href="#put" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -93,7 +93,7 @@
 <li><span><span class="tsd-kind-parameter">value</span>: <a class="tsd-signature-type tsd-kind-type-parameter" href="#putt">T</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:3490</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:3579</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

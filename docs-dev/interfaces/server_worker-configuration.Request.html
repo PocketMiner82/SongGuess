@@ -21,7 +21,7 @@
 <ul class="tsd-type-parameter-list">
 <li><span id="cfhostmetadata"><span class="tsd-kind-type-parameter">CfHostMetadata</span> = <span class="tsd-signature-type">unknown</span></span></li>
 <li><span id="cf"><span class="tsd-kind-type-parameter">Cf</span> = <a href="../types/server_worker-configuration.CfProperties.html" class="tsd-signature-type tsd-kind-type-alias">CfProperties</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#cfhostmetadata">CfHostMetadata</a><span class="tsd-signature-symbol">&gt;</span></span></li></ul></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="16903">
+<section class="tsd-panel tsd-hierarchy" data-refl="17115">
 <h4>Hierarchy (<a href="../hierarchy.html#server/worker-configuration.Request">View Summary</a>)</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="../classes/server_worker-configuration.Body.html" class="tsd-signature-type tsd-kind-class">Body</a></li>
@@ -31,8 +31,8 @@
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30504</li>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30591</li>
-<li>Defined in src/server/worker-configuration.d.ts:1791</li>
-<li>Defined in src/server/worker-configuration.d.ts:1800</li>
+<li>Defined in src/server/worker-configuration.d.ts:1808</li>
+<li>Defined in src/server/worker-configuration.d.ts:1817</li>
 <li>Defined in node_modules/@types/node/web-globals/fetch.d.ts:55</li>
 <li>Defined in node_modules/@types/node/web-globals/fetch.d.ts:56</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
@@ -97,12 +97,12 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30510</li>
-<li>Defined in src/server/worker-configuration.d.ts:1856</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1873</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cf-1"><code class="tsd-tag">Optional</code><span>cf</span><a href="#cf-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cf</span><span class="tsd-signature-symbol">?:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#cf">Cf</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1838</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1855</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-external">
 <h3 class="tsd-anchor-link" id="credentials"><code class="tsd-tag">Readonly</code><span>credentials</span><a href="#credentials" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">credentials</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestCredentials</span></div>
@@ -123,7 +123,7 @@
 <h3 class="tsd-anchor-link" id="fetcher"><span>fetcher</span><a href="#fetcher" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fetcher</span><span class="tsd-signature-symbol">:</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-call-signature">connect</span><span class="tsd-signature-symbol">(</span><br/>            <span class="tsd-kind-parameter">address</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <a href="server_worker-configuration.SocketAddress.html" class="tsd-signature-type tsd-kind-interface">SocketAddress</a><span class="tsd-signature-symbol">,</span><br/>            <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.SocketOptions.html" class="tsd-signature-type tsd-kind-interface">SocketOptions</a><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.Socket.html" class="tsd-signature-type tsd-kind-interface">Socket</a><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-call-signature">fetch</span><span class="tsd-signature-symbol">(</span><br/>            <span class="tsd-kind-parameter">input</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">URL</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">RequestInfo</span><span class="tsd-signature-symbol">,</span><br/>            <span class="tsd-kind-parameter">init</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInit.html" class="tsd-signature-type tsd-kind-interface">RequestInit</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/server_worker-configuration.CfProperties.html" class="tsd-signature-type tsd-kind-type-alias">CfProperties</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.Response.html" class="tsd-signature-type tsd-kind-interface">Response</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1831</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1848</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="headers"><code class="tsd-tag">Readonly</code><span>headers</span><a href="#headers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">headers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Headers</span></div>
@@ -132,7 +132,7 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30528</li>
-<li>Defined in src/server/worker-configuration.d.ts:1824</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1841</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="integrity"><code class="tsd-tag">Readonly</code><span>integrity</span><a href="#integrity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">integrity</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -141,7 +141,7 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30534</li>
-<li>Defined in src/server/worker-configuration.d.ts:1844</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1861</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="keepalive"><code class="tsd-tag">Readonly</code><span>keepalive</span><a href="#keepalive" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">keepalive</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -150,7 +150,7 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30540</li>
-<li>Defined in src/server/worker-configuration.d.ts:1850</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1867</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="method"><code class="tsd-tag">Readonly</code><span>method</span><a href="#method" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">method</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -159,7 +159,7 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30546</li>
-<li>Defined in src/server/worker-configuration.d.ts:1812</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1829</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-external">
 <h3 class="tsd-anchor-link" id="mode"><code class="tsd-tag">Readonly</code><span>mode</span><a href="#mode" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">mode</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestMode</span></div>
@@ -176,7 +176,7 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30558</li>
-<li>Defined in src/server/worker-configuration.d.ts:1830</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1847</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-external">
 <h3 class="tsd-anchor-link" id="referrer"><code class="tsd-tag">Readonly</code><span>referrer</span><a href="#referrer" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">referrer</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -201,7 +201,7 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30576</li>
-<li>Defined in src/server/worker-configuration.d.ts:1837</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:1854</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="url"><code class="tsd-tag">Readonly</code><span>url</span><a href="#url" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">url</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -210,7 +210,7 @@
 </div><aside class="tsd-sources">
 <ul>
 <li>Defined in node_modules/typescript/lib/lib.dom.d.ts:30582</li>
-<li>Defined in src/server/worker-configuration.d.ts:1818</li></ul></aside></section></section></details>
+<li>Defined in src/server/worker-configuration.d.ts:1835</li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -234,7 +234,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBuffer</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="../classes/server_worker-configuration.Body.html">Body</a>.<a href="../classes/server_worker-configuration.Body.html#arraybuffer">arrayBuffer</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1696</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:1713</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="blob"><span>blob</span><a href="#blob" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -255,7 +255,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="../classes/server_worker-configuration.Body.html">Body</a>.<a href="../classes/server_worker-configuration.Body.html#blob">blob</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1706</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:1723</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="bytes"><span>bytes</span><a href="#bytes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -276,7 +276,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="../classes/server_worker-configuration.Body.html">Body</a>.<a href="../classes/server_worker-configuration.Body.html#bytes">bytes</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1698</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:1715</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="clone"><span>clone</span><a href="#clone" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -292,12 +292,12 @@
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="clone-2"><span class="tsd-kind-call-signature">clone</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-interface">Request</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#cfhostmetadata">CfHostMetadata</a><span class="tsd-signature-symbol">,</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#cf">Cf</a><span class="tsd-signature-symbol">&gt;</span><a href="#clone-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>The <strong><code>clone()</code></strong> method of the Request interface creates a copy of the current <code>Request</code> object.</p>
+<div class="tsd-comment tsd-typography"><p>The <strong><code>clone()</code></strong> method of the Request interface creates a copy of the current Request object.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/Request/clone">MDN Reference</a></p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-interface">Request</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#cfhostmetadata">CfHostMetadata</a><span class="tsd-signature-symbol">,</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#cf">Cf</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1806</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:1823</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="formdata"><span>form<wbr/>Data</span><a href="#formdata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -318,7 +318,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">FormData</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="../classes/server_worker-configuration.Body.html">Body</a>.<a href="../classes/server_worker-configuration.Body.html#formdata">formData</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1704</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:1721</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="json"><span>json</span><a href="#json" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -343,7 +343,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="../classes/server_worker-configuration.Body.html#jsont">T</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="../classes/server_worker-configuration.Body.html">Body</a>.<a href="../classes/server_worker-configuration.Body.html#json">json</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1702</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:1719</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="text"><span>text</span><a href="#text" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -364,7 +364,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="../classes/server_worker-configuration.Body.html">Body</a>.<a href="../classes/server_worker-configuration.Body.html#text">text</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:1700</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:1717</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

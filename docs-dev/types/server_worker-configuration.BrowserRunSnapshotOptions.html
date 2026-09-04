@@ -11,10 +11,21 @@
 <li><a href="../modules/server_worker-configuration.html">server/worker-configuration</a></li>
 <li><a href="" aria-current="page">BrowserRunSnapshotOptions</a></li></ul>
 <h1>Type Alias BrowserRunSnapshotOptions</h1></div>
-<div class="tsd-signature"><span class="tsd-kind-type-alias">BrowserRunSnapshotOptions</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.BrowserRunCommonOptions.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunCommonOptions</a> <span class="tsd-signature-symbol">&amp;</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">screenshotOptions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><br/>        <a href="server_worker-configuration.BrowserRunPuppeteerScreenshotOptions.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunPuppeteerScreenshotOptions</a><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-signature-type">&quot;encoding&quot;</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-signature"><span class="tsd-kind-type-alias">BrowserRunSnapshotOptions</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.BrowserRunCommonOptions.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunCommonOptions</a> <span class="tsd-signature-symbol">&amp;</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">formats</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.BrowserRunSnapshotFormat.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunSnapshotFormat</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">screenshotOptions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.BrowserRunPuppeteerScreenshotOptions.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunPuppeteerScreenshotOptions</a><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">&quot;encoding&quot;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
 <div class="tsd-type-declaration">
 <h4>Type Declaration</h4>
 <ul class="tsd-parameters">
+<li class="tsd-parameter">
+<h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">formats</span><span class="tsd-signature-symbol">?: </span><a href="server_worker-configuration.BrowserRunSnapshotFormat.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunSnapshotFormat</a><span class="tsd-signature-symbol">[]</span></h5>
+<div class="tsd-comment tsd-typography"><p>Which representations of the page to return. At least two distinct formats
+are required; request a single format from its dedicated action instead.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-default">
+<h4 class="tsd-anchor-link" id="default">Default<a href="#default" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-2">[</span><span class="hl-6">&quot;content&quot;</span><span class="hl-2">,</span><span class="hl-6">&quot;screenshot&quot;</span><span class="hl-2">]</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div></li>
 <li class="tsd-parameter">
 <h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">screenshotOptions</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.BrowserRunPuppeteerScreenshotOptions.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunPuppeteerScreenshotOptions</a><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">&quot;encoding&quot;</span><span class="tsd-signature-symbol">&gt;</span></h5>
 <div class="tsd-comment tsd-typography">
@@ -22,7 +33,7 @@
 <h4 class="tsd-anchor-link" id="see">See<a href="#see" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p><a href="https://pptr.dev/api/puppeteer.screenshotoptions">https://pptr.dev/api/puppeteer.screenshotoptions</a></p>
 </div></div></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10950</li></ul></aside></div>
+<li>Defined in src/server/worker-configuration.d.ts:11204</li></ul></aside></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

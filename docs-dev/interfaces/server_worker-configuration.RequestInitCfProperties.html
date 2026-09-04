@@ -20,7 +20,7 @@ features are applied to that new Request.</p>
 playground.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">RequestInitCfProperties</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#apps">apps</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachecontrol">cacheControl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachedeceptionarmor">cacheDeceptionArmor</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cacheeverything">cacheEverything</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachekey">cacheKey</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachereserveeligible">cacheReserveEligible</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachereserveminimumfilesize">cacheReserveMinimumFileSize</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachetags">cacheTags</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachettl">cacheTtl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cachettlbystatus">cacheTtlByStatus</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#grpcweb">grpcWeb</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;passthrough&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;convert&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#image">image</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesImage.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesImage</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#minify">minify</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesImageMinify.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesImageMinify</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#mirage">mirage</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#polish">polish</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;off&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;lossy&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;lossless&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#r2">r2</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesR2.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesR2</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#resolveoverride">resolveOverride</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#respectstrongetag">respectStrongEtag</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#scrapeshield">scrapeShield</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#stripetags">stripEtags</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#striplastmodified">stripLastModified</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#vary">vary</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesVary.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesVary</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">[</span><span class="tsd-kind-index-signature">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]:</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="13319">
+<section class="tsd-panel tsd-hierarchy" data-refl="13478">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span>
@@ -32,7 +32,7 @@ playground.</p>
 <li class="tsd-index-signature">
 <div class="tsd-signature"><span class="tsd-signature-symbol">[</span><span class="tsd-kind-parameter">key</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]:</span> <span class="tsd-signature-type">unknown</span></div></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11220</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:11600</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -70,7 +70,7 @@ playground.</p>
 <h3 class="tsd-anchor-link" id="apps"><code class="tsd-tag">Optional</code><span>apps</span><a href="#apps" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">apps</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11287</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11667</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachecontrol"><code class="tsd-tag">Optional</code><span>cache<wbr/>Control</span><a href="#cachecontrol" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheControl</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -81,7 +81,7 @@ as these are mutually exclusive cache control mechanisms. Setting both will thro
 <p>Can be used together with <code>cacheTtlByStatus</code>.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11260</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11640</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachedeceptionarmor"><code class="tsd-tag">Optional</code><span>cache<wbr/>Deception<wbr/>Armor</span><a href="#cachedeceptionarmor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheDeceptionArmor</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -89,12 +89,12 @@ as these are mutually exclusive cache control mechanisms. Setting both will thro
 deception attacks by verifying the Content-Type matches the URL extension.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11281</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11661</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cacheeverything"><code class="tsd-tag">Optional</code><span>cache<wbr/>Everything</span><a href="#cacheeverything" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheEverything</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11221</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11601</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachekey"><code class="tsd-tag">Optional</code><span>cache<wbr/>Key</span><a href="#cachekey" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheKey</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -105,21 +105,21 @@ both. (e.g. 'some-key')</p>
 <p>Only available for Enterprise customers.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11230</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11610</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachereserveeligible"><code class="tsd-tag">Optional</code><span>cache<wbr/>Reserve<wbr/>Eligible</span><a href="#cachereserveeligible" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheReserveEligible</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Whether the response should be eligible for Cache Reserve storage.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11264</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11644</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachereserveminimumfilesize"><code class="tsd-tag">Optional</code><span>cache<wbr/>Reserve<wbr/>Minimum<wbr/>File<wbr/>Size</span><a href="#cachereserveminimumfilesize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheReserveMinimumFileSize</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Minimum file size in bytes for a response to be eligible for Cache Reserve storage.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11285</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11665</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachetags"><code class="tsd-tag">Optional</code><span>cache<wbr/>Tags</span><a href="#cachetags" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheTags</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
@@ -130,14 +130,14 @@ utilizing changes only in the Workers process.</p>
 <p>Only available for Enterprise customers.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11239</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11619</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachettl"><code class="tsd-tag">Optional</code><span>cache<wbr/>Ttl</span><a href="#cachettl" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheTtl</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Force response to be cached for a given number of seconds. (e.g. 300)</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11243</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11623</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cachettlbystatus"><code class="tsd-tag">Optional</code><span>cache<wbr/>Ttl<wbr/>By<wbr/>Status</span><a href="#cachettlbystatus" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cacheTtlByStatus</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span></div>
@@ -145,7 +145,7 @@ utilizing changes only in the Workers process.</p>
 (e.g. { '200-299': 86400, '404': 1, '500-599': 0 })</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11248</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11628</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="grpcweb"><code class="tsd-tag">Optional</code><span>grpc<wbr/>Web</span><a href="#grpcweb" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">grpcWeb</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;passthrough&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;convert&quot;</span></div>
@@ -159,32 +159,32 @@ converted to gRPC at the Cloudflare edge.</p>
 gated by the <code>auto_grpc_convert</code> compatibility flag.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11298</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11678</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="image"><code class="tsd-tag">Optional</code><span>image</span><a href="#image" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">image</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesImage.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesImage</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11299</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11679</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="minify"><code class="tsd-tag">Optional</code><span>minify</span><a href="#minify" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">minify</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesImageMinify.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesImageMinify</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11300</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11680</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="mirage"><code class="tsd-tag">Optional</code><span>mirage</span><a href="#mirage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">mirage</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11301</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11681</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="polish"><code class="tsd-tag">Optional</code><span>polish</span><a href="#polish" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">polish</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;off&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;lossy&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;lossless&quot;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11302</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11682</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="r2"><code class="tsd-tag">Optional</code><span>r2</span><a href="#r2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">r2</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesR2.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesR2</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11303</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11683</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="resolveoverride"><code class="tsd-tag">Optional</code><span>resolve<wbr/>Override</span><a href="#resolveoverride" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">resolveOverride</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -200,40 +200,40 @@ external hostname, set proxy on Cloudflare, then set resolveOverride
 to point to that CNAME record.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11317</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11697</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="respectstrongetag"><code class="tsd-tag">Optional</code><span>respect<wbr/>Strong<wbr/>Etag</span><a href="#respectstrongetag" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">respectStrongEtag</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Whether to respect strong ETags (as opposed to weak ETags) from the origin.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11268</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11648</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="scrapeshield"><code class="tsd-tag">Optional</code><span>scrape<wbr/>Shield</span><a href="#scrapeshield" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">scrapeShield</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11286</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11666</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="stripetags"><code class="tsd-tag">Optional</code><span>strip<wbr/>Etags</span><a href="#stripetags" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">stripEtags</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Whether to strip ETag headers from the origin response before caching.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11272</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11652</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="striplastmodified"><code class="tsd-tag">Optional</code><span>strip<wbr/>Last<wbr/>Modified</span><a href="#striplastmodified" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">stripLastModified</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Whether to strip Last-Modified headers from the origin response before caching.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11276</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11656</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="vary"><code class="tsd-tag">Optional</code><span>vary</span><a href="#vary" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">vary</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.RequestInitCfPropertiesVary.html" class="tsd-signature-type tsd-kind-interface">RequestInitCfPropertiesVary</a></div>
 <div class="tsd-comment tsd-typography"><p>Controls how responses with a <code>Vary</code> header are cached for this request.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11250</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:11630</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

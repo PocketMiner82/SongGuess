@@ -13,7 +13,7 @@
 <h1>Type Alias AiSearchListItemsParams</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">AiSearchListItemsParams</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#item_id">item_id</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#key">key</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#metadata_filter">metadata_filter</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#page">page</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#per_page">per_page</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#search">search</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#sort_by">sort_by</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;status&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;modified_at&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#source">source</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#status">status</a><span class="tsd-signature-symbol">?:</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;queued&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;running&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;completed&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;error&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;skipped&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;outdated&quot;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4192</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:4281</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -40,7 +40,7 @@
 <div class="tsd-comment tsd-typography"><p>Filter items by their unique ID. Returns at most one item.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4206</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4295</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="key"><code class="tsd-tag">Optional</code><span>key</span><a href="#key" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">key</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -48,52 +48,52 @@
 per source, so combine with <code>source</code> to disambiguate across data sources.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4211</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4300</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="metadata_filter"><code class="tsd-tag">Optional</code><span>metadata_<wbr/>filter</span><a href="#metadata_filter" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">metadata_filter</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>JSON-encoded Vectorize filter for metadata filtering.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4204</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4293</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="page"><code class="tsd-tag">Optional</code><span>page</span><a href="#page" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">page</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4193</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4282</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="per_page"><code class="tsd-tag">Optional</code><span>per_<wbr/>page</span><a href="#per_page" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">per_page</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4194</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4283</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="search"><code class="tsd-tag">Optional</code><span>search</span><a href="#search" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">search</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Search items by key name.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4196</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4285</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="sort_by"><code class="tsd-tag">Optional</code><span>sort_<wbr/>by</span><a href="#sort_by" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">sort_by</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;status&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;modified_at&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Sort order for results.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4198</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4287</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="source"><code class="tsd-tag">Optional</code><span>source</span><a href="#source" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">source</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter items by source (e.g. &quot;builtin&quot; or &quot;web-crawler:<a href="https://example.com">https://example.com</a>&quot;).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4202</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:4291</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="status"><code class="tsd-tag">Optional</code><span>status</span><a href="#status" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">status</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;queued&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;running&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;completed&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;error&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;skipped&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;outdated&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter items by processing status.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:4200</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:4289</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

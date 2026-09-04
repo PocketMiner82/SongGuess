@@ -12,11 +12,12 @@
 <li><a href="" aria-current="page">BrowserRunSnapshotSuccessResponse</a></li></ul>
 <h1>Type Alias BrowserRunSnapshotSuccessResponse</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Success response for <code>snapshot</code> action.</p>
+<div class="tsd-comment tsd-typography"><p>Success response for <code>snapshot</code> action. Each field is present only when the
+corresponding entry was requested in <code>formats</code>.</p>
 </div></section>
-<div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">BrowserRunSnapshotSuccessResponse</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#meta">meta</a><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.BrowserRunResponseMeta.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunResponseMeta</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#result">result</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">content</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">screenshot</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#success">success</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">BrowserRunSnapshotSuccessResponse</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#meta">meta</a><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.BrowserRunResponseMeta.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunResponseMeta</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#result">result</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">accessibilityTree</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/server_worker-configuration.BrowserRunSerializedAXNode.html" class="tsd-signature-type tsd-kind-interface">BrowserRunSerializedAXNode</a><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">content</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">markdown</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">screenshot</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#success">success</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11030</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:11372</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -35,28 +36,37 @@
 <h3 class="tsd-anchor-link" id="meta"><span>meta</span><a href="#meta" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">meta</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.BrowserRunResponseMeta.html" class="tsd-signature-type tsd-kind-type-alias">BrowserRunResponseMeta</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11038</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11386</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="result"><span>result</span><a href="#result" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">result</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">content</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">screenshot</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-signature"><span class="tsd-kind-property">result</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">accessibilityTree</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/server_worker-configuration.BrowserRunSerializedAXNode.html" class="tsd-signature-type tsd-kind-interface">BrowserRunSerializedAXNode</a><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">content</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">markdown</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">screenshot</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
 <div class="tsd-type-declaration">
 <h4>Type Declaration</h4>
 <ul class="tsd-parameters">
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">content</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+<h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">accessibilityTree</span><span class="tsd-signature-symbol">?: </span><a href="../interfaces/server_worker-configuration.BrowserRunSerializedAXNode.html" class="tsd-signature-type tsd-kind-interface">BrowserRunSerializedAXNode</a></h5>
+<div class="tsd-comment tsd-typography"><p>Root of the page's accessibility tree.</p>
+</div></li>
+<li class="tsd-parameter">
+<h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">content</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
 <div class="tsd-comment tsd-typography"><p>HTML content of the page.</p>
 </div></li>
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">screenshot</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+<h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">markdown</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>Markdown content. Prefixed with YAML frontmatter (e.g. <code>title</code>) when the
+page provides that metadata.</p>
+</div></li>
+<li class="tsd-parameter">
+<h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">screenshot</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
 <div class="tsd-comment tsd-typography"><p>Base64-encoded screenshot image.</p>
 </div></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11032</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:11374</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="success"><span>success</span><a href="#success" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">success</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:11031</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:11373</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

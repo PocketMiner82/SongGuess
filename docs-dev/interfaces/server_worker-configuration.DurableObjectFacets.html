@@ -13,7 +13,7 @@
 <h1>Interface DurableObjectFacets</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">DurableObjectFacets</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-call-signature" href="#abort-1">abort</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">reason</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#clone-1">clone</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">src</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">dst</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#delete-1">delete</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#get-1">get</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a> <span class="tsd-signature-keyword">extends</span> <a href="server_worker-configuration.Rpc.DurableObjectBranded.html" class="tsd-signature-type tsd-kind-interface">DurableObjectBranded</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><br/>        <span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">getStartupOptions</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-symbol">|</span> <a href="server_worker-configuration.FacetStartupOptions.html" class="tsd-signature-type tsd-kind-interface">FacetStartupOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a><span class="tsd-signature-symbol">&gt;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.FacetStartupOptions.html" class="tsd-signature-type tsd-kind-interface">FacetStartupOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/server_worker-configuration.Fetcher.html" class="tsd-signature-type tsd-kind-type-alias">Fetcher</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:653</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:658</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -42,7 +42,7 @@
 <li><span><span class="tsd-kind-parameter">reason</span>: <span class="tsd-signature-type">any</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:655</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:660</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="clone"><span>clone</span><a href="#clone" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -56,7 +56,7 @@
 <li><span><span class="tsd-kind-parameter">dst</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:657</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:662</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="delete"><span>delete</span><a href="#delete" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -69,7 +69,7 @@
 <li><span><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:656</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:661</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="get"><span>get</span><a href="#get" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -87,7 +87,7 @@
 <li><span><span class="tsd-kind-parameter">getStartupOptions</span>: <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <a href="server_worker-configuration.FacetStartupOptions.html" class="tsd-signature-type tsd-kind-interface">FacetStartupOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a><span class="tsd-signature-symbol">&gt;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.FacetStartupOptions.html" class="tsd-signature-type tsd-kind-interface">FacetStartupOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="../types/server_worker-configuration.Fetcher.html" class="tsd-signature-type tsd-kind-type-alias">Fetcher</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#gett">T</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:654</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:659</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

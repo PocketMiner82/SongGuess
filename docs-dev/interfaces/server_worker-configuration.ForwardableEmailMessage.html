@@ -15,14 +15,14 @@
 <div class="tsd-comment tsd-typography"><p>An email message that is sent to a consumer Worker and can be rejected/forwarded.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ForwardableEmailMessage</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#from">from</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#headers">headers</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Headers</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#raw">raw</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#rawsize">rawSize</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#to">to</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#forward-1">forward</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">rcptTo</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">headers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Headers</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.EmailSendResult.html" class="tsd-signature-type tsd-kind-interface">EmailSendResult</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#reply-1">reply</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">message</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.EmailMessage.html" class="tsd-signature-type tsd-kind-interface">EmailMessage</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.EmailSendResult.html" class="tsd-signature-type tsd-kind-interface">EmailSendResult</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#reply-2">reply</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">builder</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.EmailReplyMessageBuilder.html" class="tsd-signature-type tsd-kind-interface">EmailReplyMessageBuilder</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.EmailSendResult.html" class="tsd-signature-type tsd-kind-interface">EmailSendResult</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#setreject-1">setReject</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">reason</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="13703">
+<section class="tsd-panel tsd-hierarchy" data-refl="13862">
 <h4>Hierarchy (<a href="../hierarchy.html#server/worker-configuration.ForwardableEmailMessage">View Summary</a>)</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="server_worker-configuration.EmailMessage.html" class="tsd-signature-type tsd-kind-interface">EmailMessage</a>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ForwardableEmailMessage</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12248</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:12628</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -52,28 +52,28 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="server_worker-configuration.EmailMessage.html">EmailMessage</a>.<a href="server_worker-configuration.EmailMessage.html#from">from</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12239</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:12619</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="headers"><code class="tsd-tag">Readonly</code><span>headers</span><a href="#headers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">headers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Headers</span></div>
 <div class="tsd-comment tsd-typography"><p>An <a href="https://developer.mozilla.org/en-US/docs/Web/API/Headers">Headers object</a>.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12256</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:12636</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="raw"><code class="tsd-tag">Readonly</code><span>raw</span><a href="#raw" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">raw</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Stream of the email message content.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12252</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:12632</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="rawsize"><code class="tsd-tag">Readonly</code><span>raw<wbr/>Size</span><a href="#rawsize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">rawSize</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Size of the email message content.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12260</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:12640</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="to"><code class="tsd-tag">Readonly</code><span>to</span><a href="#to" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">to</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -81,7 +81,7 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="server_worker-configuration.EmailMessage.html">EmailMessage</a>.<a href="server_worker-configuration.EmailMessage.html#to">to</a></p>
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12243</li></ul></aside></section></section></details>
+<li>Defined in src/server/worker-configuration.d.ts:12623</li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -105,7 +105,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.EmailSendResult.html" class="tsd-signature-type tsd-kind-interface">EmailSendResult</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves when the email message is forwarded.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12273</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:12653</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="reply"><span>reply</span><a href="#reply" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -123,7 +123,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.EmailSendResult.html" class="tsd-signature-type tsd-kind-interface">EmailSendResult</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves when the email message is replied.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12279</li></ul></aside></div></li>
+<li>Defined in src/server/worker-configuration.d.ts:12659</li></ul></aside></div></li>
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="reply-2"><span class="tsd-kind-call-signature">reply</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">builder</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.EmailReplyMessageBuilder.html" class="tsd-signature-type tsd-kind-interface">EmailReplyMessageBuilder</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.EmailSendResult.html" class="tsd-signature-type tsd-kind-interface">EmailSendResult</a><span class="tsd-signature-symbol">&gt;</span><a href="#reply-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
@@ -139,7 +139,7 @@ fields. Threading headers (In-Reply-To/References) are set automatically.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.EmailSendResult.html" class="tsd-signature-type tsd-kind-interface">EmailSendResult</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves when the email message is replied.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12286</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:12666</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setreject"><span>set<wbr/>Reject</span><a href="#setreject" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -157,7 +157,7 @@ fields. Threading headers (In-Reply-To/References) are set automatically.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><p>void</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12266</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:12646</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

@@ -13,7 +13,7 @@
 <h1>Interface Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#choices">choices</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">finish_reason</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">index</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">logprobs</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{}</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">prompt_logprobs</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{}</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">stop_reason</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">text</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#created">created</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#id">id</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#model">model</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#object">object</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;text_completion&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#usage">usage</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">completion_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">prompt_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">total_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9785</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:9874</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -64,35 +64,35 @@
 <div class="tsd-comment tsd-typography"><p>The generated text completion</p>
 </div></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9805</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:9894</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="created"><code class="tsd-tag">Optional</code><span>created</span><a href="#created" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">created</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Unix timestamp of when the completion was created</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9797</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:9886</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="id"><code class="tsd-tag">Optional</code><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Unique identifier for the completion</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9789</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:9878</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="model"><code class="tsd-tag">Optional</code><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Model used for the completion</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9801</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:9890</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="object"><code class="tsd-tag">Optional</code><span>object</span><a href="#object" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">object</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;text_completion&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Object type identifier</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9793</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:9882</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="usage"><code class="tsd-tag">Optional</code><span>usage</span><a href="#usage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">usage</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">completion_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">prompt_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">total_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
@@ -114,7 +114,7 @@
 <div class="tsd-comment tsd-typography"><p>Total number of input and output tokens</p>
 </div></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9834</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:9923</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

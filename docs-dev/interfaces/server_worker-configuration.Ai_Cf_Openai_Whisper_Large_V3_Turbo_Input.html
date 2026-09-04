@@ -13,7 +13,7 @@
 <h1>Interface Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">Ai_Cf_Openai_Whisper_Large_V3_Turbo_Input</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#audio">audio</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">body</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">contentType</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#beam_size">beam_size</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#compression_ratio_threshold">compression_ratio_threshold</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#condition_on_previous_text">condition_on_previous_text</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#hallucination_silence_threshold">hallucination_silence_threshold</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#initial_prompt">initial_prompt</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#language">language</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#log_prob_threshold">log_prob_threshold</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#no_speech_threshold">no_speech_threshold</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#prefix">prefix</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#task">task</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#vad_filter">vad_filter</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5833</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:5922</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -41,84 +41,84 @@
 <h3 class="tsd-anchor-link" id="audio"><span>audio</span><a href="#audio" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">audio</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">body</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">contentType</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5834</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5923</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="beam_size"><code class="tsd-tag">Optional</code><span>beam_<wbr/>size</span><a href="#beam_size" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">beam_size</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>The number of beams to use in beam search decoding. Higher values may improve accuracy at the cost of speed.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5861</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5950</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="compression_ratio_threshold"><code class="tsd-tag">Optional</code><span>compression_<wbr/>ratio_<wbr/>threshold</span><a href="#compression_ratio_threshold" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">compression_ratio_threshold</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Threshold for filtering out segments with high compression ratio, which often indicate repetitive or hallucinated text.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5873</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5962</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="condition_on_previous_text"><code class="tsd-tag">Optional</code><span>condition_<wbr/>on_<wbr/>previous_<wbr/>text</span><a href="#condition_on_previous_text" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">condition_on_previous_text</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Whether to condition on previous text during transcription. Setting to false may help prevent hallucination loops.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5865</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5954</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="hallucination_silence_threshold"><code class="tsd-tag">Optional</code><span>hallucination_<wbr/>silence_<wbr/>threshold</span><a href="#hallucination_silence_threshold" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">hallucination_silence_threshold</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Optional threshold (in seconds) to skip silent periods that may cause hallucinations.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5881</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5970</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="initial_prompt"><code class="tsd-tag">Optional</code><span>initial_<wbr/>prompt</span><a href="#initial_prompt" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">initial_prompt</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>A text prompt to help provide context to the model on the contents of the audio.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5853</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5942</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="language"><code class="tsd-tag">Optional</code><span>language</span><a href="#language" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">language</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The language of the audio being transcribed or translated.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5845</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5934</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="log_prob_threshold"><code class="tsd-tag">Optional</code><span>log_<wbr/>prob_<wbr/>threshold</span><a href="#log_prob_threshold" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">log_prob_threshold</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Threshold for filtering out segments with low average log probability, indicating low confidence.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5877</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5966</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="no_speech_threshold"><code class="tsd-tag">Optional</code><span>no_<wbr/>speech_<wbr/>threshold</span><a href="#no_speech_threshold" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">no_speech_threshold</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Threshold for detecting no-speech segments. Segments with no-speech probability above this value are skipped.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5869</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5958</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="prefix"><code class="tsd-tag">Optional</code><span>prefix</span><a href="#prefix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">prefix</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The prefix appended to the beginning of the output of the transcription and can guide the transcription result.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5857</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5946</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="task"><code class="tsd-tag">Optional</code><span>task</span><a href="#task" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">task</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Supported tasks are 'translate' or 'transcribe'.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5841</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:5930</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="vad_filter"><code class="tsd-tag">Optional</code><span>vad_<wbr/>filter</span><a href="#vad_filter" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">vad_filter</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Preprocess the audio with a voice activity detection model.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:5849</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:5938</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

@@ -13,7 +13,7 @@
 <h1>Interface R2MultipartUpload</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">R2MultipartUpload</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#key">key</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#uploadid">uploadId</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#abort-1">abort</a><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#complete-1">complete</a><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">uploadedParts</span><span class="tsd-signature-symbol">:</span> <a href="server_worker-configuration.R2UploadedPart.html" class="tsd-signature-type tsd-kind-interface">R2UploadedPart</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/server_worker-configuration.R2Object.html" class="tsd-signature-type tsd-kind-class">R2Object</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-call-signature" href="#uploadpart-1">uploadPart</a><span class="tsd-signature-symbol">(</span><br/>        <span class="tsd-kind-parameter">partNumber</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span><br/>            <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><br/>            <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><br/>            <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBuffer</span><br/>            <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Blob</span><br/>            <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBufferView</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/>        <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.R2UploadPartOptions.html" class="tsd-signature-type tsd-kind-interface">R2UploadPartOptions</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.R2UploadedPart.html" class="tsd-signature-type tsd-kind-interface">R2UploadedPart</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:2057</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:2074</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -37,12 +37,12 @@
 <h3 class="tsd-anchor-link" id="key"><code class="tsd-tag">Readonly</code><span>key</span><a href="#key" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:2058</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:2075</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="uploadid"><code class="tsd-tag">Readonly</code><span>upload<wbr/>Id</span><a href="#uploadid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">uploadId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:2059</li></ul></aside></section></section></details>
+<li>Defined in src/server/worker-configuration.d.ts:2076</li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -54,7 +54,7 @@
 <div class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:2061</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:2078</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="complete"><span>complete</span><a href="#complete" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -67,7 +67,7 @@
 <li><span><span class="tsd-kind-parameter">uploadedParts</span>: <a href="server_worker-configuration.R2UploadedPart.html" class="tsd-signature-type tsd-kind-interface">R2UploadedPart</a><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/server_worker-configuration.R2Object.html" class="tsd-signature-type tsd-kind-class">R2Object</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:2062</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:2079</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="uploadpart"><span>upload<wbr/>Part</span><a href="#uploadpart" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -82,7 +82,7 @@
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">options</span>: <a href="server_worker-configuration.R2UploadPartOptions.html" class="tsd-signature-type tsd-kind-interface">R2UploadPartOptions</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.R2UploadedPart.html" class="tsd-signature-type tsd-kind-interface">R2UploadedPart</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:2060</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:2077</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

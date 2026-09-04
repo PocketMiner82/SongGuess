@@ -13,7 +13,7 @@
 <h1>Type Alias StreamUpdateVideoParams</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">StreamUpdateVideoParams</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#allowedorigins">allowedOrigins</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#creator">creator</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#maxdurationseconds">maxDurationSeconds</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#meta">meta</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#requiresignedurls">requireSignedURLs</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#scheduleddeletion">scheduledDeletion</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#thumbnailtimestamppct">thumbnailTimestampPct</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13805</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:14264</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -40,14 +40,14 @@ domains in an array and use <code>*</code> for wildcard subdomains. Empty arrays
 video to be viewed on any origin.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13811</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:14270</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="creator"><code class="tsd-tag">Optional</code><span>creator</span><a href="#creator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">creator</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>A user-defined identifier for the media creator.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13815</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:14274</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="maxdurationseconds"><code class="tsd-tag">Optional</code><span>max<wbr/>Duration<wbr/>Seconds</span><a href="#maxdurationseconds" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">maxDurationSeconds</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -57,7 +57,7 @@ specified duration will fail during processing. A value of <code>-1</code> means
 is unknown.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13822</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:14281</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="meta"><code class="tsd-tag">Optional</code><span>meta</span><a href="#meta" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">meta</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></div>
@@ -65,7 +65,7 @@ is unknown.</p>
 record for managing videos.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13827</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:14286</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="requiresignedurls"><code class="tsd-tag">Optional</code><span>require<wbr/>Signed<wbr/>UR<wbr/>Ls</span><a href="#requiresignedurls" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">requireSignedURLs</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -74,7 +74,7 @@ set to <code>true</code>, a signed token must be generated with a signing key to
 video.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13833</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:14292</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="scheduleddeletion"><code class="tsd-tag">Optional</code><span>scheduled<wbr/>Deletion</span><a href="#scheduleddeletion" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">scheduledDeletion</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span></div>
@@ -84,7 +84,7 @@ existing scheduled deletion. If specified, must be at least 30 days from upload
 time.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13840</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:14299</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="thumbnailtimestamppct"><code class="tsd-tag">Optional</code><span>thumbnail<wbr/>Timestamp<wbr/>Pct</span><a href="#thumbnailtimestamppct" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">thumbnailTimestampPct</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -95,7 +95,7 @@ this value is not set, the default thumbnail image is taken from 0s of the
 video.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:13848</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:14307</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

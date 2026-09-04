@@ -13,7 +13,7 @@
 <h1>Interface ImageUploadOptions</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ImageUploadOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#creator">creator</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#encoding">encoding</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;base64&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#filename">filename</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#id">id</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#metadata">metadata</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#requiresignedurls">requireSignedURLs</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12624</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:13025</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -35,32 +35,34 @@
 <h3 class="tsd-anchor-link" id="creator"><code class="tsd-tag">Optional</code><span>creator</span><a href="#creator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">creator</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12629</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:13030</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="encoding"><code class="tsd-tag">Optional</code><span>encoding</span><a href="#encoding" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">encoding</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;base64&quot;</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">encoding</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;base64&quot;</span></div>
+<div class="tsd-comment tsd-typography"><p>If 'base64', the input data will be decoded from base64 before processing</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12630</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:13034</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="filename"><code class="tsd-tag">Optional</code><span>filename</span><a href="#filename" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">filename</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12626</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:13027</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="id"><code class="tsd-tag">Optional</code><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12625</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:13026</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="metadata"><code class="tsd-tag">Optional</code><span>metadata</span><a href="#metadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">metadata</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12628</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:13029</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="requiresignedurls"><code class="tsd-tag">Optional</code><span>require<wbr/>Signed<wbr/>UR<wbr/>Ls</span><a href="#requiresignedurls" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">requireSignedURLs</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:12627</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:13028</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

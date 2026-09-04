@@ -16,7 +16,7 @@
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">Ai_Cf_Deepgram_Flux_Output</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#audio_window_end">audio_window_end</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#audio_window_start">audio_window_start</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#end_of_turn_confidence">end_of_turn_confidence</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#event">event</a><span class="tsd-signature-symbol">?:</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;Update&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;StartOfTurn&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;EagerEndOfTurn&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;TurnResumed&quot;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;EndOfTurn&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#request_id">request_id</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#sequence_id">sequence_id</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#transcript">transcript</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#turn_index">turn_index</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#words">words</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">confidence</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">word</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9922</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:10011</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -43,56 +43,56 @@
 <div class="tsd-comment tsd-typography"><p>End time in seconds of the audio range that was transcribed</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9946</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10035</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="audio_window_start"><code class="tsd-tag">Optional</code><span>audio_<wbr/>window_<wbr/>start</span><a href="#audio_window_start" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">audio_window_start</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Start time in seconds of the audio range that was transcribed</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9942</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10031</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="end_of_turn_confidence"><code class="tsd-tag">Optional</code><span>end_<wbr/>of_<wbr/>turn_<wbr/>confidence</span><a href="#end_of_turn_confidence" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">end_of_turn_confidence</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Confidence that no more speech is coming in this turn</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9967</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10056</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="event"><code class="tsd-tag">Optional</code><span>event</span><a href="#event" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">event</span><span class="tsd-signature-symbol">?:</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;Update&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;StartOfTurn&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;EagerEndOfTurn&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;TurnResumed&quot;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;EndOfTurn&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>The type of event being reported.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9934</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10023</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="request_id"><code class="tsd-tag">Optional</code><span>request_<wbr/>id</span><a href="#request_id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">request_id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The unique identifier of the request (uuid)</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9926</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10015</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="sequence_id"><code class="tsd-tag">Optional</code><span>sequence_<wbr/>id</span><a href="#sequence_id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">sequence_id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Starts at 0 and increments for each message the server sends to the client.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9930</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10019</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="transcript"><code class="tsd-tag">Optional</code><span>transcript</span><a href="#transcript" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">transcript</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Text that was said over the course of the current turn</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9950</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10039</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="turn_index"><code class="tsd-tag">Optional</code><span>turn_<wbr/>index</span><a href="#turn_index" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">turn_index</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>The index of the current turn</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9938</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10027</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="words"><code class="tsd-tag">Optional</code><span>words</span><a href="#words" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">words</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">confidence</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">word</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></div>
@@ -110,7 +110,7 @@
 <div class="tsd-comment tsd-typography"><p>The individual punctuated, properly-cased word from the transcript</p>
 </div></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:9954</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:10043</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
