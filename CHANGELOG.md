@@ -1,3 +1,17 @@
+## [3.3.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.3.1-dev.1...3.3.1-dev.2) (2026-09-06)
+
+
+### Bug Fixes
+
+* **Config:** don't reset data if first init from storage ([dfd540b](https://github.com/PocketMiner82/SongGuess/commit/dfd540b734a1788a83d9567e7a2bcdf3b42aed36))
+
+## [3.3.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.3.0...3.3.1-dev.1) (2026-09-06)
+
+
+### Bug Fixes
+
+* **Config:** allow even more answer options for multiple choice ([b5a0446](https://github.com/PocketMiner82/SongGuess/commit/b5a04467fe136f03515928c0df6cecbd3be97f22))
+
 # [3.3.0](https://github.com/PocketMiner82/SongGuess/compare/3.2.0...3.3.0) (2026-09-04)
 
 
