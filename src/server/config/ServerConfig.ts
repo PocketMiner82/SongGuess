@@ -34,7 +34,7 @@ export class ServerConfig extends BaseConfig implements IEventListener {
     return false;
   }
 
-  applyMessage(msg: RoomConfigMessage) {
+  applyMessage(msg: RoomConfigMessage, firstInit: boolean = false) {
     if (this.gameMode !== msg.gameMode) {
       this.room.game.destroy();
 
@@ -47,9 +47,11 @@ export class ServerConfig extends BaseConfig implements IEventListener {
           break;
       }
 
-      // reset rounds count and time per question on every game mode change
-      msg.roundsCount = 10;
-      msg.timePerQuestion = 25;
+      if (!firstInit) {
+        // reset rounds count and time per question on every game mode change
+        msg.roundsCount = 10;
+        msg.timePerQuestion = 25;
+      }
     }
 
     super.applyMessage(msg);

@@ -141,7 +141,7 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * The amount of multiple choice answers to add.
    */
-  multipleChoiceAnswersCount: z.int().min(2).max(8).multipleOf(2),
+  multipleChoiceAnswersCount: z.int().min(2).max(12).multipleOf(2),
 });
 
 export const PingMessageSchema = z.object({
