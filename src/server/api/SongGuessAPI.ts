@@ -7,6 +7,7 @@ import type { SoundCloudStreams } from "./SoundCloudAPI";
 import { AppleMusicConfig, AuthType, getAuthenticatedAxios, Region } from "@syncfm/applemusic-api";
 import { env } from "cloudflare:workers";
 import { Server } from "partyserver";
+import { Innertube } from "youtubei.js/cf-worker";
 import { albumRegex, appleMusicPreviewRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { fixedAppleMusicCoverSize, fixedSoundCloudCoverSize } from "../../shared/Utils";
 import { DefaultPlaylist } from "../../types/MessageTypes";
@@ -26,12 +27,73 @@ export class SongGuessAPI extends Server<Env> {
    */
   soundCloud: SoundCloudAPI = new SoundCloudAPI(this, this.env.SOUNDCLOUD_CLIENT_ID as string, this.env.SOUNDCLOUD_CLIENT_SECRET as string);
 
+  /**
+   * The currently used innertube instance.
+   */
+  private innertube: Innertube | null = null;
 
   /**
    * Returns the current {@link this.ctx}
    */
   public getCtx() {
     return this.ctx;
+  }
+
+  public async getInnertube(): Promise<Innertube> {
+    if (!this.innertube) {
+      this.innertube = await Innertube.create();
+    }
+
+    return this.innertube;
+  }
+
+  private async fetchYTAudio(videoId: string, req: Request): Promise<Response> {
+    try {
+      const yt = await this.getInnertube();
+
+      const info = await yt.getInfo(videoId, { client: "IOS" });
+
+      const format = info.chooseFormat({
+        type: "audio",
+        quality: "bestefficiency",
+        format: "mp4",
+        codec: "mp4a",
+      });
+
+      console.log(format);
+
+      if (!format || !format.url) {
+        return new Response("Audio format URL is inaccessible.", { status: 500 });
+      }
+
+
+      const headers = new Headers();
+
+      const range = req.headers.get("Range");
+      if (range) {
+        headers.set("Range", range);
+      }
+
+      const audioResponse = await fetch(format.url, {
+        headers,
+      });
+
+      if (!audioResponse.ok) {
+        return new Response(`Error fetching audio: ${audioResponse.status}.`, { status: 500 });
+      }
+
+      const responseHeaders = new Headers(audioResponse.headers);
+      responseHeaders.set("Access-Control-Allow-Origin", "*");
+
+      return new Response(audioResponse.body, {
+        status: audioResponse.status,
+        statusText: audioResponse.statusText,
+        headers: responseHeaders,
+      });
+    } catch (e) {
+      console.error(e);
+      return new Response("Internal server error during audio extraction.", { status: 500 });
+    }
   }
 
   private async fetchSoundCloudAudio(urn: string): Promise<Response> {
@@ -228,6 +290,44 @@ export class SongGuessAPI extends Server<Env> {
   }
 
   /**
+   * Asynchronously caches a network response for a given URL, utilizing the Cache API.
+   * If a cached response does not exist, it executes the provided fetch function,
+   * modifies the response headers to enforce caching, stores the clone in the cache,
+   * and returns the response.
+   *
+   * @param url The target URL whose response is to be cached.
+   * @param fetchFunction A callback function that executes the network request and returns a promise resolving to a Response.
+   * @returns A promise that resolves to the cached or newly fetched Response.
+   */
+  private async cacheResponse(url: URL, fetchFunction: () => Promise<Response>): Promise<Response> {
+    const cache = await caches.open("default");
+    let resp = await cache.match(url.toString());
+
+    if (!resp) {
+      const originalResponse = await fetchFunction();
+
+      if (!originalResponse.ok) {
+        return originalResponse;
+      }
+
+      const headers = new Headers(originalResponse.headers);
+
+      headers.set("Cache-Control", "public, max-age=7200");
+      headers.delete("Age");
+      headers.delete("Set-Cookie");
+
+      resp = new Response(originalResponse.body, {
+        status: originalResponse.status,
+        statusText: originalResponse.statusText,
+        headers,
+      });
+      await cache.put(url.toString(), resp.clone());
+    }
+
+    return resp;
+  }
+
+  /**
    * Handles HTTP request to the room's endpoint.
    */
   async onRequest(req: Request): Promise<Response> {
@@ -271,26 +371,17 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing urn parameter.", { status: 400 });
         }
 
-        const cache = await caches.open("default");
-        let resp = await cache.match(url.toString());
+        return this.cacheResponse(url, () => this.fetchSoundCloudAudio(urn));
+      }
 
-        if (!resp) {
-          const originalResponse = await this.fetchSoundCloudAudio(urn);
-          const headers = new Headers(originalResponse.headers);
-
-          headers.set("Cache-Control", "public, max-age=7200");
-          headers.delete("Age");
-          headers.delete("Set-Cookie");
-
-          resp = new Response(originalResponse.body, {
-            status: originalResponse.status,
-            statusText: originalResponse.statusText,
-            headers,
-          });
-          await cache.put(url.toString(), resp.clone());
+      case "fetchYTAudio": {
+        const videoId = url.searchParams.get("v");
+        if (!videoId) {
+          return new Response("Missing video identifier.", { status: 400 });
         }
 
-        return resp;
+        return this.fetchYTAudio(videoId, req);
+        return this.cacheResponse(url, () => this.fetchYTAudio(videoId, req));
       }
 
       default:

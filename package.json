@@ -38,6 +38,7 @@
     "soundcloud.ts": "^0.7.4",
     "unique-username-generator": "^1.5.1",
     "uuid": "^14.0.2",
+    "youtubei.js": "^18.1.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
