@@ -32,8 +32,9 @@ export class BaseConfig implements RoomConfigMessage {
   /**
    * Applys a {@link RoomConfigMessage} to this config instance.
    * @param msg the message to apply.
+   * @param _firstInit whether the applied message is the first init after e.g. load of saved state from storage
    */
-  public applyMessage(msg: RoomConfigMessage) {
+  public applyMessage(msg: RoomConfigMessage, _firstInit: boolean = false) {
     Object.assign(this, msg);
   }
 
