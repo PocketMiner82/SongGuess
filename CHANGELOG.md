@@ -1,3 +1,10 @@
+# [3.4.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.3.1-dev.3...3.4.0-dev.1) (2026-09-25)
+
+
+### Features
+
+* **API:** add yt audio fetch method ([ca55a73](https://github.com/PocketMiner82/SongGuess/commit/ca55a73ecf2e86f07de08808fb998217627e0d6b))
+
 ## [3.3.1-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.3.1-dev.2...3.3.1-dev.3) (2026-09-12)
 
 ## [3.3.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.3.1-dev.1...3.3.1-dev.2) (2026-09-06)
