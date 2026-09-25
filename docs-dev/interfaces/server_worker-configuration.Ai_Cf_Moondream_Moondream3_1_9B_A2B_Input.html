@@ -13,7 +13,7 @@
 <h1>Interface Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input</h1></div>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#caption_length">caption_length</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;long&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;short&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;normal&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#image">image</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#max_objects">max_objects</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#max_tokens">max_tokens</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#question">question</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#reasoning">reasoning</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#stream">stream</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#target">target</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#task">task</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;query&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;caption&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;point&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;detect&quot;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#temperature">temperature</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#top_p">top_p</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10224</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:10230</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -42,77 +42,77 @@
 <div class="tsd-comment tsd-typography"><p>Caption length for the <code>caption</code> task.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10240</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10246</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="image"><code class="tsd-tag">Optional</code><span>image</span><a href="#image" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">image</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Input image as a public HTTPS URL or base64 data URI. Optional for <code>query</code>; required for <code>caption</code>, <code>point</code>, and <code>detect</code>.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10232</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10238</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="max_objects"><code class="tsd-tag">Optional</code><span>max_<wbr/>objects</span><a href="#max_objects" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">max_objects</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Max objects to return for <code>point</code> and <code>detect</code>.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10264</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10270</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="max_tokens"><code class="tsd-tag">Optional</code><span>max_<wbr/>tokens</span><a href="#max_tokens" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">max_tokens</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Max tokens to generate for <code>query</code> and <code>caption</code>.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10260</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10266</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="question"><code class="tsd-tag">Optional</code><span>question</span><a href="#question" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">question</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Question for the <code>query</code> task.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10236</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10242</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="reasoning"><code class="tsd-tag">Optional</code><span>reasoning</span><a href="#reasoning" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">reasoning</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Enable reasoning trace for the <code>query</code> task.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10248</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10254</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="stream"><code class="tsd-tag">Optional</code><span>stream</span><a href="#stream" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">stream</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Return incremental tokens for <code>query</code> and <code>caption</code>. <code>point</code> and <code>detect</code> do not support streaming.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10268</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10274</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="target"><code class="tsd-tag">Optional</code><span>target</span><a href="#target" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">target</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Object phrase to locate for <code>point</code> and <code>detect</code> tasks (e.g. 'person wearing a red shirt').</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10244</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10250</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="task"><code class="tsd-tag">Optional</code><span>task</span><a href="#task" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">task</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;query&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;caption&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;point&quot;</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">&quot;detect&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>Which Moondream skill to run.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10228</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10234</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="temperature"><code class="tsd-tag">Optional</code><span>temperature</span><a href="#temperature" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">temperature</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Sampling temperature.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10252</li></ul></aside></section>
+<li>Defined in src/server/worker-configuration.d.ts:10258</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="top_p"><code class="tsd-tag">Optional</code><span>top_<wbr/>p</span><a href="#top_p" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">top_p</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Top-p (nucleus) sampling.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:10256</li></ul></aside></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:10262</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
