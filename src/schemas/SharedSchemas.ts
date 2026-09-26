@@ -7,12 +7,21 @@ import {
   soundCloudRegex,
   soundCloudSongRegex,
   usernameRegex,
+  ytSongRegex,
 } from "./ValidationRegexes";
 
 /**
  * The zod schema for the username.
  */
 export const UsernameSchema = z.stringFormat("user", usernameRegex);
+
+/**
+ * The zod schema for cover URLs.
+ */
+const CoverSchema = z.nullable(z.union([
+  z.url({ pattern: appleMusicCoverRegex }),
+  z.url({ pattern: soundCloudCoverRegex }),
+]));
 
 export const SongSchema = z.object({
   /**
@@ -33,13 +42,17 @@ export const SongSchema = z.object({
   /**
    * Cover URL of the song.
    */
-  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
+  cover: CoverSchema,
 
   /**
    * A URL to the audio file of the song.
-   * Currently only audio previews from Apple Music and SoundCloud are allowed.
+   * Currently only audio previews from Apple Music, SoundCloud and YT are allowed.
    */
-  audioURL: z.union([z.url({ pattern: appleMusicPreviewRegex }), z.stringFormat("SoundCloudSong", soundCloudSongRegex)]),
+  audioURL: z.union([
+    z.url({ pattern: appleMusicPreviewRegex }),
+    z.stringFormat("SoundCloudSong", soundCloudSongRegex),
+    z.stringFormat("YTSong", ytSongRegex),
+  ]),
 });
 
 export const PlaylistSchema = z.object({
@@ -61,7 +74,7 @@ export const PlaylistSchema = z.object({
   /**
    * Cover URL of the playlist.
    */
-  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
+  cover: CoverSchema,
 
   /**
    * A list of song names and music urls
