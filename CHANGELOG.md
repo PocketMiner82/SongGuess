@@ -1,3 +1,10 @@
+# [3.4.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.1...3.4.0-dev.2) (2026-09-26)
+
+
+### Features
+
+* **API:** add yt search ([dd497b4](https://github.com/PocketMiner82/SongGuess/commit/dd497b4dc64b7a2727000487f7ea7a4dfd47d434))
+
 # [3.4.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.3.1-dev.3...3.4.0-dev.1) (2026-09-25)
 
 
