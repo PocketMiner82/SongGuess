@@ -1,3 +1,10 @@
+# [3.4.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.3...3.4.0-dev.4) (2026-09-26)
+
+
+### Features
+
+* fully add support for YT ([d5dbc54](https://github.com/PocketMiner82/SongGuess/commit/d5dbc54c56d5985e6f8c6d3e2c02c544d713c506))
+
 # [3.4.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.2...3.4.0-dev.3) (2026-09-26)
 
 
