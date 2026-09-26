@@ -7,6 +7,8 @@ import {
   soundCloudRegex,
   soundCloudSongRegex,
   usernameRegex,
+  ytCoverRegex,
+  ytRegex,
   ytSongRegex,
 } from "./ValidationRegexes";
 
@@ -21,7 +23,15 @@ export const UsernameSchema = z.stringFormat("user", usernameRegex);
 const CoverSchema = z.nullable(z.union([
   z.url({ pattern: appleMusicCoverRegex }),
   z.url({ pattern: soundCloudCoverRegex }),
+  z.url({ pattern: ytCoverRegex }),
+
 ]));
+
+const HrefSchema = z.union([
+  z.url({ pattern: appleMusicRegex }),
+  z.url({ pattern: soundCloudRegex }),
+  z.url({ pattern: ytRegex }),
+]);
 
 export const SongSchema = z.object({
   /**
@@ -37,7 +47,7 @@ export const SongSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
+  hrefURL: HrefSchema,
 
   /**
    * Cover URL of the song.
@@ -69,7 +79,7 @@ export const PlaylistSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
+  hrefURL: HrefSchema,
 
   /**
    * Cover URL of the playlist.
