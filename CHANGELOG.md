@@ -1,3 +1,10 @@
+# [3.4.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.2...3.4.0-dev.3) (2026-09-26)
+
+
+### Features
+
+* **API:** proxy YT requests better ([8695bbc](https://github.com/PocketMiner82/SongGuess/commit/8695bbc1aa2e3688fd6cefd72f9d5cb2e0aeeb81))
+
 # [3.4.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.1...3.4.0-dev.2) (2026-09-26)
 
 
