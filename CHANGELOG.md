@@ -1,3 +1,10 @@
+# [3.4.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.5...3.4.0-dev.6) (2026-09-27)
+
+
+### Bug Fixes
+
+* **API:** return and log errors on some request failures ([83cdcff](https://github.com/PocketMiner82/SongGuess/commit/83cdcff25eecbb4f555264536ddd35f4d63d0956))
+
 # [3.4.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.4...3.4.0-dev.5) (2026-09-27)
 
 
