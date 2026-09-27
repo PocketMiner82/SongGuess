@@ -1,3 +1,10 @@
+# [3.4.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.4...3.4.0-dev.5) (2026-09-27)
+
+
+### Bug Fixes
+
+* **API:** improve YT download speeds ([367ee74](https://github.com/PocketMiner82/SongGuess/commit/367ee7457300d0e1df7d7a74755fa5e9baa8aacc))
+
 # [3.4.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.3...3.4.0-dev.4) (2026-09-26)
 
 
