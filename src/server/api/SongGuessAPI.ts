@@ -58,6 +58,7 @@ export class SongGuessAPI extends Server<Env> {
       });
 
       if (!audioResponse.ok) {
+        console.warn(`[YT] Fetching Audio failed: ${audioResponse.status} ${audioResponse.statusText}`);
         return new Response(`Error fetching audio: ${audioResponse.status}.`, { status: 500 });
       }
 
@@ -111,7 +112,7 @@ export class SongGuessAPI extends Server<Env> {
     }
   }
 
-  private async searchYT(query: string): Promise<Song[]> {
+  private async searchYT(query: string): Promise<Response> {
     const headers: Headers = new Headers();
     headers.set("Authorization", `Basic ${env.YATTEE_AUTH}`);
 
@@ -120,12 +121,13 @@ export class SongGuessAPI extends Server<Env> {
     });
 
     if (!resp.ok) {
-      return [];
+      console.warn(`[YT] Search failed: ${resp.status} ${resp.statusText}`);
+      return new Response(`Search failed: ${resp.status}`, { status: 500 });
     }
 
     const ytResults: SearchResponse = await resp.json();
 
-    return ytResults.reduce((filtered, vid) => {
+    const songs: Song[] = ytResults.reduce((filtered, vid) => {
       if (vid.lengthSeconds <= 900) {
         filtered.push({
           name: vid.title,
@@ -140,6 +142,8 @@ export class SongGuessAPI extends Server<Env> {
 
       return filtered;
     }, [] as Song[]);
+
+    return Response.json(songs);
   }
 
   private async fetchSoundCloudAudio(urn: string): Promise<Response> {
@@ -444,7 +448,7 @@ export class SongGuessAPI extends Server<Env> {
 
     switch (url.pathname.split("/").pop()) {
       case "createRoom":
-        return await this.createNewRoom();
+        return this.createNewRoom();
 
       case "playlistInfo": {
         // fetch playlist info
@@ -453,7 +457,8 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing url parameter.", { status: 400 });
         }
 
-        return Response.json(await this.getPlaylistInfo(playlistURL));
+        // return Response.json(await this.getPlaylistInfo(playlistURL));
+        return this.cacheResponse(url, async () => Response.json(await this.getPlaylistInfo(playlistURL)));
       }
 
       case "songByISRC": {
@@ -462,7 +467,8 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing isrc parameter.", { status: 400 });
         }
 
-        return this.songByISRC(isrc);
+        // return this.songByISRC(isrc);
+        return this.cacheResponse(url, () => this.songByISRC(isrc));
       }
 
       case "searchSoundCloud": {
@@ -476,6 +482,7 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing q (query) parameter.", { status: 400 });
         }
 
+        // return Response.json(await this.searchSoundCloud(query));
         return this.cacheResponse(url, async () => Response.json(await this.searchSoundCloud(query)));
       }
 
@@ -490,6 +497,7 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing urn parameter.", { status: 400 });
         }
 
+        // return this.fetchSoundCloudAudio(urn);
         return this.cacheResponse(url, () => this.fetchSoundCloudAudio(urn));
       }
 
@@ -503,7 +511,8 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing q (query) parameter.", { status: 400 });
         }
 
-        return this.cacheResponse(url, async () => Response.json(await this.searchYT(query)));
+        // return this.searchYT(query);
+        return this.cacheResponse(url, () => this.searchYT(query));
       }
 
       case "fetchYTAudio": {
