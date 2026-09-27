@@ -53,7 +53,7 @@ export class SongGuessAPI extends Server<Env> {
       const headers: Headers = new Headers();
       headers.set("Authorization", `Basic ${env.YATTEE_AUTH}`);
 
-      const audioResponse = await fetch(`${env.YATTEE_SERVER}/api/v1/videos/${encodeURIComponent(videoId)}?proxy=true&proxy_mode=download`, {
+      const audioResponse = await fetch(`${env.YATTEE_SERVER}/api/v1/videos/${encodeURIComponent(videoId)}`, {
         headers,
       });
 

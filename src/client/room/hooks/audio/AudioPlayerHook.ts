@@ -63,7 +63,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
     if (hls) {
       return new HLSPlayerWrapper(src, vol, mut);
     } else {
-      return new HowlPlayerWrapper(src, vol, mut, setState);
+      return new HowlPlayerWrapper(src, vol, mut);
     }
   };
 
@@ -94,6 +94,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
       setState("playing");
     });
     playerRef.current.on("loaderror", async () => {
+      console.error("[Audio] Load error");
       setState("not_playing");
     });
     playerRef.current.on("pause", async () => {
@@ -106,6 +107,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
       setState("not_playing");
     });
     playerRef.current.on("playerror", async () => {
+      console.error("[Audio] Play error");
       setState("not_playing");
     });
   }, [muted, volume]);
