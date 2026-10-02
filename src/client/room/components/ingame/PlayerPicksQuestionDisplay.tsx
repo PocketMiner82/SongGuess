@@ -210,13 +210,15 @@ export function PlayerPicksQuestionDisplay() {
     : (isMyQuestion ? "This is your question" : "Type the song title you hear");
 
   return (
-    <div className="space-y-6 w-full lg:w-4xl xl:w-5xl">
-      <h3 className="text-lg text-center font-bold">
-        {pickingMessage}
-      </h3>
-      {isPickingPhase
-        ? <PlayerPickingDisplay />
-        : <AnswerInput />}
+    <div className="xl:flex-2 space-y-6 w-full flex items-center justify-center">
+      <div className="w-full lg:w-3xl 2xl:w-5xl">
+        <h3 className="text-lg text-center font-bold">
+          {pickingMessage}
+        </h3>
+        {isPickingPhase
+          ? <PlayerPickingDisplay />
+          : <AnswerInput />}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { GamePhase } from "../../../../shared/game/GamePhase";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
 import { ResultsPlayerList } from "../results/ResultsPlayerList";
@@ -12,22 +11,19 @@ function AnswerResults() {
   useRoomControllerMessageTypeListener(controller, "round_state");
 
   const rankedPlayers = useMemo(() => {
-    if (controller.questionData.roundMsg?.gamePhase !== GamePhase.ANSWER)
-      return [];
-
     return [...controller.playerMessages]
       .sort((a, b) => {
-        return (b.answerData?.questionPoints ?? 0)
-          - (a.answerData?.questionPoints ?? 0);
+        return (b.points)
+          - (a.points);
       });
-  }, [controller.playerMessages, controller.questionData.roundMsg?.gamePhase]);
+  }, [controller.playerMessages]);
 
   if (rankedPlayers.length === 0) {
     return null;
   }
 
   return (
-    <div className="space-y-6 xl:max-w-3/4 mx-auto p-4 min-h-full mt-8 text-center">
+    <div className="xl:flex-1 w-full space-y-6 xl:max-w-3/4 text-center">
       <h3 className="text-lg font-bold">
         Player Answers
       </h3>
@@ -65,17 +61,13 @@ export function Ingame() {
   }
 
   return (
-    <div className="flex flex-col items-center h-full">
-      <div className="flex-1 mx-auto w-full flex justify-center p-4">
-        <div className="m-auto w-full lg:w-auto">
-          {
-            controller.config.gameMode === "multiple_choice"
-              ? <MultipleChoiceQuestionDisplay />
-              : <PlayerPicksQuestionDisplay />
-          }
-          <AnswerResults />
-        </div>
-      </div>
+    <div className="w-full h-full flex flex-col xl:flex-row-reverse justify-center items-center gap-8 p-4">
+      {
+        controller.config.gameMode === "multiple_choice"
+          ? <MultipleChoiceQuestionDisplay />
+          : <PlayerPicksQuestionDisplay />
+      }
+      <AnswerResults />
     </div>
   );
 }
