@@ -63,7 +63,7 @@ export function ResultsPlayerList({ rankedPlayers, showField, showField2, showFi
             </div>
           )}
 
-          <div className="flex-1 flex flex-col bg-card-hover-bg rounded-lg">
+          <div className="flex-1 flex flex-col bg-card-hover-bg rounded-lg w-full">
             <div className="flex items-center w-full">
               <div className="flex-1">
                 <PlayerCard player={player}>
@@ -80,7 +80,7 @@ export function ResultsPlayerList({ rankedPlayers, showField, showField2, showFi
             </div>
 
             {showField3 && getShowField(player, showField3) && (
-              <div className="font-medium text-left p-3 text-sm text-disabled-text">
+              <div className="font-medium text-left p-3 text-sm text-disabled-text wrap-break-word">
                 {getShowField(player, showField3)}
               </div>
             )}

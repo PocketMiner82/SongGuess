@@ -6,6 +6,10 @@ export class SoundCloudAPI {
     return this.sgAPI.getCtx();
   }
 
+  public get isEnabled(): boolean {
+    return this.client_id.trim().length > 0;
+  }
+
   constructor(readonly sgAPI: SongGuessAPI, private client_id: string, private client_secret: string) {}
 
   // the access token string
@@ -125,6 +129,10 @@ export class SoundCloudAPI {
   }
 
   async fetch(uri: string, method: string, params?: ConstructorParameters<typeof URLSearchParams>[0]): Promise<Response> {
+    if (!this.isEnabled) {
+      return new Response("SoundCloud API is disabled", { status: 403 });
+    }
+
     const token = await this.getValidToken();
     const url = new URL(uri, "https://api.soundcloud.com");
 

@@ -1,4 +1,13 @@
-import type { Entities, Lookup, Media, Options, PlainObject, Response, ResultMusicTrack, Results } from "itunes-store-api";
+import type {
+  Entities,
+  Lookup,
+  Media,
+  Options,
+  PlainObject,
+  Response,
+  ResultMusicTrack,
+  Results,
+} from "itunes-store-api";
 import type * as React from "react";
 import type { Playlist, PlaylistsFile, Song } from "../types/MessageTypes";
 import { lookup } from "itunes-store-api";
@@ -162,14 +171,14 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
 }
 
 /**
- * Searches Apple Music and SoundCloud for a given query. Only calls each API once;
+ * Searches Apple Music, SoundCloud and YT for a given query. Only calls each API once;
  * filling in songs for Artist/Album required e.g. with {@link getPlaylistByURL}
  * @param query the query to search for
  * @param onlySongs whether to only search for songs
  * @returns an array of Apple Music playlists interleaved with SoundCloud tracks, starting with an Apple Music playlist
  */
 export async function performSearch(query: string, onlySongs: boolean): Promise<Playlist[]> {
-  let items: Playlist[] = [];
+  const amPlaylists: Playlist[] = [];
   try {
     const results = await safeSearch(query, {
       media: "music",
@@ -180,7 +189,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
 
     for (const result of results) {
       if ("kind" in result && result.kind === "song" && result.wrapperType === "track") {
-        items.push({
+        amPlaylists.push({
           name: result.trackName,
           subtitle: `Song by ${result.artistName} (Apple Music)`,
           hrefURL: result.trackViewUrl,
@@ -194,7 +203,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
           }],
         });
       } else if (!onlySongs && result.wrapperType === "collection" && "collectionType" in result && (result as any).collectionType === "Album") {
-        items.push({
+        amPlaylists.push({
           name: result.collectionName,
           subtitle: `Album by ${result.artistName} | ${Math.min(result.trackCount, 50)} song(s)`,
           hrefURL: result.collectionViewUrl,
@@ -202,7 +211,7 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
           songs: [],
         });
       } else if (!onlySongs && result.wrapperType === "artist") {
-        items.push({
+        amPlaylists.push({
           name: result.artistName,
           subtitle: "Artist | max. 50 songs",
           hrefURL: result.artistLinkUrl,
@@ -215,23 +224,31 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
     // ignore
   }
 
+  const ytPlaylists: Playlist[] = await fetchLocalSongAPI(`/api/searchYT?q=${encodeURIComponent(query)}`, "YT");
+  const scPlaylists: Playlist[] = await fetchLocalSongAPI(`/api/searchSoundCloud?q=${encodeURIComponent(query)}`, "SoundCloud");
+  return _.flatten(_.zip(amPlaylists, ytPlaylists, scPlaylists)).filter(element => element !== undefined);
+}
+
+/**
+ * Fetches a local API endpoint that returns {@link Song}s.
+ * @param uri path to API endpoint.
+ * @param providerName string shown at subtitle to indicate used provider.
+ * @returns a promise resolving to an array of playlists generated from the returned songs that each contain one song.
+ */
+async function fetchLocalSongAPI(uri: string, providerName: string): Promise<Playlist[]> {
   try {
-    const resp = await fetch(`/api/searchSoundCloud?q=${encodeURIComponent(query)}`);
+    const resp = await fetch(uri);
     const results: Song[] = await resp.json();
-    const playlists: Playlist[] = results.map(song => ({
+    return results.map(song => ({
       name: song.name,
-      subtitle: `Song by ${song.artist} (SoundCloud)`,
+      subtitle: `Song by ${song.artist} (${providerName})`,
       hrefURL: song.hrefURL,
       cover: song.cover,
       songs: [song],
     } satisfies Playlist));
-
-    items = _.flatten(_.zip(items, playlists)).filter(element => element !== undefined);
   } catch {
-    // ignore
+    return [];
   }
-
-  return items;
 }
 
 /**

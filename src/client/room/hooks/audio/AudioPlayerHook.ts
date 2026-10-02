@@ -24,6 +24,13 @@ function isHLSContentType(contentType: string | null): boolean {
 }
 
 async function detectIsHLS(url: string): Promise<boolean> {
+  if ((url.startsWith("/") && !url.startsWith("/api/fetchSoundCloudAudio"))
+    || url.startsWith("./")
+    || url.startsWith("../")
+    || url.endsWith(".mp3")) {
+    return false;
+  }
+
   try {
     const response = await fetch(url, { method: "HEAD" });
     const contentType = response.headers.get("content-type");
@@ -40,13 +47,6 @@ async function detectIsHLS(url: string): Promise<boolean> {
   return false;
 }
 
-function isLocalFile(url: string): boolean {
-  return (url.startsWith("/") && !url.startsWith("/api/"))
-    || url.startsWith("./")
-    || url.startsWith("../")
-    || url.endsWith(".mp3");
-}
-
 export function useAudioPlayer(volume: number, muted: boolean, url?: string): AudioPlayer {
   const [state, setState] = useState<"loading" | "playing" | "not_playing">("not_playing");
   const [audioURL, setAudioURL] = useState<string | undefined>(url);
@@ -56,11 +56,6 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
   const initializingRef = useRef<Promise<void> | null>(null);
 
   const createPlayer = async (src: string, vol: number, mut: boolean): Promise<PlayerWrapper> => {
-    if (isLocalFile(src)) {
-      setIsHLS(false);
-      return new HowlPlayerWrapper(src, vol, mut, setState);
-    }
-
     const hls = await detectIsHLS(src);
     console.debug(`[Audio] HLS detection result for ${src}:`, hls);
     setIsHLS(hls);
@@ -68,7 +63,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
     if (hls) {
       return new HLSPlayerWrapper(src, vol, mut);
     } else {
-      return new HowlPlayerWrapper(src, vol, mut, setState);
+      return new HowlPlayerWrapper(src, vol, mut);
     }
   };
 
@@ -99,6 +94,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
       setState("playing");
     });
     playerRef.current.on("loaderror", async () => {
+      console.error("[Audio] Load error");
       setState("not_playing");
     });
     playerRef.current.on("pause", async () => {
@@ -111,6 +107,7 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
       setState("not_playing");
     });
     playerRef.current.on("playerror", async () => {
+      console.error("[Audio] Play error");
       setState("not_playing");
     });
   }, [muted, volume]);

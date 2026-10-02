@@ -3,6 +3,7 @@ import type { AxiosInstance } from "axios";
 import type { SoundcloudTrack } from "soundcloud.ts";
 import type { CreateRoomResponse } from "../../types/APIResponseTypes";
 import type { Playlist, Song } from "../../types/MessageTypes";
+import type { SearchResponse } from "../../types/SearchResponse";
 import type { SoundCloudStreams } from "./SoundCloudAPI";
 import { AppleMusicConfig, AuthType, getAuthenticatedAxios, Region } from "@syncfm/applemusic-api";
 import { env } from "cloudflare:workers";
@@ -11,6 +12,14 @@ import { albumRegex, appleMusicPreviewRegex, artistRegex, songRegex } from "../.
 import { fixedAppleMusicCoverSize, fixedSoundCloudCoverSize } from "../../shared/Utils";
 import { DefaultPlaylist } from "../../types/MessageTypes";
 import { SoundCloudAPI } from "./SoundCloudAPI";
+
+
+interface InFlightEntry {
+  headers: Headers;
+  status: number;
+  statusText: string;
+  stream: ReadableStream;
+}
 
 /**
  * Handles API requests to the /api/{endpoint} endpoints.
@@ -26,12 +35,115 @@ export class SongGuessAPI extends Server<Env> {
    */
   soundCloud: SoundCloudAPI = new SoundCloudAPI(this, this.env.SOUNDCLOUD_CLIENT_ID as string, this.env.SOUNDCLOUD_CLIENT_SECRET as string);
 
+  /**
+   * Internal registry tracking active, ongoing fetch operations within this DO instance.
+   */
+  private inFlightRequests: Map<string, Promise<InFlightEntry>> = new Map();
+
 
   /**
    * Returns the current {@link this.ctx}
    */
   public getCtx() {
     return this.ctx;
+  }
+
+  private async fetchYTAudio(videoId: string): Promise<Response> {
+    try {
+      const headers: Headers = new Headers();
+      headers.set("Authorization", `Basic ${env.YATTEE_AUTH}`);
+
+      const audioResponse = await fetch(`${env.YATTEE_SERVER}/api/v1/videos/${encodeURIComponent(videoId)}`, {
+        headers,
+      });
+
+      if (!audioResponse.ok) {
+        console.warn(`[YT] Fetching Audio failed: ${audioResponse.status} ${audioResponse.statusText}`);
+        return new Response(`Error fetching audio: ${audioResponse.status}.`, { status: 500 });
+      }
+
+      const vid = await audioResponse.json() as {
+        adaptiveFormats: {
+          url: string;
+          bitrate?: string;
+          type?: string;
+          audioTrack?: {
+            id: string;
+            displayName: string;
+            isDefault: boolean;
+          };
+        }[];
+      };
+      const adaptiveFormats = vid.adaptiveFormats;
+
+      let originalStreams = adaptiveFormats.filter((stream) => {
+        return stream.audioTrack && stream.audioTrack.isDefault;
+      });
+
+      if (originalStreams.length === 0) {
+        // retry including all (even non default)
+        originalStreams = adaptiveFormats.filter((stream) => {
+          return stream.audioTrack;
+        });
+        if (originalStreams.length === 0) {
+          return new Response("Couldn't find working audio url.", { status: 500 });
+        }
+      }
+
+      originalStreams.sort((a, b) => {
+        const bitrateA = parseInt(a.bitrate || "0", 10);
+        const bitrateB = parseInt(b.bitrate || "0", 10);
+
+        // select worst bitrate for fast download
+        if (bitrateB !== bitrateA) {
+          return bitrateA - bitrateB;
+        }
+
+        // Fallback preference: WebM (Opus) over M4A (AAC)
+        const isOpusA = a.type?.includes("webm") ? 1 : 0;
+        const isOpusB = b.type?.includes("webm") ? 1 : 0;
+        return isOpusB - isOpusA;
+      });
+
+      return fetch(originalStreams[0].url);
+    } catch (e) {
+      console.error(e);
+      return new Response("Internal server error during audio extraction.", { status: 500 });
+    }
+  }
+
+  private async searchYT(query: string): Promise<Response> {
+    const headers: Headers = new Headers();
+    headers.set("Authorization", `Basic ${env.YATTEE_AUTH}`);
+
+    const resp = await fetch(`${env.YATTEE_SERVER}/api/v1/search?q=${encodeURIComponent(query)}`, {
+      headers,
+    });
+
+    if (!resp.ok) {
+      console.warn(`[YT] Search failed: ${resp.status} ${resp.statusText}`);
+      return new Response(`Search failed: ${resp.status}`, { status: 500 });
+    }
+
+    const ytResults: SearchResponse = await resp.json();
+
+    const songs: Song[] = ytResults.reduce((filtered, vid) => {
+      if (vid.lengthSeconds <= 900) {
+        filtered.push({
+          name: vid.title,
+          artist: vid.author,
+          hrefURL: `https://youtu.be/${vid.videoId}`,
+          cover: vid.videoThumbnails.reduce((prev, current) => {
+            return (current.width > prev.width) ? current : prev;
+          }).url,
+          audioURL: `/api/fetchYTAudio?v=${vid.videoId}`,
+        } satisfies Song);
+      }
+
+      return filtered;
+    }, [] as Song[]);
+
+    return Response.json(songs);
   }
 
   private async fetchSoundCloudAudio(urn: string): Promise<Response> {
@@ -228,6 +340,107 @@ export class SongGuessAPI extends Server<Env> {
   }
 
   /**
+   * Caches a fetch response asynchronously while streaming the body content directly to the client.
+   * Also prevents redundant fetches during concurrent requests
+   *
+   * @param url - The target URL key for the Cache API storage.
+   * @param fetchFunction - An asynchronous supplier returning the underlying network Response.
+   * @returns A Promise resolving to a Response object suitable for immediate streaming.
+   */
+  /**
+   * Caches a fetch response asynchronously while streaming the body content directly to the client.
+   *
+   * @param url - The target URL key for the Cache API storage.
+   * @param fetchFunction - An asynchronous supplier returning the underlying network Response.
+   * @returns A Promise resolving to a Response object suitable for immediate streaming.
+   */
+  private async cacheResponse(url: URL, fetchFunction: () => Promise<Response>): Promise<Response> {
+    const key = url.toString();
+    const cache = await caches.open("default");
+    const cachedResponse = await cache.match(key);
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // Coalesce in-flight requests by teeing the existing unconsumed stream branch
+    if (this.inFlightRequests.has(key)) {
+      const entry = await this.inFlightRequests.get(key)!;
+      const [streamForClient, streamToKeep] = entry.stream.tee();
+
+      // Update the stored entry stream branch for any subsequent listeners
+      entry.stream = streamToKeep;
+
+      return new Response(streamForClient, {
+        status: entry.status,
+        statusText: entry.statusText,
+        headers: new Headers(entry.headers),
+      });
+    }
+
+    const executionPromise = (async (): Promise<InFlightEntry> => {
+      try {
+        const originalResponse = await fetchFunction();
+
+        if (!originalResponse.ok || !originalResponse.body) {
+          // noinspection ExceptionCaughtLocallyJS
+          throw new Error(`Upstream fetch failed with status ${originalResponse.status}`);
+        }
+
+        const headers = new Headers(originalResponse.headers);
+        headers.set("Cache-Control", "public, max-age=7200");
+        headers.delete("Age");
+        headers.delete("Set-Cookie");
+
+        // Split initial stream into cache stream and response stream
+        const [streamForCache, streamForResponse] = originalResponse.body.tee();
+
+        const responseToCache = new Response(streamForCache, {
+          status: originalResponse.status,
+          statusText: originalResponse.statusText,
+          headers,
+        });
+
+        // Background cache save
+        const cachePromise = cache.put(key, responseToCache)
+          .catch(() => {})
+          .finally(() => {
+            this.inFlightRequests.delete(key);
+          });
+
+        this.ctx.waitUntil(cachePromise);
+
+        return {
+          headers,
+          status: originalResponse.status,
+          statusText: originalResponse.statusText,
+          stream: streamForResponse,
+        };
+      } catch (error) {
+        this.inFlightRequests.delete(key);
+        throw error;
+      }
+    })();
+
+    this.inFlightRequests.set(key, executionPromise);
+
+    try {
+      const entry = await executionPromise;
+      const [streamForClient, streamToKeep] = entry.stream.tee();
+      entry.stream = streamToKeep;
+
+      return new Response(streamForClient, {
+        status: entry.status,
+        statusText: entry.statusText,
+        headers: new Headers(entry.headers),
+      });
+    } catch {
+      // Fallback if initial fetch execution fails
+      return fetchFunction();
+    }
+  }
+
+  /**
    * Handles HTTP request to the room's endpoint.
    */
   async onRequest(req: Request): Promise<Response> {
@@ -235,7 +448,7 @@ export class SongGuessAPI extends Server<Env> {
 
     switch (url.pathname.split("/").pop()) {
       case "createRoom":
-        return await this.createNewRoom();
+        return this.createNewRoom();
 
       case "playlistInfo": {
         // fetch playlist info
@@ -244,7 +457,8 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing url parameter.", { status: 400 });
         }
 
-        return Response.json(await this.getPlaylistInfo(playlistURL));
+        // return Response.json(await this.getPlaylistInfo(playlistURL));
+        return this.cacheResponse(url, async () => Response.json(await this.getPlaylistInfo(playlistURL)));
       }
 
       case "songByISRC": {
@@ -253,44 +467,66 @@ export class SongGuessAPI extends Server<Env> {
           return new Response("Missing isrc parameter.", { status: 400 });
         }
 
-        return this.songByISRC(isrc);
+        // return this.songByISRC(isrc);
+        return this.cacheResponse(url, () => this.songByISRC(isrc));
       }
 
       case "searchSoundCloud": {
+        if (!this.soundCloud.isEnabled) {
+          // this will send the error response
+          return this.soundCloud.fetchGet("dummy");
+        }
+
         const query = url.searchParams.get("q");
         if (!query) {
           return new Response("Missing q (query) parameter.", { status: 400 });
         }
 
-        return Response.json(await this.searchSoundCloud(query));
+        // return Response.json(await this.searchSoundCloud(query));
+        return this.cacheResponse(url, async () => Response.json(await this.searchSoundCloud(query)));
       }
 
       case "fetchSoundCloudAudio": {
+        if (!this.soundCloud.isEnabled) {
+          // this will send the error response
+          return this.soundCloud.fetchGet("dummy");
+        }
+
         const urn = url.searchParams.get("urn");
         if (!urn) {
           return new Response("Missing urn parameter.", { status: 400 });
         }
 
-        const cache = await caches.open("default");
-        let resp = await cache.match(url.toString());
+        // return this.fetchSoundCloudAudio(urn);
+        return this.cacheResponse(url, () => this.fetchSoundCloudAudio(urn));
+      }
 
-        if (!resp) {
-          const originalResponse = await this.fetchSoundCloudAudio(urn);
-          const headers = new Headers(originalResponse.headers);
-
-          headers.set("Cache-Control", "public, max-age=7200");
-          headers.delete("Age");
-          headers.delete("Set-Cookie");
-
-          resp = new Response(originalResponse.body, {
-            status: originalResponse.status,
-            statusText: originalResponse.statusText,
-            headers,
-          });
-          await cache.put(url.toString(), resp.clone());
+      case "searchYT": {
+        if (env.YATTEE_SERVER.trim().length === 0) {
+          return new Response("YT API is disabled", { status: 403 });
         }
 
-        return resp;
+        const query = url.searchParams.get("q");
+        if (!query) {
+          return new Response("Missing q (query) parameter.", { status: 400 });
+        }
+
+        // return this.searchYT(query);
+        return this.cacheResponse(url, () => this.searchYT(query));
+      }
+
+      case "fetchYTAudio": {
+        if (env.YATTEE_SERVER.trim().length === 0) {
+          return new Response("YT API is disabled", { status: 403 });
+        }
+
+        const videoId = url.searchParams.get("v");
+        if (!videoId) {
+          return new Response("Missing video identifier.", { status: 400 });
+        }
+
+        // return this.fetchYTAudio(videoId);
+        return this.cacheResponse(url, () => this.fetchYTAudio(videoId));
       }
 
       default:

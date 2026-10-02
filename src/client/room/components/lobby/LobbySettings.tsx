@@ -45,6 +45,8 @@ export function Settings({ disabled }: { disabled?: boolean }) {
                 { value: 4, label: "4 answers" },
                 { value: 6, label: "6 answers" },
                 { value: 8, label: "8 answers" },
+                { value: 10, label: "10 answers" },
+                { value: 12, label: "12 answers" },
               ]}
             >
               Amount of answers

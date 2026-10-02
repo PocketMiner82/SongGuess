@@ -1,6 +1,6 @@
 import type { RoomGetResponse } from "../../types/APIResponseTypes";
 import { env } from "cloudflare:workers";
-import { soundCloudSongRegex } from "../../schemas/ValidationRegexes";
+import { soundCloudSongRegex, ytSongRegex } from "../../schemas/ValidationRegexes";
 
 /**
  * Fetches room information from the specified URL.
@@ -24,16 +24,16 @@ export async function fetchGetRoom(url: URL | string): Promise<RoomGetResponse |
 }
 
 /**
- * A function that only returns false if the uri is a non-fetchable soundcloud uri.
+ * A function that only returns false if the uri is a non-fetchable uri.
  * @param uri the uri to test.
  */
 export async function fetchTestSoundCloudSong(uri: string): Promise<boolean> {
-  if (soundCloudSongRegex.test(uri)) {
+  if (soundCloudSongRegex.test(uri) || ytSongRegex.test(uri)) {
     const stub = env.SongGuessAPI.getByName("default");
     // add dummy localhost prefix so it is a "valid" url
-    const resp = await stub.fetch(`http://localhost${uri}`);
+    const resp = await stub.fetch(`http://localhost${uri}`, { redirect: "manual" });
 
-    if (!resp.ok) {
+    if (!resp.ok && resp.status !== 302) {
       return false;
     }
   }

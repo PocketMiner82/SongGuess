@@ -7,12 +7,31 @@ import {
   soundCloudRegex,
   soundCloudSongRegex,
   usernameRegex,
+  ytCoverRegex,
+  ytRegex,
+  ytSongRegex,
 } from "./ValidationRegexes";
 
 /**
  * The zod schema for the username.
  */
 export const UsernameSchema = z.stringFormat("user", usernameRegex);
+
+/**
+ * The zod schema for cover URLs.
+ */
+const CoverSchema = z.nullable(z.union([
+  z.url({ pattern: appleMusicCoverRegex }),
+  z.url({ pattern: soundCloudCoverRegex }),
+  z.url({ pattern: ytCoverRegex }),
+
+]));
+
+const HrefSchema = z.union([
+  z.url({ pattern: appleMusicRegex }),
+  z.url({ pattern: soundCloudRegex }),
+  z.url({ pattern: ytRegex }),
+]);
 
 export const SongSchema = z.object({
   /**
@@ -28,18 +47,22 @@ export const SongSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
+  hrefURL: HrefSchema,
 
   /**
    * Cover URL of the song.
    */
-  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
+  cover: CoverSchema,
 
   /**
    * A URL to the audio file of the song.
-   * Currently only audio previews from Apple Music and SoundCloud are allowed.
+   * Currently only audio previews from Apple Music, SoundCloud and YT are allowed.
    */
-  audioURL: z.union([z.url({ pattern: appleMusicPreviewRegex }), z.stringFormat("SoundCloudSong", soundCloudSongRegex)]),
+  audioURL: z.union([
+    z.url({ pattern: appleMusicPreviewRegex }),
+    z.stringFormat("SoundCloudSong", soundCloudSongRegex),
+    z.stringFormat("YTSong", ytSongRegex),
+  ]),
 });
 
 export const PlaylistSchema = z.object({
@@ -56,12 +79,12 @@ export const PlaylistSchema = z.object({
   /**
    * The URL users will be redirected to when clicking.
    */
-  hrefURL: z.union([z.url({ pattern: appleMusicRegex }), z.url({ pattern: soundCloudRegex })]),
+  hrefURL: HrefSchema,
 
   /**
    * Cover URL of the playlist.
    */
-  cover: z.nullable(z.union([z.url({ pattern: appleMusicCoverRegex }), z.url({ pattern: soundCloudCoverRegex })])),
+  cover: CoverSchema,
 
   /**
    * A list of song names and music urls
@@ -141,7 +164,7 @@ export const RoomConfigMessageSchema = z.object({
   /**
    * The amount of multiple choice answers to add.
    */
-  multipleChoiceAnswersCount: z.int().min(2).max(8).multipleOf(2),
+  multipleChoiceAnswersCount: z.int().min(2).max(12).multipleOf(2),
 });
 
 export const PingMessageSchema = z.object({
