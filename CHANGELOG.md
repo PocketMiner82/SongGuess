@@ -1,3 +1,10 @@
+# [3.4.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.10...3.4.0-dev.11) (2026-10-02)
+
+
+### Bug Fixes
+
+* **API:** revert axios to 1.19.0 to prevent cache bug ([e2e7395](https://github.com/PocketMiner82/SongGuess/commit/e2e7395f26740624dc25c0c5bbdac4b40b9a92a9))
+
 # [3.4.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.9...3.4.0-dev.10) (2026-10-02)
 
 
