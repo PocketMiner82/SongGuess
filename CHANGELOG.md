@@ -1,3 +1,10 @@
+# [3.4.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.9...3.4.0-dev.10) (2026-10-02)
+
+
+### Bug Fixes
+
+* **API:** add workaround because axios sends cache: default which is not supported by workers ([af6bb53](https://github.com/PocketMiner82/SongGuess/commit/af6bb5321520b55e0213d07cd73a6fa7c7f3297c))
+
 # [3.4.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.8...3.4.0-dev.9) (2026-10-02)
 
 
