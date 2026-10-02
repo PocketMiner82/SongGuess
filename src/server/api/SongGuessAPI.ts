@@ -191,15 +191,15 @@ export class SongGuessAPI extends Server<Env> {
         region: Region.US,
         authType: AuthType.Scraped,
       }));
+    }
 
+    try {
       // workaround because axios sends cache: default which is not supported by workers
       this.axiosClient.defaults.fetchOptions = {
         ...this.axiosClient.defaults.fetchOptions, // Preserve existing options
         cache: "no-store",
       };
-    }
 
-    try {
       const resp = await this.axiosClient
         .get(`https://amp-api-edge.music.apple.com/v1/catalog/us/songs?filter[isrc]=${encodeURIComponent(isrc)}`);
 
