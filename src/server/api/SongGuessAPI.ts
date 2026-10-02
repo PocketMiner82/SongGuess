@@ -191,6 +191,12 @@ export class SongGuessAPI extends Server<Env> {
         region: Region.US,
         authType: AuthType.Scraped,
       }));
+
+      // workaround because axios sends cache: default which is not supported by workers
+      this.axiosClient.defaults.fetchOptions = {
+        ...this.axiosClient.defaults.fetchOptions, // Preserve existing options
+        cache: "no-store",
+      };
     }
 
     try {
