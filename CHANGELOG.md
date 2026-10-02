@@ -1,3 +1,10 @@
+# [3.4.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.7...3.4.0-dev.8) (2026-10-02)
+
+
+### Bug Fixes
+
+* **Ingame:** better use larger screens ([554ed63](https://github.com/PocketMiner82/SongGuess/commit/554ed63e64ba6a0fa6fbb5ddeb5cde3e6184574d))
+
 # [3.4.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.6...3.4.0-dev.7) (2026-10-02)
 
 # [3.4.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.5...3.4.0-dev.6) (2026-09-27)
