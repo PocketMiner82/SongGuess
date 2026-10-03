@@ -25,7 +25,7 @@ export function BottomBar({
   className = "",
 }: BottomBarProps) {
   return (
-    <div className={`bg-default-bg border-t border-gray-300 dark:border-gray-700 z-50 ${className}`}>
+    <div className={`bg-default-bg border-t border-border z-50 ${className}`}>
       <div className="flex items-center justify-between h-16 px-4">
         {children}
       </div>

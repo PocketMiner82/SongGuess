@@ -16,6 +16,7 @@ import { BottomBar } from "./room/components/BottomBar";
 import { Ingame } from "./room/components/ingame/Ingame";
 import { QuestionHeader } from "./room/components/ingame/QuestionHeader";
 import { Lobby } from "./room/components/lobby/Lobby";
+import { PlayerList } from "./room/components/lobby/PlayerList";
 import { Results } from "./room/components/results/Results";
 import { RoomContext, useControllerContext, useRoomController } from "./room/hooks/RoomControllerHooks";
 import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "./room/hooks/RoomControllerListenerHooks";
@@ -109,8 +110,6 @@ function Room({ hasJoined, setHasJoined }: { hasJoined: boolean; setHasJoined: (
         )}
       </TopBar>
 
-      <QuestionHeader />
-
       {
         !hasJoined
           ? (
@@ -118,12 +117,24 @@ function Room({ hasJoined, setHasJoined }: { hasJoined: boolean; setHasJoined: (
             )
           : (
               <>
-                <main className="flex-1 overflow-auto">
-                  <Lobby />
-                  <Ingame />
-                  <Results />
-                  <Countdown />
-                </main>
+                <div className="flex flex-1 flex-col-reverse lg:flex-row-reverse overflow-auto">
+                  <main className="flex-1 flex flex-col lg:min-h-full lg:overflow-auto">
+                    <QuestionHeader />
+                    <div className="p-4 flex-1">
+                      <Lobby />
+                      <Ingame />
+                      <Results />
+                    </div>
+                  </main>
+                  <aside className="p-4 border-border border-b lg:basis-sm lg:border-b-0 lg:border-r lg:overflow-auto">
+                    <PlayerList
+                      showField="points"
+                      showField2="answerSpeed"
+                      showField3={controller.config.gameMode !== "multiple_choice" ? "answer" : undefined}
+                    />
+                  </aside>
+                </div>
+                <Countdown />
               </>
             )
       }

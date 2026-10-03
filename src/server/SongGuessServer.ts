@@ -49,44 +49,6 @@ export class SongGuessServer extends Server<Env> {
   }
 
   /**
-   * Saves relevant state of the room to storage.
-   */
-  async saveState() {
-    if (!this.validRoom) {
-      await this.ctx.storage.delete("state");
-      return;
-    }
-
-    const state: PersistedServerState = {
-      version: PERSISTED_STATE_VERSION,
-      name: this.name,
-      ...this.validRoom.toStorage(),
-    };
-    // console.debug(state);
-    await this.ctx.storage.put("state", state);
-  }
-
-  /**
-   * Restores the state of the room, e.g. when the Durable Object gets restarted.
-   */
-  async restoreState(ctx: DurableObjectState = this.ctx) {
-    const state = await ctx.storage.get<PersistedServerState>("state");
-    if (!state) {
-      // the room is not valid, nothing to do
-      return;
-    }
-
-    this._name = state.name;
-    if (state.version !== PERSISTED_STATE_VERSION) {
-      this.logger.warn(`Discarding state with old version ${state.version}`);
-      return;
-    }
-
-    this.logger.info("Restoring state...");
-    this.validRoom = ValidRoom.fromStorage(this, state);
-  }
-
-  /**
    * Creates a ValidRoom instance, allowing players to connect to this room.
    */
   public async createValidRoom() {
@@ -494,5 +456,43 @@ export class SongGuessServer extends Server<Env> {
         }
         break;
     }
+  }
+
+  /**
+   * Saves relevant state of the room to storage.
+   */
+  async saveState() {
+    if (!this.validRoom) {
+      await this.ctx.storage.delete("state");
+      return;
+    }
+
+    const state: PersistedServerState = {
+      version: PERSISTED_STATE_VERSION,
+      name: this.name,
+      ...this.validRoom.toStorage(),
+    };
+    // console.debug(state);
+    await this.ctx.storage.put("state", state);
+  }
+
+  /**
+   * Restores the state of the room, e.g. when the Durable Object gets restarted.
+   */
+  async restoreState(ctx: DurableObjectState = this.ctx) {
+    const state = await ctx.storage.get<PersistedServerState>("state");
+    if (!state) {
+      // the room is not valid, nothing to do
+      return;
+    }
+
+    this._name = state.name;
+    if (state.version !== PERSISTED_STATE_VERSION) {
+      this.logger.warn(`Discarding state with old version ${state.version}`);
+      return;
+    }
+
+    this.logger.info("Restoring state...");
+    this.validRoom = ValidRoom.fromStorage(this, state);
   }
 }

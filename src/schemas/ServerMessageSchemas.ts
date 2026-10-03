@@ -236,6 +236,11 @@ export const PlayerMessageSchema = z.object({
    * True, if this player is just spectating
    */
   isSpectator: z.boolean(),
+
+  /**
+   * True, if this player has picked a song in player picks. Ommitted otherwise.
+   */
+  hasPicked: z.boolean().optional(),
 });
 
 /**

@@ -1,42 +1,7 @@
-import { useMemo } from "react";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
-import { ResultsPlayerList } from "../results/ResultsPlayerList";
 import { MultipleChoiceQuestionDisplay } from "./MultipleChoiceQuestionDisplay";
 import { PlayerPicksQuestionDisplay } from "./PlayerPicksQuestionDisplay";
-
-
-function AnswerResults() {
-  const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "round_state");
-
-  const rankedPlayers = useMemo(() => {
-    return [...controller.playerMessages]
-      .sort((a, b) => {
-        return (b.points)
-          - (a.points);
-      });
-  }, [controller.playerMessages]);
-
-  if (rankedPlayers.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="xl:flex-1 w-full space-y-6 xl:max-w-3/4 text-center">
-      <h3 className="text-lg font-bold">
-        Player Answers
-      </h3>
-      <ResultsPlayerList
-        rankedPlayers={rankedPlayers}
-        showField="points"
-        showField2="answerSpeed"
-        showField3={controller.config.gameMode !== "multiple_choice" ? "answer" : undefined}
-        showRankingNumbers={false}
-      />
-    </div>
-  );
-}
 
 /**
  * Main ingame component that only renders when game state is 'ingame'.
@@ -61,13 +26,12 @@ export function Ingame() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col xl:flex-row-reverse justify-center items-center gap-8 p-4">
+    <div className="w-full h-full flex flex-col xl:flex-row-reverse justify-center items-center gap-8">
       {
         controller.config.gameMode === "multiple_choice"
           ? <MultipleChoiceQuestionDisplay />
           : <PlayerPicksQuestionDisplay />
       }
-      <AnswerResults />
     </div>
   );
 }

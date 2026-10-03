@@ -12,7 +12,7 @@ import { ratio, token_set_ratio } from "fuzzball";
 import { QUESTION_ANSWER_MIN_SIMILARITY, QUESTION_MAX_POINTS } from "../../../shared/ConfigConstants";
 import { GamePhase } from "../../../shared/game/GamePhase";
 import { normalizeSongName } from "../../../shared/Utils";
-import { fetchTestSoundCloudSong } from "../../api/HTTPHelpers";
+import { testFetchSong } from "../../api/HTTPHelpers";
 import { Game } from "../Game";
 import { PlayerPicksQuestion } from "./PlayerPicksQuestion";
 
@@ -34,14 +34,14 @@ export class PlayerPicksGame extends Game {
    * List of all players still needing to pick a song.
    */
   get remainingPickers(): Player[] {
-    return this.room.activePlayers.filter(player => !this.nextQuestions.has(player.uuid));
+    return this.room.activePlayers.filter(player => !player.hasPicked);
   }
 
   getGameMessages(sendPrevious?: boolean, player?: Player): ServerMessage[] {
     const msgs = super.getGameMessages(sendPrevious);
 
     // add the picked song to the game messages - if exists
-    if (player && this.nextQuestions.has(player.uuid) && this.gamePhase === GamePhase.PICKING) {
+    if (player?.hasPicked) {
       msgs.push({
         type: "confirmation",
         sourceMessage: {
@@ -89,10 +89,10 @@ export class PlayerPicksGame extends Game {
     if (this.gamePhase !== GamePhase.PICKING) {
       player.sendConfirmationOrError(msg, "Can only pick songs during picking phase.");
       return;
-    } else if (this.nextQuestions.has(player.uuid)) {
+    } else if (player.hasPicked) {
       player.sendConfirmationOrError(msg, "You cannot change your picked song.");
       return;
-    } else if (!(await fetchTestSoundCloudSong(msg.song.audioURL))) {
+    } else if (!(await testFetchSong(msg.song.audioURL))) {
       player.sendConfirmationOrError(msg, "Failed to fetch song audio. Please select a different song.");
       return;
     }
@@ -112,6 +112,7 @@ export class PlayerPicksGame extends Game {
     }
 
     player.sendConfirmationOrError(msg);
+    this.room.broadcastRoomStateMessage();
   }
 
   onGamePhaseChanged(previous: GamePhase) {

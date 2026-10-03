@@ -27,7 +27,7 @@ export async function fetchGetRoom(url: URL | string): Promise<RoomGetResponse |
  * A function that only returns false if the uri is a non-fetchable uri.
  * @param uri the uri to test.
  */
-export async function fetchTestSoundCloudSong(uri: string): Promise<boolean> {
+export async function testFetchSong(uri: string): Promise<boolean> {
   if (soundCloudSongRegex.test(uri) || ytSongRegex.test(uri)) {
     const stub = env.SongGuessAPI.getByName("default");
     // add dummy localhost prefix so it is a "valid" url

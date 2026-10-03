@@ -39,19 +39,38 @@ function getMaxContrastColor(colorName: string | undefined): string | undefined 
  */
 export const PlayerAvatar = memo(({ size, player }: { size: number; player: PlayerMessage | null }) => {
   return (
-    <div
-      className="rounded-full flex items-center justify-center text-xl font-bold bg-disabled-bg text-disabled-text"
-      style={{
-        backgroundColor: player?.color,
-        color: getMaxContrastColor(player?.color),
-        minWidth: size,
-        minHeight: size,
-        fontSize: size / 2.2,
-      }}
-    >
-      {player
-        ? player.username.charAt(0).toUpperCase()
-        : "+"}
+    <div className="relative">
+      <div
+        className="rounded-full flex items-center justify-center text-xl font-bold bg-disabled-bg text-disabled-text"
+        style={{
+          backgroundColor: player?.color,
+          color: getMaxContrastColor(player?.color),
+          minWidth: size,
+          minHeight: size,
+          fontSize: size / 2.2,
+        }}
+      >
+        {player
+          ? player.username.charAt(0).toUpperCase()
+          : "+"}
+      </div>
+      {player?.isHost
+        && (
+          <div
+            className="absolute rounded-full bg-gold flex items-center justify-center"
+            style={{
+              width: size / 2.5,
+              height: size / 2.5,
+              fontSize: size / 3,
+              top: -size / 25,
+              right: -size / 25,
+            }}
+          >
+            <span className="material-symbols-outlined text-black text-[1em]!">
+              crown
+            </span>
+          </div>
+        )}
     </div>
   );
 });

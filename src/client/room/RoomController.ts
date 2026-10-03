@@ -76,10 +76,17 @@ export class RoomController {
   };
 
   /**
-   * The current list of just player messages of this room.
+   * The current list of non-spectating player messages of this room.
    */
   get playerMessages(): PlayerMessage[] {
     return Array.from(this.players.values()).filter(p => !p.isSpectator);
+  }
+
+  /**
+   * The current list of spectating player messages of this room.
+   */
+  get spectatorPlayerMessages(): PlayerMessage[] {
+    return Array.from(this.players.values()).filter(p => p.isSpectator);
   }
 
   /**

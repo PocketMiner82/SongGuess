@@ -18,6 +18,7 @@ import { PlayerMessageSchema } from "../schemas/ServerMessageSchemas";
 import { usernameRegex } from "../schemas/ValidationRegexes";
 import { ROOM_INACTIVITY_KICK_TIMEOUT } from "../shared/ConfigConstants";
 import { GamePhase } from "../shared/game/GamePhase";
+import { PlayerPicksGame } from "./game/playerPicks/PlayerPicksGame";
 
 
 export class Player implements PlayerMessage, IEventListener {
@@ -28,6 +29,18 @@ export class Player implements PlayerMessage, IEventListener {
   points: number = 0;
 
   answerData?: PlayerAnswerData;
+
+  get isHost(): boolean {
+    return this.room.host === this;
+  }
+
+  get hasPicked(): boolean | undefined {
+    return this.room.game instanceof PlayerPicksGame
+      && this.room.game.nextQuestions.has(this.uuid)
+      && this.room.game.gamePhase === GamePhase.PICKING
+      ? true
+      : undefined;
+  }
 
   /**
    * Holds the Timeout which will kick the player after inactivity.
@@ -48,13 +61,6 @@ export class Player implements PlayerMessage, IEventListener {
    * Whether this player is an admin
    */
   isAdmin: boolean;
-
-  /**
-   * Whether this player is host.
-   */
-  get isHost(): boolean {
-    return this.room.host === this;
-  }
 
   constructor(readonly room: ValidRoom, public conn: Connection<string> | null, readonly uuid: string, readonly connID: string) {
     room.listener.registerEvents(this);

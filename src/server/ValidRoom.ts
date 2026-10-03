@@ -423,7 +423,7 @@ export class ValidRoom {
     const persistedPlayers: PersistedPlayer[] = [];
 
     this.players.forEach((player) => {
-      if (!player.isAdmin && (player.isOnline || player.connID === this.hostID)) {
+      if (!player.isAdmin) {
         persistedPlayers.push(player.toStorage());
       }
     });
