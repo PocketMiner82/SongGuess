@@ -1,3 +1,10 @@
+# [3.4.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.11...3.4.0-dev.12) (2026-10-03)
+
+
+### Features
+
+* major layout refactoring to better use both smaller and larger screens + fix race condition when restoring state ([cf2c3b4](https://github.com/PocketMiner82/SongGuess/commit/cf2c3b42b1c5c787619ec6d9ffc7612144337b84))
+
 # [3.4.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.10...3.4.0-dev.11) (2026-10-02)
 
 
