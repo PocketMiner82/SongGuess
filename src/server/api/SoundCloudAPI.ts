@@ -7,7 +7,7 @@ export class SoundCloudAPI {
   }
 
   public get isEnabled(): boolean {
-    return this.client_id.trim().length > 0;
+    return typeof this.client_id === "string" && this.client_id.trim().length > 0;
   }
 
   constructor(readonly sgAPI: SongGuessAPI, private client_id: string, private client_secret: string) {}

@@ -1,11 +1,11 @@
 import type { PlayerMessage } from "../../../../types/MessageTypes";
-import type { PossibleFields } from "../lobby/getShowField";
-import { getShowField } from "../lobby/getShowField";
+import type { PossibleShowFields } from "../../../../types/PossibleShowFields";
 import { PlayerCard } from "../player/PlayerCard";
+import { PlayerMessageField } from "../PlayerMessageField";
 
 
 export function ResultsPlayerList({ rankedPlayers, showField }:
-{ rankedPlayers: PlayerMessage[]; showField: PossibleFields }) {
+{ rankedPlayers: PlayerMessage[]; showField: PossibleShowFields }) {
   return (
     <div className="flex flex-col gap-3 overflow-y-auto">
       {rankedPlayers.map((player, index) => (
@@ -25,7 +25,7 @@ export function ResultsPlayerList({ rankedPlayers, showField }:
 
           <div className="flex-1 flex flex-col bg-card-hover-bg rounded-lg w-full">
             <PlayerCard player={player} forceDesktop={true}>
-              {getShowField(player, showField)}
+              <PlayerMessageField player={player} showField={showField} className="text-xl!" />
             </PlayerCard>
           </div>
         </div>

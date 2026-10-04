@@ -11,6 +11,7 @@ export async function fetchPostCreateRoom(url: URL | string): Promise<CreateRoom
     const resp = await fetch(url, { method: "POST", signal: AbortSignal.timeout(5000) });
     if (resp.status !== 201) {
       console.error(`Posting ${url} returned ${resp.status}!`);
+      return null;
     }
 
     return await resp.json();

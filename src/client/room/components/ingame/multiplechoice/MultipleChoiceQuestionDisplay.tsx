@@ -1,10 +1,10 @@
-import type { PlayerMessage } from "../../../../types/MessageTypes";
+import type { PlayerMessage } from "../../../../../types/MessageTypes";
 import { memo, useCallback } from "react";
-import { GamePhase } from "../../../../shared/game/GamePhase";
-import { Button } from "../../../components/Button";
-import { useControllerContext } from "../../hooks/RoomControllerHooks";
-import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
-import { PlayerAvatar } from "../player/PlayerAvatar";
+import { GamePhase } from "../../../../../shared/game/GamePhase";
+import { Button } from "../../../../components/Button";
+import { useControllerContext } from "../../../hooks/RoomControllerHooks";
+import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../../hooks/RoomControllerListenerHooks";
+import { PlayerAvatar } from "../../player/PlayerAvatar";
 
 
 type AnswerState = "pending" | "selected" | "correct" | "incorrect" | "disabled";

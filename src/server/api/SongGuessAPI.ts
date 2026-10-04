@@ -502,7 +502,7 @@ export class SongGuessAPI extends Server<Env> {
       }
 
       case "searchYT": {
-        if (env.YATTEE_SERVER.trim().length === 0) {
+        if (typeof env.YATTEE_SERVER === "string" && env.YATTEE_SERVER.trim().length === 0) {
           return new Response("YT API is disabled", { status: 403 });
         }
 
@@ -516,7 +516,7 @@ export class SongGuessAPI extends Server<Env> {
       }
 
       case "fetchYTAudio": {
-        if (env.YATTEE_SERVER.trim().length === 0) {
+        if (typeof env.YATTEE_SERVER === "string" && env.YATTEE_SERVER.trim().length === 0) {
           return new Response("YT API is disabled", { status: 403 });
         }
 

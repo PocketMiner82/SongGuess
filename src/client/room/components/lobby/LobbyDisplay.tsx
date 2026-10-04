@@ -8,7 +8,7 @@ import { PlaylistsList } from "./PlaylistsList";
  * Main lobby component that only renders when game state is 'lobby'.
  * Organizes player list, playlist management and game start controls.
  */
-export function Lobby() {
+export function LobbyDisplay() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "room_state");
   useRoomControllerMessageTypeListener(controller, "update_playlists");

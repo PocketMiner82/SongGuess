@@ -2,51 +2,15 @@ import { useMemo } from "react";
 import { Button } from "../../../components/Button";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
-import { PlaylistCard } from "../PlaylistCard";
+import { PlayedSongsList } from "./PlayedSongsList";
 import { ResultsPlayerList } from "./ResultsPlayerList";
 
-/**
- * Component for displaying list of songs played during the game round.
- * Shows all songs that were played with their title, artist, and cover art.
- */
-function PlayedSongsList() {
-  const controller = useControllerContext();
-  useRoomControllerMessageTypeListener(controller, "update_played_songs");
-
-  return controller.playedSongs.length > 0 && (
-    <div className="mt-8">
-      <h3 className="text-xl font-semibold mb-4 text-center">
-        Played Songs
-      </h3>
-      <div className="space-y-2 mx-auto">
-        {controller.playedSongs.map((song, idx) => (
-          song
-            ? (
-                <PlaylistCard
-                  key={idx}
-                  title={song.name}
-                  subtitle={song.artist}
-                  coverURL={song.cover}
-                  hrefURL={song.hrefURL}
-                />
-              )
-            : (
-                <PlaylistCard
-                  key={idx}
-                  title="(Skipped Round)"
-                />
-              )
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /**
  * Component for displaying game results after all questions are answered.
  * Shows ranked list of players who played the game with their points.
  */
-export function Results() {
+export function ResultsDisplay() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "room_state");
 

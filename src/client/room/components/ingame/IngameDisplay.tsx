@@ -1,13 +1,13 @@
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
-import { MultipleChoiceQuestionDisplay } from "./MultipleChoiceQuestionDisplay";
-import { PlayerPicksQuestionDisplay } from "./PlayerPicksQuestionDisplay";
+import { MultipleChoiceQuestionDisplay } from "./multiplechoice/MultipleChoiceQuestionDisplay";
+import { PlayerPicksQuestionDisplay } from "./playerpicks/PlayerPicksQuestionDisplay";
 
 /**
  * Main ingame component that only renders when game state is 'ingame'.
  * Displays the current question and handles answer selection.
  */
-export function Ingame() {
+export function IngameDisplay() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "room_state");
 

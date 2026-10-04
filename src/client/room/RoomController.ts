@@ -299,7 +299,7 @@ export class RoomController {
 
     // Show fatal error for disconnection
     if (!this.reconnecting) {
-      Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false });
+      Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false }).then();
     }
   }
 
@@ -315,7 +315,7 @@ export class RoomController {
 
     // Show fatal error for connection failure
     if (!this.reconnecting) {
-      Modal.open(FatalErrorDialog, { error: ev.message || "WebSocket error. See console for details.", closable: false });
+      Modal.open(FatalErrorDialog, { error: ev.message || "WebSocket error. See console for details.", closable: false }).then();
     }
   }
 
