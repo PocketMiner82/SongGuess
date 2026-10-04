@@ -19,9 +19,7 @@ export function PlayerPicksAnsweringDisplay() {
     ? roundMsg?.question?.correctAnswer
     : undefined;
   const answerInputEnabled = roundMsg?.gamePhase === GamePhase.ANSWERING || roundMsg?.gamePhase === GamePhase.QUESTION;
-  const isMyQuestion = roundMsg?.question?.questionType === "player_picks"
-    ? controller.uuid === roundMsg?.question?.pickerId
-    : false;
+  const isMyQuestion = controller.checkCurrentQuestionIsByUUID(controller.uuid);
 
   const handleSelect = useCallback(() => {
     if (roundMsg?.gamePhase !== GamePhase.ANSWERING || !answer.trim() || answer === controller.questionData.selectedAnswer || isMyQuestion) {

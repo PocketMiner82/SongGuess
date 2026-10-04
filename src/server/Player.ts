@@ -307,7 +307,6 @@ export class Player implements PlayerMessage, IEventListener {
    */
   toStorage(): PersistedPlayer {
     return {
-      uuid: this.uuid,
       connId: this.connID,
       ...this.toPlayerMessage(true),
     };

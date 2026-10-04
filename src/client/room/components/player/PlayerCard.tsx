@@ -23,6 +23,7 @@ export const PlayerCard = memo(({
   return (
     <div className={`box-border flex flex-1 flex-col lg:flex-row items-center gap-4 p-3 bg-card-bg rounded-lg
         ${player?.hasPicked ? "border-2 border-success" : ""}
+        ${controller.checkCurrentQuestionIsByUUID(player?.uuid ?? "") ? "border-2 border-secondary" : ""}
         ${forceDesktop ? "flex-row!" : ""}`}
     >
       <PlayerAvatar size={48} player={player} />

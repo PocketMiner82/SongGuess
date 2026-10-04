@@ -606,4 +606,15 @@ export class RoomController {
     };
     this.socket.send(JSON.stringify(req));
   }
+
+  /**
+   * Whether the current question in player picks was selected by the provided uuid.
+   * @param uuid the uuid to check.
+   * @returns true if the game mode is player picks and the current round message pickerId matches the provided uuid.
+   */
+  public checkCurrentQuestionIsByUUID(uuid: string): boolean {
+    return this.questionData.roundMsg?.question?.questionType === "player_picks"
+      ? uuid === this.questionData.roundMsg?.question?.pickerId
+      : false;
+  }
 }
