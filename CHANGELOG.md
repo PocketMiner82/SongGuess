@@ -1,3 +1,28 @@
+# [3.4.0](https://github.com/PocketMiner82/SongGuess/compare/3.3.0...3.4.0) (2026-10-04)
+
+
+### Bug Fixes
+
+* **API:** add workaround because axios sends cache: default which is not supported by workers ([af6bb53](https://github.com/PocketMiner82/SongGuess/commit/af6bb5321520b55e0213d07cd73a6fa7c7f3297c))
+* **API:** add workaround because axios sends cache: default which is not supported by workers ([9926428](https://github.com/PocketMiner82/SongGuess/commit/992642819f231433a02e3dd5f5d8cf5420737a89))
+* **API:** improve YT download speeds ([367ee74](https://github.com/PocketMiner82/SongGuess/commit/367ee7457300d0e1df7d7a74755fa5e9baa8aacc))
+* **API:** return and log errors on some request failures ([83cdcff](https://github.com/PocketMiner82/SongGuess/commit/83cdcff25eecbb4f555264536ddd35f4d63d0956))
+* **API:** revert axios to 1.19.0 to prevent cache bug ([e2e7395](https://github.com/PocketMiner82/SongGuess/commit/e2e7395f26740624dc25c0c5bbdac4b40b9a92a9))
+* **Config:** allow even more answer options for multiple choice ([b5a0446](https://github.com/PocketMiner82/SongGuess/commit/b5a04467fe136f03515928c0df6cecbd3be97f22))
+* **Config:** don't reset data if first init from storage ([dfd540b](https://github.com/PocketMiner82/SongGuess/commit/dfd540b734a1788a83d9567e7a2bcdf3b42aed36))
+* **Ingame:** better use larger screens ([554ed63](https://github.com/PocketMiner82/SongGuess/commit/554ed63e64ba6a0fa6fbb5ddeb5cde3e6184574d))
+
+
+### Features
+
+* allow up to 16 players per room + fix playerlist sorting + restructure playerlist and refactor room folder structure ([f716a53](https://github.com/PocketMiner82/SongGuess/commit/f716a53da0166c9540a185ff3c18adb8db0c4702))
+* **API:** add yt audio fetch method ([ca55a73](https://github.com/PocketMiner82/SongGuess/commit/ca55a73ecf2e86f07de08808fb998217627e0d6b))
+* **API:** add yt search ([dd497b4](https://github.com/PocketMiner82/SongGuess/commit/dd497b4dc64b7a2727000487f7ea7a4dfd47d434))
+* **API:** proxy YT requests better ([8695bbc](https://github.com/PocketMiner82/SongGuess/commit/8695bbc1aa2e3688fd6cefd72f9d5cb2e0aeeb81))
+* fully add support for YT ([d5dbc54](https://github.com/PocketMiner82/SongGuess/commit/d5dbc54c56d5985e6f8c6d3e2c02c544d713c506))
+* major layout refactoring to better use both smaller and larger screens + fix race condition when restoring state ([cf2c3b4](https://github.com/PocketMiner82/SongGuess/commit/cf2c3b42b1c5c787619ec6d9ffc7612144337b84))
+* **PlayerPicks:** show who picked the current song ([1e3ae44](https://github.com/PocketMiner82/SongGuess/commit/1e3ae449b38425b68177a50ed4fcb8bb55f4bd78))
+
 # [3.4.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.13...3.4.0-dev.14) (2026-10-04)
 
 
