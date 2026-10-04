@@ -1,3 +1,10 @@
+# [3.4.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.12...3.4.0-dev.13) (2026-10-04)
+
+
+### Features
+
+* allow up to 16 players per room + fix playerlist sorting + restructure playerlist and refactor room folder structure ([f716a53](https://github.com/PocketMiner82/SongGuess/commit/f716a53da0166c9540a185ff3c18adb8db0c4702))
+
 # [3.4.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.11...3.4.0-dev.12) (2026-10-03)
 
 
