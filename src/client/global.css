@@ -21,70 +21,74 @@ body {
   --color-success: var(--color-green-500);
   --color-card-bg: light-dark(var(--color-gray-100), var(--color-gray-800));
   --color-card-hover-bg: light-dark(var(--color-gray-200), var(--color-gray-900));
+  --color-border: light-dark(var(--color-gray-300), var(--color-gray-700));
+  --color-gold: #ffc30b;
+  --color-silver: #c0c0c0;
+  --color-bronze: #bf8970;
 }
 
 @layer base {
-    input[type='number']::-webkit-outer-spin-button,
-    input[type='number']::-webkit-inner-spin-button,
-    input[type='number'] {
-        -webkit-appearance: none;
-        margin: 0;
-        -moz-appearance: textfield !important;
-    }
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number'] {
+    -webkit-appearance: none;
+    margin: 0;
+    -moz-appearance: textfield !important;
+  }
 }
 
 @keyframes progress-bar {
-    from {
-        width: 100%;
-    }
-    to {
-        width: 0;
-    }
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
 }
 
 @keyframes progress-bar-reversed {
-    from {
-        width: 0%;
-    }
-    to {
-        width: 100%;
-    }
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 .progress-bar,
 .progress-bar-reversed {
-    animation-timing-function: linear;
-    animation-fill-mode: forwards;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
 }
 
 .progress-bar {
-    animation-name: progress-bar;
-    width: 0;
+  animation-name: progress-bar;
+  width: 0;
 }
 
 .progress-bar-reversed {
-    animation-name: progress-bar-reversed;
-    width: 0;
+  animation-name: progress-bar-reversed;
+  width: 0;
 }
 
 .modal {
-    @apply fixed inset-0 z-50 transition-opacity duration-250;
+  @apply fixed inset-0 z-50 transition-opacity duration-250;
 }
 
 .modal:not(.modal--active) {
-    @apply opacity-0 pointer-events-none;
+  @apply opacity-0 pointer-events-none;
 }
 
 .modal__container {
-    @apply absolute inset-0 flex justify-center items-center overflow-auto;
-    background: rgba(0, 0, 0, 0.5);
-    overscroll-behavior: contain;
+  @apply absolute inset-0 flex justify-center items-center overflow-auto;
+  background: rgba(0, 0, 0, 0.5);
+  overscroll-behavior: contain;
 }
 
 .modal:not(.modal--active) .modal__container {
-    @apply overflow-hidden;
+  @apply overflow-hidden;
 }
 
 .modal__inner {
-    @apply p-4;
+  @apply p-4;
 }

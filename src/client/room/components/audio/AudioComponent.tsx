@@ -12,7 +12,7 @@ import { AudioControls } from "./AudioControls";
  * Audio component that handles audio playback and controls.
  * Manages audio element, volume control, and responds to server audio control messages.
  */
-export function Audio() {
+export function AudioComponent() {
   const controller = useControllerContext();
   const [cookies, setCookie] = useCookies<"audioVolume" | "audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
   const audioVolume = cookies.audioVolume ?? 0.2;

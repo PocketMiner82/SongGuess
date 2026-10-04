@@ -4,7 +4,6 @@ import type { GameState, PlayerMessage, Playlist, RoomConfigMessage, Song } from
 
 export interface PersistedPlayer extends PlayerMessage {
   connId: string;
-  uuid: string;
 }
 
 export interface PersistedAbstractQuestion {

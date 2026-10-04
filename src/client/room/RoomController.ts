@@ -76,10 +76,17 @@ export class RoomController {
   };
 
   /**
-   * The current list of just player messages of this room.
+   * The current list of non-spectating player messages of this room.
    */
   get playerMessages(): PlayerMessage[] {
     return Array.from(this.players.values()).filter(p => !p.isSpectator);
+  }
+
+  /**
+   * The current list of spectating player messages of this room.
+   */
+  get spectatorPlayerMessages(): PlayerMessage[] {
+    return Array.from(this.players.values()).filter(p => p.isSpectator);
   }
 
   /**
@@ -292,7 +299,7 @@ export class RoomController {
 
     // Show fatal error for disconnection
     if (!this.reconnecting) {
-      Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false });
+      Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false }).then();
     }
   }
 
@@ -308,7 +315,7 @@ export class RoomController {
 
     // Show fatal error for connection failure
     if (!this.reconnecting) {
-      Modal.open(FatalErrorDialog, { error: ev.message || "WebSocket error. See console for details.", closable: false });
+      Modal.open(FatalErrorDialog, { error: ev.message || "WebSocket error. See console for details.", closable: false }).then();
     }
   }
 
@@ -598,5 +605,16 @@ export class RoomController {
       playlists,
     };
     this.socket.send(JSON.stringify(req));
+  }
+
+  /**
+   * Whether the current question in player picks was selected by the provided uuid.
+   * @param uuid the uuid to check.
+   * @returns true if the game mode is player picks and the current round message pickerId matches the provided uuid.
+   */
+  public checkCurrentQuestionIsByUUID(uuid: string): boolean {
+    return this.questionData.roundMsg?.question?.questionType === "player_picks"
+      ? uuid === this.questionData.roundMsg?.question?.pickerId
+      : false;
   }
 }

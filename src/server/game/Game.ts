@@ -358,6 +358,11 @@ export abstract class Game implements IEventListener {
     if (this.hasPickingPhase && previous === GamePhase.PICKING) {
       this.room.server.safeBroadcast(this.getAudioControlMessage("play_countdown_end"));
     }
+
+    // send update when picking phase starts to clear answer data on clients
+    if (this.gamePhase === GamePhase.PICKING) {
+      this.room.broadcastRoomStateMessage();
+    }
   }
 
   /**

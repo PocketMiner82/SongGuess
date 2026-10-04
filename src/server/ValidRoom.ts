@@ -423,7 +423,7 @@ export class ValidRoom {
     const persistedPlayers: PersistedPlayer[] = [];
 
     this.players.forEach((player) => {
-      if (!player.isAdmin && (player.isOnline || player.connID === this.hostID)) {
+      if (!player.isAdmin) {
         persistedPlayers.push(player.toStorage());
       }
     });
@@ -455,7 +455,7 @@ export class ValidRoom {
     }
 
     // this will also set the correct game mode
-    validRoom.config.applyMessage(state.config);
+    validRoom.config.applyMessage(state.config, true);
 
     validRoom.lobby.updateFromStorage(state.lobby);
     validRoom.game.updateFromStorage(state.game);

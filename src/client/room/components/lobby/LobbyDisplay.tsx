@@ -1,7 +1,6 @@
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
 import { Settings } from "./LobbySettings";
-import { PlayerList } from "./PlayerList";
 import { PlaylistsList } from "./PlaylistsList";
 
 
@@ -9,7 +8,7 @@ import { PlaylistsList } from "./PlaylistsList";
  * Main lobby component that only renders when game state is 'lobby'.
  * Organizes player list, playlist management and game start controls.
  */
-export function Lobby() {
+export function LobbyDisplay() {
   const controller = useControllerContext();
   useRoomControllerMessageTypeListener(controller, "room_state");
   useRoomControllerMessageTypeListener(controller, "update_playlists");
@@ -18,14 +17,13 @@ export function Lobby() {
     return null;
 
   return (
-    <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
-      <PlayerList />
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 flex-1">
-        <div className="lg:order-last">
+    <div className="flex flex-col">
+      <div className="grid gap-4 grid-cols-1 xl:grid-cols-2 flex-1">
+        <div className="xl:order-last">
           <Settings disabled={!controller.isHost} />
         </div>
 
-        <div className="lg:order-first min-h-0">
+        <div className="xl:order-first min-h-0">
           <PlaylistsList />
         </div>
       </div>

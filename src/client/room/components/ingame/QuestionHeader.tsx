@@ -24,7 +24,7 @@ export function QuestionHeader() {
   return (
     <>
       <div className="flex flex-col items-center gap-3 p-3 px-6 bg-default-bg border-b border-gray-300
-      dark:border-gray-700 mx-auto w-full lg:w-1/3 lg:border-l lg:border-r lg:rounded-b-2xl mb-2"
+      dark:border-gray-700 mx-auto w-full 2xl:w-1/2 2xl:border-l 2xl:border-r 2xl:rounded-b-2xl mb-2"
       >
         <h2 className="text-xl font-bold whitespace-nowrap">
           Round

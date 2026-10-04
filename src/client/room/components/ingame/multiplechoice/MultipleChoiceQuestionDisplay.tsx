@@ -1,10 +1,10 @@
-import type { PlayerMessage } from "../../../../types/MessageTypes";
+import type { PlayerMessage } from "../../../../../types/MessageTypes";
 import { memo, useCallback } from "react";
-import { GamePhase } from "../../../../shared/game/GamePhase";
-import { Button } from "../../../components/Button";
-import { useControllerContext } from "../../hooks/RoomControllerHooks";
-import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
-import { PlayerAvatar } from "../player/PlayerAvatar";
+import { GamePhase } from "../../../../../shared/game/GamePhase";
+import { Button } from "../../../../components/Button";
+import { useControllerContext } from "../../../hooks/RoomControllerHooks";
+import { useRoomControllerListener, useRoomControllerMessageTypeListener } from "../../../hooks/RoomControllerListenerHooks";
+import { PlayerAvatar } from "../../player/PlayerAvatar";
 
 
 type AnswerState = "pending" | "selected" | "correct" | "incorrect" | "disabled";
@@ -53,7 +53,7 @@ const AnswerOption = memo(({
         onClick={() => onSelect(index)}
         disabled={state !== "pending"}
         variant="plain"
-        className={`w-full h-auto py-5 lg:w-100 lg:min-h-25 text-center justify-start transition-colors ${getAnswerButtonClass(state)}`}
+        className={`w-full h-full py-5 md:w-75 xl:w-100 xl:min-h-25 text-center justify-start transition-colors ${getAnswerButtonClass(state)}`}
       >
         {option}
       </Button>
@@ -110,38 +110,40 @@ export function MultipleChoiceQuestionDisplay() {
   }
 
   return (
-    <div className="space-y-6 text-center">
+    <div className="xl:flex-2 space-y-6 w-full md:w-auto text-center">
       <h3 className="text-lg font-bold">
         Select the correct song title
       </h3>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {answerOptions!.map((option, index) => {
-          const isSelected = controller.questionData.selectedAnswerIndex === index;
-          const isCorrect = correctIndex !== undefined ? correctIndex === index : null;
+      <div className="w-full md:w-auto flex items-center justify-center">
+        <div className="w-full md:w-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+          {answerOptions!.map((option, index) => {
+            const isSelected = controller.questionData.selectedAnswerIndex === index;
+            const isCorrect = correctIndex !== undefined ? correctIndex === index : null;
 
-          let state: AnswerState = "pending";
-          if (isCorrect !== null && isCorrect) {
-            state = "correct";
-          } else if (isCorrect !== null && !isCorrect && isSelected) {
-            state = "incorrect";
-          } else if (isSelected) {
-            state = "selected";
-          } else if (controller.questionData.roundMsg?.gamePhase !== GamePhase.ANSWERING || controller.questionData.selectedAnswerIndex !== undefined) {
-            state = "disabled";
-          }
+            let state: AnswerState = "pending";
+            if (isCorrect !== null && isCorrect) {
+              state = "correct";
+            } else if (isCorrect !== null && !isCorrect && isSelected) {
+              state = "incorrect";
+            } else if (isSelected) {
+              state = "selected";
+            } else if (controller.questionData.roundMsg?.gamePhase !== GamePhase.ANSWERING || controller.questionData.selectedAnswerIndex !== undefined) {
+              state = "disabled";
+            }
 
-          // we can use the option as key here, because the server ensures song names are unique in each question
-          return (
-            <AnswerOption
-              key={option}
-              option={option}
-              index={index}
-              state={state}
-              onSelect={handleAnswerSelect}
-              playerAnswers={controller.playerMessages}
-            />
-          );
-        })}
+            // we can use the option as key here, because the server ensures song names are unique in each question
+            return (
+              <AnswerOption
+                key={option}
+                option={option}
+                index={index}
+                state={state}
+                onSelect={handleAnswerSelect}
+                playerAnswers={controller.playerMessages}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );
