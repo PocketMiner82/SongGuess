@@ -1,3 +1,10 @@
+# [3.4.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.13...3.4.0-dev.14) (2026-10-04)
+
+
+### Features
+
+* **PlayerPicks:** show who picked the current song ([1e3ae44](https://github.com/PocketMiner82/SongGuess/commit/1e3ae449b38425b68177a50ed4fcb8bb55f4bd78))
+
 # [3.4.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/3.4.0-dev.12...3.4.0-dev.13) (2026-10-04)
 
 
