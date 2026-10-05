@@ -1,3 +1,11 @@
+## [3.4.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.4.0...3.4.1-dev.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **PlayerCard:** better highlight own user ([99e0af0](https://github.com/PocketMiner82/SongGuess/commit/99e0af04ee2130e96fc66ee2c8be3dd6666e3832))
+* **PlayerCard:** improve style for highlighting self ([4457423](https://github.com/PocketMiner82/SongGuess/commit/44574236ea68ba5849630829802e94d7d656c83a))
+
 # [3.4.0](https://github.com/PocketMiner82/SongGuess/compare/3.3.0...3.4.0) (2026-10-04)
 
 
