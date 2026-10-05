@@ -44,15 +44,16 @@ export const PlayerCard = memo(({
                     <>
                       {player.username === controller.username
                         ? (
-                            <button
-                              type="button"
-                              className="text-lg font-medium wrap-anywhere leading-none cursor-pointer hover:underline text-center"
-                              onClick={() => setIsEditing(true)}
-                            >
-                              {player.username}
-                              {" "}
-                              (You)
-                            </button>
+                            <div className="flex gap-1.5">
+                              <button
+                                type="button"
+                                className="text-lg font-medium wrap-anywhere leading-none cursor-pointer hover:underline text-center"
+                                onClick={() => setIsEditing(true)}
+                              >
+                                {player.username}
+                              </button>
+                              <span className="rounded-full bg-secondary text-white px-1.5">You</span>
+                            </div>
                           )
                         : (
                             <span className="text-lg font-medium wrap-anywhere leading-none text-center">
