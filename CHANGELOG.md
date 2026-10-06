@@ -1,3 +1,10 @@
+## [3.4.2-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.4.1...3.4.2-dev.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **PlayerPicks:** properly set questionCount when loading from storage + styling improvements ([e6160c8](https://github.com/PocketMiner82/SongGuess/commit/e6160c8e571c5445879972e33f6d54b03bd51e8a))
+
 ## [3.4.1](https://github.com/PocketMiner82/SongGuess/compare/3.4.0...3.4.1) (2026-10-06)
 
 
