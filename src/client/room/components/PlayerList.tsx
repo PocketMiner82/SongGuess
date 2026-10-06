@@ -61,9 +61,9 @@ export function PlayerList() {
       });
     }
 
-    while (msgs.length < COLORS.length) {
-      msgs.push(null);
-    }
+    // while (msgs.length < COLORS.length) {
+    //   msgs.push(null);
+    // }
 
     return msgs;
   }, [controller.playerMessages, controller.state]);
@@ -85,7 +85,7 @@ export function PlayerList() {
         }
       </h3>
 
-      <div className="flex flex-row lg:flex-col gap-3 overflow-y-auto">
+      <div className="flex flex-row justify-center lg:flex-col gap-3 overflow-y-auto">
         {rankedPlayers.map((player, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <div key={player?.username ?? index} className="flex items-center gap-4 min-w-32">
@@ -108,7 +108,7 @@ export function PlayerList() {
                           }}
                           aria-label="Transfer host"
                         >
-                          <span className="material-symbols-outlined text-2xl" aria-hidden="true">crown</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">crown</span>
                         </Button>
                       ))
                     : (

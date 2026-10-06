@@ -23,7 +23,7 @@ export function PlayerPicksQuestionDisplay() {
 
   return (
     <div className="xl:flex-2 space-y-6 w-full flex items-center justify-center">
-      <div className="w-full lg:w-3xl 2xl:w-5xl">
+      <div className="flex flex-col gap-2 w-full lg:w-3xl 2xl:w-5xl">
         <h3 className="text-lg text-center font-bold">
           {pickingMessage}
         </h3>

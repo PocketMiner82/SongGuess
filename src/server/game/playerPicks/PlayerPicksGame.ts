@@ -253,7 +253,11 @@ export class PlayerPicksGame extends Game {
     if (persistedGame.type === "player_picks") {
       this.questions = persistedGame.questions.map(q => PlayerPicksQuestion.fromStorage(q));
 
-      const nextQ = persistedGame.nextQuestions.map(q => PlayerPicksQuestion.fromStorage(q));
+      const nextQ = persistedGame.nextQuestions.map((qPersisted) => {
+        const q = PlayerPicksQuestion.fromStorage(qPersisted);
+        q.questionCount = persistedGame.nextQuestions.length;
+        return q;
+      });
       for (const q of nextQ) {
         this.nextQuestions.set(q.pickerId, q);
       }

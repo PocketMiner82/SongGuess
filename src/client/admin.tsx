@@ -43,7 +43,7 @@ function AuthForm({ onAuth }: { onAuth: (auth: AuthData) => void }) {
       <div className="flex items-center justify-center flex-1 p-4">
         <div className="w-full max-w-md">
           <div className="bg-card-bg rounded-lg border border-gray-300 dark:border-gray-700 p-6">
-            <h2 className="text-2xl font-bold text-default mb-6 text-center">Admin Login</h2>
+            <h2 className="text-xl font-bold text-default mb-6 text-center">Admin Login</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
                 autoFocus={true}

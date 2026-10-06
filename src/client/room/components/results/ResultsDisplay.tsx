@@ -24,7 +24,7 @@ export function ResultsDisplay() {
   return (
     <div className="space-y-6 2xl:max-w-3/4 mx-auto">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">
+        <h2 className="text-xl font-bold mb-2">
           Game Results
         </h2>
         <p className="text-disabled-text">

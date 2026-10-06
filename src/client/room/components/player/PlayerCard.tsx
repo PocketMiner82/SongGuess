@@ -44,7 +44,7 @@ export const PlayerCard = memo(({
                     <>
                       {player.username === controller.username
                         ? (
-                            <div className="flex flex-col lg:flex-row gap-1.5 items-center">
+                            <div className={`flex flex-col lg:flex-row gap-1.5 items-center ${forceDesktop ? "flex-row!" : ""}`}>
                               <button
                                 type="button"
                                 className="text-lg font-medium wrap-anywhere leading-none cursor-pointer hover:underline text-center"
