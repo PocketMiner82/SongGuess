@@ -220,8 +220,8 @@ export class Player implements PlayerMessage, IEventListener {
    * @param msg the message to send with the code.
    */
   public kick(code: number, msg: string) {
-    this.onClose();
     this.conn?.close(code, msg);
+    this.onClose();
   }
 
   /**
