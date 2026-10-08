@@ -26,7 +26,7 @@ import z from "zod";
 import { version } from "../../../package.json";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { BaseConfig } from "../../shared/BaseConfig";
-import { AUTO_RECONNECT_WAIT_MS, CLOSE_CODE_MIN, CLOSE_CODE_WRONG_VERSION } from "../../shared/ConfigConstants";
+import { AUTO_RECONNECT_WAIT_MS, CLOSE_CODE_WRONG_VERSION } from "../../shared/ConfigConstants";
 import { GamePhase } from "../../shared/game/GamePhase";
 import { FatalErrorDialog } from "../components/modal/FatalErrorDialog";
 import { Modal } from "../Modal";
@@ -249,8 +249,6 @@ export class RoomController {
   private onClose(ev: CloseEvent) {
     console.log(`Disconnected from ${this.socket.room} (${ev.code}):`, ev.reason);
 
-    this.cleanup(false);
-
     // force hard reload when version is outdated
     if (ev.code === CLOSE_CODE_WRONG_VERSION) {
       Modal.open(FatalErrorDialog, {
@@ -259,15 +257,13 @@ export class RoomController {
         forceGet: true,
         closable: false,
       }).then();
-      return;
-    }
-
-    // Show fatal error for disconnection
-    if (!this.reconnecting && ev.code >= CLOSE_CODE_MIN) {
+    } else if (ev.code >= 4000) {
       Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false }).then();
     } else {
       this.handleAutoReconnect();
     }
+
+    this.cleanup(false);
   }
 
   /**
@@ -278,9 +274,9 @@ export class RoomController {
   private onError(ev: ErrorEvent) {
     console.error(`Disconnected from ${this.socket.room} due to:`, ev);
 
-    this.cleanup(false);
-
     this.handleAutoReconnect();
+
+    this.cleanup(false);
   }
 
   /**
@@ -388,6 +384,7 @@ export class RoomController {
    * (Re)connect to the PartyKit server.
    */
   public reconnect() {
+    console.debug("Reconnecting...");
     this.questionData = new QuestionData();
     this.reconnecting = true;
     this.setIsReady(false);
@@ -421,10 +418,10 @@ export class RoomController {
     //                                        CONNECTING or OPEN
     if (closeSocket && this.socket.readyState <= WebSocket.OPEN) {
       this.socket.close();
+      this.stopAutoReconnect();
     }
 
     this.stopPingInterval();
-    this.stopAutoReconnect();
   }
 
   /**
