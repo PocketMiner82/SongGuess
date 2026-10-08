@@ -387,7 +387,6 @@ export class RoomController {
     console.debug("Reconnecting...");
     this.questionData = new QuestionData();
     this.reconnecting = true;
-    this.setIsReady(false);
 
     this.socket.reconnect();
   }
@@ -399,6 +398,8 @@ export class RoomController {
    * @see reconnect
    */
   public reconnectWithOptions(newUsername: string | null, spectator: boolean = false) {
+    this.setIsReady(false);
+
     this.socket.updateProperties({
       query: {
         username: newUsername ?? undefined,
