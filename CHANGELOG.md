@@ -1,3 +1,10 @@
+# [4.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.1...4.0.0-dev.2) (2026-10-08)
+
+
+### Bug Fixes
+
+* **RoomController:** actually show fatal error when auto reconnecting fails ([1cc11ba](https://github.com/PocketMiner82/SongGuess/commit/1cc11ba3e49c78b5925e6a5ed81859d16c688d66))
+
 # [4.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.4.2-dev.1...4.0.0-dev.1) (2026-10-08)
 
 
