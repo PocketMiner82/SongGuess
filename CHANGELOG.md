@@ -1,3 +1,11 @@
+# [4.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.2...4.0.0-dev.3) (2026-10-08)
+
+
+### Bug Fixes
+
+* **Player:** when kicking player close connection before calling onClose ([4504bb1](https://github.com/PocketMiner82/SongGuess/commit/4504bb1d506e945da1d5a788f8c4192e0a72eb0c))
+* **RoomController:** don't refresh frontend when reconnecting ([1db193d](https://github.com/PocketMiner82/SongGuess/commit/1db193d1b159377444a6d284d5af6fa4ea5ca053))
+
 # [4.0.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.1...4.0.0-dev.2) (2026-10-08)
 
 
