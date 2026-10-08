@@ -1,3 +1,10 @@
+# [4.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.3...4.0.0-dev.4) (2026-10-08)
+
+
+### Bug Fixes
+
+* **SongGuessServer:** delete whole storage if room not valid ([f774e4b](https://github.com/PocketMiner82/SongGuess/commit/f774e4b4115f3af1dfc38a56345a9c0268e76e54))
+
 # [4.0.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.2...4.0.0-dev.3) (2026-10-08)
 
 
