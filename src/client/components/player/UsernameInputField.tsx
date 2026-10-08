@@ -11,23 +11,25 @@ import { Button } from "../Button";
  *
  * @param onEnd - Callback function called when the user submits a valid username
  * @param requireEnter - If true, requires pressing Enter to submit; otherwise submits on blur
- * @param showButton - If true, displays a "Join Game" button alongside the input field
+ * @param showButton - If true, also displays join and spectator buttons
  * @constructor
  */
-export function UsernameInputField({ onEnd, requireEnter, showButton }: { onEnd: (editedName: string) => void; requireEnter?: boolean; showButton?: boolean }) {
+export function UsernameInputField({ onEnd, requireEnter, showButtons }: { onEnd: (editedName: string, spectator: boolean) => void; requireEnter?: boolean; showButtons?: boolean }) {
   const controller = useControllerContext();
+  const [controllerUsername, setControllerUsername] = useState(controller.username ?? "");
   const [editedName, setEditedName] = useState(controller.username ?? "");
 
   useRoomControllerListener(controller, useCallback((msg) => {
-    if (msg?.type === "room_state" && controller.username !== undefined && controller.username !== editedName) {
+    if (msg?.type === "room_state" && controller.username !== undefined && controller.username !== controllerUsername) {
+      setControllerUsername(controller.username);
       setEditedName(controller.username);
     }
     return false;
-  }, [controller.username, editedName]));
+  }, [controller.username, controllerUsername]));
 
-  const handleNameUpdate = useCallback(() => {
+  const handleNameUpdate = useCallback((spectator: boolean) => {
     if (editedName && usernameRegex.test(editedName)) {
-      onEnd(editedName);
+      onEnd(editedName, spectator);
     }
   }, [editedName, onEnd]);
 
@@ -39,8 +41,8 @@ export function UsernameInputField({ onEnd, requireEnter, showButton }: { onEnd:
         type="text"
         value={editedName}
         onChange={e => setEditedName(e.target.value)}
-        onBlur={() => !requireEnter && handleNameUpdate()}
-        onKeyDown={e => e.key === "Enter" && handleNameUpdate()}
+        onBlur={() => !requireEnter && handleNameUpdate(false)}
+        onKeyDown={e => e.key === "Enter" && handleNameUpdate(false)}
         autoComplete="username"
         spellCheck={false}
         autoFocus={true}
@@ -48,11 +50,19 @@ export function UsernameInputField({ onEnd, requireEnter, showButton }: { onEnd:
         className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
                 ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}
       />
-      {showButton
+      {showButtons
         ? (
-            <Button className="mt-4 w-full" onClick={handleNameUpdate}>
-              Join Game
-            </Button>
+            <div className="flex flex-col gap-2 mt-4">
+              <Button className="w-full" onClick={() => handleNameUpdate(false)}>
+                Join Game
+              </Button>
+              <Button
+                className="w-full bg-secondary hover:bg-secondary-hover"
+                onClick={() => handleNameUpdate(true)}
+              >
+                Join as Spectator
+              </Button>
+            </div>
           )
         : undefined}
     </div>

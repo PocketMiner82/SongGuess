@@ -23,6 +23,7 @@ import PartySocket from "partysocket";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
+import { version } from "../../../package.json";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { BaseConfig } from "../../shared/BaseConfig";
 import { CLOSE_CODE_WRONG_VERSION } from "../../shared/ConfigConstants";
@@ -183,6 +184,8 @@ export class RoomController {
     readonly setCookies: CookieSetter,
     readonly setIsReady: (ready: boolean) => void,
   ) {
+    console.log(`SongGuess client version: ${version}`);
+
     const cookies = getCookies();
 
     // generate uuid if not set via cookie
@@ -205,6 +208,7 @@ export class RoomController {
       query: {
         username: newUsername,
         spectator: "true",
+        version,
       },
       connectionTimeout: 10000,
     });
@@ -226,21 +230,20 @@ export class RoomController {
 
   /**
    * (Re)connect to the PartyKit server.
-   * @param newUsername optionally request a new username when reconnecting.
+   * @param newUsername if this is null, request a new username when reconnecting.
    * @param spectator whether the player wants to spectate the game.
    */
-  public reconnect(newUsername?: string, spectator: boolean = false) {
+  public reconnect(newUsername: string | null, spectator: boolean = false) {
     this.questionData = new QuestionData();
     this.reconnecting = true;
     this.setIsReady(false);
 
     this.socket.updateProperties({
-      query: !newUsername
-        ? undefined
-        : {
-            username: newUsername,
-            spectator: spectator ? "true" : undefined,
-          },
+      query: {
+        username: newUsername ?? undefined,
+        spectator: spectator ? "true" : undefined,
+        version,
+      },
     });
 
     this.socket.reconnect();

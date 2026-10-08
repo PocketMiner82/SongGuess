@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { useModalWindow } from "react-modal-global";
 import { useControllerContext } from "../../hooks/RoomControllerHooks";
-import { Button } from "../Button";
 import { UsernameInputField } from "../player/UsernameInputField";
 
 
@@ -17,16 +16,10 @@ export function ChooseUsernameDialog({ onComplete }: ChooseUsernameContentProps)
   const modal = useModalWindow();
   const controller = useControllerContext();
 
-  const handleJoin = useCallback((username?: string) => {
-    if (username) {
-      controller.reconnect(username);
-    } else {
-      const nameInput = document.querySelector<HTMLInputElement>("#username-input");
-      controller.reconnect(nameInput?.value ?? "", true);
-    }
+  const handleJoin = useCallback(() => {
     modal.close();
     onComplete();
-  }, [controller, modal, onComplete]);
+  }, [modal, onComplete]);
 
   return (
     <div className="bg-card-bg rounded-lg p-6 max-w-md mx-4 shadow-xl w-full">
@@ -37,14 +30,15 @@ export function ChooseUsernameDialog({ onComplete }: ChooseUsernameContentProps)
       </h2>
       <p className="text-default mb-2">Please choose your username:</p>
 
-      <div className="mb-2">
-        <UsernameInputField onEnd={name => handleJoin(name)} requireEnter={true} showButton={true} />
-      </div>
-
-      <div className="mb-4 w-full">
-        <Button className="w-full bg-secondary hover:bg-secondary-hover" onClick={() => handleJoin()}>
-          Join as Spectator
-        </Button>
+      <div className="mb-4">
+        <UsernameInputField
+          onEnd={(name, spectator) => {
+            controller.reconnect(name, spectator);
+            handleJoin();
+          }}
+          requireEnter={true}
+          showButtons={true}
+        />
       </div>
 
       <p className="text-sm text-disabled-text">Tip: You can later click on your username to change it.</p>

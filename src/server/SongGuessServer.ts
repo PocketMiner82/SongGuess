@@ -249,7 +249,7 @@ export class SongGuessServer extends Server<Env> {
     }
 
     if (this.hasTag(conn, "wrong_version")) {
-      conn.close(CLOSE_CODE_WRONG_VERSION, "Wrong client version");
+      conn.close(CLOSE_CODE_WRONG_VERSION, `Wrong client version. Server version: ${version}`);
       return;
     }
 
