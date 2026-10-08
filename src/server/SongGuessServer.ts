@@ -478,7 +478,8 @@ export class SongGuessServer extends Server<Env> {
    */
   async saveState() {
     if (!this.validRoom) {
-      await this.ctx.storage.delete("state");
+      // delete whole storage for this durable object if room not valid
+      await this.ctx.storage.deleteAll();
       return;
     }
 
