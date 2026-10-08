@@ -1,3 +1,25 @@
+# [4.0.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.4.2-dev.1...4.0.0-dev.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* actually send version number + improve username input dialog ([b7111f7](https://github.com/PocketMiner82/SongGuess/commit/b7111f75b8c557ba67fe518ad3762a8cb064b45c))
+
+
+### Code Refactoring
+
+* **client:** flatten folder structure ([546f3ba](https://github.com/PocketMiner82/SongGuess/commit/546f3bab74e77b5aff7ee0eb66f46662a2ab4071))
+
+
+### Features
+
+* **RoomController:** implement reconnecting ([bb852e0](https://github.com/PocketMiner82/SongGuess/commit/bb852e09baef87def46c55f7a16cd35d42ff2997))
+
+
+### BREAKING CHANGES
+
+* **client:** also introduces new close codes and removes duplicate usage of code 4000
+
 ## [3.4.2-dev.1](https://github.com/PocketMiner82/SongGuess/compare/3.4.1...3.4.2-dev.1) (2026-10-06)
 
 
