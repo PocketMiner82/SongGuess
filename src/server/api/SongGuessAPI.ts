@@ -347,13 +347,6 @@ export class SongGuessAPI extends Server<Env> {
    * @param fetchFunction - An asynchronous supplier returning the underlying network Response.
    * @returns A Promise resolving to a Response object suitable for immediate streaming.
    */
-  /**
-   * Caches a fetch response asynchronously while streaming the body content directly to the client.
-   *
-   * @param url - The target URL key for the Cache API storage.
-   * @param fetchFunction - An asynchronous supplier returning the underlying network Response.
-   * @returns A Promise resolving to a Response object suitable for immediate streaming.
-   */
   private async cacheResponse(url: URL, fetchFunction: () => Promise<Response>): Promise<Response> {
     const key = url.toString();
     const cache = await caches.open("default");
