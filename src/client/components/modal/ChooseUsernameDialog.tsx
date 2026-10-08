@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { useModalWindow } from "react-modal-global";
-import { UsernameInputField } from "../../room/components/player/UsernameInputField";
-import { useControllerContext } from "../../room/hooks/RoomControllerHooks";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
 import { Button } from "../Button";
+import { UsernameInputField } from "../player/UsernameInputField";
 
 
 interface ChooseUsernameContentProps {

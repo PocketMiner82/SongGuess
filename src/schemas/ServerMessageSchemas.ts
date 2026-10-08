@@ -255,11 +255,6 @@ export const RoomStateMessage = z.object({
   type: z.literal("room_state").default("room_state"),
 
   /**
-   * The current {@link version} of the server.
-   */
-  version: z.string(),
-
-  /**
    * The current game state
    */
   state: GameStateSchema,

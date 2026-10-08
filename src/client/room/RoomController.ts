@@ -18,17 +18,17 @@ import type {
   StartGameMessage,
   TransferHostMessage,
 } from "../../types/MessageTypes";
-import type { ListenerCallback } from "./hooks/RoomControllerListenerHooks";
+import type { ListenerCallback } from "../hooks/RoomControllerListenerHooks";
 import PartySocket from "partysocket";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
-import { version } from "../../../package.json";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { BaseConfig } from "../../shared/BaseConfig";
+import { CLOSE_CODE_WRONG_VERSION } from "../../shared/ConfigConstants";
 import { GamePhase } from "../../shared/game/GamePhase";
 import { FatalErrorDialog } from "../components/modal/FatalErrorDialog";
-import { Modal } from "../modal/Modal";
+import { Modal } from "../Modal";
 import { QuestionData } from "./QuestionData";
 
 
@@ -297,6 +297,17 @@ export class RoomController {
 
     this.stopPingInterval();
 
+    // force hard reload when version is outdated
+    if (ev.code === CLOSE_CODE_WRONG_VERSION) {
+      Modal.open(FatalErrorDialog, {
+        error: "Client outdated, please try reloading the page.\n\n"
+          + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or CTRL+F5 or delete all cookies and data from this page.",
+        forceGet: true,
+        closable: false,
+      }).then();
+      return;
+    }
+
     // Show fatal error for disconnection
     if (!this.reconnecting) {
       Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false }).then();
@@ -414,23 +425,6 @@ export class RoomController {
         }
         break;
       case "room_state":
-        // force hard reload when version is outdated
-        if (msg.version !== version) {
-          this.socket.close();
-          alert("Client outdated. Click OK to reload the page and try again.\n\n"
-            + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or CTRL+F5 or delete all cookies and data from this page.");
-
-          // try reloading with refreshing cache
-          try {
-            // @ts-expect-error - reload(forceGet) is deprecated but still works
-            window.location.reload(true);
-          } catch {
-            window.location.reload();
-          }
-
-          return;
-        }
-
         this.roomState = msg;
         if (this.username) {
           this.setCookies("userName", this.username);

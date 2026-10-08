@@ -3,7 +3,7 @@ import { SearchMusicComponent } from "../SearchMusicComponent";
 import { ModalContent } from "./ModalContent";
 
 /**
- * A modal dialog for searching Apple Music content by URL or search term.
+ * A util dialog for searching Apple Music content by URL or search term.
  * Supports searching for songs, albums, and artists.
  * Can be restricted to only accept songs via the onlyAcceptSongs prop.
  */

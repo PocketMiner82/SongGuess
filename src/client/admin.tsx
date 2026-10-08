@@ -9,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import { toast } from "react-toastify";
 import z, { uuidv4 } from "zod";
 import { ServerMessageSchema } from "../schemas/MessageSchemas";
+import { CLOSE_CODE_ACCESS_DENIED } from "../shared/ConfigConstants";
 import { Button } from "./components/Button";
 import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
@@ -251,7 +252,7 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
       setConnectionStatus(null);
     },
     onClose: (e) => {
-      if (e.code === 4403) {
+      if (e.code === CLOSE_CODE_ACCESS_DENIED) {
         setConnectionStatus(e.reason);
       } else {
         setConnectionStatus("Reconnecting...");

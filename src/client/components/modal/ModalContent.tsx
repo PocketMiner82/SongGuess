@@ -6,7 +6,7 @@ import { useModalWindow } from "react-modal-global";
  * Props for the ModalContent component.
  */
 interface ModalContentProps {
-  /** Optional title displayed at the top of the modal */
+  /** Optional title displayed at the top of the util */
   title?: string;
   /** Optional Material Icons name to display next to the title */
   iconName?: string;
@@ -14,12 +14,12 @@ interface ModalContentProps {
   iconColor?: string;
   /** Modal body content */
   children: ReactNode;
-  /** Maximum width constraint for the modal */
+  /** Maximum width constraint for the util */
   maxWidth?: "sm" | "md" | "lg" | "full";
 }
 
 /**
- * The content wrapper for modal dialogs.
+ * The content wrapper for util dialogs.
  * Provides consistent styling with optional title, icon, and max-width constraints.
  * Closes on Escape key when closable param is set.
  */

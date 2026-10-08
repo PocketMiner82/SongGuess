@@ -59,3 +59,33 @@ export const QUESTION_MAX_POINTS = 1000;
  * Points are scaled linearly from that point until 100%.
  */
 export const QUESTION_ANSWER_MIN_SIMILARITY = 50;
+
+/**
+ * The close code used for a wrong version number.
+ */
+export const CLOSE_CODE_WRONG_VERSION = 4000;
+
+/**
+ * The close code used when the room id was not found
+ */
+export const CLOSE_CODE_ROOM_NOT_FOUND = 4001;
+
+/**
+ * The close code used when player gets kicked due to inactivity.
+ */
+export const CLOSE_CODE_INACTIVE = 4002;
+
+/**
+ * The close code used when room is full.
+ */
+export const CLOSE_CODE_ROOM_FULL = 4003;
+
+/**
+ * The close code used when username generation failed (no unique username found).
+ */
+export const CLOSE_CODE_USERNAME_GENERATION_FAILURE = 4004;
+
+/**
+ * The close code used when access was denied to an admin.
+ */
+export const CLOSE_CODE_ACCESS_DENIED = 4403;

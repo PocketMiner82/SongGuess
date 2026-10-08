@@ -1,17 +1,17 @@
 import type { ICookieProps } from "../../types/ICookieProps";
 import type { Playlist } from "../../types/MessageTypes";
-import type { AudioPlayer } from "../room/hooks/audio/AudioPlayerHook";
+import type { AudioPlayer } from "../hooks/audio/AudioPlayerHook";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useModalWindow } from "react-modal-global";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { getPlaylistByURL, performSearch } from "../../shared/Utils";
-import { PlaylistCard } from "../room/components/PlaylistCard";
-import { useAudioPlayer } from "../room/hooks/audio/AudioPlayerHook";
-import { useControllerContext } from "../room/hooks/RoomControllerHooks";
-import { useRoomControllerMessageTypeListener } from "../room/hooks/RoomControllerListenerHooks";
+import { useAudioPlayer } from "../hooks/audio/AudioPlayerHook";
+import { useControllerContext } from "../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../hooks/RoomControllerListenerHooks";
 import { Button } from "./Button";
+import { PlaylistCard } from "./PlaylistCard";
 
 /**
  * The current status of the search operation.
@@ -48,7 +48,7 @@ export interface SearchMusicComponentProps {
 }
 
 /**
- * A modal dialog for searching Apple Music content by URL or search term.
+ * A util dialog for searching Apple Music content by URL or search term.
  * Supports searching for songs, albums, and artists.
  * Can be restricted to only accept songs via the onlyAcceptSongs prop.
  */
