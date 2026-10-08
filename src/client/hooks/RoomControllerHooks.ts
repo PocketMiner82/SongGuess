@@ -30,7 +30,7 @@ export function useRoomController(host: string, roomID: string, getCookies: Cook
   useEffect(() => {
     // cleanup logic for when the component unmounts or roomID changes
     return () => {
-      controllerRef.current?.destroy();
+      controllerRef.current?.cleanup(true);
       controllerRef.current = null;
     };
   }, [roomID]);

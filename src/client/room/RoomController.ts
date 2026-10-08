@@ -26,7 +26,7 @@ import z from "zod";
 import { version } from "../../../package.json";
 import { ServerMessageSchema } from "../../schemas/MessageSchemas";
 import { BaseConfig } from "../../shared/BaseConfig";
-import { CLOSE_CODE_WRONG_VERSION } from "../../shared/ConfigConstants";
+import { AUTO_RECONNECT_WAIT_MS, CLOSE_CODE_MIN, CLOSE_CODE_WRONG_VERSION } from "../../shared/ConfigConstants";
 import { GamePhase } from "../../shared/game/GamePhase";
 import { FatalErrorDialog } from "../components/modal/FatalErrorDialog";
 import { Modal } from "../Modal";
@@ -59,6 +59,11 @@ export class RoomController {
    * Whether the WebSocket is currently reconnecting
    */
   reconnecting: boolean = false;
+
+  /**
+   * Auto reconnect timeout. If set, then auto reconnect is currently running or failed.
+   */
+  autoReconnectTimeout: number | null = null;
 
   /**
    * Listeners that are called whenever the state of the room changes.
@@ -220,74 +225,20 @@ export class RoomController {
   }
 
   /**
-   * Cleans up resources and closes the socket connection.
-   */
-  public destroy() {
-    this.socket.close();
-
-    this.stopPingInterval();
-  }
-
-  /**
-   * (Re)connect to the PartyKit server.
-   * @param newUsername if this is null, request a new username when reconnecting.
-   * @param spectator whether the player wants to spectate the game.
-   */
-  public reconnect(newUsername: string | null, spectator: boolean = false) {
-    this.questionData = new QuestionData();
-    this.reconnecting = true;
-    this.setIsReady(false);
-
-    this.socket.updateProperties({
-      query: {
-        username: newUsername ?? undefined,
-        spectator: spectator ? "true" : undefined,
-        version,
-      },
-    });
-
-    this.socket.reconnect();
-  }
-
-  /**
-   * Registers a listener that will be called whenever the state of the room changes.
-   *
-   * @param listener The {@link ListenerCallback} function.
-   * @returns A function to unregister the listener.
-   */
-  public registerOnStateChangeListener(listener: ListenerCallback) {
-    this.stateChangeEventListeners.push(listener);
-    return () => this.unregisterOnStateChangeListener(listener);
-  }
-
-  /**
-   * Unregisters a previously registered state change listener.
-   * @param listener The {@link ListenerCallback} function.
-   */
-  public unregisterOnStateChangeListener(listener: ListenerCallback) {
-    this.stateChangeEventListeners = this.stateChangeEventListeners.filter(l => l !== listener);
-  }
-
-  /**
-   * Calls all registered state change listeners.
-   *
-   * @param msg the received {@link ServerMessage} that caused the state change
-   */
-  private callOnStateChange(msg: ServerMessage | null) {
-    for (const listener of this.stateChangeEventListeners) {
-      listener(msg);
-    }
-  }
-
-  /**
    * Handles the "open" event of the socket connection.
    */
   private onOpen() {
-    this.reconnecting = false;
     console.log(`Connected to ${this.socket.room}`);
+    if (this.reconnecting && this.autoReconnectTimeout) {
+      toast.success("Reconnected successfully!");
+    }
+
+    this.reconnecting = false;
+    this.autoReconnectTimeout = null;
 
     this.startPingInterval();
     this.setIsReady(true);
+    this.autoReconnectTimeout = null;
   }
 
   /**
@@ -296,9 +247,9 @@ export class RoomController {
    * @param ev The CloseEvent containing details about the disconnection.
    */
   private onClose(ev: CloseEvent) {
-    console.log(`Disconnected from ${this.socket.room} (${ev.code}): ${ev.reason}`);
+    console.log(`Disconnected from ${this.socket.room} (${ev.code}):`, ev.reason);
 
-    this.stopPingInterval();
+    this.cleanup(false);
 
     // force hard reload when version is outdated
     if (ev.code === CLOSE_CODE_WRONG_VERSION) {
@@ -312,8 +263,10 @@ export class RoomController {
     }
 
     // Show fatal error for disconnection
-    if (!this.reconnecting) {
+    if (!this.reconnecting && ev.code >= CLOSE_CODE_MIN) {
       Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false }).then();
+    } else {
+      this.handleAutoReconnect();
     }
   }
 
@@ -325,50 +278,9 @@ export class RoomController {
   private onError(ev: ErrorEvent) {
     console.error(`Disconnected from ${this.socket.room} due to:`, ev);
 
-    this.stopPingInterval();
+    this.cleanup(false);
 
-    // Show fatal error for connection failure
-    if (!this.reconnecting) {
-      Modal.open(FatalErrorDialog, { error: ev.message || "WebSocket error. See console for details.", closable: false }).then();
-    }
-  }
-
-  /**
-   * Starts the ping interval if not running. Will send pings to the server every second.
-   * @private
-   */
-  private startPingInterval() {
-    if (!this.pingInterval) {
-      this.pingInterval = window.setInterval(() => this.sendPing(), PING_INTERVAL);
-      this.sendPing();
-    }
-  }
-
-  /**
-   * Stops ping interval if running.
-   * @private
-   */
-  private stopPingInterval() {
-    if (this.pingInterval) {
-      window.clearInterval(this.pingInterval);
-      this.pingInterval = undefined;
-    }
-  }
-
-  /**
-   * Sends a ping with the current sequence number to the server and tracks the start timestamp.
-   */
-  private sendPing() {
-    if (this.pingSeq !== this.pongSeq) {
-      // server did not respond fast enough, calling handleMessage will set ping to max
-      this.handleMessage({ type: "pong", seq: this.pongSeq });
-    }
-
-    this.pingStart = performance.now();
-    this.socket.send(JSON.stringify({
-      type: "ping",
-      seq: ++this.pingSeq,
-    } satisfies PingMessage));
+    this.handleAutoReconnect();
   }
 
   /**
@@ -390,7 +302,7 @@ export class RoomController {
     // check if received message is valid
     const result = ServerMessageSchema.safeParse(json);
     if (!result.success) {
-      console.debug("Server sent:", ev.data);
+      console.debug("Server sent:", json);
       console.error("Server sent invalid data:\n%s", z.prettifyError(result.error));
       return;
     }
@@ -399,7 +311,7 @@ export class RoomController {
 
     // don't log ping/pong
     if (msg.type !== "ping" && msg.type !== "pong")
-      console.debug("Server sent:", ev.data);
+      console.debug("Server sent:", msg);
 
     this.handleMessage(msg);
   }
@@ -417,7 +329,7 @@ export class RoomController {
         break;
       case "confirmation":
         if (msg.error) {
-          console.error(`Server reported an error for ${msg.sourceMessage.type}:\n${msg.error}`);
+          console.error(`Server reported an error for ${msg.sourceMessage.type}:`, msg.error);
           toast.error(msg.error);
           break;
         } else if (msg.sourceMessage.type === "select_answer") {
@@ -470,6 +382,140 @@ export class RoomController {
 
     // call listeners
     this.callOnStateChange(msg);
+  }
+
+  /**
+   * (Re)connect to the PartyKit server.
+   */
+  public reconnect() {
+    this.questionData = new QuestionData();
+    this.reconnecting = true;
+    this.setIsReady(false);
+
+    this.socket.reconnect();
+  }
+
+  /**
+   * (Re)connect to the PartyKit server with options.
+   * @param newUsername if this is null, request a new username when reconnecting.
+   * @param spectator whether the player wants to spectate the game.
+   * @see reconnect
+   */
+  public reconnectWithOptions(newUsername: string | null, spectator: boolean = false) {
+    this.socket.updateProperties({
+      query: {
+        username: newUsername ?? undefined,
+        spectator: spectator ? "true" : undefined,
+        version,
+      },
+    });
+
+    this.reconnect();
+  }
+
+  /**
+   * Cleans up resources.
+   * @param closeSocket whether to also close the socket connection.
+   */
+  public cleanup(closeSocket: boolean) {
+    //                                        CONNECTING or OPEN
+    if (closeSocket && this.socket.readyState <= WebSocket.OPEN) {
+      this.socket.close();
+    }
+
+    this.stopPingInterval();
+    this.stopAutoReconnect();
+  }
+
+  /**
+   * Registers a listener that will be called whenever the state of the room changes.
+   *
+   * @param listener The {@link ListenerCallback} function.
+   * @returns A function to unregister the listener.
+   */
+  public registerOnStateChangeListener(listener: ListenerCallback) {
+    this.stateChangeEventListeners.push(listener);
+    return () => this.unregisterOnStateChangeListener(listener);
+  }
+
+  /**
+   * Unregisters a previously registered state change listener.
+   * @param listener The {@link ListenerCallback} function.
+   */
+  public unregisterOnStateChangeListener(listener: ListenerCallback) {
+    this.stateChangeEventListeners = this.stateChangeEventListeners.filter(l => l !== listener);
+  }
+
+  /**
+   * Calls all registered state change listeners.
+   *
+   * @param msg the received {@link ServerMessage} that caused the state change
+   */
+  private callOnStateChange(msg: ServerMessage | null) {
+    for (const listener of this.stateChangeEventListeners) {
+      listener(msg);
+    }
+  }
+
+  /**
+   * Handles the auto reconnect timeout waiting. Shows fatal error dialog if auto reconnect fails.
+   */
+  private handleAutoReconnect() {
+    if (!this.reconnecting && !this.autoReconnectTimeout) {
+      this.autoReconnectTimeout = window.setTimeout(() => this.reconnect(), AUTO_RECONNECT_WAIT_MS);
+      toast.warning("Connection lost. Reconnecting...");
+    } else if (this.reconnecting && this.autoReconnectTimeout) {
+      this.autoReconnectTimeout = null;
+      Modal.open(FatalErrorDialog, { error: "Auto reconnect failed. Please try again!", closable: false }).then();
+    }
+  }
+
+  /**
+   * Stops the auto reconnecting.
+   */
+  private stopAutoReconnect() {
+    if (this.autoReconnectTimeout) {
+      window.clearTimeout(this.autoReconnectTimeout);
+      this.autoReconnectTimeout = null;
+    }
+  }
+
+  /**
+   * Starts the ping interval if not running. Will send pings to the server every second.
+   * @private
+   */
+  private startPingInterval() {
+    if (!this.pingInterval) {
+      this.pingInterval = window.setInterval(() => this.sendPing(), PING_INTERVAL);
+      this.sendPing();
+    }
+  }
+
+  /**
+   * Stops ping interval if running.
+   * @private
+   */
+  private stopPingInterval() {
+    if (this.pingInterval) {
+      window.clearInterval(this.pingInterval);
+      this.pingInterval = undefined;
+    }
+  }
+
+  /**
+   * Sends a ping with the current sequence number to the server and tracks the start timestamp.
+   */
+  private sendPing() {
+    if (this.pingSeq !== this.pongSeq) {
+      // server did not respond fast enough, calling handleMessage will set ping to max
+      this.handleMessage({ type: "pong", seq: this.pongSeq });
+    }
+
+    this.pingStart = performance.now();
+    this.socket.send(JSON.stringify({
+      type: "ping",
+      seq: ++this.pingSeq,
+    } satisfies PingMessage));
   }
 
   /**

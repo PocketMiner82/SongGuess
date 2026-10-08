@@ -61,6 +61,16 @@ export const QUESTION_MAX_POINTS = 1000;
 export const QUESTION_ANSWER_MIN_SIMILARITY = 50;
 
 /**
+ * Amount of milliseconds to wait before attempting to auto reconnect.
+ */
+export const AUTO_RECONNECT_WAIT_MS = 500;
+
+/**
+ * The minimum close code used.
+ */
+export const CLOSE_CODE_MIN = 4000;
+
+/**
  * The close code used for a wrong version number.
  */
 export const CLOSE_CODE_WRONG_VERSION = 4000;

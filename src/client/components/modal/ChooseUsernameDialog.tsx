@@ -33,7 +33,7 @@ export function ChooseUsernameDialog({ onComplete }: ChooseUsernameContentProps)
       <div className="mb-4">
         <UsernameInputField
           onEnd={(name, spectator) => {
-            controller.reconnect(name, spectator);
+            controller.reconnectWithOptions(name, spectator);
             handleJoin();
           }}
           requireEnter={true}
