@@ -1,3 +1,30 @@
+# [4.0.0](https://github.com/PocketMiner82/SongGuess/compare/3.4.1...4.0.0) (2026-10-10)
+
+
+### Bug Fixes
+
+* actually send version number + improve username input dialog ([b7111f7](https://github.com/PocketMiner82/SongGuess/commit/b7111f75b8c557ba67fe518ad3762a8cb064b45c))
+* **PlayerPicks:** properly set questionCount when loading from storage + styling improvements ([e6160c8](https://github.com/PocketMiner82/SongGuess/commit/e6160c8e571c5445879972e33f6d54b03bd51e8a))
+* **Player:** when kicking player close connection before calling onClose ([4504bb1](https://github.com/PocketMiner82/SongGuess/commit/4504bb1d506e945da1d5a788f8c4192e0a72eb0c))
+* **RoomController:** actually show fatal error when auto reconnecting fails ([1cc11ba](https://github.com/PocketMiner82/SongGuess/commit/1cc11ba3e49c78b5925e6a5ed81859d16c688d66))
+* **RoomController:** don't refresh frontend when reconnecting ([1db193d](https://github.com/PocketMiner82/SongGuess/commit/1db193d1b159377444a6d284d5af6fa4ea5ca053))
+* **SongGuessServer:** delete whole storage if room not valid ([f774e4b](https://github.com/PocketMiner82/SongGuess/commit/f774e4b4115f3af1dfc38a56345a9c0268e76e54))
+
+
+### Code Refactoring
+
+* **client:** flatten folder structure ([546f3ba](https://github.com/PocketMiner82/SongGuess/commit/546f3bab74e77b5aff7ee0eb66f46662a2ab4071))
+
+
+### Features
+
+* **RoomController:** implement reconnecting ([bb852e0](https://github.com/PocketMiner82/SongGuess/commit/bb852e09baef87def46c55f7a16cd35d42ff2997))
+
+
+### BREAKING CHANGES
+
+* **client:** also introduces new close codes and removes duplicate usage of code 4000
+
 # [4.0.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.4...4.0.0-dev.5) (2026-10-09)
 
 # [4.0.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.0.0-dev.3...4.0.0-dev.4) (2026-10-08)
