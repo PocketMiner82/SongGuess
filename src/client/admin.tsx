@@ -9,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import { toast } from "react-toastify";
 import z, { uuidv4 } from "zod";
 import { ServerMessageSchema } from "../schemas/MessageSchemas";
+import { CLOSE_CODE_ACCESS_DENIED } from "../shared/ConfigConstants";
 import { Button } from "./components/Button";
 import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
@@ -43,7 +44,7 @@ function AuthForm({ onAuth }: { onAuth: (auth: AuthData) => void }) {
       <div className="flex items-center justify-center flex-1 p-4">
         <div className="w-full max-w-md">
           <div className="bg-card-bg rounded-lg border border-gray-300 dark:border-gray-700 p-6">
-            <h2 className="text-2xl font-bold text-default mb-6 text-center">Admin Login</h2>
+            <h2 className="text-xl font-bold text-default mb-6 text-center">Admin Login</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
                 autoFocus={true}
@@ -251,7 +252,7 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
       setConnectionStatus(null);
     },
     onClose: (e) => {
-      if (e.code === 4403) {
+      if (e.code === CLOSE_CODE_ACCESS_DENIED) {
         setConnectionStatus(e.reason);
       } else {
         setConnectionStatus("Reconnecting...");

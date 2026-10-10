@@ -298,7 +298,7 @@ export function App() {
         <div className="lg:max-w-3/4 mx-auto p-4 min-h-full flex flex-col">
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-3xl font-bold mb-4">Transfer Playlists to SongGuess</h1>
+              <h1 className="text-xl font-bold mb-4">Transfer Playlists to SongGuess</h1>
               <p className="text-disabled-text mb-8">
                 Import playlists from any music service using a CSV file
               </p>

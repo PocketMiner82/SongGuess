@@ -3,11 +3,11 @@ import { useState } from "react";
 import { CookiesProvider, useCookies } from "react-cookie";
 import { createRoot } from "react-dom/client";
 import { ModalContainer } from "react-modal-global";
+import { ConnectingScreen } from "./components/ConnectingScreen";
+import { RoomDisplay } from "./components/RoomDisplay";
 import { ToastDisplay } from "./components/ToastDisplay";
-import { Modal } from "./modal/Modal";
-import { ConnectingScreen } from "./room/components/ConnectingScreen";
-import { RoomDisplay } from "./room/components/RoomDisplay";
-import { RoomContext, useRoomController } from "./room/hooks/RoomControllerHooks";
+import { RoomContext, useRoomController } from "./hooks/RoomControllerHooks";
+import { Modal } from "./Modal";
 
 /**
  * Main application component for the game room.

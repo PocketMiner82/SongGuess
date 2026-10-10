@@ -13,10 +13,14 @@ import type { PersistedPlayer } from "../types/PersistedStateTypes";
 import type { IEventListener } from "./listener/IEventListener";
 import type { ValidRoom } from "./ValidRoom";
 import { adjectives, nouns, uniqueUsernameGenerator } from "unique-username-generator";
-import { version } from "../../package.json";
 import { PlayerMessageSchema } from "../schemas/ServerMessageSchemas";
 import { usernameRegex } from "../schemas/ValidationRegexes";
-import { ROOM_INACTIVITY_KICK_TIMEOUT } from "../shared/ConfigConstants";
+import {
+  CLOSE_CODE_INACTIVE,
+  CLOSE_CODE_ROOM_FULL,
+  CLOSE_CODE_USERNAME_GENERATION_FAILURE,
+  ROOM_INACTIVITY_KICK_TIMEOUT,
+} from "../shared/ConfigConstants";
 import { GamePhase } from "../shared/game/GamePhase";
 import { PlayerPicksGame } from "./game/playerPicks/PlayerPicksGame";
 
@@ -83,7 +87,7 @@ export class Player implements PlayerMessage, IEventListener {
     if (!this.isSpectator) {
       const color = this.room.getUnusedColors()[0];
       if (!color) {
-        this.kick(4002, "Room is full.");
+        this.kick(CLOSE_CODE_ROOM_FULL, "Room is full.");
         return false;
       }
       this.color = color;
@@ -109,7 +113,7 @@ export class Player implements PlayerMessage, IEventListener {
         style: "titleCase",
         length: 16,
       }))) {
-        this.kick(4000, "Error assigning random username. Please try again.");
+        this.kick(CLOSE_CODE_USERNAME_GENERATION_FAILURE, "Error assigning random username. Please try again.");
         return false;
       }
     }
@@ -204,7 +208,6 @@ export class Player implements PlayerMessage, IEventListener {
   public sendRoomStateMessage() {
     this.safeSend({
       type: "room_state",
-      version,
       state: this.room.state,
       players: this.room.getOnlinePlayerMessages(),
       uuid: this.uuid,
@@ -217,8 +220,8 @@ export class Player implements PlayerMessage, IEventListener {
    * @param msg the message to send with the code.
    */
   public kick(code: number, msg: string) {
-    this.onClose();
     this.conn?.close(code, msg);
+    this.onClose();
   }
 
   /**
@@ -265,7 +268,7 @@ export class Player implements PlayerMessage, IEventListener {
     this.kickPlayerTimeout = setTimeout(() => {
       try {
         this.room.server.logger.info(`Kicked ${this.conn?.state} due to inactivity.`);
-        this.kick(4001, "Didn't receive updates within 15 seconds.");
+        this.kick(CLOSE_CODE_INACTIVE, "Didn't receive updates within 15 seconds.");
       } catch (e) {
         this.room.server.logger.error("Error running kick player timeout:");
         this.room.server.logger.error(e);

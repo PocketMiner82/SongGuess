@@ -5,7 +5,14 @@ import type { ServerMessage } from "../types/MessageTypes";
 import type { PersistedServerState } from "../types/PersistedStateTypes";
 import { clearInterval } from "node:timers";
 import { Server } from "partyserver";
-import { ROOM_CLEANUP_TIMEOUT, ROOM_HOST_TRANSFER_TIMEOUT } from "../shared/ConfigConstants";
+import { version } from "../../package.json";
+import {
+  CLOSE_CODE_ACCESS_DENIED,
+  CLOSE_CODE_ROOM_NOT_FOUND,
+  CLOSE_CODE_WRONG_VERSION,
+  ROOM_CLEANUP_TIMEOUT,
+  ROOM_HOST_TRANSFER_TIMEOUT,
+} from "../shared/ConfigConstants";
 import { PERSISTED_STATE_VERSION } from "../types/PersistedStateTypes";
 import { Logger } from "./logger/Logger";
 import { ValidRoom } from "./ValidRoom";
@@ -203,6 +210,7 @@ export class SongGuessServer extends Server<Env> {
 
   getConnectionTags(conn: Connection<string>, ctx: ConnectionContext) {
     const url = new URL(ctx.request.url);
+
     const authParam = url.searchParams.get("auth");
     if (authParam) {
       const credentials = atob(authParam).split(":");
@@ -214,7 +222,9 @@ export class SongGuessServer extends Server<Env> {
         return ["unauthorized"];
       }
     }
-    return ["player"];
+
+    const versionParam = url.searchParams.get("version");
+    return versionParam === version ? ["player"] : ["wrong_version"];
   }
 
   /**
@@ -225,7 +235,7 @@ export class SongGuessServer extends Server<Env> {
    */
   async onConnect(conn: Connection<string>, ctx: ConnectionContext) {
     if (this.hasTag(conn, "unauthorized")) {
-      conn.close(4403, "Access denied.");
+      conn.close(CLOSE_CODE_ACCESS_DENIED, "Access denied.");
       return;
     }
 
@@ -238,9 +248,14 @@ export class SongGuessServer extends Server<Env> {
       return;
     }
 
+    if (this.hasTag(conn, "wrong_version")) {
+      conn.close(CLOSE_CODE_WRONG_VERSION, `Wrong client version. Server version: ${version}`);
+      return;
+    }
+
     // kick player if room is not created yet
     if (!this.validRoom) {
-      conn.close(4000, "Room ID not found");
+      conn.close(CLOSE_CODE_ROOM_NOT_FOUND, "Room ID not found");
       this.logger.info(`${conn.state} tried connecting to non-validated room.`);
       return;
     }
@@ -463,7 +478,8 @@ export class SongGuessServer extends Server<Env> {
    */
   async saveState() {
     if (!this.validRoom) {
-      await this.ctx.storage.delete("state");
+      // delete whole storage for this durable object if room not valid
+      await this.ctx.storage.deleteAll();
       return;
     }
 

@@ -6,8 +6,8 @@ import { toast } from "react-toastify";
 import { Button } from "./components/Button";
 import { ToastDisplay } from "./components/ToastDisplay";
 import { TopBar } from "./components/TopBar";
-import { fetchPostCreateRoom } from "./HTTPHelpers";
-import { Modal } from "./modal/Modal";
+import { Modal } from "./Modal";
+import { fetchPostCreateRoom } from "./util/HTTPHelpers";
 
 
 /**

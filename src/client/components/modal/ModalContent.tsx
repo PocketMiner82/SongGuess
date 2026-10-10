@@ -6,7 +6,7 @@ import { useModalWindow } from "react-modal-global";
  * Props for the ModalContent component.
  */
 interface ModalContentProps {
-  /** Optional title displayed at the top of the modal */
+  /** Optional title displayed at the top of the util */
   title?: string;
   /** Optional Material Icons name to display next to the title */
   iconName?: string;
@@ -14,12 +14,12 @@ interface ModalContentProps {
   iconColor?: string;
   /** Modal body content */
   children: ReactNode;
-  /** Maximum width constraint for the modal */
+  /** Maximum width constraint for the util */
   maxWidth?: "sm" | "md" | "lg" | "full";
 }
 
 /**
- * The content wrapper for modal dialogs.
+ * The content wrapper for util dialogs.
  * Provides consistent styling with optional title, icon, and max-width constraints.
  * Closes on Escape key when closable param is set.
  */
@@ -54,13 +54,13 @@ export function ModalContent({ title, iconName, iconColor = "text-default", chil
           className="text-default hover:text-primary transition-colors cursor-pointer p-1 absolute top-4 right-4 focus-visible:ring-2 focus-visible:ring-secondary rounded"
           aria-label="Close"
         >
-          <span className="material-symbols-outlined text-2xl" aria-hidden="true">close</span>
+          <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       )}
       {(title || iconName) && (
         <div className="flex items-center gap-3 mb-4">
           {iconName && (
-            <span className={`material-icons text-2xl ${iconColor}`} aria-hidden="true">{iconName}</span>
+            <span className={`material-icons ${iconColor}`} aria-hidden="true">{iconName}</span>
           )}
           {title && (
             <h2 className="text-xl font-bold text-default">{title}</h2>
