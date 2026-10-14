@@ -174,6 +174,11 @@ export class RoomController {
   currentPingMs: number = -1;
 
   /**
+   * Whether we are just spectating.
+   */
+  spectator: boolean = true;
+
+  /**
    * Creates a new RoomController instance and initializes the socket connection.
    *
    * @param host the host used when creating the socket connection.
@@ -382,33 +387,33 @@ export class RoomController {
 
   /**
    * (Re)connect to the PartyKit server.
+   * @see reconnectWithOptions
    */
   public reconnect() {
-    console.debug("Reconnecting...");
-    this.questionData = new QuestionData();
-    this.reconnecting = true;
-
-    this.socket.reconnect();
+    this.reconnectWithOptions(this.username ?? null, this.spectator);
   }
 
   /**
    * (Re)connect to the PartyKit server with options.
    * @param newUsername if this is null, request a new username when reconnecting.
-   * @param spectator whether the player wants to spectate the game.
-   * @see reconnect
+   * @param spectate whether the player wants to spectate the game.
    */
-  public reconnectWithOptions(newUsername: string | null, spectator: boolean = false) {
+  public reconnectWithOptions(newUsername: string | null, spectate: boolean = false) {
     this.setIsReady(false);
+    console.debug("Reconnecting...");
+    this.questionData = new QuestionData();
+    this.reconnecting = true;
 
     this.socket.updateProperties({
       query: {
         username: newUsername ?? undefined,
-        spectator: spectator ? "true" : undefined,
+        spectator: spectate ? "true" : undefined,
         version,
       },
     });
 
-    this.reconnect();
+    this.socket.reconnect();
+    this.spectator = spectate;
   }
 
   /**
