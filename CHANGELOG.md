@@ -1,3 +1,15 @@
+# [4.1.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/4.0.0...4.1.0-dev.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* username should not reset when auto reconnecting ([ad0aa06](https://github.com/PocketMiner82/SongGuess/commit/ad0aa0648e8d1e84d7b09edb61c5a9e3d5209b81))
+
+
+### Features
+
+* add animation when players get points ([0282245](https://github.com/PocketMiner82/SongGuess/commit/0282245b35346d59c9f5c0a1df09cbeab67765f1))
+
 # [4.0.0](https://github.com/PocketMiner82/SongGuess/compare/3.4.1...4.0.0) (2026-10-10)
 
 
