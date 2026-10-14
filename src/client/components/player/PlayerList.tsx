@@ -63,7 +63,7 @@ export function PlayerList() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-full">
       <h3 className="text-xl font-bold w-full">
         Players
         {
@@ -77,7 +77,7 @@ export function PlayerList() {
 
       <div
         ref={animationParent}
-        className="flex flex-row justify-center gap-3 overflow-auto lg:flex-col"
+        className="flex flex-row justify-center-safe gap-3 overflow-y-hidden overflow-x-auto lg:overflow-y-auto lg:flex-col"
       >
         {players.map(player => (
           <div

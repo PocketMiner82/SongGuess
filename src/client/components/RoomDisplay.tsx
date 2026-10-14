@@ -62,7 +62,7 @@ export function RoomDisplay({ hasJoined, setHasJoined }: { hasJoined: boolean; s
                       <ResultsDisplay />
                     </div>
                   </main>
-                  <aside className="p-4 border-border border-b lg:basis-sm lg:border-b-0 lg:border-r lg:overflow-auto">
+                  <aside className="p-4 border-border border-b lg:basis-sm lg:border-b-0 lg:border-r">
                     <PlayerList />
                   </aside>
                 </div>
