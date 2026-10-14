@@ -11,7 +11,7 @@ import { Countdown } from "./Countdown";
 import { IngameDisplay } from "./ingame/IngameDisplay";
 import { QuestionHeader } from "./ingame/QuestionHeader";
 import { LobbyDisplay } from "./lobby/LobbyDisplay";
-import { PlayerList } from "./PlayerList";
+import { PlayerList } from "./player/PlayerList";
 import { ResultsDisplay } from "./results/ResultsDisplay";
 import { TopBar } from "./TopBar";
 

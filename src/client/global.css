@@ -48,7 +48,7 @@ body {
 
 @keyframes progress-bar-reversed {
   from {
-    width: 0%;
+    width: 0;
   }
   to {
     width: 100%;
@@ -91,4 +91,33 @@ body {
 
 .modal__inner {
   @apply p-4;
+}
+
+/**
+ * Registered custom property so it can be interpolated by a transition.
+ * Used to count the points up to their target value using only CSS.
+ */
+@property --points {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@utility number-counter {
+  transition: --points 1s ease-out;
+  counter-reset: points var(--points);
+
+  &::after {
+    content: counter(points);
+  }
+
+  @variant motion-reduce {
+    transition: none;
+  }
+}
+
+@starting-style {
+  .number-counter {
+    --points: 0;
+  }
 }

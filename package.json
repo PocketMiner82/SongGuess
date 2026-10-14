@@ -17,6 +17,7 @@
     "docs:serve": "typedoc --watch"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.10.0",
     "@syncfm/applemusic-api": "^0.0.6",
     "@types/hls.js": "^1.0.0",
     "axios": "1.19.0",
