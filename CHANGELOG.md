@@ -1,3 +1,10 @@
+# [4.1.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.1...4.1.0-dev.2) (2026-10-14)
+
+
+### Bug Fixes
+
+* improve animation styling for mobile and desktop a bit ([d5a345c](https://github.com/PocketMiner82/SongGuess/commit/d5a345cbae0c32407e454a8881350d7ee5027919))
+
 # [4.1.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/4.0.0...4.1.0-dev.1) (2026-10-14)
 
 
