@@ -1,3 +1,10 @@
+# [4.1.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.4...4.1.0-dev.5) (2026-10-16)
+
+
+### Bug Fixes
+
+* **css:** increase animation duration ingame ([87825db](https://github.com/PocketMiner82/SongGuess/commit/87825db0b62fb447a8f8cb62ccb8a477c7c7303c))
+
 # [4.1.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.3...4.1.0-dev.4) (2026-10-16)
 
 
