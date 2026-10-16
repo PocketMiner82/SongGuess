@@ -48,7 +48,7 @@ export function PlayerList() {
 
   const players = useMemo(() => {
     const list = [...controller.playerMessages];
-    return controller.state === "ingame"
+    return controller.state !== "lobby"
       ? list.sort((a, b) => b.points - a.points)
       : list;
   }, [controller.playerMessages, controller.state]);
