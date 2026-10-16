@@ -1,3 +1,10 @@
+# [4.1.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.2...4.1.0-dev.3) (2026-10-16)
+
+
+### Bug Fixes
+
+* prevent glitching animations for mobile ([7755425](https://github.com/PocketMiner82/SongGuess/commit/7755425b07794857e7c53b6e2c01b5e70e945643))
+
 # [4.1.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.1...4.1.0-dev.2) (2026-10-14)
 
 
