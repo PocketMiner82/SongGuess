@@ -77,7 +77,7 @@ export function PlayerList() {
 
       <div
         ref={animationParent}
-        className="flex flex-row justify-center-safe gap-3 overflow-y-hidden overflow-x-auto lg:overflow-y-auto lg:flex-col"
+        className="flex-1 flex flex-row justify-center-safe gap-3 overflow-y-hidden overflow-x-auto lg:justify-start lg:overflow-y-auto lg:flex-col"
       >
         {players.map(player => (
           <div
