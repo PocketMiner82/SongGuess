@@ -126,7 +126,7 @@ body {
 }
 
 @utility number-counter {
-  transition: --points 1s ease-out;
+  transition: --points 2.5s ease-out;
   counter-reset: points var(--points);
 
   &::after {
