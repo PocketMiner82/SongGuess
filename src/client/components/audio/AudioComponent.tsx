@@ -23,10 +23,6 @@ export function AudioComponent() {
   const countdownDonePlayer = useAudioPlayer(audioVolume, audioMuted, "/sounds/countdown_done_1.mp3");
 
   useRoomControllerListener(controller, useCallback((msg: ServerMessage | null) => {
-    if (!countdownRunningPlayer.howler || !countdownDonePlayer.howler) {
-      return false;
-    }
-
     // perform requested action
     if (msg?.type === "audio_control") {
       switch (msg.action) {
