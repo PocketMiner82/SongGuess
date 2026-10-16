@@ -21,7 +21,7 @@ export function Countdown() {
   return visible
     ? (
         <div className="fixed inset-0 flex items-center justify-center bg-black/85" aria-live="polite">
-          <div className="text-white text-9xl font-bold">{countdown}</div>
+          <div key={countdown} className="countdown-zoom text-white text-9xl font-bold">{countdown}</div>
         </div>
       )
     : null;
