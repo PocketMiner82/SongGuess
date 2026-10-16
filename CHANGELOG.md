@@ -1,3 +1,10 @@
+# [4.1.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.5...4.1.0-dev.6) (2026-10-16)
+
+
+### Bug Fixes
+
+* **PlayerList:** don't remove sorting in results ([c40b6ea](https://github.com/PocketMiner82/SongGuess/commit/c40b6ea84eef6b6c33716a0056680ea31e082934))
+
 # [4.1.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.4...4.1.0-dev.5) (2026-10-16)
 
 
