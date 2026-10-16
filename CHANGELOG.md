@@ -1,3 +1,10 @@
+# [4.1.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.3...4.1.0-dev.4) (2026-10-16)
+
+
+### Features
+
+* **countdown:** add animation ([e0dfaf1](https://github.com/PocketMiner82/SongGuess/commit/e0dfaf1ae49e98aaabeaf8404d9b3374badc85a7))
+
 # [4.1.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.2...4.1.0-dev.3) (2026-10-16)
 
 
