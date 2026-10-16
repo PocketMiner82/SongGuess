@@ -1,3 +1,10 @@
+# [4.1.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.6...4.1.0-dev.7) (2026-10-16)
+
+
+### Bug Fixes
+
+* **AudioComponent:** make audio play after reconnect ([32cfcea](https://github.com/PocketMiner82/SongGuess/commit/32cfcea222fd968436deceb9ab2526c68b2edb5a))
+
 # [4.1.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.5...4.1.0-dev.6) (2026-10-16)
 
 
