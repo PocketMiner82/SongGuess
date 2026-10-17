@@ -16,7 +16,7 @@
 <ul class="tsd-type-parameter-list">
 <li><span id="params"><span class="tsd-kind-type-parameter">PARAMS</span> = <span class="tsd-signature-type">unknown</span></span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:15931</li></ul></aside>
+<li>Defined in src/server/worker-configuration.d.ts:15955</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -67,26 +67,43 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with a handle for the Instance</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:15943</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:15967</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="createbatch"><span>create<wbr/>Batch</span><a href="#createbatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="createbatch-1"><span class="tsd-kind-call-signature">createBatch</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">batch</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/server_worker-configuration.WorkflowInstanceCreateOptions.html" class="tsd-signature-type tsd-kind-interface">WorkflowInstanceCreateOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#params">PARAMS</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#createbatch-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="createbatch-1"><span class="tsd-kind-call-signature">createBatch</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">:</span> <a href="../types/server_worker-configuration.WorkflowBatchCreateOptions.html" class="tsd-signature-type tsd-kind-type-alias">WorkflowBatchCreateOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#params">PARAMS</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/server_worker-configuration.WorkflowBatchCreateResult.html" class="tsd-signature-type tsd-kind-type-alias">WorkflowBatchCreateResult</a><span class="tsd-signature-symbol">&gt;</span><a href="#createbatch-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Create a batch of instances and return handle for all of them. If a provided id exists, an error will be thrown.
+<div class="tsd-comment tsd-typography"><p>Create a batch of instances and return handles for the created instances and any per-instance errors.
 <code>createBatch</code> is limited at 100 instances at a time or when the RPC limit for the batch (1MiB) is reached.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">batch</span>: <a href="../interfaces/server_worker-configuration.WorkflowInstanceCreateOptions.html" class="tsd-signature-type tsd-kind-interface">WorkflowInstanceCreateOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#params">PARAMS</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></span>
-<div class="tsd-comment tsd-typography"><p>List of Options when creating an instance including name and params</p>
+<li><span><span class="tsd-kind-parameter">options</span>: <a href="../types/server_worker-configuration.WorkflowBatchCreateOptions.html" class="tsd-signature-type tsd-kind-type-alias">WorkflowBatchCreateOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#params">PARAMS</a><span class="tsd-signature-symbol">&gt;</span></span>
+<div class="tsd-comment tsd-typography"><p>Options for creating instances by count or from a list of instance options</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with a list of handles for the created instances.</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/server_worker-configuration.WorkflowBatchCreateResult.html" class="tsd-signature-type tsd-kind-type-alias">WorkflowBatchCreateResult</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with the created instance handles and any per-instance errors.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:15950</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:15974</li></ul></aside></div></li>
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="createbatch-2"><span class="tsd-kind-call-signature">createBatch</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">batch</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/server_worker-configuration.WorkflowInstanceCreateOptions.html" class="tsd-signature-type tsd-kind-interface">WorkflowInstanceCreateOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#params">PARAMS</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#createbatch-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Create a batch of instances and return handles for the ones that were created.
+Instances that could not be created, for example because their ID already exists, are omitted from the result without an error.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">batch</span>: <a href="../interfaces/server_worker-configuration.WorkflowInstanceCreateOptions.html" class="tsd-signature-type tsd-kind-interface">WorkflowInstanceCreateOptions</a><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#params">PARAMS</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-deprecated">
+<h4 class="tsd-anchor-link" id="deprecated">Deprecated<a href="#deprecated" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Use the object form of <code>createBatch</code> instead of the array form.</p>
+</div></div><aside class="tsd-sources">
+<ul>
+<li>Defined in src/server/worker-configuration.d.ts:15980</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="deletebatch"><span>delete<wbr/>Batch</span><a href="#deletebatch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -106,7 +123,7 @@ The result contains one entry for each input position; IDs that do not exist are
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/server_worker-configuration.WorkflowBatchDeleteResult.html" class="tsd-signature-type tsd-kind-type-alias">WorkflowBatchDeleteResult</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with the successfully deleted instances and any per-instance errors.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:15958</li></ul></aside></div></li></ul></section>
+<li>Defined in src/server/worker-configuration.d.ts:15988</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="get"><span>get</span><a href="#get" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -124,7 +141,7 @@ The result contains one entry for each input position; IDs that do not exist are
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="server_worker-configuration.WorkflowInstance.html" class="tsd-signature-type tsd-kind-class">WorkflowInstance</a><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves with a handle for the Instance</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in src/server/worker-configuration.d.ts:15937</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in src/server/worker-configuration.d.ts:15961</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
