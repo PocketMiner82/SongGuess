@@ -48,7 +48,7 @@ body {
 
 @keyframes progress-bar-reversed {
   from {
-    width: 0%;
+    width: 0;
   }
   to {
     width: 100%;
@@ -71,6 +71,28 @@ body {
   width: 0;
 }
 
+@keyframes countdown-zoom {
+  from {
+    transform: scale(2);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.countdown-zoom {
+  animation: countdown-zoom 0.3s ease-out;
+
+  @variant motion-reduce {
+    animation: none;
+  }
+}
+
 .modal {
   @apply fixed inset-0 z-50 transition-opacity duration-250;
 }
@@ -91,4 +113,33 @@ body {
 
 .modal__inner {
   @apply p-4;
+}
+
+/**
+ * Registered custom property so it can be interpolated by a transition.
+ * Used to count the points up to their target value using only CSS.
+ */
+@property --points {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@utility number-counter {
+  transition: --points 2.5s ease-out;
+  counter-reset: points var(--points);
+
+  &::after {
+    content: counter(points);
+  }
+
+  @variant motion-reduce {
+    transition: none;
+  }
+}
+
+@starting-style {
+  .number-counter {
+    --points: 0;
+  }
 }

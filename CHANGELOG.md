@@ -1,3 +1,64 @@
+# [4.1.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.6...4.1.0-dev.7) (2026-10-17)
+
+
+### Bug Fixes
+
+* **AudioComponent:** make audio play after reconnect ([32cfcea](https://github.com/PocketMiner82/SongGuess/commit/32cfcea222fd968436deceb9ab2526c68b2edb5a))
+
+# [4.1.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.6...4.1.0-dev.7) (2026-10-16)
+
+
+### Bug Fixes
+
+* **AudioComponent:** make audio play after reconnect ([32cfcea](https://github.com/PocketMiner82/SongGuess/commit/32cfcea222fd968436deceb9ab2526c68b2edb5a))
+
+# [4.1.0-dev.6](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.5...4.1.0-dev.6) (2026-10-16)
+
+
+### Bug Fixes
+
+* **PlayerList:** don't remove sorting in results ([c40b6ea](https://github.com/PocketMiner82/SongGuess/commit/c40b6ea84eef6b6c33716a0056680ea31e082934))
+
+# [4.1.0-dev.5](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.4...4.1.0-dev.5) (2026-10-16)
+
+
+### Bug Fixes
+
+* **css:** increase animation duration ingame ([87825db](https://github.com/PocketMiner82/SongGuess/commit/87825db0b62fb447a8f8cb62ccb8a477c7c7303c))
+
+# [4.1.0-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.3...4.1.0-dev.4) (2026-10-16)
+
+
+### Features
+
+* **countdown:** add animation ([e0dfaf1](https://github.com/PocketMiner82/SongGuess/commit/e0dfaf1ae49e98aaabeaf8404d9b3374badc85a7))
+
+# [4.1.0-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.2...4.1.0-dev.3) (2026-10-16)
+
+
+### Bug Fixes
+
+* prevent glitching animations for mobile ([7755425](https://github.com/PocketMiner82/SongGuess/commit/7755425b07794857e7c53b6e2c01b5e70e945643))
+
+# [4.1.0-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.1...4.1.0-dev.2) (2026-10-14)
+
+
+### Bug Fixes
+
+* improve animation styling for mobile and desktop a bit ([d5a345c](https://github.com/PocketMiner82/SongGuess/commit/d5a345cbae0c32407e454a8881350d7ee5027919))
+
+# [4.1.0-dev.1](https://github.com/PocketMiner82/SongGuess/compare/4.0.0...4.1.0-dev.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* username should not reset when auto reconnecting ([ad0aa06](https://github.com/PocketMiner82/SongGuess/commit/ad0aa0648e8d1e84d7b09edb61c5a9e3d5209b81))
+
+
+### Features
+
+* add animation when players get points ([0282245](https://github.com/PocketMiner82/SongGuess/commit/0282245b35346d59c9f5c0a1df09cbeab67765f1))
+
 # [4.0.0](https://github.com/PocketMiner82/SongGuess/compare/3.4.1...4.0.0) (2026-10-10)
 
 
