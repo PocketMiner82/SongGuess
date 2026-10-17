@@ -146,7 +146,7 @@ export class RoomController {
   /**
    * The list of songs played in the last round.
    */
-  playedSongs: (Song | undefined)[] = [];
+  playedSongs: Song[] = [];
 
   /**
    * The interval of the ping function.
