@@ -12,6 +12,8 @@ export class BaseConfig implements RoomConfigMessage {
 
   public endWhenAnswered: boolean = false;
 
+  public allowChangingAnswer: boolean = false;
+
   public roundsCount: number = 10;
 
   public timePerQuestion: number = 25;

@@ -93,7 +93,7 @@ export function MultipleChoiceQuestionDisplay() {
   }, []));
 
   const canAnswer = controller.questionData.roundMsg?.gamePhase === GamePhase.ANSWERING
-    && controller.questionData.selectedAnswerIndex === undefined;
+    && (controller.questionData.selectedAnswerIndex === undefined || controller.config.allowChangingAnswer);
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -127,7 +127,7 @@ export function MultipleChoiceQuestionDisplay() {
               state = "incorrect";
             } else if (isSelected) {
               state = "selected";
-            } else if (controller.questionData.roundMsg?.gamePhase !== GamePhase.ANSWERING || controller.questionData.selectedAnswerIndex !== undefined) {
+            } else if (!canAnswer) {
               state = "disabled";
             }
 

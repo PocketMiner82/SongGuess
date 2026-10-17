@@ -201,7 +201,7 @@ export abstract class Game implements IEventListener {
           player.sendRoomStateMessage();
           player.sendConfirmationOrError(msg, "Can only accept answers during questioning phase.");
           return true;
-        } else if (player.answerData !== undefined && this instanceof MultipleChoiceGame) {
+        } else if (!this.room.config.allowChangingAnswer && player.answerData !== undefined && this instanceof MultipleChoiceGame) {
           player.sendRoomStateMessage();
           player.sendConfirmationOrError(msg, "You already selected an answer.");
           return true;
