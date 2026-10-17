@@ -1,3 +1,10 @@
+# [4.1.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.7...4.1.0-dev.8) (2026-10-17)
+
+
+### Features
+
+* **config:** add option to allow changing answer ([ad3d25a](https://github.com/PocketMiner82/SongGuess/commit/ad3d25a62c50fb637502c1421312aa0557ad5010))
+
 # [4.1.0-dev.7](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.6...4.1.0-dev.7) (2026-10-17)
 
 
