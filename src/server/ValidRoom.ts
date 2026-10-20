@@ -119,8 +119,12 @@ export class ValidRoom {
   onMessage(conn: Connection<string>, message: string) {
     const player = this.getOrCreatePlayer(conn);
 
+    if (!player.isOnline && !player.isAdmin) {
+      return;
+    }
+
     // refresh inactive timeout (admins don't have that)
-    if (!this.server.hasTag(conn, "admin")) {
+    if (!player.isAdmin) {
       player.refreshKickTimeout();
     }
 
