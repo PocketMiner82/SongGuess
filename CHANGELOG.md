@@ -1,3 +1,10 @@
+# [4.1.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.8...4.1.0-dev.9) (2026-10-20)
+
+
+### Bug Fixes
+
+* try to fix host transfer timeout not working ([fd8f50b](https://github.com/PocketMiner82/SongGuess/commit/fd8f50be283944b02417784908856358aecc09ad))
+
 # [4.1.0-dev.8](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.7...4.1.0-dev.8) (2026-10-17)
 
 
