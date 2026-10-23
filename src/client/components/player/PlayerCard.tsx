@@ -42,21 +42,18 @@ export const PlayerCard = memo(({
                   )
                 : (
                     <>
-                      {player.username === controller.username
+                      {player.uuid === controller.uuid
                         ? (
-                            <div className={`flex flex-col lg:flex-row gap-1.5 items-center ${forceDesktop ? "flex-row!" : ""}`}>
-                              <button
-                                type="button"
-                                className="text-lg font-medium wrap-anywhere leading-none cursor-pointer hover:underline text-center"
-                                onClick={() => setIsEditing(true)}
-                              >
-                                {player.username}
-                              </button>
-                              <span className="rounded-full bg-secondary text-white px-1.5">You</span>
-                            </div>
+                            <button
+                              type="button"
+                              className="text-lg font-medium wrap-anywhere leading-none cursor-pointer hover:underline text-left"
+                              onClick={() => setIsEditing(true)}
+                            >
+                              {player.username}
+                            </button>
                           )
                         : (
-                            <span className="text-lg font-medium wrap-anywhere leading-none text-center">
+                            <span className="text-lg font-medium wrap-anywhere leading-none text-left">
                               {player.username}
                             </span>
                           )}
@@ -73,7 +70,7 @@ export const PlayerCard = memo(({
             </div>
           )
         : (
-            <span className="text-lg text-disabled-text text-center">Empty slot</span>
+            <span className="text-lg text-disabled-text text-left">Empty slot</span>
           )}
     </div>
   );

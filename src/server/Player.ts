@@ -251,7 +251,7 @@ export class Player implements PlayerMessage, IEventListener {
       return false;
     }
     this.username = username;
-    this.conn?.setState(`${this.conn.state} (${username})`);
+    this.conn?.setState(`${this.conn.id} (${username})`);
 
     return true;
   }

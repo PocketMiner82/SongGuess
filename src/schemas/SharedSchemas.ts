@@ -128,6 +128,11 @@ export const RoomConfigMessageSchema = z.object({
   endWhenAnswered: z.boolean(),
 
   /**
+   * Whether to allow changing answer in multiple choice.
+   */
+  allowChangingAnswer: z.boolean(),
+
+  /**
    * The amount of rounds to play.
    */
   roundsCount: z.number().min(1).max(30),

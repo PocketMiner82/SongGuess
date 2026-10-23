@@ -85,6 +85,17 @@ export function Settings({ disabled }: { disabled?: boolean }) {
               End round when all players answered
             </SettingsToggle>
 
+            <SettingsToggle
+              value={controller.config.allowChangingAnswer}
+              disabled={disabled}
+              onToggle={(v) => {
+                controller.config.allowChangingAnswer = v;
+                controller.sendConfig();
+              }}
+            >
+              Allow changing answer
+            </SettingsToggle>
+
             <div className="border-t border-disabled-bg my-1"></div>
           </>
         )}

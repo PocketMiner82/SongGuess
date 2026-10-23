@@ -1,6 +1,6 @@
 {
   "name": "songguess",
-  "version": "4.0.0",
+  "version": "4.1.0-dev.11",
   "type": "module",
   "private": true,
   "scripts": {
@@ -17,6 +17,7 @@
     "docs:serve": "typedoc --watch"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.10.0",
     "@syncfm/applemusic-api": "^0.0.6",
     "@types/hls.js": "^1.0.0",
     "axios": "1.19.0",
@@ -38,32 +39,32 @@
     "react-toastify": "^11.1.0",
     "soundcloud.ts": "^0.7.4",
     "unique-username-generator": "^1.5.1",
-    "uuid": "^14.0.2",
+    "uuid": "^14.0.3",
     "youtubei.js": "^18.1.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.5.1",
-    "@eslint-react/eslint-plugin": "^5.24.6",
+    "@eslint-react/eslint-plugin": "^5.26.5",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/chroma-js": "^3.1.2",
     "@types/howler": "^2.2.13",
-    "@types/lodash": "^4.17.25",
-    "@types/node": "^26.6.4",
+    "@types/lodash": "^4.17.26",
+    "@types/node": "^26.6.5",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.71.1",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
     "@typescript-eslint/parser": "^8.61.0",
     "autoprefixer": "^10.6.1",
     "esbuild": "^0.28.2",
     "eslint": "^10.12.0",
     "eslint-plugin-react-refresh": "^0.5.7",
-    "postcss": "^8.5.29",
+    "postcss": "^8.5.30",
     "postcss-cli": "^12.0.0",
     "tailwindcss": "^4.3.1",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "wrangler": "^4.147.0"
+    "wrangler": "^4.150.0"
   }
 }

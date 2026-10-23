@@ -13,6 +13,11 @@ export class PlayerPicksQuestion extends Question {
    */
   public questionCount: number = -1;
 
+  /**
+   * @param questionCurrent current question number
+   * @param pickerId picker uuid
+   * @param song correct song
+   */
   constructor(readonly questionCurrent: number, public pickerId: string, song: Song) {
     super(song);
   }
