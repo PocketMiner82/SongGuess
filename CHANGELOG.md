@@ -1,3 +1,10 @@
+# [4.1.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.10...4.1.0-dev.11) (2026-10-23)
+
+
+### Bug Fixes
+
+* round picker points ([4e36057](https://github.com/PocketMiner82/SongGuess/commit/4e36057045c080872018d29729f4732f7ac601ec))
+
 # [4.1.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.9...4.1.0-dev.10) (2026-10-23)
 
 
