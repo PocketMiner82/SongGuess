@@ -252,7 +252,7 @@ export class PlayerPicksGame extends Game {
     const picker = this.room.activePlayers.find(player => player.uuid === pickerId);
     if (picker && sumCount > 0) {
       const averagePoints = sumPoints / sumCount;
-      const questionPoints = averagePoints / 2;
+      const questionPoints = Math.round(averagePoints / 2);
 
       picker.answerData = {
         questionPoints,
