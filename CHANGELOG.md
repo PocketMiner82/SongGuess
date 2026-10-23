@@ -1,3 +1,10 @@
+# [4.1.0-dev.10](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.9...4.1.0-dev.10) (2026-10-23)
+
+
+### Features
+
+* also give picker points depending on how many players guessed correctly ([9d66b89](https://github.com/PocketMiner82/SongGuess/commit/9d66b894d9ab8f1813e685c19e404be4ccb9f0e9))
+
 # [4.1.0-dev.9](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.8...4.1.0-dev.9) (2026-10-20)
 
 
