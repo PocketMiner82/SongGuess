@@ -217,6 +217,10 @@ export class PlayerPicksGame extends Game {
   }
 
   calculatePoints() {
+    let sumCount = 0;
+    let sumPoints = 0;
+    const pickerId = (this.currentQuestion as PlayerPicksQuestion).pickerId;
+
     for (const player of this.room.activePlayers) {
       if (player.answerData) {
         const withParens = this.getPointsWithParens(player);
@@ -237,6 +241,23 @@ export class PlayerPicksGame extends Game {
         player.answerData!.questionPoints = Math.round(player.answerData!.questionPoints);
         player.points += player.answerData!.questionPoints;
       }
+
+      if (player.uuid !== pickerId) {
+        sumPoints += player.answerData?.questionPoints ?? 0;
+        sumCount++;
+      }
+    }
+
+    // picker will get portion of average of points achieved in this round
+    const picker = this.room.activePlayers.find(player => player.uuid === pickerId);
+    if (picker && sumCount > 0) {
+      const averagePoints = sumPoints / sumCount;
+      const questionPoints = averagePoints / 2;
+
+      picker.answerData = {
+        questionPoints,
+      };
+      picker.points += questionPoints;
     }
   }
 

@@ -91,7 +91,8 @@ export abstract class Game implements IEventListener {
   abstract calculatePoints(): void;
 
   protected getTimePoints(player: Player): number {
-    const factor = Math.max(0, (this.room.config.timePerQuestion * 1000 - (player.answerData!.answerTimestamp - this.questionStartTime)))
+    const maxTime = this.room.config.timePerQuestion * 1000 + this.questionStartTime;
+    const factor = Math.max(0, maxTime - (player.answerData!.answerTimestamp ?? maxTime))
       / (this.room.config.timePerQuestion * 1000);
     return (QUESTION_MAX_POINTS / 2) * factor;
   }

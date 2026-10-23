@@ -31,11 +31,11 @@ export function PlayerMessageField({ player, showField, className }:
   } else if (playerMessageFieldNames.includes(showField)) {
     answerText = player[showField as Exclude<keyof PlayerMessage, "answerData">];
   } else if (player.answerData) {
-    if (showField === "answerSpeed" && (player.answerData.questionPoints ?? 0) > 0) {
+    if (showField === "answerSpeed" && player.answerData.answerSpeed && player.answerData.questionPoints > 0) {
       answerText = `${(player.answerData.answerSpeed / 1000).toFixed(3)} s`;
-    } else if (showField === "answer") {
-      answerText = player.answerData.answer ? `"${player.answerData.answer}"` : undefined;
-    } else if (showField !== "answerSpeed") {
+    } else if (showField === "answer" && player.answerData.answer) {
+      answerText = `"${player.answerData.answer}"`;
+    } else if (showField !== "answerSpeed" && showField !== "answer") {
       answerText = player.answerData[showField as keyof PlayerAnswerData];
     }
   }
