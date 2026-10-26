@@ -17,8 +17,6 @@ import type { Question } from "./Question";
 import {
   QUESTION_MAX_POINTS,
   QUESTION_PADDING_TICKS,
-  QUESTION_ROUND_PICK_PHASE_CONTINUOUS_WARNING_TICK,
-  QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK,
   QUESTION_ROUND_START_TICK,
 } from "../../shared/ConfigConstants";
 import { GamePhase } from "../../shared/game/GamePhase";
@@ -328,17 +326,6 @@ export abstract class Game implements IEventListener {
       case this.room.config.getQuestionPauseMusicTick():
         this.gamePhase = GamePhase.PAUSE_MUSIC;
         break;
-    }
-
-    // play warning sounds shortly before picking phase ends
-    if (this.gamePhase === GamePhase.PICKING) {
-      const pickPhaseEndTick = this.room.config.getQuestionPickedSongTick();
-      const firstWarning = (pickPhaseEndTick - this.questionTick) === QUESTION_ROUND_PICK_PHASE_FIRST_WARNING_TICK;
-      const continuousWarning = (pickPhaseEndTick - this.questionTick) <= QUESTION_ROUND_PICK_PHASE_CONTINUOUS_WARNING_TICK;
-
-      if (firstWarning || continuousWarning) {
-        this.room.server.safeBroadcast(this.getAudioControlMessage("play_countdown_running"));
-      }
     }
 
     this.questionTick++;
