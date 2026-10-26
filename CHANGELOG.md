@@ -1,3 +1,10 @@
+# [4.1.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.11...4.1.0-dev.12) (2026-10-26)
+
+
+### Bug Fixes
+
+* do countdown client side to prevent uneven sounds/jumps ([c6f59d1](https://github.com/PocketMiner82/SongGuess/commit/c6f59d1711725a49ad5b1d531a7438b552c3e9fa))
+
 # [4.1.0-dev.11](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.10...4.1.0-dev.11) (2026-10-23)
 
 
