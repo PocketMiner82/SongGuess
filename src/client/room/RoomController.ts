@@ -2,6 +2,7 @@ import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import type { CookieGetter, CookieSetter } from "../../types/CookieFunctionTypes";
 import type {
   AddPlaylistsMessage,
+  AudioControlMessage,
   ChangeUsernameMessage,
   GameState,
   PingMessage,
@@ -458,6 +459,26 @@ export class RoomController {
     for (const listener of this.stateChangeEventListeners) {
       listener(msg);
     }
+  }
+
+  /**
+   * Emits a countdown running event to be consumed by the audio player.
+   */
+  public playCountdownRunning() {
+    this.callOnStateChange({
+      type: "audio_control",
+      action: "play_countdown_running",
+    } satisfies AudioControlMessage);
+  }
+
+  /**
+   * Emits a countdown end event to be consumed by the audio player.
+   */
+  public playCountdownEnd() {
+    this.callOnStateChange({
+      type: "audio_control",
+      action: "play_countdown_end",
+    } satisfies AudioControlMessage);
   }
 
   /**

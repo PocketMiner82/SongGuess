@@ -1,5 +1,5 @@
 import type { ServerMessage } from "../../types/MessageTypes";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useControllerContext } from "../hooks/RoomControllerHooks";
 import { useRoomControllerListener } from "../hooks/RoomControllerListenerHooks";
 
@@ -8,15 +8,33 @@ import { useRoomControllerListener } from "../hooks/RoomControllerListenerHooks"
  * Listens for countdown messages from the server and shows/hides accordingly.
  */
 export function Countdown() {
+  const controller = useControllerContext();
   const [countdown, setCountdown] = useState(0);
   const visible = countdown > 0;
 
-  useRoomControllerListener(useControllerContext(), useCallback((msg: ServerMessage | null) => {
+  useRoomControllerListener(controller, useCallback((msg: ServerMessage | null) => {
     if (msg && msg.type === "countdown") {
+      controller[msg.countdown > 0 ? "playCountdownRunning" : "playCountdownEnd"]();
       setCountdown(msg.countdown);
     }
     return false;
-  }, []));
+  }, [controller]));
+
+  useEffect(() => {
+    let timeout: number | null = null;
+    if (countdown > 1) {
+      timeout = window.setTimeout(() => {
+        controller.playCountdownRunning();
+        setCountdown(countdown - 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+    };
+  }, [controller, countdown]);
 
   return visible
     ? (

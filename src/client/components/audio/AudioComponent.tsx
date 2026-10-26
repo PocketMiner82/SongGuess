@@ -56,11 +56,9 @@ export function AudioComponent() {
 
     let player: Howl | null = null;
 
-    if ((msg?.type === "countdown" && msg.countdown > 0)
-      || (msg?.type === "audio_control" && msg.action === "play_countdown_running")) {
+    if (msg?.type === "audio_control" && msg.action === "play_countdown_running") {
       player = countdownRunningPlayer.howler;
-    } else if ((msg?.type === "countdown" && msg.countdown <= 0)
-      || (msg?.type === "audio_control" && msg.action === "play_countdown_end")) {
+    } else if (msg?.type === "audio_control" && msg.action === "play_countdown_end") {
       player = countdownDonePlayer.howler;
     }
 

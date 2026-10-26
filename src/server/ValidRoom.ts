@@ -376,10 +376,9 @@ export class ValidRoom {
   public startCountdown(from: number, callback: () => void) {
     const decrementCountdown = () => {
       try {
-        this.server.safeBroadcast(this.getCountdownMessage());
-
         if (this.countdown === 0) {
           this.stopCountdown();
+          this.server.safeBroadcast(this.getCountdownMessage());
           callback();
           return;
         }
@@ -392,6 +391,7 @@ export class ValidRoom {
     };
 
     this.countdown = from;
+    this.server.safeBroadcast(this.getCountdownMessage());
     decrementCountdown();
     this.countdownInterval = setInterval(decrementCountdown.bind(this), 1000);
   }
