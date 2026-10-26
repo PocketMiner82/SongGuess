@@ -1,3 +1,10 @@
+# [4.1.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.12...4.1.0-dev.13) (2026-10-26)
+
+
+### Bug Fixes
+
+* also handle pick time warning sounds client side ([5ec9d68](https://github.com/PocketMiner82/SongGuess/commit/5ec9d68f088a3a15597669874090e2f1a90aa008))
+
 # [4.1.0-dev.12](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.11...4.1.0-dev.12) (2026-10-26)
 
 
