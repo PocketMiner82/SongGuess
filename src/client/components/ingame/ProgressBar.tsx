@@ -52,7 +52,7 @@ export function ProgressBar() {
           }, 1000);
         }, continuousWarningSeconds * 1000);
       } else {
-      // eslint-disable-next-line react/set-state-in-effect
+        // eslint-disable-next-line react/set-state-in-effect
         setFirstWarning(false);
         // eslint-disable-next-line react/set-state-in-effect
         setContinuousWarning(false);
@@ -70,7 +70,7 @@ export function ProgressBar() {
         }
       };
     },
-    // the deps MUST contain animationKey, so that a new listener message resets the interval
+    // the deps MUST contain animationKey, so that a new listener message clears the intervals and timeouts
     [absoluteDuration, continuousWarningSeconds, controller, controller.questionData.roundMsg?.gamePhase, firstWarningSeconds, animationKey],
   );
 
