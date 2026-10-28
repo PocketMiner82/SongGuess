@@ -1,23 +1,21 @@
 import type { Playlist } from "../../../../types/MessageTypes";
 import type { ListenerCallback } from "../../../hooks/RoomControllerListenerHooks";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useControllerContext } from "../../../hooks/RoomControllerHooks";
 import { useRoomControllerListener } from "../../../hooks/RoomControllerListenerHooks";
 import { PlaylistCard } from "../../PlaylistCard";
 import { SearchMusicComponent } from "../../SearchMusicComponent";
-import { SettingsRange } from "../../settings/SettingsRange";
 
 
 export function PlayerPickingDisplay() {
   const controller = useControllerContext();
-  const [audioStartPos, setAudioStartPos] = useState(() => controller.config.audioStartPosition ?? 0);
   useRoomControllerListener(controller, useCallback((msg) => {
     return msg?.type === "confirmation" && msg.sourceMessage.type === "player_pick_song";
   }, []));
 
   const pickedSong = controller.questionData.pickedSong;
 
-  const handlePickSong = useCallback(async (playlist: Playlist) => {
+  const handlePickSong = useCallback(async (playlist: Playlist, audioStartPos: number) => {
     if (playlist.songs.length > 0 && !pickedSong) {
       controller.pickSong(playlist.songs[0], audioStartPos);
 
@@ -42,30 +40,17 @@ export function PlayerPickingDisplay() {
     }
 
     return false;
-  }, [audioStartPos, controller, pickedSong]);
+  }, [controller, pickedSong]);
 
   return (
     <div className="space-y-6 w-full">
       { !pickedSong
         ? (
             <div>
-              {controller.config.audioStartPosition === null && (
-                <SettingsRange
-                  value={audioStartPos}
-                  onChange={(v) => {
-                    setAudioStartPos(v);
-                  }}
-                  displayText={`${Math.round((audioStartPos) * 100)}%`}
-                >
-                  Start song at
-                </SettingsRange>
-              )}
-
               <div className="mt-2 flex justify-center max-h-[calc(100vh-21rem)] min-h-0">
                 <SearchMusicComponent
-                  onlyAcceptSongs={true}
+                  playerPicksMode={true}
                   onPlaylistSelected={handlePickSong}
-                  audioStartPos={audioStartPos}
                 />
               </div>
             </div>
