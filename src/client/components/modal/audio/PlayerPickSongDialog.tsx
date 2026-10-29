@@ -38,6 +38,7 @@ export function PlayerPickSongDialog({
 
   useRoomControllerMessageTypeListener(controller, "room_config");
   useRoomControllerMessageTypeListener(controller, "round_state");
+  useRoomControllerMessageTypeListener(controller, "room_state");
 
   const audioPlayTime = controller.config.timePerQuestion + QUESTION_PADDING_TICKS;
   const isFixed = controller.config.audioStartPosition !== null;
@@ -90,10 +91,10 @@ export function PlayerPickSongDialog({
   }, [state, player.howler, duration]);
 
   useEffect(() => {
-    if (controller.questionData.roundMsg?.gamePhase !== GamePhase.PICKING) {
+    if (controller.questionData.roundMsg?.gamePhase !== GamePhase.PICKING || controller.state !== "ingame") {
       modal.close();
     }
-  }, [controller.questionData.roundMsg?.gamePhase, modal]);
+  }, [controller.questionData.roundMsg?.gamePhase, controller.state, modal]);
 
   const handleSelectionChange = useCallback((value: number) => {
     if (isFixed || duration <= 0) {
@@ -154,12 +155,13 @@ export function PlayerPickSongDialog({
       if (state === "playing") {
         howl.pause();
       } else {
+        howl.seek(startPosSeconds);
         howl.play();
       }
     } catch {
       // ignore
     }
-  }, [player, state]);
+  }, [player.howler, startPosSeconds, state]);
 
   return (
     <ModalContent title="Review selected song" maxWidth="full">

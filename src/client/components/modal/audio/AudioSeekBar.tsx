@@ -1,4 +1,4 @@
-import type { MouseEvent as ReactMouseEvent } from "react";
+import type { MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 
@@ -55,6 +55,8 @@ export function AudioSeekBar({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<"none" | "stripe" | "playback">("none");
   const clickStartRef = useRef<{ x: number; y: number } | null>(null);
+  // Used to ignore mouse compatibility events that fire shortly after touch events on mobile.
+  const lastTouchRef = useRef<number>(0);
 
   const endPercent = useMemo(() => {
     if (!endSeconds || clampedMax <= 0) {
@@ -64,17 +66,27 @@ export function AudioSeekBar({
     return (endClamped / clampedMax) * 100;
   }, [clampedMax, endSeconds]);
 
-  const getValueFromEvent = useCallback((e: MouseEvent): number => {
+  const startPercent = clampedMax > 0 ? (clampedSelection / clampedMax) * 100 : 0;
+
+  const showStartMarker = clampedMax > 0;
+  const showEndMarker = endSeconds !== undefined && clampedMax > 0 && endSeconds > 0 && endSeconds <= clampedMax;
+  const isDisabled = disabled || clampedMax <= 0;
+
+  const getValueFromPosition = useCallback((clientX: number): number => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect || rect.width <= 0) {
       return 0;
     }
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     return x * clampedMax;
   }, [clampedMax]);
 
+  const getValueFromEvent = useCallback((e: MouseEvent): number => {
+    return getValueFromPosition(e.clientX);
+  }, [getValueFromPosition]);
+
   const onMouseMove = useCallback((e: MouseEvent) => {
-    if (disabled || dragging === "none") {
+    if (disabled || Date.now() - lastTouchRef.current < 500 || dragging === "none") {
       return;
     }
     const val = getValueFromEvent(e);
@@ -85,19 +97,45 @@ export function AudioSeekBar({
     }
   }, [disabled, dragging, getValueFromEvent, onChange, onSeek]);
 
+  const onTouchMove = useCallback((e: TouchEvent) => {
+    if (disabled || dragging === "none") {
+      return;
+    }
+    e.preventDefault();
+    const val = getValueFromPosition(e.touches[0].clientX);
+    if (dragging === "stripe") {
+      onChange(val);
+    } else {
+      onSeek(val);
+    }
+  }, [disabled, dragging, getValueFromPosition, onChange, onSeek]);
+
   const onMouseUp = useCallback(() => {
     setDragging("none");
   }, []);
 
+  const onTouchEnd = useCallback(() => {
+    setDragging("none");
+  }, []);
+
   const onContainerMouseDown = useCallback((e: ReactMouseEvent) => {
-    if (disabled) {
+    if (disabled || Date.now() - lastTouchRef.current < 500) {
       return;
     }
     clickStartRef.current = { x: e.clientX, y: e.clientY };
   }, [disabled]);
 
+  const onContainerTouchStart = useCallback((e: ReactTouchEvent) => {
+    if (disabled) {
+      return;
+    }
+    lastTouchRef.current = Date.now();
+    e.preventDefault();
+    clickStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, [disabled]);
+
   const onContainerMouseUp = useCallback((e: ReactMouseEvent) => {
-    if (disabled || !clickStartRef.current) {
+    if (disabled || Date.now() - lastTouchRef.current < 500 || !clickStartRef.current) {
       return;
     }
     const dx = Math.abs(e.clientX - clickStartRef.current.x);
@@ -113,36 +151,72 @@ export function AudioSeekBar({
     }
   }, [disabled, onClick, clampedMax]);
 
+  const onContainerTouchEnd = useCallback((e: ReactTouchEvent) => {
+    if (disabled || !clickStartRef.current) {
+      return;
+    }
+    const dx = Math.abs(e.changedTouches[0].clientX - clickStartRef.current.x);
+    const dy = Math.abs(e.changedTouches[0].clientY - clickStartRef.current.y);
+    clickStartRef.current = null;
+
+    if (dx < 3 && dy < 3) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect && rect.width > 0) {
+        const x = Math.max(0, Math.min(1, (e.changedTouches[0].clientX - rect.left) / rect.width));
+        onClick(x * clampedMax);
+      }
+    }
+  }, [disabled, onClick, clampedMax]);
+
   useEffect(() => {
     if (dragging === "none") {
       return;
     }
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onTouchEnd);
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [dragging, onMouseMove, onMouseUp]);
+  }, [dragging, onMouseMove, onMouseUp, onTouchMove, onTouchEnd]);
 
   const onStripeMouseDown = useCallback((e: ReactMouseEvent) => {
-    if (disabled) {
+    if (disabled || Date.now() - lastTouchRef.current < 500) {
       return;
     }
     e.preventDefault();
     setDragging("stripe");
   }, [disabled]);
 
-  const onPlaybackMouseDown = useCallback((e: ReactMouseEvent) => {
+  const onStripeTouchStart = useCallback((e: ReactTouchEvent) => {
     if (disabled) {
+      return;
+    }
+    lastTouchRef.current = Date.now();
+    e.preventDefault();
+    setDragging("stripe");
+  }, [disabled]);
+
+  const onPlaybackMouseDown = useCallback((e: ReactMouseEvent) => {
+    if (disabled || Date.now() - lastTouchRef.current < 500) {
       return;
     }
     e.preventDefault();
     setDragging("playback");
   }, [disabled]);
 
-  const showEndMarker = endSeconds !== undefined && audioPlayTime !== undefined && clampedMax > 0 && endSeconds > 0 && endSeconds <= clampedMax;
-  const isDisabled = disabled || clampedMax <= 0;
+  const onPlaybackTouchStart = useCallback((e: ReactTouchEvent) => {
+    if (disabled) {
+      return;
+    }
+    lastTouchRef.current = Date.now();
+    e.preventDefault();
+    setDragging("playback");
+  }, [disabled]);
 
   return (
     <div className="w-full">
@@ -150,7 +224,14 @@ export function AudioSeekBar({
         <span>{formatTime(clampedValue)}</span>
         <span>{formatTime(clampedMax)}</span>
       </div>
-      <div className="relative h-6" ref={containerRef} onMouseDown={onContainerMouseDown} onMouseUp={onContainerMouseUp}>
+      <div
+        className="relative h-6 touch-none"
+        ref={containerRef}
+        onMouseDown={onContainerMouseDown}
+        onMouseUp={onContainerMouseUp}
+        onTouchStart={onContainerTouchStart}
+        onTouchEnd={onContainerTouchEnd}
+      >
         {/* Track background */}
         <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-gray-500" />
 
@@ -162,6 +243,7 @@ export function AudioSeekBar({
             width: `${stripePercent}%`,
           }}
           onMouseDown={onStripeMouseDown}
+          onTouchStart={onStripeTouchStart}
         />
 
         {/* Playback handle - secondary colored circle */}
@@ -173,14 +255,61 @@ export function AudioSeekBar({
             transform: "translateY(-50%)",
           }}
           onMouseDown={onPlaybackMouseDown}
+          onTouchStart={onPlaybackTouchStart}
         />
 
+        {/* Start marker - "[" brace in text color, perfectly centered */}
+        {showStartMarker && (
+          <div
+            className="absolute pointer-events-none select-none"
+            style={{
+              left: `${startPercent}%`,
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+            title={`Start at ${formatTime(clampedSelection)}`}
+            aria-label={`Start at ${formatTime(clampedSelection)}`}
+          >
+            <svg
+              className="w-5 h-5 text-default"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M 8 1 L 6 1 L 6 11 L 8 11" />
+            </svg>
+          </div>
+        )}
+
+        {/* End marker - "]" brace in text color, perfectly centered */}
         {showEndMarker && endPercent !== undefined && (
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-secondary rounded pointer-events-none"
-            style={{ left: `${endPercent}%` }}
+            className="absolute pointer-events-none select-none"
+            style={{
+              left: `${endPercent}%`,
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
             title={`End at ${formatTime(endSeconds)}`}
-          />
+            aria-label={`End at ${formatTime(endSeconds)}`}
+          >
+            <svg
+              className="w-5 h-5 text-default"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M 4 1 L 6 1 L 6 11 L 4 11" />
+            </svg>
+          </div>
         )}
       </div>
     </div>
