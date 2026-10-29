@@ -1,3 +1,10 @@
+# [4.1.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.16...4.1.0-dev.17) (2026-10-29)
+
+
+### Bug Fixes
+
+* correctly show end marker on short songs ([65ea559](https://github.com/PocketMiner82/SongGuess/commit/65ea5599e92e723ffc8640b81c3929fa70afa594))
+
 # [4.1.0-dev.16](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.15...4.1.0-dev.16) (2026-10-29)
 
 
