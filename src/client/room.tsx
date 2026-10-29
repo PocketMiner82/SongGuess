@@ -6,6 +6,8 @@ import { ModalContainer } from "react-modal-global";
 import { ConnectingScreen } from "./components/ConnectingScreen";
 import { RoomDisplay } from "./components/RoomDisplay";
 import { ToastDisplay } from "./components/ToastDisplay";
+import { AudioPlayerContext } from "./hooks/audio/AudioPlayerContext";
+import { useAudioPlayer } from "./hooks/audio/AudioPlayerHook";
 import { RoomContext, useRoomController } from "./hooks/RoomControllerHooks";
 import { Modal } from "./Modal";
 
@@ -15,10 +17,19 @@ import { Modal } from "./Modal";
  */
 export function App() {
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
-  const [cookies, setCookie] = useCookies<"userID" | "userName", ICookieProps>(["userID", "userName"]);
+  const [cookies, setCookie] = useCookies<
+    "userID" | "userName" | "audioVolume" | "audioMuted",
+    ICookieProps
+  >(["userID", "userName", "audioVolume", "audioMuted"]);
   const { getController, isReady } = useRoomController(window.location.host, roomID, () => cookies, setCookie);
 
   const [hasJoined, setHasJoined] = useState(false);
+
+  // Single shared preview player for the whole room. Providing it via context
+  // lets any component (including modals rendered through a portal) read the
+  // live, reactive playback state exactly as if useAudioPlayer were called
+  // directly in that component.
+  const player = useAudioPlayer(cookies.audioVolume ?? 0.2, cookies.audioMuted ?? false);
 
   const controller = getController();
 
@@ -28,14 +39,16 @@ export function App() {
 
   return (
     <RoomContext value={controller}>
-      {
-        isReady
-          ? <RoomDisplay hasJoined={hasJoined} setHasJoined={setHasJoined} />
-          : <ConnectingScreen roomID={roomID} />
-      }
+      <AudioPlayerContext value={{ player, state: player.state }}>
+        {
+          isReady
+            ? <RoomDisplay hasJoined={hasJoined} setHasJoined={setHasJoined} />
+            : <ConnectingScreen roomID={roomID} />
+        }
 
-      <ToastDisplay />
-      <ModalContainer controller={Modal} />
+        <ToastDisplay />
+        <ModalContainer controller={Modal} />
+      </AudioPlayerContext>
     </RoomContext>
   );
 }

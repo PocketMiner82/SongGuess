@@ -18,6 +18,7 @@ export interface PersistedMultipleChoiceQuestion extends PersistedAbstractQuesti
 export interface PersistedPlayerPicksQuestion extends PersistedAbstractQuestion {
   pickerId: string;
   questionCurrent: number;
+  questionCount: number;
 }
 
 export type PersistedQuestion = PersistedMultipleChoiceQuestion | PersistedPlayerPicksQuestion;
@@ -68,6 +69,6 @@ export interface PersistedServerState extends PersistedRoomState {
 }
 
 /**
- * The version of this file. Should be changed when breaking changes are introduced in an update.
+ * The version of this file. Should be changed when storage breaking changes are introduced in an update.
  */
-export const PERSISTED_STATE_VERSION = 2;
+export const PERSISTED_STATE_VERSION = 4;

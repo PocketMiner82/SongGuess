@@ -17,22 +17,13 @@ export function PlayedSongsList() {
       </h3>
       <div className="space-y-2 mx-auto">
         {controller.playedSongs.map((song, idx) => (
-          song
-            ? (
-                <PlaylistCard
-                  key={idx}
-                  title={song.name}
-                  subtitle={song.artist}
-                  coverURL={song.cover}
-                  hrefURL={song.hrefURL}
-                />
-              )
-            : (
-                <PlaylistCard
-                  key={idx}
-                  title="(Skipped Round)"
-                />
-              )
+          <PlaylistCard
+            key={idx}
+            title={song.name}
+            subtitle={song.artist}
+            coverURL={song.cover}
+            hrefURL={song.hrefURL}
+          />
         ))}
       </div>
     </div>

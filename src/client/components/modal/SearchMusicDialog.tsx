@@ -5,17 +5,17 @@ import { ModalContent } from "./ModalContent";
 /**
  * A util dialog for searching Apple Music content by URL or search term.
  * Supports searching for songs, albums, and artists.
- * Can be restricted to only accept songs via the onlyAcceptSongs prop.
+ * Can be restricted to only accept songs via the playerPicksMode prop.
  */
 export function SearchMusicDialog({
-  onlyAcceptSongs = false,
+  playerPicksMode = false,
   onPlaylistSelected,
   onSuccess,
 }: SearchMusicComponentProps) {
   return (
-    <ModalContent title={onlyAcceptSongs ? "Search Songs" : "Search Apple Music"} maxWidth="full">
+    <ModalContent title={playerPicksMode ? "Search Songs" : "Search Apple Music"} maxWidth="full">
       <SearchMusicComponent
-        onlyAcceptSongs={onlyAcceptSongs}
+        playerPicksMode={playerPicksMode}
         onPlaylistSelected={onPlaylistSelected}
         onSuccess={onSuccess}
       />

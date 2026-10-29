@@ -13,6 +13,11 @@ export class PlayerPicksQuestion extends Question {
    */
   public questionCount: number = -1;
 
+  /**
+   * @param questionCurrent current question number
+   * @param pickerId picker uuid
+   * @param song correct song
+   */
   constructor(readonly questionCurrent: number, public pickerId: string, song: Song) {
     super(song);
   }
@@ -36,6 +41,7 @@ export class PlayerPicksQuestion extends Question {
     return {
       pickerId: this.pickerId,
       questionCurrent: this.questionCurrent,
+      questionCount: this.questionCount,
       ...this.baseToStorage(),
     };
   }
@@ -43,6 +49,7 @@ export class PlayerPicksQuestion extends Question {
   public static fromStorage(persistedQuestion: PersistedPlayerPicksQuestion): PlayerPicksQuestion {
     const q = new PlayerPicksQuestion(persistedQuestion.questionCurrent, persistedQuestion.pickerId, persistedQuestion.song);
     q.startPos = persistedQuestion.startPos;
+    q.questionCount = persistedQuestion.questionCount;
     return q;
   }
 }

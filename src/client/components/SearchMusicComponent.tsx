@@ -1,16 +1,17 @@
-import type { ICookieProps } from "../../types/ICookieProps";
 import type { Playlist } from "../../types/MessageTypes";
 import type { AudioPlayer } from "../hooks/audio/AudioPlayerHook";
+import type { PlayerPickSongDialogProps } from "./modal/audio/PlayerPickSongDialog";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useCookies } from "react-cookie";
 import { useModalWindow } from "react-modal-global";
 import { albumRegex, artistRegex, songRegex } from "../../schemas/ValidationRegexes";
 import { QUESTION_PADDING_TICKS } from "../../shared/ConfigConstants";
 import { getPlaylistByURL, performSearch } from "../../shared/Utils";
-import { useAudioPlayer } from "../hooks/audio/AudioPlayerHook";
+import { useAudioPlayerContext } from "../hooks/audio/AudioPlayerContext";
 import { useControllerContext } from "../hooks/RoomControllerHooks";
 import { useRoomControllerMessageTypeListener } from "../hooks/RoomControllerListenerHooks";
+import { Modal } from "../Modal";
 import { Button } from "./Button";
+import { PlayerPickSongDialog } from "./modal/audio/PlayerPickSongDialog";
 import { PlaylistCard } from "./PlaylistCard";
 
 /**
@@ -37,73 +38,53 @@ function StatusIcon({ searchStatus }: { searchStatus: SearchStatus }) {
  * Props for the SearchMusicDialog component.
  */
 export interface SearchMusicComponentProps {
-  onlyAcceptSongs?: boolean;
   // should return true when the playlist add was sent successfully
-  onPlaylistSelected: (playlist: Playlist) => Promise<boolean>;
+  onPlaylistSelected: (playlist: Playlist, audioStartPos: number) => Promise<boolean>;
   onSuccess?: () => void;
   /**
-   * The start position for the audio preview. See {@link RoomConfigMessageSchema.audioStartPosition} (only 0-2 here!).
+   * When true, only shows songs in the search (player picks mode).
+   * Removes the Select button from playlist cards and enables card clicking.
+   * Will also open a dialog on card click to review selected song.
    */
-  audioStartPos?: number;
+  playerPicksMode?: boolean;
 }
 
 /**
  * A util dialog for searching Apple Music content by URL or search term.
  * Supports searching for songs, albums, and artists.
- * Can be restricted to only accept songs via the onlyAcceptSongs prop.
  */
 export function SearchMusicComponent({
-  onlyAcceptSongs = false,
+  playerPicksMode = false,
   onPlaylistSelected,
   onSuccess,
-  audioStartPos,
 }: SearchMusicComponentProps) {
   const controller = useControllerContext();
-  const [cookies] = useCookies<"audioVolume" | "audioMuted", ICookieProps>(["audioVolume", "audioMuted"]);
+  const { player } = useAudioPlayerContext();
 
   const searchResultsListRef = useRef<HTMLUListElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [searchResults, setSearchResults] = useState<Playlist[]>([]);
   const [addedIndices, setAddedIndices] = useState<Set<number>>(() => new Set());
-  const prevAudioStartPosRef = useRef(audioStartPos);
 
   useRoomControllerMessageTypeListener(controller, "room_config");
-
-  const player = useAudioPlayer(
-    cookies.audioVolume ?? 0.2,
-    cookies.audioMuted ?? false,
-  );
 
   try {
     const modal = useModalWindow();
 
-    modal.then(() => {
-      player.howler?.pause();
-    });
+    // Subscribe to modal close once via useEffect so we don't accumulate
+    // pause() listeners on every render. it is okay that this is called conditionally here
+    // eslint-disable-next-line react/rules-of-hooks
+    useEffect(() => {
+      if (!modal) {
+        return;
+      }
+      return modal.on("close", () => {
+        player.howler?.pause();
+      });
+    }, [modal, player]);
   } catch {}
 
-  const handlePlayPause = (playlist: Playlist) => {
-    if (playlist.songs.length !== 1) {
-      return;
-    }
-    const audioURL = playlist.songs[0].audioURL;
-
-    if (player.audioURL !== audioURL || player.state !== "playing") {
-      player.load(audioURL);
-      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + QUESTION_PADDING_TICKS);
-    } else {
-      player.howler?.pause();
-    }
-  };
-
-  // restart audio when audio position is changed
-  useEffect(() => {
-    if (player.state === "playing" && audioStartPos !== prevAudioStartPosRef.current) {
-      player.playWithPositionAndFade(audioStartPos ?? 0, controller.config.timePerQuestion + QUESTION_PADDING_TICKS);
-      prevAudioStartPosRef.current = audioStartPos;
-    }
-  }, [audioStartPos, controller.config.timePerQuestion, player]);
 
   const getAudioState = useCallback((playlist: Playlist): AudioPlayer["state"] | undefined => {
     if (playlist.songs.length === 1 && playlist.songs[0].audioURL === player.audioURL) {
@@ -115,7 +96,7 @@ export function SearchMusicComponent({
     return undefined;
   }, [player.audioURL, player.state]);
 
-  const isValidURL = (onlyAcceptSongs
+  const isValidURL = (playerPicksMode
     ? songRegex.test(searchQuery)
     : artistRegex.test(searchQuery)
       || albumRegex.test(searchQuery)
@@ -129,7 +110,7 @@ export function SearchMusicComponent({
       return;
     }
 
-    if (onlyAcceptSongs ? songRegex.test(query) : (artistRegex.test(query) || albumRegex.test(query) || songRegex.test(query))) {
+    if (playerPicksMode ? songRegex.test(query) : (artistRegex.test(query) || albumRegex.test(query) || songRegex.test(query))) {
       setSearchStatus("loading");
       const playlist = await getPlaylistByURL(query);
 
@@ -138,7 +119,7 @@ export function SearchMusicComponent({
         return;
       }
 
-      if (await onPlaylistSelected(playlist)) {
+      if (await onPlaylistSelected(playlist, controller.config.audioStartPosition ?? 0)) {
         setSearchStatus("success");
         onSuccess?.();
       } else {
@@ -149,7 +130,7 @@ export function SearchMusicComponent({
 
     setSearchStatus("loading");
 
-    const items = await performSearch(query, onlyAcceptSongs);
+    const items = await performSearch(query, playerPicksMode);
     setSearchResults(items);
 
     setAddedIndices(new Set());
@@ -158,7 +139,7 @@ export function SearchMusicComponent({
     player.howler?.pause();
   };
 
-  const handleSelectResult = async (playlist: Playlist, index: number) => {
+  const handleSelectResult = useCallback(async (playlist: Playlist, index: number, audioStartPos?: number) => {
     const hrefURL = playlist.hrefURL;
 
     setSearchStatus("loading");
@@ -177,7 +158,7 @@ export function SearchMusicComponent({
 
     setAddedIndices(prev => new Set([...prev, index]));
 
-    if (await onPlaylistSelected(playlist)) {
+    if (await onPlaylistSelected(playlist, audioStartPos ?? 0)) {
       setSearchStatus("success");
       onSuccess?.();
     } else {
@@ -188,20 +169,43 @@ export function SearchMusicComponent({
         return next;
       });
     }
-  };
+  }, [onPlaylistSelected, onSuccess]);
+
+  const handlePlayPause = useCallback(async (playlist: Playlist, idx: number) => {
+    if (playlist.songs.length !== 1) {
+      return;
+    }
+    const audioURL = playlist.songs[0].audioURL;
+
+    if (player.audioURL !== audioURL || player.state !== "playing") {
+      await player.load(audioURL);
+      await player.playWithPositionAndFade(controller.config.audioStartPosition ?? 0, controller.config.timePerQuestion + QUESTION_PADDING_TICKS);
+
+      if (playerPicksMode) {
+        Modal.open(PlayerPickSongDialog, {
+          playlist,
+          onSubmit: async (audioStartPos: number) => {
+            await handleSelectResult(playlist, idx, audioStartPos);
+          },
+        } satisfies PlayerPickSongDialogProps);
+      }
+    } else {
+      player.howler?.pause();
+    }
+  }, [controller.config.audioStartPosition, controller.config.timePerQuestion, handleSelectResult, player, playerPicksMode]);
 
   return (
     <div className="flex flex-col min-h-0 w-full">
       <div className="flex items-center gap-2 mb-2">
         <div className="relative flex-1">
-          <label htmlFor="music-search-input" className="sr-only">{onlyAcceptSongs ? "Search for a song" : "Search Apple Music"}</label>
+          <label htmlFor="music-search-input" className="sr-only">{playerPicksMode ? "Search for a song" : "Search Apple Music"}</label>
           <input
             id="music-search-input"
             type="search"
             autoComplete="off"
             autoFocus={true}
-            placeholder={onlyAcceptSongs ? "Search for a song…" : "Enter apple music URL or search term"}
-            className={`w-full outline-0 focus:outline-0 border-b-2 pb-1 pr-10 ${
+            placeholder={playerPicksMode ? "Search for a song…" : "Enter apple music URL or search term"}
+            className={`w-full outline-0 border-b-2 pb-1 pr-10 ${
               searchQuery && searchQuery.startsWith("https://") && !isValidURL
                 ? "focus:border-error"
                 : "border-gray-500 focus:border-secondary"
@@ -243,16 +247,23 @@ export function SearchMusicComponent({
               subtitle={playlist.subtitle}
               coverURL={playlist.cover}
               hrefURL={playlist.hrefURL}
-              onPlayPause={() => handlePlayPause(playlist)}
+              onPlayPause={() => handlePlayPause(playlist, idx)}
               audioState={getAudioState(playlist)}
+              hidePlayPause={playerPicksMode}
+              onCardClick={() => handlePlayPause(playlist, idx)}
+              disabled={searchStatus === "loading" || addedIndices.has(idx)}
             >
-              <Button
-                onClick={() => handleSelectResult(playlist, idx)}
-                disabled={searchStatus === "loading" || addedIndices.has(idx)}
-                className="min-w-20"
-              >
-                Select
-              </Button>
+              {playerPicksMode
+                ? undefined
+                : (
+                    <Button
+                      onClick={() => handleSelectResult(playlist, idx)}
+                      disabled={searchStatus === "loading" || addedIndices.has(idx)}
+                      className="min-w-20"
+                    >
+                      Select
+                    </Button>
+                  )}
             </PlaylistCard>
           ))}
         </ul>
