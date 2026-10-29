@@ -138,12 +138,9 @@ export function PlayerPickSongDialog({
   }, [duration, isFixed, maxStartSeconds, playbackPosition, player.howler]);
 
   const handleSubmit = useCallback(async () => {
-    if (maxStartSeconds <= 0) {
-      return;
-    }
-
     modal.close();
-    await onSubmit(startPosSeconds / maxStartSeconds);
+
+    await onSubmit(maxStartSeconds === 0 ? 0 : startPosSeconds / maxStartSeconds);
   }, [maxStartSeconds, modal, onSubmit, startPosSeconds]);
 
   const togglePlay = useCallback(() => {

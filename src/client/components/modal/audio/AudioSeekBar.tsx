@@ -1,5 +1,6 @@
 import type { MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { QUESTION_PADDING_TICKS } from "../../../../shared/ConfigConstants";
 
 
 interface AudioSeekBarProps {
@@ -62,7 +63,7 @@ export function AudioSeekBar({
     if (!endSeconds || clampedMax <= 0) {
       return undefined;
     }
-    const endClamped = Math.min(Math.max(endSeconds, 0), clampedMax);
+    const endClamped = Math.max(0, Math.min(Math.max(endSeconds, 0), clampedMax) - QUESTION_PADDING_TICKS);
     return (endClamped / clampedMax) * 100;
   }, [clampedMax, endSeconds]);
 
@@ -294,8 +295,8 @@ export function AudioSeekBar({
               top: "50%",
               transform: "translate(-50%, -50%)",
             }}
-            title={`End at ${formatTime(endSeconds)}`}
-            aria-label={`End at ${formatTime(endSeconds)}`}
+            title={`End at ${formatTime(endSeconds - QUESTION_PADDING_TICKS)}`}
+            aria-label={`End at ${formatTime(endSeconds - QUESTION_PADDING_TICKS)}`}
           >
             <svg
               className="w-5 h-5 text-default"
