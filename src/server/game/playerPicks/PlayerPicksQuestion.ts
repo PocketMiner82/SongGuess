@@ -41,6 +41,7 @@ export class PlayerPicksQuestion extends Question {
     return {
       pickerId: this.pickerId,
       questionCurrent: this.questionCurrent,
+      questionCount: this.questionCount,
       ...this.baseToStorage(),
     };
   }
@@ -48,6 +49,7 @@ export class PlayerPicksQuestion extends Question {
   public static fromStorage(persistedQuestion: PersistedPlayerPicksQuestion): PlayerPicksQuestion {
     const q = new PlayerPicksQuestion(persistedQuestion.questionCurrent, persistedQuestion.pickerId, persistedQuestion.song);
     q.startPos = persistedQuestion.startPos;
+    q.questionCount = persistedQuestion.questionCount;
     return q;
   }
 }

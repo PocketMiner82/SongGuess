@@ -18,6 +18,7 @@ export interface PersistedMultipleChoiceQuestion extends PersistedAbstractQuesti
 export interface PersistedPlayerPicksQuestion extends PersistedAbstractQuestion {
   pickerId: string;
   questionCurrent: number;
+  questionCount: number;
 }
 
 export type PersistedQuestion = PersistedMultipleChoiceQuestion | PersistedPlayerPicksQuestion;
