@@ -1,3 +1,10 @@
+# [4.1.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.14...4.1.0-dev.15) (2026-10-29)
+
+
+### Bug Fixes
+
+* pick dialog UX improvements + better seekbar UI ([d583a40](https://github.com/PocketMiner82/SongGuess/commit/d583a4004729e5ff907d56301911c86c1316f6f6))
+
 # [4.1.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.13...4.1.0-dev.14) (2026-10-29)
 
 
