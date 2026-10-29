@@ -1,3 +1,10 @@
+# [4.1.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.17...4.1.0-dev.18) (2026-10-29)
+
+
+### Bug Fixes
+
+* **PlayerPicksQuestion:** also persist `questionCount` to prevent exception after restore ([18be624](https://github.com/PocketMiner82/SongGuess/commit/18be6248f677c49051d87656a4a96ce2acedc2a5))
+
 # [4.1.0-dev.17](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.16...4.1.0-dev.17) (2026-10-29)
 
 
