@@ -1,3 +1,11 @@
+# [4.1.0-dev.14](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.13...4.1.0-dev.14) (2026-10-29)
+
+
+### Features
+
+* add dialog on playerpicks to review selected song ([8cef135](https://github.com/PocketMiner82/SongGuess/commit/8cef135a5abc6fb504afc7ba490266c9cf9ba095))
+* improve styling/UX for new audio seekbar ([8f579a3](https://github.com/PocketMiner82/SongGuess/commit/8f579a325bfe6dc8596f5e06a9fe71d2a09b6ff6))
+
 # [4.1.0-dev.13](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.12...4.1.0-dev.13) (2026-10-26)
 
 
