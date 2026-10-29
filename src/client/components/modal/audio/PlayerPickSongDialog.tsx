@@ -1,5 +1,5 @@
 import type { Playlist } from "../../../../types/MessageTypes";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useModalWindow } from "react-modal-global";
 import { QUESTION_PADDING_TICKS } from "../../../../shared/ConfigConstants";
 import { GamePhase } from "../../../../shared/game/GamePhase";
@@ -31,10 +31,9 @@ export function PlayerPickSongDialog({
   // eventually closes, all accumulated listeners fire pause() at once,
   // interrupting playback setup for the next song.
   useEffect(() => {
-    const unsubscribe = modal.on("close", () => {
+    return modal.on("close", () => {
       player.howler?.pause();
     });
-    return unsubscribe;
   }, [modal, player]);
 
   useRoomControllerMessageTypeListener(controller, "room_config");
@@ -45,6 +44,8 @@ export function PlayerPickSongDialog({
 
   const duration = player.howler?.duration() ?? 0;
   const [startPosSeconds, setStartPosSeconds] = useState(0);
+  const [playbackPosition, setPlaybackPosition] = useState(0);
+  const rafRef = useRef<number | null>(null);
 
   const maxStartSeconds = Math.max(0, duration - audioPlayTime);
   const clampedEndSeconds = duration > 0
@@ -53,8 +54,40 @@ export function PlayerPickSongDialog({
 
   // Update start position when song changes
   useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
     setStartPosSeconds(0);
+    // eslint-disable-next-line react/set-state-in-effect
+    setPlaybackPosition(0);
   }, [playlist.songs]);
+
+  // Keep playbackPosition in sync with Howler's actual playback position while playing.
+  useEffect(() => {
+    const howl = player.howler;
+    if (state !== "playing" || !howl || duration <= 0) {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      return;
+    }
+
+    const loop = () => {
+      const pos = howl.seek();
+      if (pos != null && !Number.isNaN(pos)) {
+        setPlaybackPosition(pos);
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
+    rafRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [state, player.howler, duration]);
 
   useEffect(() => {
     if (controller.questionData.roundMsg?.gamePhase !== GamePhase.PICKING) {
@@ -62,7 +95,7 @@ export function PlayerPickSongDialog({
     }
   }, [controller.questionData.roundMsg?.gamePhase, modal]);
 
-  const handleSeekChange = useCallback((value: number) => {
+  const handleSelectionChange = useCallback((value: number) => {
     if (isFixed || duration <= 0) {
       return;
     }
@@ -78,9 +111,30 @@ export function PlayerPickSongDialog({
     }
 
     setStartPosSeconds(newStart);
+    setPlaybackPosition(newStart);
 
     player.howler?.seek(newStart);
   }, [duration, isFixed, maxStartSeconds, player.howler, startPosSeconds]);
+
+  const handlePositionChange = useCallback((value: number) => {
+    if (isFixed || duration <= 0 || maxStartSeconds === 0) {
+      return;
+    }
+    let newPos = value;
+    if (newPos > duration) {
+      newPos = duration;
+    }
+    if (newPos < 0) {
+      newPos = 0;
+    }
+    if (Math.abs(newPos - playbackPosition) < 0.01) {
+      return;
+    }
+
+    setPlaybackPosition(newPos);
+
+    player.howler?.seek(newPos);
+  }, [duration, isFixed, maxStartSeconds, playbackPosition, player.howler]);
 
   const handleSubmit = useCallback(async () => {
     if (maxStartSeconds <= 0) {
@@ -120,12 +174,15 @@ export function PlayerPickSongDialog({
 
       <div className="mb-4">
         <AudioSeekBar
-          value={startPosSeconds}
+          value={playbackPosition}
+          selectionStart={startPosSeconds}
           max={Math.max(duration, 0)}
           endSeconds={clampedEndSeconds}
           audioPlayTime={audioPlayTime}
           disabled={isFixed}
-          onChange={handleSeekChange}
+          onChange={handleSelectionChange}
+          onSeek={handlePositionChange}
+          onClick={handlePositionChange}
         />
       </div>
 
