@@ -1,3 +1,10 @@
+# [4.1.0-dev.16](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.15...4.1.0-dev.16) (2026-10-29)
+
+
+### Bug Fixes
+
+* allow selecting songs under 30 seconds + show end marker at audio guess end instead of playback end ([6c0f518](https://github.com/PocketMiner82/SongGuess/commit/6c0f5187501292994ac1ce1c09a9d51a52c4685f))
+
 # [4.1.0-dev.15](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.14...4.1.0-dev.15) (2026-10-29)
 
 
