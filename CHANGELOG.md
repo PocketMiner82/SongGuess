@@ -1,3 +1,10 @@
+# [4.1.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.18...4.1.0-dev.19) (2026-10-29)
+
+
+### Bug Fixes
+
+* increase persist version ([fac9fb1](https://github.com/PocketMiner82/SongGuess/commit/fac9fb1dcf7049c564bec8a5e6160d6c078fe82b))
+
 # [4.1.0-dev.18](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.17...4.1.0-dev.18) (2026-10-29)
 
 
