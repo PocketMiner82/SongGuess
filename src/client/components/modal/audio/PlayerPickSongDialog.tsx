@@ -48,10 +48,10 @@ export function PlayerPickSongDialog({
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const rafRef = useRef<number | null>(null);
 
-  const maxStartSeconds = Math.max(0, duration - audioPlayTime);
+  const maxStartSeconds = Math.max(0, duration - controller.config.timePerQuestion);
   const clampedEndSeconds = duration > 0
-    ? Math.min(startPosSeconds + audioPlayTime, duration)
-    : startPosSeconds + audioPlayTime;
+    ? Math.min(startPosSeconds + controller.config.timePerQuestion, duration)
+    : startPosSeconds + controller.config.timePerQuestion;
 
   // Update start position when song changes
   useEffect(() => {
@@ -176,7 +176,7 @@ export function PlayerPickSongDialog({
           value={playbackPosition}
           selectionStart={startPosSeconds}
           max={Math.max(duration, 0)}
-          endSeconds={clampedEndSeconds}
+          selectionEnd={clampedEndSeconds}
           audioPlayTime={audioPlayTime}
           disabled={isFixed}
           onChange={handleSelectionChange}

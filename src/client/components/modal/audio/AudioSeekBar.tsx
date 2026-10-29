@@ -1,13 +1,12 @@
 import type { MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { QUESTION_PADDING_TICKS } from "../../../../shared/ConfigConstants";
 
 
 interface AudioSeekBarProps {
   value: number; // current playback position (circular handle)
   selectionStart: number; // start of selection stripe
   max: number; // in seconds
-  endSeconds?: number; // end of selection stripe
+  selectionEnd?: number; // end of selection stripe
   audioPlayTime?: number;
   disabled?: boolean;
   onChange: (start: number) => void; // selection start changed (moving the stripe)
@@ -31,7 +30,7 @@ export function AudioSeekBar({
   value,
   selectionStart,
   max,
-  endSeconds,
+  selectionEnd,
   audioPlayTime,
   disabled = false,
   onChange,
@@ -60,17 +59,17 @@ export function AudioSeekBar({
   const lastTouchRef = useRef<number>(0);
 
   const endPercent = useMemo(() => {
-    if (!endSeconds || clampedMax <= 0) {
+    if (!selectionEnd || clampedMax <= 0) {
       return undefined;
     }
-    const endClamped = Math.max(0, Math.min(Math.max(endSeconds, 0), clampedMax) - QUESTION_PADDING_TICKS);
+    const endClamped = Math.min(Math.max(selectionEnd, 0), clampedMax);
     return (endClamped / clampedMax) * 100;
-  }, [clampedMax, endSeconds]);
+  }, [clampedMax, selectionEnd]);
 
   const startPercent = clampedMax > 0 ? (clampedSelection / clampedMax) * 100 : 0;
 
   const showStartMarker = clampedMax > 0;
-  const showEndMarker = endSeconds !== undefined && clampedMax > 0 && endSeconds > 0 && endSeconds <= clampedMax;
+  const showEndMarker = selectionEnd !== undefined && clampedMax > 0 && selectionEnd > 0 && selectionEnd <= clampedMax;
   const isDisabled = disabled || clampedMax <= 0;
 
   const getValueFromPosition = useCallback((clientX: number): number => {
@@ -295,8 +294,8 @@ export function AudioSeekBar({
               top: "50%",
               transform: "translate(-50%, -50%)",
             }}
-            title={`End at ${formatTime(endSeconds - QUESTION_PADDING_TICKS)}`}
-            aria-label={`End at ${formatTime(endSeconds - QUESTION_PADDING_TICKS)}`}
+            title={`End at ${formatTime(selectionEnd)}`}
+            aria-label={`End at ${formatTime(selectionEnd)}`}
           >
             <svg
               className="w-5 h-5 text-default"
