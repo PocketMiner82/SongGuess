@@ -144,6 +144,11 @@ export class Player implements PlayerMessage, IEventListener {
       } satisfies SelectAnswerMessage);
     }
 
+    // send the current countdown time, if running
+    if (this.room.countdown > 0) {
+      this.safeSend(this.room.getCountdownMessage());
+    }
+
     // kicks player if inactive
     this.refreshKickTimeout();
     return true;
@@ -251,7 +256,7 @@ export class Player implements PlayerMessage, IEventListener {
       return false;
     }
     this.username = username;
-    this.conn?.setState(`${this.conn.state} (${username})`);
+    this.conn?.setState(`${this.conn.id} (${username})`);
 
     return true;
   }

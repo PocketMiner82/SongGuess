@@ -11,9 +11,9 @@ export interface AudioPlayer {
   howler: Howl | null;
   isHLS: boolean;
   load: (src: string) => Promise<void>;
-  playWithPositionAndFade: (startPosition: number, audioPlayTime: number, startOffset?: number, fadeDuration?: number) => void;
-  playWithFade: (fadeDuration?: number) => void;
-  pauseWithFade: (fadeDuration?: number) => void;
+  playWithPositionAndFade: (startPosition: number, audioPlayTime: number, startOffset?: number, fadeDuration?: number) => Promise<void>;
+  playWithFade: (fadeDuration?: number, seekPos?: number) => Promise<void>;
+  pauseWithFade: (fadeDuration?: number) => Promise<void>;
 }
 
 function isHLSContentType(contentType: string | null): boolean {
@@ -157,19 +157,28 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
     }
   };
 
-  const playWithFade = async (fadeDuration: number = 1000) => {
+  const playWithFade = async (fadeDuration: number = 1000, seekPos: number = 0) => {
     const player = await ensurePlayerReady();
     if (!player) {
       console.error("[Audio] Cannot play audio before loading.");
       return;
     }
 
-    player.stop();
-    player.once("play", () => {
-      player.fade(0, volume, fadeDuration);
+    player.pause();
+
+    const promise = new Promise<void>((resolve) => {
+      player.once("play", () => {
+        player.seek(seekPos);
+        player.fade(0, volume, fadeDuration);
+
+        resolve();
+      });
     });
+
     player.volume(0);
     player.play();
+
+    await promise;
   };
 
   const playWithPositionAndFade = async (
@@ -184,17 +193,13 @@ export function useAudioPlayer(volume: number, muted: boolean, url?: string): Au
       return;
     }
 
-    await playWithFade(fadeDuration);
+    const duration = player.duration() - 0.5;
 
-    player.once("play", () => {
-      const duration = player.duration() - 0.5;
+    if (startPosition !== null && startPosition > 0) {
+      startOffset += Math.max(0, (duration - audioPlayTime) * startPosition);
+    }
 
-      if (startPosition !== null && startPosition > 0) {
-        startOffset += Math.max(0, (duration - audioPlayTime) * startPosition);
-      }
-
-      player.seek(startOffset);
-    });
+    await playWithFade(fadeDuration, startOffset);
   };
 
   const pauseWithFade = async (fadeDuration: number = 1000) => {

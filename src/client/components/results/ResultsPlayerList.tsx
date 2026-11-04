@@ -1,7 +1,7 @@
 import type { PlayerMessage } from "../../../types/MessageTypes";
 import type { PossibleShowFields } from "../../../types/PossibleShowFields";
 import { PlayerCard } from "../player/PlayerCard";
-import { PlayerMessageField } from "../PlayerMessageField";
+import { PlayerMessageField } from "../player/PlayerMessageField";
 
 
 export function ResultsPlayerList({ rankedPlayers, showField }:

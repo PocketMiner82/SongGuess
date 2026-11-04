@@ -2,6 +2,7 @@ import type { CloseEvent, ErrorEvent } from "partysocket/ws";
 import type { CookieGetter, CookieSetter } from "../../types/CookieFunctionTypes";
 import type {
   AddPlaylistsMessage,
+  AudioControlMessage,
   ChangeUsernameMessage,
   GameState,
   PingMessage,
@@ -146,7 +147,7 @@ export class RoomController {
   /**
    * The list of songs played in the last round.
    */
-  playedSongs: (Song | undefined)[] = [];
+  playedSongs: Song[] = [];
 
   /**
    * The interval of the ping function.
@@ -172,6 +173,11 @@ export class RoomController {
    * The current ping in milliseconds.
    */
   currentPingMs: number = -1;
+
+  /**
+   * Whether we are just spectating.
+   */
+  spectator: boolean = true;
 
   /**
    * Creates a new RoomController instance and initializes the socket connection.
@@ -382,33 +388,33 @@ export class RoomController {
 
   /**
    * (Re)connect to the PartyKit server.
+   * @see reconnectWithOptions
    */
   public reconnect() {
-    console.debug("Reconnecting...");
-    this.questionData = new QuestionData();
-    this.reconnecting = true;
-
-    this.socket.reconnect();
+    this.reconnectWithOptions(this.username ?? null, this.spectator);
   }
 
   /**
    * (Re)connect to the PartyKit server with options.
    * @param newUsername if this is null, request a new username when reconnecting.
-   * @param spectator whether the player wants to spectate the game.
-   * @see reconnect
+   * @param spectate whether the player wants to spectate the game.
    */
-  public reconnectWithOptions(newUsername: string | null, spectator: boolean = false) {
+  public reconnectWithOptions(newUsername: string | null, spectate: boolean = false) {
     this.setIsReady(false);
+    console.debug("Reconnecting...");
+    this.questionData = new QuestionData();
+    this.reconnecting = true;
 
     this.socket.updateProperties({
       query: {
         username: newUsername ?? undefined,
-        spectator: spectator ? "true" : undefined,
+        spectator: spectate ? "true" : undefined,
         version,
       },
     });
 
-    this.reconnect();
+    this.socket.reconnect();
+    this.spectator = spectate;
   }
 
   /**
@@ -453,6 +459,26 @@ export class RoomController {
     for (const listener of this.stateChangeEventListeners) {
       listener(msg);
     }
+  }
+
+  /**
+   * Emits a countdown running event to be consumed by the audio player.
+   */
+  public playCountdownRunning() {
+    this.callOnStateChange({
+      type: "audio_control",
+      action: "play_countdown_running",
+    } satisfies AudioControlMessage);
+  }
+
+  /**
+   * Emits a countdown end event to be consumed by the audio player.
+   */
+  public playCountdownEnd() {
+    this.callOnStateChange({
+      type: "audio_control",
+      action: "play_countdown_end",
+    } satisfies AudioControlMessage);
   }
 
   /**

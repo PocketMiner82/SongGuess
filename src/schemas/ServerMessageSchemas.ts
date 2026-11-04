@@ -130,12 +130,12 @@ export const PlayerAnswerDataSchema = z.object({
   /**
    * The absolute time in ms where the player answered a round question.
    */
-  answerTimestamp: z.number(),
+  answerTimestamp: z.number().optional(),
 
   /**
    * The relative time in ms a player took to answer a round question.
    */
-  answerSpeed: z.number(),
+  answerSpeed: z.number().optional(),
 
   /**
    * The points the player got for the current question.
