@@ -65,6 +65,6 @@
     "tailwindcss": "^4.3.1",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "wrangler": "^4.150.0"
+    "wrangler": "^4.157.0"
   }
 }
