@@ -115,7 +115,13 @@ export function PlayerPickSongDialog({
     setPlaybackPosition(newStart);
 
     player.howler?.seek(newStart);
-  }, [duration, isFixed, maxStartSeconds, player.howler, startPosSeconds]);
+  }, [
+    duration,
+    isFixed,
+    maxStartSeconds,
+    player.howler,
+    startPosSeconds,
+  ]);
 
   const handlePositionChange = useCallback((value: number) => {
     if (isFixed || duration <= 0 || maxStartSeconds === 0) {
@@ -135,13 +141,26 @@ export function PlayerPickSongDialog({
     setPlaybackPosition(newPos);
 
     player.howler?.seek(newPos);
-  }, [duration, isFixed, maxStartSeconds, playbackPosition, player.howler]);
+  }, [
+    duration,
+    isFixed,
+    maxStartSeconds,
+    playbackPosition,
+    player.howler,
+  ]);
 
   const handleSubmit = useCallback(async () => {
     modal.close();
 
-    await onSubmit(maxStartSeconds === 0 ? 0 : startPosSeconds / maxStartSeconds);
-  }, [maxStartSeconds, modal, onSubmit, startPosSeconds]);
+    await onSubmit(maxStartSeconds === 0
+      ? 0
+      : startPosSeconds / maxStartSeconds);
+  }, [
+    maxStartSeconds,
+    modal,
+    onSubmit,
+    startPosSeconds,
+  ]);
 
   const togglePlay = useCallback(() => {
     const howl = player.howler;

@@ -38,7 +38,10 @@ async function detectIsHLS(url: string): Promise<boolean> {
   } catch { }
 
   try {
-    const response = await fetch(url, { method: "GET", headers: { Range: "bytes=0-1" } });
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Range: "bytes=0-1" },
+    });
     const contentType = response.headers.get("content-type");
     return isHLSContentType(contentType);
   } catch (e) {

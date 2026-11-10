@@ -31,7 +31,9 @@ export class PlayerPicksQuestion extends Question {
       questionType: "player_picks",
       questionCurrent: this.questionCurrent,
       questionCount: this.questionCount,
-      correctAnswer: gamePhase === GamePhase.ANSWER ? this.song : undefined,
+      correctAnswer: gamePhase === GamePhase.ANSWER
+        ? this.song
+        : undefined,
       pickerId: this.pickerId,
       startPos: this.startPos,
     };

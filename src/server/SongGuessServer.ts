@@ -224,7 +224,9 @@ export class SongGuessServer extends Server<Env> {
     }
 
     const versionParam = url.searchParams.get("version");
-    return versionParam === version ? ["player"] : ["wrong_version"];
+    return versionParam === version
+      ? ["player"]
+      : ["wrong_version"];
   }
 
   /**

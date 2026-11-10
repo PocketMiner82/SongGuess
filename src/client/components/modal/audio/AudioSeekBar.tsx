@@ -37,12 +37,22 @@ export function AudioSeekBar({
   onSeek,
   onClick,
 }: AudioSeekBarProps) {
-  const clampedMax = max > 0 ? max : 0;
-  const clampedValue = clampedMax > 0 ? Math.min(Math.max(value, 0), clampedMax) : 0;
-  const clampedSelection = clampedMax > 0 ? Math.min(Math.max(selectionStart, 0), clampedMax) : 0;
+  const clampedMax = max > 0
+    ? max
+    : 0;
+  const clampedValue = clampedMax > 0
+    ? Math.min(Math.max(value, 0), clampedMax)
+    : 0;
+  const clampedSelection = clampedMax > 0
+    ? Math.min(Math.max(selectionStart, 0), clampedMax)
+    : 0;
 
-  const valuePercent = clampedMax > 0 ? (clampedValue / clampedMax) * 100 : 0;
-  const selectionPercent = clampedMax > 0 ? (clampedSelection / clampedMax) * 100 : 0;
+  const valuePercent = clampedMax > 0
+    ? (clampedValue / clampedMax) * 100
+    : 0;
+  const selectionPercent = clampedMax > 0
+    ? (clampedSelection / clampedMax) * 100
+    : 0;
 
   // Stripe length in percent = audioPlayTime / max
   const stripePercent = useMemo(() => {
@@ -66,7 +76,9 @@ export function AudioSeekBar({
     return (endClamped / clampedMax) * 100;
   }, [clampedMax, selectionEnd]);
 
-  const startPercent = clampedMax > 0 ? (clampedSelection / clampedMax) * 100 : 0;
+  const startPercent = clampedMax > 0
+    ? (clampedSelection / clampedMax) * 100
+    : 0;
 
   const showStartMarker = clampedMax > 0;
   const showEndMarker = selectionEnd !== undefined && clampedMax > 0 && selectionEnd > 0 && selectionEnd <= clampedMax;
@@ -95,7 +107,13 @@ export function AudioSeekBar({
     } else {
       onSeek(val);
     }
-  }, [disabled, dragging, getValueFromEvent, onChange, onSeek]);
+  }, [
+    disabled,
+    dragging,
+    getValueFromEvent,
+    onChange,
+    onSeek,
+  ]);
 
   const onTouchMove = useCallback((e: TouchEvent) => {
     if (disabled || dragging === "none") {
@@ -108,7 +126,13 @@ export function AudioSeekBar({
     } else {
       onSeek(val);
     }
-  }, [disabled, dragging, getValueFromPosition, onChange, onSeek]);
+  }, [
+    disabled,
+    dragging,
+    getValueFromPosition,
+    onChange,
+    onSeek,
+  ]);
 
   const onMouseUp = useCallback(() => {
     setDragging("none");
@@ -182,7 +206,13 @@ export function AudioSeekBar({
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [dragging, onMouseMove, onMouseUp, onTouchMove, onTouchEnd]);
+  }, [
+    dragging,
+    onMouseMove,
+    onMouseUp,
+    onTouchMove,
+    onTouchEnd,
+  ]);
 
   const onStripeMouseDown = useCallback((e: ReactMouseEvent) => {
     if (disabled || Date.now() - lastTouchRef.current < 500) {

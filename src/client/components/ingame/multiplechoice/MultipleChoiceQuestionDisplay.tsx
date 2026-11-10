@@ -65,7 +65,9 @@ const AnswerOption = memo(({
               key={player.username}
               className="rounded-full border-2 border-card-bg"
               style={{
-                marginLeft: playerIndex > 0 ? "-8px" : "0",
+                marginLeft: playerIndex > 0
+                  ? "-8px"
+                  : "0",
                 zIndex: playersForThisAnswer.length - playerIndex,
               }}
             >
@@ -118,7 +120,9 @@ export function MultipleChoiceQuestionDisplay() {
         <div className="w-full md:w-auto grid grid-cols-1 md:grid-cols-2 gap-4">
           {answerOptions!.map((option, index) => {
             const isSelected = controller.questionData.selectedAnswerIndex === index;
-            const isCorrect = correctIndex !== undefined ? correctIndex === index : null;
+            const isCorrect = correctIndex !== undefined
+              ? correctIndex === index
+              : null;
 
             let state: AnswerState = "pending";
             if (isCorrect !== null && isCorrect) {

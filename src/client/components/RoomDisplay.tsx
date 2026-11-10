@@ -86,7 +86,9 @@ export function RoomDisplay({ hasJoined, setHasJoined }: { hasJoined: boolean; s
                   : "text-success"
             }`}
             >
-              {controller.currentPingMs >= PING_INTERVAL ? "999+" : controller.currentPingMs}
+              {controller.currentPingMs >= PING_INTERVAL
+                ? "999+"
+                : controller.currentPingMs}
               {" "}
               ms
             </span>

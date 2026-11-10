@@ -217,8 +217,10 @@ function LogViewer({ logs, filters, onFilterChange }: {
             </span>
             <span className="text-sm text-default whitespace-pre-wrap">
               {React.createElement(React.Fragment, {}, ...entry.msg.split("[...]").flatMap((part, i) =>
-                // eslint-disable-next-line react/no-array-index-key
-                i === 0 ? [part] : [<span key={i} className="text-gray-500">[...]</span>, part],
+
+                i === 0
+                  ? [part]
+                  : [<span key={i} className="text-gray-500">[...]</span>, part],
               ))}
             </span>
           </div>
@@ -229,8 +231,18 @@ function LogViewer({ logs, filters, onFilterChange }: {
 }
 
 function AuthenticatedApp({ auth }: { auth: AuthData }) {
-  const [logs, setLogs] = useState<LoggerStorage>({ info: [], warn: [], error: [], debug: [] });
-  const [filters, setFilters] = useState<LogFilters>({ info: true, warn: true, error: true, debug: false });
+  const [logs, setLogs] = useState<LoggerStorage>({
+    info: [],
+    warn: [],
+    error: [],
+    debug: [],
+  });
+  const [filters, setFilters] = useState<LogFilters>({
+    info: true,
+    warn: true,
+    error: true,
+    debug: false,
+  });
   const [connectionStatus, setConnectionStatus] = useState<string | null>("Connecting...");
 
   const roomID = new URLSearchParams(window.location.search).get("id") ?? "null";
@@ -240,7 +252,9 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
     return btoa(`${authData.username}:${authData.password}`);
   };
 
-  const id = `admin_${cookies.userID ? cookies.userID : uuidv4()}`;
+  const id = `admin_${cookies.userID
+    ? cookies.userID
+    : uuidv4()}`;
 
   const socketRef = usePartySocket({
     room: roomID,
@@ -295,7 +309,9 @@ function AuthenticatedApp({ auth }: { auth: AuthData }) {
       }
     },
     // Use query parameter for authentication
-    query: { auth: generateAuthQuery(auth) },
+    query: {
+      auth: generateAuthQuery(auth),
+    },
   });
 
   // Function to send transfer host message

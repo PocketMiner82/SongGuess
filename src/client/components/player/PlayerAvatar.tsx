@@ -27,7 +27,9 @@ function getMaxContrastColor(colorName: string | undefined): string | undefined 
   const color = chroma(colorName);
   const withBlack = chroma.contrast(color, "#000");
   const withWhite = chroma.contrast(color, "#fff");
-  const result = withBlack > withWhite ? "#000" : "#fff";
+  const result = withBlack > withWhite
+    ? "#000"
+    : "#fff";
   contrastColorCache.set(colorName, result);
   return result;
 }

@@ -71,7 +71,14 @@ export function ProgressBar() {
       };
     },
     // the deps MUST contain animationKey, so that a new listener message clears the intervals and timeouts
-    [absoluteDuration, continuousWarningSeconds, controller, controller.questionData.roundMsg?.gamePhase, firstWarningSeconds, animationKey],
+    [
+      absoluteDuration,
+      continuousWarningSeconds,
+      controller,
+      controller.questionData.roundMsg?.gamePhase,
+      firstWarningSeconds,
+      animationKey,
+    ],
   );
 
   if (absoluteDuration === 0) {
@@ -97,7 +104,9 @@ export function ProgressBar() {
       key={animationKey}
     >
       <div
-        className={`h-full transition-colors ease-linear duration-300 ${firstWarning ? `${continuousWarning ? "bg-error" : "bg-warning"}` : "bg-blue-500"} ${animationClass}`}
+        className={`h-full transition-colors ease-linear duration-300 ${firstWarning
+          ? `${continuousWarning ? "bg-error" : "bg-warning"}`
+          : "bg-blue-500"} ${animationClass}`}
         style={{
           animationDelay,
           animationDuration,

@@ -14,7 +14,9 @@ export function Countdown() {
 
   useRoomControllerListener(controller, useCallback((msg: ServerMessage | null) => {
     if (msg && msg.type === "countdown") {
-      controller[msg.countdown > 0 ? "playCountdownRunning" : "playCountdownEnd"]();
+      controller[msg.countdown > 0
+        ? "playCountdownRunning"
+        : "playCountdownEnd"]();
       setCountdown(msg.countdown);
     }
     return false;

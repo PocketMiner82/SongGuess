@@ -93,7 +93,9 @@ export class MultipleChoiceQuestion extends Question {
     return {
       questionType: "multiple_choice",
       answerOptions: this.getSongNames(),
-      correctAnswerIndex: gamePhase === GamePhase.ANSWER ? this.getCorrectAnswer() : undefined,
+      correctAnswerIndex: gamePhase === GamePhase.ANSWER
+        ? this.getCorrectAnswer()
+        : undefined,
       startPos: this.startPos,
     };
   }

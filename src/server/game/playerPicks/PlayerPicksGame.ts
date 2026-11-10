@@ -273,7 +273,10 @@ export class PlayerPicksGame extends Game {
   derivativeUpdateFromStorage(persistedGame: PersistedGame) {
     if (persistedGame.type === "player_picks") {
       this.questions = persistedGame.questions.map(q => PlayerPicksQuestion.fromStorage(q));
-      this.nextQuestions = new Map(persistedGame.nextQuestions.map(q => [q.pickerId, PlayerPicksQuestion.fromStorage(q)]));
+      this.nextQuestions = new Map(persistedGame.nextQuestions.map(q => [
+        q.pickerId,
+        PlayerPicksQuestion.fromStorage(q),
+      ]));
     } else {
       this.room.server.logger.error(`Type mismatch while trying to load PersistedGame. Expected type=player_picks but got type=${persistedGame.type}`);
     }

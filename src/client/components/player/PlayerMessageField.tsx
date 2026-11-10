@@ -22,8 +22,13 @@ export function PlayerMessageField({ player, showField, className }:
     const questionPoints = player.answerData?.questionPoints;
     if (questionPoints) {
       return (
-        <div className={`text-sm ${questionPoints > 0 ? "text-success" : "text-error"} ${className}`}>
-          {questionPoints > 0 ? "+" : "-"}
+        <div className={`text-sm ${questionPoints > 0
+          ? "text-success"
+          : "text-error"} ${className}`}
+        >
+          {questionPoints > 0
+            ? "+"
+            : "-"}
           {questionPoints}
         </div>
       );

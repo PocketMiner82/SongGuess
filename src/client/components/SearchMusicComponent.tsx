@@ -110,7 +110,9 @@ export function SearchMusicComponent({
       return;
     }
 
-    if (playerPicksMode ? songRegex.test(query) : (artistRegex.test(query) || albumRegex.test(query) || songRegex.test(query))) {
+    if (playerPicksMode
+      ? songRegex.test(query)
+      : (artistRegex.test(query) || albumRegex.test(query) || songRegex.test(query))) {
       setSearchStatus("loading");
       const playlist = await getPlaylistByURL(query);
 
@@ -134,7 +136,9 @@ export function SearchMusicComponent({
     setSearchResults(items);
 
     setAddedIndices(new Set());
-    setSearchStatus(items.length === 0 ? "error" : "idle");
+    setSearchStatus(items.length === 0
+      ? "error"
+      : "idle");
     searchResultsListRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     player.howler?.pause();
   };
@@ -192,7 +196,13 @@ export function SearchMusicComponent({
     } else {
       player.howler?.pause();
     }
-  }, [controller.config.audioStartPosition, controller.config.timePerQuestion, handleSelectResult, player, playerPicksMode]);
+  }, [
+    controller.config.audioStartPosition,
+    controller.config.timePerQuestion,
+    handleSelectResult,
+    player,
+    playerPicksMode,
+  ]);
 
   return (
     <div className="flex flex-col min-h-0 w-full">

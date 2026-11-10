@@ -149,14 +149,21 @@ export function Settings({ disabled }: { disabled?: boolean }) {
           value={controller.config.audioStartPosition ?? -1}
           disabled={disabled}
           onChange={(v) => {
-            controller.config.audioStartPosition = v === -1 ? null : v;
+            controller.config.audioStartPosition = v === -1
+              ? null
+              : v;
             controller.sendConfig();
           }}
           options={[
             { value: 0, label: "Start of audio" },
             { value: 0.5, label: "Close to middle" },
             { value: 1, label: "Close to end" },
-            { value: -1, label: controller.config.gameMode === "player_picks" ? "Picker decides" : "Random" },
+            {
+              value: -1,
+              label: controller.config.gameMode === "player_picks"
+                ? "Picker decides"
+                : "Random",
+            },
           ]}
         >
           Audio start position

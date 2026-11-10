@@ -54,7 +54,9 @@ export function PlayerList() {
   }, [controller.playerMessages, controller.state]);
 
   const [animationParent] = useAutoAnimate<HTMLDivElement>({
-    duration: controller.state === "ingame" ? 2000 : 800,
+    duration: controller.state === "ingame"
+      ? 2000
+      : 800,
     easing: "cubic-bezier(0.4, 0, 0.2, 1)",
   });
 
@@ -69,7 +71,9 @@ export function PlayerList() {
         {
           ` (${controller.playerMessages.length}/${COLORS.length}${
             controller.spectatorPlayerMessages.length > 0
-              ? ` + ${controller.spectatorPlayerMessages.length} spectator${controller.spectatorPlayerMessages.length > 1 ? "s" : ""}`
+              ? ` + ${controller.spectatorPlayerMessages.length} spectator${controller.spectatorPlayerMessages.length > 1
+                ? "s"
+                : ""}`
               : ""
           })`
         }

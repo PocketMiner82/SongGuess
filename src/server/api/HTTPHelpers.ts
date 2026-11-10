@@ -10,7 +10,9 @@ import { soundCloudSongRegex, ytSongRegex } from "../../schemas/ValidationRegexe
  */
 export async function fetchGetRoom(url: URL | string): Promise<RoomGetResponse | null> {
   try {
-    const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const resp = await fetch(url, {
+      signal: AbortSignal.timeout(5000),
+    });
     if (resp.status !== 200) {
       console.error(`Getting ${url} returned ${resp.status}!`);
       return null;

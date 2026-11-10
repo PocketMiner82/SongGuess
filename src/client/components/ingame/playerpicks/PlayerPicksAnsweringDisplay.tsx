@@ -27,7 +27,12 @@ export function PlayerPicksAnsweringDisplay() {
     }
 
     controller.selectAnswerText(answer.trim());
-  }, [answer, controller, isMyQuestion, roundMsg?.gamePhase]);
+  }, [
+    answer,
+    controller,
+    isMyQuestion,
+    roundMsg?.gamePhase,
+  ]);
 
   useRoomControllerMessageTypeListener(controller, "round_state", (msg) => {
     handleSelect();

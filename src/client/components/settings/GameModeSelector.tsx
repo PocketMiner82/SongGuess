@@ -10,7 +10,9 @@ export function GameModeSelector({ disabled }: { disabled?: boolean }) {
       return;
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault();
-      const newMode = currentMode === "multiple_choice" ? "player_picks" : "multiple_choice";
+      const newMode = currentMode === "multiple_choice"
+        ? "player_picks"
+        : "multiple_choice";
       controller.config.gameMode = newMode as "multiple_choice" | "player_picks";
       controller.sendConfig();
     }
@@ -24,7 +26,9 @@ export function GameModeSelector({ disabled }: { disabled?: boolean }) {
           role="tab"
           disabled={disabled}
           aria-selected={controller.config.gameMode === "multiple_choice"}
-          tabIndex={controller.config.gameMode === "multiple_choice" ? 0 : -1}
+          tabIndex={controller.config.gameMode === "multiple_choice"
+            ? 0
+            : -1}
           onClick={() => {
             if (disabled)
               return;
@@ -45,7 +49,9 @@ export function GameModeSelector({ disabled }: { disabled?: boolean }) {
           role="tab"
           disabled={disabled}
           aria-selected={controller.config.gameMode === "player_picks"}
-          tabIndex={controller.config.gameMode === "player_picks" ? 0 : -1}
+          tabIndex={controller.config.gameMode === "player_picks"
+            ? 0
+            : -1}
           onClick={() => {
             if (disabled)
               return;

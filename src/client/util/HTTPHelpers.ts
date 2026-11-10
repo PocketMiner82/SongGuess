@@ -8,7 +8,10 @@ import type { CreateRoomResponse } from "../../types/APIResponseTypes";
  */
 export async function fetchPostCreateRoom(url: URL | string): Promise<CreateRoomResponse | null> {
   try {
-    const resp = await fetch(url, { method: "POST", signal: AbortSignal.timeout(5000) });
+    const resp = await fetch(url, {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+    });
     if (resp.status !== 201) {
       console.error(`Posting ${url} returned ${resp.status}!`);
       return null;

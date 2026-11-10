@@ -20,7 +20,12 @@ export function App() {
   const [cookies, setCookie] = useCookies<
     "userID" | "userName" | "audioVolume" | "audioMuted",
     ICookieProps
-  >(["userID", "userName", "audioVolume", "audioMuted"]);
+  >([
+    "userID",
+    "userName",
+    "audioVolume",
+    "audioMuted",
+  ]);
   const { getController, isReady } = useRoomController(window.location.host, roomID, () => cookies, setCookie);
 
   const [hasJoined, setHasJoined] = useState(false);
