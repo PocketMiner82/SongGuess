@@ -1,305 +1,196 @@
-import type { MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { formatTime } from "../../../util/TimeFormatter";
+import { AudioMarker } from "./AudioMarker";
 
 
 interface AudioSeekBarProps {
-  value: number; // current playback position (circular handle)
-  selectionStart: number; // start of selection stripe
-  max: number; // in seconds
-  selectionEnd?: number; // end of selection stripe
-  audioPlayTime?: number;
+  playbackPositionSeconds: number;
+  selectionStartSeconds: number;
+  durationSeconds: number;
+  guesstimeEndSeconds?: number;
+  audioPlaytimeSeconds?: number;
   disabled?: boolean;
-  onChange: (start: number) => void; // selection start changed (moving the stripe)
-  onSeek: (position: number) => void; // playback position changed (circular handle drag)
-  onClick: (position: number) => void; // playback position changed (click on track)
+  // selection start changed (moving the stripe)
+  onChange: (selectionStart: number) => void;
+  // playback position changed (circular handle drag)
+  onSeek: (playbackPosition: number) => void;
 }
 
-
-function formatTime(seconds: number): string {
-  if (Number.isNaN(seconds) || seconds < 0) {
-    return "0:00";
-  }
-
-  const totalSeconds = Math.floor(seconds);
-  const mins = Math.floor(totalSeconds / 60);
-  const secs = totalSeconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
 
 export function AudioSeekBar({
-  value,
-  selectionStart,
-  max,
-  selectionEnd,
-  audioPlayTime,
+  playbackPositionSeconds,
+  selectionStartSeconds,
+  durationSeconds,
+  guesstimeEndSeconds,
+  audioPlaytimeSeconds,
   disabled = false,
   onChange,
   onSeek,
-  onClick,
 }: AudioSeekBarProps) {
-  const clampedMax = max > 0
-    ? max
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    mode: "stripe" | "playback";
+    rect: DOMRect;
+    valueOffset?: number;
+  } | null>(null);
+
+
+  const clampedDuration = Math.max(durationSeconds, 0);
+
+  const maxStartSeconds = audioPlaytimeSeconds !== undefined
+    ? Math.max(0, clampedDuration - audioPlaytimeSeconds)
+    : clampedDuration;
+
+  const clampedPlaybackPositionSeconds = clampedDuration > 0
+    ? Math.min(Math.max(playbackPositionSeconds, 0), clampedDuration)
     : 0;
-  const clampedValue = clampedMax > 0
-    ? Math.min(Math.max(value, 0), clampedMax)
-    : 0;
-  const clampedSelection = clampedMax > 0
-    ? Math.min(Math.max(selectionStart, 0), clampedMax)
+  const clampedSelectionStartSeconds = maxStartSeconds > 0
+    ? Math.min(Math.max(selectionStartSeconds, 0), maxStartSeconds)
     : 0;
 
-  const valuePercent = clampedMax > 0
-    ? (clampedValue / clampedMax) * 100
-    : 0;
-  const selectionPercent = clampedMax > 0
-    ? (clampedSelection / clampedMax) * 100
+  const playbackPositionPercent = clampedDuration > 0
+    ? (clampedPlaybackPositionSeconds / clampedDuration) * 100
     : 0;
 
   // Stripe length in percent = audioPlayTime / max
-  const stripePercent = useMemo(() => {
-    if (!audioPlayTime || clampedMax <= 0) {
+  const stripeWidthPercent = useMemo(() => {
+    if (!audioPlaytimeSeconds || clampedDuration <= 0) {
       return 0;
     }
-    return Math.min((audioPlayTime / clampedMax) * 100, 100);
-  }, [audioPlayTime, clampedMax]);
+    return Math.min((audioPlaytimeSeconds / clampedDuration) * 100, 100);
+  }, [audioPlaytimeSeconds, clampedDuration]);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dragging, setDragging] = useState<"none" | "stripe" | "playback">("none");
-  const clickStartRef = useRef<{ x: number; y: number } | null>(null);
-  // Used to ignore mouse compatibility events that fire shortly after touch events on mobile.
-  const lastTouchRef = useRef<number>(0);
-
-  const endPercent = useMemo(() => {
-    if (!selectionEnd || clampedMax <= 0) {
+  const guesstimeEndPercent = useMemo(() => {
+    if (!guesstimeEndSeconds || clampedDuration <= 0) {
       return undefined;
     }
-    const endClamped = Math.min(Math.max(selectionEnd, 0), clampedMax);
-    return (endClamped / clampedMax) * 100;
-  }, [clampedMax, selectionEnd]);
+    const endClamped = Math.min(Math.max(guesstimeEndSeconds, 0), clampedDuration);
+    return (endClamped / clampedDuration) * 100;
+  }, [clampedDuration, guesstimeEndSeconds]);
 
-  const startPercent = clampedMax > 0
-    ? (clampedSelection / clampedMax) * 100
+  const selectionStartPercent = clampedDuration > 0
+    ? (clampedSelectionStartSeconds / clampedDuration) * 100
     : 0;
 
-  const showStartMarker = clampedMax > 0;
-  const showEndMarker = selectionEnd !== undefined && clampedMax > 0 && selectionEnd > 0 && selectionEnd <= clampedMax;
-  const isDisabled = disabled || clampedMax <= 0;
+  const showStartMarker = clampedDuration > 0;
+  const showEndMarker = guesstimeEndSeconds !== undefined && clampedDuration > 0 && guesstimeEndSeconds > 0 && guesstimeEndSeconds <= clampedDuration;
+  const isDisabled = disabled || clampedDuration <= 0;
 
   const getValueFromPosition = useCallback((clientX: number): number => {
-    const rect = containerRef.current?.getBoundingClientRect();
+    const rect = dragRef.current?.rect ?? containerRef.current?.getBoundingClientRect();
     if (!rect || rect.width <= 0) {
       return 0;
     }
+
     const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    return x * clampedMax;
-  }, [clampedMax]);
+    const pos = x * clampedDuration;
 
-  const getValueFromEvent = useCallback((e: MouseEvent): number => {
-    return getValueFromPosition(e.clientX);
-  }, [getValueFromPosition]);
+    return Math.min(Math.max(pos - (dragRef.current?.valueOffset ?? 0), 0), clampedDuration);
+  }, [clampedDuration]);
 
-  const onMouseMove = useCallback((e: MouseEvent) => {
-    if (disabled || Date.now() - lastTouchRef.current < 500 || dragging === "none") {
+  const onDrag = useCallback((clientX: number) => {
+    if (disabled || !dragRef.current) {
       return;
     }
-    const val = getValueFromEvent(e);
-    if (dragging === "stripe") {
-      onChange(val);
+    const val = getValueFromPosition(clientX);
+    if (dragRef.current.mode === "stripe") {
+      onChange(Math.min(val, maxStartSeconds));
     } else {
       onSeek(val);
     }
   }, [
     disabled,
-    dragging,
-    getValueFromEvent,
-    onChange,
-    onSeek,
-  ]);
-
-  const onTouchMove = useCallback((e: TouchEvent) => {
-    if (disabled || dragging === "none") {
-      return;
-    }
-    e.preventDefault();
-    const val = getValueFromPosition(e.touches[0].clientX);
-    if (dragging === "stripe") {
-      onChange(val);
-    } else {
-      onSeek(val);
-    }
-  }, [
-    disabled,
-    dragging,
     getValueFromPosition,
+    maxStartSeconds,
     onChange,
     onSeek,
   ]);
 
-  const onMouseUp = useCallback(() => {
-    setDragging("none");
+  const onPointerUp = useCallback((e?: PointerEvent) => {
+    if (dragRef.current) {
+      e?.stopPropagation();
+      dragRef.current = null;
+    }
   }, []);
-
-  const onTouchEnd = useCallback(() => {
-    setDragging("none");
-  }, []);
-
-  const onContainerMouseDown = useCallback((e: ReactMouseEvent) => {
-    if (disabled || Date.now() - lastTouchRef.current < 500) {
-      return;
-    }
-    clickStartRef.current = { x: e.clientX, y: e.clientY };
-  }, [disabled]);
-
-  const onContainerTouchStart = useCallback((e: ReactTouchEvent) => {
-    if (disabled) {
-      return;
-    }
-    lastTouchRef.current = Date.now();
-    e.preventDefault();
-    clickStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, [disabled]);
-
-  const onContainerMouseUp = useCallback((e: ReactMouseEvent) => {
-    if (disabled || Date.now() - lastTouchRef.current < 500 || !clickStartRef.current) {
-      return;
-    }
-    const dx = Math.abs(e.clientX - clickStartRef.current.x);
-    const dy = Math.abs(e.clientY - clickStartRef.current.y);
-    clickStartRef.current = null;
-
-    if (dx < 3 && dy < 3) {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect && rect.width > 0) {
-        const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        onClick(x * clampedMax);
-      }
-    }
-  }, [disabled, onClick, clampedMax]);
-
-  const onContainerTouchEnd = useCallback((e: ReactTouchEvent) => {
-    if (disabled || !clickStartRef.current) {
-      return;
-    }
-    const dx = Math.abs(e.changedTouches[0].clientX - clickStartRef.current.x);
-    const dy = Math.abs(e.changedTouches[0].clientY - clickStartRef.current.y);
-    clickStartRef.current = null;
-
-    if (dx < 3 && dy < 3) {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect && rect.width > 0) {
-        const x = Math.max(0, Math.min(1, (e.changedTouches[0].clientX - rect.left) / rect.width));
-        onClick(x * clampedMax);
-      }
-    }
-  }, [disabled, onClick, clampedMax]);
 
   useEffect(() => {
-    if (dragging === "none") {
-      return;
-    }
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd);
+    const onCancel = () => onPointerUp();
+    const onPointerMove = (e: PointerEvent) => onDrag(e.clientX);
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onCancel);
+
     return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onCancel);
     };
+  }, [onDrag, onPointerUp]);
+
+  const onDragStart = useCallback((e: React.PointerEvent<HTMLDivElement>, mode: "stripe" | "playback", clientXStart?: number) => {
+    if (disabled || !containerRef.current) {
+      return;
+    }
+    e.stopPropagation();
+    e.preventDefault();
+
+    // when computing valueOffset, getValueFromPosition(clientXStart) would be called before assigning the new dragRef.current.
+    // if previous drag left dragRef.current non-null (e.g. pointerup missed), offset calc would read stale valueOffset
+    dragRef.current = null;
+    dragRef.current = {
+      mode,
+      rect: containerRef.current.getBoundingClientRect(),
+      valueOffset: clientXStart
+        ? Math.max(0, getValueFromPosition(clientXStart) - clampedSelectionStartSeconds)
+        : 0,
+    };
+
+    onDrag(e.clientX);
   }, [
-    dragging,
-    onMouseMove,
-    onMouseUp,
-    onTouchMove,
-    onTouchEnd,
+    disabled,
+    getValueFromPosition,
+    clampedSelectionStartSeconds,
+    onDrag,
   ]);
-
-  const onStripeMouseDown = useCallback((e: ReactMouseEvent) => {
-    if (disabled || Date.now() - lastTouchRef.current < 500) {
-      return;
-    }
-    e.preventDefault();
-    setDragging("stripe");
-  }, [disabled]);
-
-  const onStripeTouchStart = useCallback((e: ReactTouchEvent) => {
-    if (disabled) {
-      return;
-    }
-    lastTouchRef.current = Date.now();
-    e.preventDefault();
-    setDragging("stripe");
-  }, [disabled]);
-
-  const onPlaybackMouseDown = useCallback((e: ReactMouseEvent) => {
-    if (disabled || Date.now() - lastTouchRef.current < 500) {
-      return;
-    }
-    e.preventDefault();
-    setDragging("playback");
-  }, [disabled]);
-
-  const onPlaybackTouchStart = useCallback((e: ReactTouchEvent) => {
-    if (disabled) {
-      return;
-    }
-    lastTouchRef.current = Date.now();
-    e.preventDefault();
-    setDragging("playback");
-  }, [disabled]);
 
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-1 text-xs text-disabled-text">
-        <span>{formatTime(clampedValue)}</span>
-        <span>{formatTime(clampedMax)}</span>
+        <span>{formatTime(clampedPlaybackPositionSeconds)}</span>
+        <span>{formatTime(clampedDuration)}</span>
       </div>
       <div
-        className="relative h-6 touch-none"
+        className="relative cursor-pointer h-6 touch-none"
         ref={containerRef}
-        onMouseDown={onContainerMouseDown}
-        onMouseUp={onContainerMouseUp}
-        onTouchStart={onContainerTouchStart}
-        onTouchEnd={onContainerTouchEnd}
+        onPointerDown={e => onDragStart(e, "stripe")}
       >
-        {/* Track background */}
         <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-gray-500" />
 
-        {/* Selection stripe - primary colored, length = audioPlayTime, movable */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-primary cursor-pointer"
+          className="absolute top-1/2 -translate-y-1/2 h-6 cursor-pointer"
           style={{
-            left: `${selectionPercent}%`,
-            width: `${stripePercent}%`,
+            left: `${selectionStartPercent}%`,
+            width: `${stripeWidthPercent}%`,
           }}
-          onMouseDown={onStripeMouseDown}
-          onTouchStart={onStripeTouchStart}
-        />
-
-        {/* Playback handle - secondary colored circle */}
-        <div
-          className={`absolute w-4 h-4 rounded-full bg-secondary border-2 border-white shadow-sm cursor-pointer ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-          style={{
-            left: `calc(${valuePercent}% - 2px)`,
-            top: "50%",
-            transform: "translateY(-50%)",
-          }}
-          onMouseDown={onPlaybackMouseDown}
-          onTouchStart={onPlaybackTouchStart}
-        />
-
-        {/* Start marker - "[" brace in text color, perfectly centered */}
-        {showStartMarker && (
+          onPointerDown={e => onDragStart(e, "stripe", e.clientX)}
+        >
           <div
-            className="absolute pointer-events-none select-none"
-            style={{
-              left: `${startPercent}%`,
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-            }}
-            title={`Start at ${formatTime(clampedSelection)}`}
-            aria-label={`Start at ${formatTime(clampedSelection)}`}
-          >
+            className="relative top-1/2 -translate-y-1/2 h-1.5 w-full rounded-full bg-primary cursor-pointer"
+          />
+        </div>
+
+        <div
+          className={`absolute top-1/2 -translate-1/2 w-4 h-4 rounded-full bg-secondary border-2 border-white
+                      shadow-sm cursor-pointer ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          style={{
+            left: `${playbackPositionPercent}%`,
+          }}
+          onPointerDown={e => onDragStart(e, "playback")}
+        />
+
+        {showStartMarker && (
+          <AudioMarker markerPositionSeconds={clampedSelectionStartSeconds} markerPositionPercent={selectionStartPercent}>
             <svg
               className="w-5 h-5 text-default"
               viewBox="0 0 12 12"
@@ -312,21 +203,11 @@ export function AudioSeekBar({
             >
               <path d="M 8 1 L 6 1 L 6 11 L 8 11" />
             </svg>
-          </div>
+          </AudioMarker>
         )}
 
-        {/* End marker - "]" brace in text color, perfectly centered */}
-        {showEndMarker && endPercent !== undefined && (
-          <div
-            className="absolute pointer-events-none select-none"
-            style={{
-              left: `${endPercent}%`,
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-            }}
-            title={`End at ${formatTime(selectionEnd)}`}
-            aria-label={`End at ${formatTime(selectionEnd)}`}
-          >
+        {showEndMarker && guesstimeEndPercent !== undefined && (
+          <AudioMarker markerPositionSeconds={guesstimeEndSeconds} markerPositionPercent={guesstimeEndPercent}>
             <svg
               className="w-5 h-5 text-default"
               viewBox="0 0 12 12"
@@ -339,7 +220,7 @@ export function AudioSeekBar({
             >
               <path d="M 4 1 L 6 1 L 6 11 L 4 11" />
             </svg>
-          </div>
+          </AudioMarker>
         )}
       </div>
     </div>

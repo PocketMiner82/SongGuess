@@ -40,18 +40,19 @@ export function PlayerPickSongDialog({
   useRoomControllerMessageTypeListener(controller, "round_state");
   useRoomControllerMessageTypeListener(controller, "room_state");
 
-  const audioPlayTime = controller.config.timePerQuestion + QUESTION_PADDING_TICKS;
   const isFixed = controller.config.audioStartPosition !== null;
+  const guesstimeSeconds = controller.config.timePerQuestion;
+  const audioPlaytimeSeconds = controller.config.timePerQuestion + QUESTION_PADDING_TICKS;
 
   const duration = player.howler?.duration() ?? 0;
   const [startPosSeconds, setStartPosSeconds] = useState(0);
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const rafRef = useRef<number | null>(null);
 
-  const maxStartSeconds = Math.max(0, duration - controller.config.timePerQuestion);
-  const clampedEndSeconds = duration > 0
-    ? Math.min(startPosSeconds + controller.config.timePerQuestion, duration)
-    : startPosSeconds + controller.config.timePerQuestion;
+  const maxStartSeconds = Math.max(0, duration - audioPlaytimeSeconds);
+  const guesstimeEndSeconds = duration > 0
+    ? Math.min(startPosSeconds + guesstimeSeconds, duration)
+    : startPosSeconds + guesstimeSeconds;
 
   // Update start position when song changes
   useEffect(() => {
@@ -100,51 +101,35 @@ export function PlayerPickSongDialog({
     if (isFixed || duration <= 0) {
       return;
     }
-    let newStart = value;
-    if (newStart > maxStartSeconds) {
-      newStart = maxStartSeconds;
-    }
-    if (newStart < 0) {
-      newStart = 0;
-    }
-    if (Math.abs(newStart - startPosSeconds) < 0.01) {
+    if (Math.abs(value - startPosSeconds) < 0.01) {
       return;
     }
 
-    setStartPosSeconds(newStart);
-    setPlaybackPosition(newStart);
+    setStartPosSeconds(value);
+    setPlaybackPosition(value);
 
-    player.howler?.seek(newStart);
+    player.howler?.seek(value);
   }, [
     duration,
     isFixed,
-    maxStartSeconds,
     player.howler,
     startPosSeconds,
   ]);
 
   const handlePositionChange = useCallback((value: number) => {
-    if (isFixed || duration <= 0 || maxStartSeconds === 0) {
+    if (isFixed || duration <= 0) {
       return;
     }
-    let newPos = value;
-    if (newPos > duration) {
-      newPos = duration;
-    }
-    if (newPos < 0) {
-      newPos = 0;
-    }
-    if (Math.abs(newPos - playbackPosition) < 0.01) {
+    if (Math.abs(value - playbackPosition) < 0.01) {
       return;
     }
 
-    setPlaybackPosition(newPos);
+    setPlaybackPosition(value);
 
-    player.howler?.seek(newPos);
+    player.howler?.seek(value);
   }, [
     duration,
     isFixed,
-    maxStartSeconds,
     playbackPosition,
     player.howler,
   ]);
@@ -192,15 +177,14 @@ export function PlayerPickSongDialog({
 
       <div className="mb-4">
         <AudioSeekBar
-          value={playbackPosition}
-          selectionStart={startPosSeconds}
-          max={Math.max(duration, 0)}
-          selectionEnd={clampedEndSeconds}
-          audioPlayTime={audioPlayTime}
+          playbackPositionSeconds={playbackPosition}
+          selectionStartSeconds={startPosSeconds}
+          durationSeconds={duration}
+          guesstimeEndSeconds={guesstimeEndSeconds}
+          audioPlaytimeSeconds={audioPlaytimeSeconds}
           disabled={isFixed}
           onChange={handleSelectionChange}
           onSeek={handlePositionChange}
-          onClick={handlePositionChange}
         />
       </div>
 
