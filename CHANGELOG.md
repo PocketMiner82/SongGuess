@@ -1,3 +1,10 @@
+# [4.1.0-dev.20](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.19...4.1.0-dev.20) (2026-11-11)
+
+
+### Bug Fixes
+
+* **AudioSeekBar:** refactor component + centralize value clamping + improve UI behavior ([04b4ce7](https://github.com/PocketMiner82/SongGuess/commit/04b4ce7e49b09e57f94f9dd924123fbde8aebcb2))
+
 # [4.1.0-dev.19](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.18...4.1.0-dev.19) (2026-10-29)
 
 
