@@ -1,3 +1,35 @@
+# [4.1.0](https://github.com/PocketMiner82/SongGuess/compare/4.0.0...4.1.0) (2026-11-12)
+
+
+### Bug Fixes
+
+* allow selecting songs under 30 seconds + show end marker at audio guess end instead of playback end ([6c0f518](https://github.com/PocketMiner82/SongGuess/commit/6c0f5187501292994ac1ce1c09a9d51a52c4685f))
+* also handle pick time warning sounds client side ([5ec9d68](https://github.com/PocketMiner82/SongGuess/commit/5ec9d68f088a3a15597669874090e2f1a90aa008))
+* **AudioComponent:** make audio play after reconnect ([32cfcea](https://github.com/PocketMiner82/SongGuess/commit/32cfcea222fd968436deceb9ab2526c68b2edb5a))
+* **AudioSeekBar:** refactor component + centralize value clamping + improve UI behavior ([04b4ce7](https://github.com/PocketMiner82/SongGuess/commit/04b4ce7e49b09e57f94f9dd924123fbde8aebcb2))
+* correctly show end marker on short songs ([65ea559](https://github.com/PocketMiner82/SongGuess/commit/65ea5599e92e723ffc8640b81c3929fa70afa594))
+* **css:** increase animation duration ingame ([87825db](https://github.com/PocketMiner82/SongGuess/commit/87825db0b62fb447a8f8cb62ccb8a477c7c7303c))
+* do countdown client side to prevent uneven sounds/jumps ([c6f59d1](https://github.com/PocketMiner82/SongGuess/commit/c6f59d1711725a49ad5b1d531a7438b552c3e9fa))
+* improve animation styling for mobile and desktop a bit ([d5a345c](https://github.com/PocketMiner82/SongGuess/commit/d5a345cbae0c32407e454a8881350d7ee5027919))
+* increase persist version ([fac9fb1](https://github.com/PocketMiner82/SongGuess/commit/fac9fb1dcf7049c564bec8a5e6160d6c078fe82b))
+* pick dialog UX improvements + better seekbar UI ([d583a40](https://github.com/PocketMiner82/SongGuess/commit/d583a4004729e5ff907d56301911c86c1316f6f6))
+* **PlayerList:** don't remove sorting in results ([c40b6ea](https://github.com/PocketMiner82/SongGuess/commit/c40b6ea84eef6b6c33716a0056680ea31e082934))
+* **PlayerPicksQuestion:** also persist `questionCount` to prevent exception after restore ([18be624](https://github.com/PocketMiner82/SongGuess/commit/18be6248f677c49051d87656a4a96ce2acedc2a5))
+* prevent glitching animations for mobile ([7755425](https://github.com/PocketMiner82/SongGuess/commit/7755425b07794857e7c53b6e2c01b5e70e945643))
+* round picker points ([4e36057](https://github.com/PocketMiner82/SongGuess/commit/4e36057045c080872018d29729f4732f7ac601ec))
+* try to fix host transfer timeout not working ([fd8f50b](https://github.com/PocketMiner82/SongGuess/commit/fd8f50be283944b02417784908856358aecc09ad))
+* username should not reset when auto reconnecting ([ad0aa06](https://github.com/PocketMiner82/SongGuess/commit/ad0aa0648e8d1e84d7b09edb61c5a9e3d5209b81))
+
+
+### Features
+
+* add animation when players get points ([0282245](https://github.com/PocketMiner82/SongGuess/commit/0282245b35346d59c9f5c0a1df09cbeab67765f1))
+* add dialog on playerpicks to review selected song ([8cef135](https://github.com/PocketMiner82/SongGuess/commit/8cef135a5abc6fb504afc7ba490266c9cf9ba095))
+* also give picker points depending on how many players guessed correctly ([9d66b89](https://github.com/PocketMiner82/SongGuess/commit/9d66b894d9ab8f1813e685c19e404be4ccb9f0e9))
+* **config:** add option to allow changing answer ([ad3d25a](https://github.com/PocketMiner82/SongGuess/commit/ad3d25a62c50fb637502c1421312aa0557ad5010))
+* **countdown:** add animation ([e0dfaf1](https://github.com/PocketMiner82/SongGuess/commit/e0dfaf1ae49e98aaabeaf8404d9b3374badc85a7))
+* improve styling/UX for new audio seekbar ([8f579a3](https://github.com/PocketMiner82/SongGuess/commit/8f579a325bfe6dc8596f5e06a9fe71d2a09b6ff6))
+
 # [4.1.0-dev.20](https://github.com/PocketMiner82/SongGuess/compare/4.1.0-dev.19...4.1.0-dev.20) (2026-11-11)
 
 
