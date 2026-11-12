@@ -48,7 +48,9 @@ export function UsernameInputField({ onEnd, requireEnter, showButtons }: { onEnd
         autoFocus={true}
         maxLength={16}
         className={`text-lg bg-transparent border-b-2 border-gray-500 focus:outline-none w-full
-                ${usernameRegex.test(editedName ?? "") ? "focus:border-secondary" : "focus:border-error"}`}
+                ${usernameRegex.test(editedName ?? "")
+      ? "focus:border-secondary"
+      : "focus:border-error"}`}
       />
       {showButtons
         ? (

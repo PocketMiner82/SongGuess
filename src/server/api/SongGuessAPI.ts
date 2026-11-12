@@ -100,8 +100,12 @@ export class SongGuessAPI extends Server<Env> {
         }
 
         // Fallback preference: WebM (Opus) over M4A (AAC)
-        const isOpusA = a.type?.includes("webm") ? 1 : 0;
-        const isOpusB = b.type?.includes("webm") ? 1 : 0;
+        const isOpusA = a.type?.includes("webm")
+          ? 1
+          : 0;
+        const isOpusB = b.type?.includes("webm")
+          ? 1
+          : 0;
         return isOpusB - isOpusA;
       });
 
@@ -134,7 +138,9 @@ export class SongGuessAPI extends Server<Env> {
           artist: vid.author,
           hrefURL: `https://youtu.be/${vid.videoId}`,
           cover: vid.videoThumbnails.reduce((prev, current) => {
-            return (current.width > prev.width) ? current : prev;
+            return (current.width > prev.width)
+              ? current
+              : prev;
           }).url,
           audioURL: `/api/fetchYTAudio?v=${vid.videoId}`,
         } satisfies Song);

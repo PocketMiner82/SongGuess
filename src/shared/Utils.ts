@@ -101,7 +101,9 @@ export function convertToAlnum(input: string): string {
     .replace(/\s+/g, " ")
     .trim();
 
-  return deburred.length === 0 ? input.trim() : deburred;
+  return deburred.length === 0
+    ? input.trim()
+    : deburred;
 }
 
 /**
@@ -164,7 +166,9 @@ export async function getPlaylistByURL(url: string): Promise<Playlist | null> {
 
   // add subtitle + show song count if playlist is not song type
   playlist.subtitle = type + (type !== "Song"
-    ? ` | ${playlist.songs.length} song${playlist.songs.length !== 1 ? "s" : ""}`
+    ? ` | ${playlist.songs.length} song${playlist.songs.length !== 1
+      ? "s"
+      : ""}`
     : "");
 
   return playlist;
@@ -194,13 +198,15 @@ export async function performSearch(query: string, onlySongs: boolean): Promise<
           subtitle: `Song by ${result.artistName} (Apple Music)`,
           hrefURL: result.trackViewUrl,
           cover: fixedAppleMusicCoverSize(result.artworkUrl100),
-          songs: [{
-            name: result.trackName,
-            artist: result.artistName,
-            hrefURL: result.trackViewUrl,
-            cover: fixedAppleMusicCoverSize(result.artworkUrl100),
-            audioURL: result.previewUrl,
-          }],
+          songs: [
+            {
+              name: result.trackName,
+              artist: result.artistName,
+              hrefURL: result.trackViewUrl,
+              cover: fixedAppleMusicCoverSize(result.artworkUrl100),
+              audioURL: result.previewUrl,
+            },
+          ],
         });
       } else if (!onlySongs && result.wrapperType === "collection" && "collectionType" in result && (result as any).collectionType === "Album") {
         amPlaylists.push({
@@ -352,7 +358,10 @@ export async function safeLookup<M extends Media, E extends Entities[M]>(
     } catch {
       // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
       try {
-        const newOptions = { ...options, magicnumber: Date.now() };
+        const newOptions = {
+          ...options,
+          magicnumber: Date.now(),
+        };
         // @ts-expect-error - third-party type mismatch
         results = (await lookup(type, value, newOptions)).results;
       } catch {
@@ -381,7 +390,10 @@ export async function safeSearch<M extends Media, E extends Entities[M]>(term: s
     } catch {
       // this hack fixes a weird caching problem on Apple's side, where an old (invalid) access-control-allow-origin header gets cached
       try {
-        const newOptions = { ...options, magicnumber: Date.now() };
+        const newOptions = {
+          ...options,
+          magicnumber: Date.now(),
+        };
         results = (await search(term, newOptions)).results;
       } catch {
         results = [];
@@ -402,7 +414,10 @@ async function search<M extends Media, E extends Entities[M]>(
   search: string,
   options: Partial<Options<M, E>> = {},
 ): Promise<Response<M, E>> {
-  const resolvedOptions = { ...defaultOptions, ...options };
+  const resolvedOptions = {
+    ...defaultOptions,
+    ...options,
+  };
 
   return await query<Response<M, E>>("search", {
     ...resolvedOptions,

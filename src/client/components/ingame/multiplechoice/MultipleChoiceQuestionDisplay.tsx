@@ -65,7 +65,9 @@ const AnswerOption = memo(({
               key={player.username}
               className="rounded-full border-2 border-card-bg"
               style={{
-                marginLeft: playerIndex > 0 ? "-8px" : "0",
+                marginLeft: playerIndex > 0
+                  ? "-8px"
+                  : "0",
                 zIndex: playersForThisAnswer.length - playerIndex,
               }}
             >
@@ -93,7 +95,7 @@ export function MultipleChoiceQuestionDisplay() {
   }, []));
 
   const canAnswer = controller.questionData.roundMsg?.gamePhase === GamePhase.ANSWERING
-    && controller.questionData.selectedAnswerIndex === undefined;
+    && (controller.questionData.selectedAnswerIndex === undefined || controller.config.allowChangingAnswer);
 
   // select answer if answering is allowed
   const handleAnswerSelect = useCallback((answerIndex: number) => {
@@ -118,7 +120,9 @@ export function MultipleChoiceQuestionDisplay() {
         <div className="w-full md:w-auto grid grid-cols-1 md:grid-cols-2 gap-4">
           {answerOptions!.map((option, index) => {
             const isSelected = controller.questionData.selectedAnswerIndex === index;
-            const isCorrect = correctIndex !== undefined ? correctIndex === index : null;
+            const isCorrect = correctIndex !== undefined
+              ? correctIndex === index
+              : null;
 
             let state: AnswerState = "pending";
             if (isCorrect !== null && isCorrect) {
@@ -127,7 +131,7 @@ export function MultipleChoiceQuestionDisplay() {
               state = "incorrect";
             } else if (isSelected) {
               state = "selected";
-            } else if (controller.questionData.roundMsg?.gamePhase !== GamePhase.ANSWERING || controller.questionData.selectedAnswerIndex !== undefined) {
+            } else if (!canAnswer) {
               state = "disabled";
             }
 

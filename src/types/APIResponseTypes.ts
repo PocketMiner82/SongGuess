@@ -4,13 +4,13 @@
 export interface RoomGetResponse {
   /**
    * The amount of players online in the room
-   * @see {@link Server#getOnlinePlayersCount}
+   * @see {@link SongGuessServer#getActivePlayersCount}
    */
   onlineCount: number;
 
   /**
    * True, if this room was created by a request to /createRoom
-   * @see {@link Server#isValidRoom}
+   * @see {@link SongGuessServer#isValidRoom}
    */
   isValidRoom: boolean;
 }

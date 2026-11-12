@@ -119,7 +119,12 @@ export const AudioControlMessageSchema = z.union([
      * - "play_countdown_running": Plays the countdown_running sound effect on a secondary audio player.
      * - "play_countdown_end": Plays the countdown_end sound effect on a secondary audio player.
      */
-    action: z.literal(["play", "pause", "play_countdown_running", "play_countdown_end"]),
+    action: z.literal([
+      "play",
+      "pause",
+      "play_countdown_running",
+      "play_countdown_end",
+    ]),
   }),
 ]);
 
@@ -130,12 +135,12 @@ export const PlayerAnswerDataSchema = z.object({
   /**
    * The absolute time in ms where the player answered a round question.
    */
-  answerTimestamp: z.number(),
+  answerTimestamp: z.number().optional(),
 
   /**
    * The relative time in ms a player took to answer a round question.
    */
-  answerSpeed: z.number(),
+  answerSpeed: z.number().optional(),
 
   /**
    * The points the player got for the current question.

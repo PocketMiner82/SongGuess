@@ -202,7 +202,9 @@ function ImportCSV() {
         }
 
         if (playlist.songs.length > 0) {
-          playlist.subtitle = `Imported Playlist | ${playlist.songs.length} song${playlist.songs.length !== 1 ? "s" : ""}`;
+          playlist.subtitle = `Imported Playlist | ${playlist.songs.length} song${playlist.songs.length !== 1
+            ? "s"
+            : ""}`;
           playlists.push(playlist);
         }
       }
@@ -227,7 +229,9 @@ function ImportCSV() {
 
       setStatus("success");
       const totalSongs = playlists.reduce((sum, p) => sum + p.songs.length, 0);
-      const successMessage = `Successfully imported ${playlists.length} playlist(s) with ${totalSongs} song${totalSongs !== 1 ? "s" : ""}!`;
+      const successMessage = `Successfully imported ${playlists.length} playlist(s) with ${totalSongs} song${totalSongs !== 1
+        ? "s"
+        : ""}!`;
 
       if (notFoundSongs.length > 0) {
         const notFoundList = notFoundSongs.join("\n• ");

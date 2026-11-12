@@ -1,6 +1,8 @@
 import type { PlayerMessage } from "../../../types/MessageTypes";
 import chroma from "chroma-js";
 import { memo } from "react";
+import { useControllerContext } from "../../hooks/RoomControllerHooks";
+import { useRoomControllerMessageTypeListener } from "../../hooks/RoomControllerListenerHooks";
 
 
 const contrastColorCache = new Map<string, string>();
@@ -25,7 +27,9 @@ function getMaxContrastColor(colorName: string | undefined): string | undefined 
   const color = chroma(colorName);
   const withBlack = chroma.contrast(color, "#000");
   const withWhite = chroma.contrast(color, "#fff");
-  const result = withBlack > withWhite ? "#000" : "#fff";
+  const result = withBlack > withWhite
+    ? "#000"
+    : "#fff";
   contrastColorCache.set(colorName, result);
   return result;
 }
@@ -38,6 +42,9 @@ function getMaxContrastColor(colorName: string | undefined): string | undefined 
  * @param playerState The player's state or null for empty slot
  */
 export const PlayerAvatar = memo(({ size, player }: { size: number; player: PlayerMessage | null }) => {
+  const controller = useControllerContext();
+  useRoomControllerMessageTypeListener(controller, "room_state");
+
   return (
     <div className="relative">
       <div
@@ -71,6 +78,19 @@ export const PlayerAvatar = memo(({ size, player }: { size: number; player: Play
             </span>
           </div>
         )}
+      {player?.uuid === controller.uuid && (
+        <span
+          className="absolute rounded-full bg-secondary text-white flex items-center justify-center left-1/2 -translate-x-1/2"
+          style={{
+            width: 3 * size / 4,
+            height: 3 * size / 8,
+            fontSize: size / 3.5,
+            bottom: -size / 8,
+          }}
+        >
+          You
+        </span>
+      )}
     </div>
   );
 });

@@ -33,7 +33,9 @@ export function SettingsRange({
         if (disabled)
           return;
 
-        const direction = e.deltaY > 0 ? -1 : 1;
+        const direction = e.deltaY > 0
+          ? -1
+          : 1;
         const stepped = Math.round((value + direction * step * 2) / (step * 2)) * step * 2;
         onChange(Math.min(max, Math.max(min, +stepped.toFixed(10))));
         (e.target as HTMLElement).blur();
