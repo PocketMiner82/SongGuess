@@ -1,3 +1,10 @@
+## [4.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.1...4.1.1-dev.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* also trigger host timeout on room state restore ([0f305e4](https://github.com/PocketMiner82/SongGuess/commit/0f305e450632d14e40411d978227b0c2adb15729))
+
 ## [4.1.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/4.1.0...4.1.1-dev.1) (2026-11-13)
 
 
