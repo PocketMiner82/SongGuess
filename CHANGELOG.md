@@ -1,3 +1,10 @@
+## [4.1.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/4.1.0...4.1.1-dev.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* also trigger host timeout when player gets kicked but connection is not closed correctly ([0e8538a](https://github.com/PocketMiner82/SongGuess/commit/0e8538abeaa7b5acdf5023c8efc7a9bb82882ac0))
+
 # [4.1.0](https://github.com/PocketMiner82/SongGuess/compare/4.0.0...4.1.0) (2026-11-12)
 
 
