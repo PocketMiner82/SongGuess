@@ -11,7 +11,7 @@
 <li><a href="../modules/server_worker-configuration.html">server/worker-configuration</a></li>
 <li><a href="" aria-current="page">DurableObjectNamespaceGetDurableObjectOptions</a></li></ul>
 <h1>Interface DurableObjectNamespaceGetDurableObjectOptions</h1></div>
-<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">DurableObjectNamespaceGetDurableObjectOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#locationhint">locationHint</a><span class="tsd-signature-symbol">?:</span> <a href="../types/server_worker-configuration.DurableObjectLocationHint.html" class="tsd-signature-type tsd-kind-type-alias">DurableObjectLocationHint</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#routingmode">routingMode</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;primary-only&quot;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">DurableObjectNamespaceGetDurableObjectOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#locationhint">locationHint</a><span class="tsd-signature-symbol">?:</span> <a href="../types/server_worker-configuration.DurableObjectLocationHint.html" class="tsd-signature-type tsd-kind-type-alias">DurableObjectLocationHint</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#retry">retry</a><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.DurableObjectRetryOptions.html" class="tsd-signature-type tsd-kind-interface">DurableObjectRetryOptions</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#routingmode">routingMode</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;primary-only&quot;</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
 <li>Defined in src/server/worker-configuration.d.ts:596</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
@@ -22,6 +22,7 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#locationhint" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>location<wbr/>Hint?</span></a>
+<a href="#retry" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>retry?</span></a>
 <a href="#routingmode" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>routing<wbr/>Mode?</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -32,6 +33,11 @@
 <div class="tsd-signature"><span class="tsd-kind-property">locationHint</span><span class="tsd-signature-symbol">?:</span> <a href="../types/server_worker-configuration.DurableObjectLocationHint.html" class="tsd-signature-type tsd-kind-type-alias">DurableObjectLocationHint</a></div><aside class="tsd-sources">
 <ul>
 <li>Defined in src/server/worker-configuration.d.ts:597</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="retry"><code class="tsd-tag">Optional</code><span>retry</span><a href="#retry" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">retry</span><span class="tsd-signature-symbol">?:</span> <a href="server_worker-configuration.DurableObjectRetryOptions.html" class="tsd-signature-type tsd-kind-interface">DurableObjectRetryOptions</a></div><aside class="tsd-sources">
+<ul>
+<li>Defined in src/server/worker-configuration.d.ts:599</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="routingmode"><code class="tsd-tag">Optional</code><span>routing<wbr/>Mode</span><a href="#routingmode" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">routingMode</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;primary-only&quot;</span></div><aside class="tsd-sources">
@@ -54,7 +60,7 @@
 <h3>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#locationhint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>location<wbr/>Hint</span></a><a href="#routingmode"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>routing<wbr/>Mode</span></a></div></details></div></details></div>
+<div><a href="#locationhint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>location<wbr/>Hint</span></a><a href="#retry"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>retry</span></a><a href="#routingmode"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>routing<wbr/>Mode</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">SongGuess</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
