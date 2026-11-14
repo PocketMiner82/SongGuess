@@ -174,8 +174,16 @@ export class Player implements PlayerMessage, IEventListener {
       this.kickPlayerTimeout = undefined;
     }
 
+    // host left
+    if (this.room.hostID === this.connID) {
+      this.room.host = undefined;
+    }
+
     this.isOnline = false;
     this.conn = null;
+
+    // inform all clients about changes, including possible host transfer
+    this.room.broadcastRoomStateMessage();
   }
 
   /**

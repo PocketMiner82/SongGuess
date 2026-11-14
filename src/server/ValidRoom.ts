@@ -184,14 +184,6 @@ export class ValidRoom {
 
   async onClose(conn: Connection<string>) {
     this.getOrCreatePlayer(conn).onClose();
-
-    // host left
-    if (this.hostID === conn.id) {
-      this.host = undefined;
-    }
-
-    // inform all clients about changes, including possible host transfer
-    this.broadcastRoomStateMessage();
   }
 
   /**

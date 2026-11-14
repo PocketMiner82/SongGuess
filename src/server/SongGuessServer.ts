@@ -512,5 +512,8 @@ export class SongGuessServer extends Server<Env> {
 
     this.logger.info("Restoring state...");
     this.validRoom = ValidRoom.fromStorage(this, state);
+
+    // schedule host transfer once, so that if the room closed while host was online or pending transfer someone will get host
+    await this.scheduleHostTransfer();
   }
 }
