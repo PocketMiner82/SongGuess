@@ -1,3 +1,5 @@
+## [4.1.1-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.2...4.1.1-dev.3) (2026-11-19)
+
 ## [4.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.1...4.1.1-dev.2) (2026-11-13)
 
 
