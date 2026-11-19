@@ -23,7 +23,7 @@ jobs:
           node-version: 24
           cache: npm
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
 
       - name: Set doc destination
         id: vars

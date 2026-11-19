@@ -19,7 +19,7 @@ jobs:
     - name: Install expect
       run: sudo apt install -y expect
     - name: Install dependencies
-      run: npm ci --legacy-peer-deps
+      run: npm ci
     - name: Run Checks
       run: npm run check
     - name: Verify build and startup

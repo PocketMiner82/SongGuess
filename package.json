@@ -64,5 +64,13 @@
     "typescript": "^6.0.3",
     "universal-cookie": "^8.1.2",
     "wrangler": "^4.163.0"
+  },
+  "overrides": {
+    "@syncfm/applemusic-api": {
+      "typescript": "$typescript"
+    },
+    "react-modal-global": {
+      "react": "$react"
+    }
   }
 }
