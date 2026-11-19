@@ -402,7 +402,6 @@ export class RoomController {
    * @param spectate whether the player wants to spectate the game.
    */
   public reconnectWithOptions(newUsername: string | null, spectate: boolean = false) {
-    this.setIsReady(false);
     console.debug("Reconnecting...");
     this.questionData = new QuestionData();
     this.reconnecting = true;
