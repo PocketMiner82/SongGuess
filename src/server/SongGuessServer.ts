@@ -405,10 +405,13 @@ export class SongGuessServer extends Server<Env> {
    * @param repeatMs - The repetition interval in milliseconds, or null if one-time.
    */
   async scheduleEvent(id: ScheduledAlarmEvent["id"], runAfter: number, repeatMs: number | null = null): Promise<void> {
+    const eventName = `event:${id}`;
+    const oldRunAt = (await this.ctx.storage.get<ScheduledAlarmEvent>(eventName))?.runAt;
     const runAt = Date.now() + runAfter;
-    await this.ctx.storage.put<ScheduledAlarmEvent>(`event:${id}`, { id, runAt, repeatMs });
     const currentAlarm = await this.ctx.storage.getAlarm();
-    if (!currentAlarm || runAt < currentAlarm) {
+
+    await this.ctx.storage.put<ScheduledAlarmEvent>(eventName, { id, runAt, repeatMs });
+    if (!currentAlarm || runAt < currentAlarm || oldRunAt === currentAlarm) {
       await this.ctx.storage.setAlarm(runAt);
     }
   }
@@ -512,5 +515,10 @@ export class SongGuessServer extends Server<Env> {
 
     this.logger.info("Restoring state...");
     this.validRoom = ValidRoom.fromStorage(this, state);
+
+    // schedule host transfer once, so that if the room closed while host was online or pending transfer someone will get host
+    if (!await this.ctx.storage.get<ScheduledAlarmEvent>(`event:host_transfer`)) {
+      await this.scheduleHostTransfer();
+    }
   }
 }

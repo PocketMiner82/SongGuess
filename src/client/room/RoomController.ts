@@ -239,6 +239,9 @@ export class RoomController {
       toast.success("Reconnected successfully!");
     }
 
+    // close any fatal error dialogs that might still be open
+    Modal.closeByComponent(FatalErrorDialog);
+
     this.reconnecting = false;
     this.autoReconnectTimeout = null;
 
@@ -258,13 +261,15 @@ export class RoomController {
     // force hard reload when version is outdated
     if (ev.code === CLOSE_CODE_WRONG_VERSION) {
       Modal.open(FatalErrorDialog, {
-        error: "Client outdated, please try reloading the page.\n\n"
+        error: "Client outdated, please reload the page.\n\n"
           + "If reloading doesn't work after some waiting, try pressing CTRL+SHIFT+R or CTRL+F5 or delete all cookies and data from this page.",
         forceGet: true,
         closable: false,
       }).then();
+      this.setIsReady(false);
     } else if (ev.code >= 4000) {
       Modal.open(FatalErrorDialog, { error: `Disconnected: ${ev.reason || ev.code}`, closable: false }).then();
+      this.setIsReady(false);
     } else {
       this.handleAutoReconnect();
     }
@@ -402,7 +407,6 @@ export class RoomController {
    * @param spectate whether the player wants to spectate the game.
    */
   public reconnectWithOptions(newUsername: string | null, spectate: boolean = false) {
-    this.setIsReady(false);
     console.debug("Reconnecting...");
     this.questionData = new QuestionData();
     this.reconnecting = true;
@@ -492,7 +496,8 @@ export class RoomController {
       toast.warning("Connection lost. Reconnecting...");
     } else if (this.reconnecting && this.autoReconnectTimeout) {
       this.autoReconnectTimeout = null;
-      Modal.open(FatalErrorDialog, { error: "Auto reconnect failed. Please try again!", closable: false }).then();
+      Modal.open(FatalErrorDialog, { error: "Auto reconnect failed. Please try reloading the page.", closable: false }).then();
+      this.setIsReady(false);
     }
   }
 

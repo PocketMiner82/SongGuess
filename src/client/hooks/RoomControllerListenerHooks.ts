@@ -16,11 +16,11 @@ export type ListenerCallback = (msg: ServerMessage | null) => boolean | void;
  */
 export function useRoomControllerListener(controller: RoomController, cb: ListenerCallback) {
   const [updateVal, setUpdateVal] = React.useState(false);
-  // eslint-disable-next-line react/set-state-in-effect
   const forceUpdateComponent = React.useCallback(() => setUpdateVal(!updateVal), [updateVal]);
 
   useEffect(() => {
     if (cb(null) ?? true) {
+      // eslint-disable-next-line react/set-state-in-effect
       forceUpdateComponent();
     }
 
