@@ -233,8 +233,9 @@ export class Player implements PlayerMessage, IEventListener {
    * @param msg the message to send with the code.
    */
   public kick(code: number, msg: string) {
-    this.conn?.close(code, msg);
+    this.room.server.logger.info(`Kicked ${this.conn?.state}; reason (${code}): ${msg}`);
     this.onClose();
+    this.conn?.close(code, msg);
   }
 
   /**
@@ -280,7 +281,6 @@ export class Player implements PlayerMessage, IEventListener {
 
     this.kickPlayerTimeout = setTimeout(() => {
       try {
-        this.room.server.logger.info(`Kicked ${this.conn?.state} due to inactivity.`);
         this.kick(CLOSE_CODE_INACTIVE, "Didn't receive updates within 15 seconds.");
       } catch (e) {
         this.room.server.logger.error("Error running kick player timeout:");
