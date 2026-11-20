@@ -1,3 +1,11 @@
+## [4.1.1-dev.8](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.7...4.1.1-dev.8) (2026-11-20)
+
+
+### Bug Fixes
+
+* **CookieConsent:** made CookieConsent more prominent ([8264020](https://github.com/PocketMiner82/SongGuess/commit/826402018b2c8e81f6e10bac7ce133da0593ec7b))
+* **RoomController:** should not be ready after fatal error ([6c8544d](https://github.com/PocketMiner82/SongGuess/commit/6c8544d35868c9f49c195e752c41cb902c4441df))
+
 ## [4.1.1-dev.7](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.6...4.1.1-dev.7) (2026-11-20)
 
 
