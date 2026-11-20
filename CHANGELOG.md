@@ -1,3 +1,10 @@
+## [4.1.1-dev.5](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.4...4.1.1-dev.5) (2026-11-20)
+
+
+### Bug Fixes
+
+* **SongGuessServer:** prevent unnecessary alarm runs ([53fa16a](https://github.com/PocketMiner82/SongGuess/commit/53fa16a6efed52da5b5dde2fea7c5159bd1c0c18))
+
 ## [4.1.1-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.3...4.1.1-dev.4) (2026-11-20)
 
 
