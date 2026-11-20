@@ -1,3 +1,10 @@
+## [4.1.1-dev.6](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.5...4.1.1-dev.6) (2026-11-20)
+
+
+### Bug Fixes
+
+* remove debug log from alarm ([b60b57b](https://github.com/PocketMiner82/SongGuess/commit/b60b57badb079b188d63576b4ef2e61bb69e7260))
+
 ## [4.1.1-dev.5](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.4...4.1.1-dev.5) (2026-11-20)
 
 
