@@ -405,10 +405,13 @@ export class SongGuessServer extends Server<Env> {
    * @param repeatMs - The repetition interval in milliseconds, or null if one-time.
    */
   async scheduleEvent(id: ScheduledAlarmEvent["id"], runAfter: number, repeatMs: number | null = null): Promise<void> {
+    const eventName = `event:${id}`;
+    const oldRunAt = (await this.ctx.storage.get<ScheduledAlarmEvent>(eventName))?.runAt;
     const runAt = Date.now() + runAfter;
-    await this.ctx.storage.put<ScheduledAlarmEvent>(`event:${id}`, { id, runAt, repeatMs });
     const currentAlarm = await this.ctx.storage.getAlarm();
-    if (!currentAlarm || runAt < currentAlarm) {
+
+    await this.ctx.storage.put<ScheduledAlarmEvent>(eventName, { id, runAt, repeatMs });
+    if (!currentAlarm || runAt < currentAlarm || oldRunAt === currentAlarm) {
       await this.ctx.storage.setAlarm(runAt);
     }
   }
@@ -426,6 +429,7 @@ export class SongGuessServer extends Server<Env> {
    * The alarm handler invoked by the Cloudflare Workers runtime.
    */
   async alarm(): Promise<void> {
+    this.logger.info("ALARM RUN!!!!!!!!!!!!!!");
     const now = Date.now();
     const events = await this.ctx.storage.list<ScheduledAlarmEvent>({ prefix: "event:" });
     let nextAlarm: number | null = null;
@@ -514,6 +518,8 @@ export class SongGuessServer extends Server<Env> {
     this.validRoom = ValidRoom.fromStorage(this, state);
 
     // schedule host transfer once, so that if the room closed while host was online or pending transfer someone will get host
-    await this.scheduleHostTransfer();
+    if (!await this.ctx.storage.get<ScheduledAlarmEvent>(`event:host_transfer`)) {
+      await this.scheduleHostTransfer();
+    }
   }
 }
