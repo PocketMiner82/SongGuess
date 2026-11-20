@@ -429,7 +429,6 @@ export class SongGuessServer extends Server<Env> {
    * The alarm handler invoked by the Cloudflare Workers runtime.
    */
   async alarm(): Promise<void> {
-    this.logger.info("ALARM RUN!!!!!!!!!!!!!!");
     const now = Date.now();
     const events = await this.ctx.storage.list<ScheduledAlarmEvent>({ prefix: "event:" });
     let nextAlarm: number | null = null;
