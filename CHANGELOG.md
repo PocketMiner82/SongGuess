@@ -1,3 +1,12 @@
+## [4.1.1-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.3...4.1.1-dev.4) (2026-11-20)
+
+
+### Bug Fixes
+
+* **AudioSeekBar:** show resize cursor on selection stripe ([15aa3c2](https://github.com/PocketMiner82/SongGuess/commit/15aa3c258e3b35cdb253602665d30e62936be641))
+* **RoomController:** try to fix disconnecting not transferring host ([70b67e2](https://github.com/PocketMiner82/SongGuess/commit/70b67e258ce5e0a19652a39d445adb7c3b2b2d17))
+* **RoomController:** try to not reload page on reconnect ([74a111d](https://github.com/PocketMiner82/SongGuess/commit/74a111d160df42de064ae9d5c7607d72091f06ec))
+
 ## [4.1.1-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.2...4.1.1-dev.3) (2026-11-19)
 
 ## [4.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.1...4.1.1-dev.2) (2026-11-13)
