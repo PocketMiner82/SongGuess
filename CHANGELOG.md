@@ -1,3 +1,10 @@
+## [4.1.1-dev.7](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.6...4.1.1-dev.7) (2026-11-20)
+
+
+### Bug Fixes
+
+* **AudioSeekBar:** allow clicking on stripe to change playback position ([27b0d3d](https://github.com/PocketMiner82/SongGuess/commit/27b0d3d996d30314103c014a913d60fd36e8fdd9))
+
 ## [4.1.1-dev.6](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.5...4.1.1-dev.6) (2026-11-20)
 
 
