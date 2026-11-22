@@ -154,6 +154,11 @@ export function AudioSeekBar({
     onDrag,
   ]);
 
+  const onStripeDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    onSeek(getValueFromPosition(e.clientX));
+    onDragStart(e, "stripe", e.clientX);
+  }, [getValueFromPosition, onDragStart, onSeek]);
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-1 text-xs text-disabled-text">
@@ -168,15 +173,15 @@ export function AudioSeekBar({
         <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-gray-500" />
 
         <div
-          className="absolute top-1/2 -translate-y-1/2 h-6 cursor-pointer"
+          className="absolute top-1/2 -translate-y-1/2 h-6 cursor-ew-resize"
           style={{
             left: `${selectionStartPercent}%`,
             width: `${stripeWidthPercent}%`,
           }}
-          onPointerDown={e => onDragStart(e, "stripe", e.clientX)}
+          onPointerDown={e => onStripeDown(e)}
         >
           <div
-            className="relative top-1/2 -translate-y-1/2 h-1.5 w-full rounded-full bg-primary cursor-pointer"
+            className="relative top-1/2 -translate-y-1/2 h-1.5 w-full rounded-full bg-primary"
           />
         </div>
 

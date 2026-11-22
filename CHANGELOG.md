@@ -1,3 +1,57 @@
+## [4.1.1-dev.8](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.7...4.1.1-dev.8) (2026-11-20)
+
+
+### Bug Fixes
+
+* **CookieConsent:** made CookieConsent more prominent ([8264020](https://github.com/PocketMiner82/SongGuess/commit/826402018b2c8e81f6e10bac7ce133da0593ec7b))
+* **RoomController:** should not be ready after fatal error ([6c8544d](https://github.com/PocketMiner82/SongGuess/commit/6c8544d35868c9f49c195e752c41cb902c4441df))
+
+## [4.1.1-dev.7](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.6...4.1.1-dev.7) (2026-11-20)
+
+
+### Bug Fixes
+
+* **AudioSeekBar:** allow clicking on stripe to change playback position ([27b0d3d](https://github.com/PocketMiner82/SongGuess/commit/27b0d3d996d30314103c014a913d60fd36e8fdd9))
+
+## [4.1.1-dev.6](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.5...4.1.1-dev.6) (2026-11-20)
+
+
+### Bug Fixes
+
+* remove debug log from alarm ([b60b57b](https://github.com/PocketMiner82/SongGuess/commit/b60b57badb079b188d63576b4ef2e61bb69e7260))
+
+## [4.1.1-dev.5](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.4...4.1.1-dev.5) (2026-11-20)
+
+
+### Bug Fixes
+
+* **SongGuessServer:** prevent unnecessary alarm runs ([53fa16a](https://github.com/PocketMiner82/SongGuess/commit/53fa16a6efed52da5b5dde2fea7c5159bd1c0c18))
+
+## [4.1.1-dev.4](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.3...4.1.1-dev.4) (2026-11-20)
+
+
+### Bug Fixes
+
+* **AudioSeekBar:** show resize cursor on selection stripe ([15aa3c2](https://github.com/PocketMiner82/SongGuess/commit/15aa3c258e3b35cdb253602665d30e62936be641))
+* **RoomController:** try to fix disconnecting not transferring host ([70b67e2](https://github.com/PocketMiner82/SongGuess/commit/70b67e258ce5e0a19652a39d445adb7c3b2b2d17))
+* **RoomController:** try to not reload page on reconnect ([74a111d](https://github.com/PocketMiner82/SongGuess/commit/74a111d160df42de064ae9d5c7607d72091f06ec))
+
+## [4.1.1-dev.3](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.2...4.1.1-dev.3) (2026-11-19)
+
+## [4.1.1-dev.2](https://github.com/PocketMiner82/SongGuess/compare/4.1.1-dev.1...4.1.1-dev.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* also trigger host timeout on room state restore ([0f305e4](https://github.com/PocketMiner82/SongGuess/commit/0f305e450632d14e40411d978227b0c2adb15729))
+
+## [4.1.1-dev.1](https://github.com/PocketMiner82/SongGuess/compare/4.1.0...4.1.1-dev.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* also trigger host timeout when player gets kicked but connection is not closed correctly ([0e8538a](https://github.com/PocketMiner82/SongGuess/commit/0e8538abeaa7b5acdf5023c8efc7a9bb82882ac0))
+
 # [4.1.0](https://github.com/PocketMiner82/SongGuess/compare/4.0.0...4.1.0) (2026-11-12)
 
 

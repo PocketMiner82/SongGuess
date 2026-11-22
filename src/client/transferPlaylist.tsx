@@ -292,8 +292,8 @@ function ImportCSV() {
 export function App() {
   return (
     <div className="flex flex-col h-screen">
-      <CookieConsent location="bottom" buttonText="I understand" overlay>
-        This website uses cookies to to enhance the user experience. Only technically necessary cookies are used.
+      <CookieConsent location="top" buttonText="I understand" overlay overlayClasses="bg-black/90!">
+        This website uses cookies to enhance the user experience. Only technically necessary cookies are used.
       </CookieConsent>
 
       <TopBar />
